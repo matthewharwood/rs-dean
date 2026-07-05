@@ -1,0 +1,19 @@
+[package]
+name = "rs-dean-state"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+garde.workspace = true
+rs-dean-idb = { path = "../idb", version = "0.1.0" }
+rs-dean-schema = { path = "../schema", version = "0.1.0" }
+thiserror.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test.workspace = true
+
+[lints]
+workspace = true

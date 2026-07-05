@@ -1,0 +1,70 @@
+[workspace]
+resolver = "3"
+members = [
+    "apps/web",
+    "apps/stories",
+    "apps/cube-smoke",
+    "crates/ui",
+    "crates/state",
+    "crates/idb",
+    "crates/schema",
+    "crates/srs",
+    "crates/curriculum",
+    "crates/vector-dungeon",
+    "crates/bevy-scenes",
+    "crates/cards",
+    "xtask",
+]
+exclude = ["apps/test-project"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+rust-version = "1.96.1"
+version = "0.1.0"
+
+[workspace.dependencies]
+anyhow = "1.0.100"
+base64 = "0.22.1"
+bevy = { version = "0.19.0", default-features = false, features = [
+    "2d_bevy_render",
+    "3d_bevy_render",
+    "bevy_winit",
+    "default_app",
+    "png",
+    "web",
+    "webgpu",
+] }
+console_error_panic_hook = "0.1.7"
+command-fds = "0.3.3"
+garde = { version = "0.22.1", features = ["derive"] }
+futures-channel = "0.3.32"
+leptos = { version = "0.8.20", features = ["csr"] }
+os_pipe = "1.2.3"
+redb = "4.1.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde-wasm-bindgen = "0.6.5"
+serde_json = "1.0.150"
+thiserror = "2.0.17"
+png = "0.18.0"
+wasm-bindgen = "0.2.106"
+wasm-bindgen-test = "0.3.76"
+web-sys = "0.3.83"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_imports = "warn"
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "warn"
+private_intra_doc_links = "warn"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+[profile.dev.package."*"]
+opt-level = 1

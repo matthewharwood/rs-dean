@@ -1,0 +1,51 @@
+# cargo-deny policy for rs-dean.
+# Runs in `cargo xtask gate`.
+
+[graph]
+all-features = true
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+yanked = "deny"
+ignore = [
+    # paste is unmaintained, not vulnerable. It is currently pulled by the
+    # Metal path under wgpu-hal even though rs-dean targets browser WebGPU.
+    { id = "RUSTSEC-2024-0436", reason = "transitive via wgpu-hal; unmaintained-only, no exploit advisory" },
+    # proc-macro-error2 is currently pulled transitively by Leptos macros.
+    # RustSec reports no safe upgrade; keep this explicit until Leptos removes it.
+    { id = "RUSTSEC-2026-0173", reason = "transitive via leptos_macro/reactive_stores_macro; no safe upgrade available yet" },
+]
+
+[licenses]
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "Unicode-3.0",
+    "Zlib",
+]
+confidence-threshold = 0.8
+
+[bans]
+# Bevy and Leptos carry platform-specific transitive duplicate versions that
+# cannot be resolved from this workspace. Keep the actionable ban on wildcards.
+multiple-versions = "allow"
+wildcards = "deny"
+highlight = "all"
+deny = []
+skip = []
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

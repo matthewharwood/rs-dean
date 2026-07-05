@@ -1,0 +1,80 @@
+# Rust / Cargo build outputs
+/target/
+**/target/
+*.profraw
+*.profdata
+
+# Trunk / WASM static build outputs
+/dist/
+/apps/*/dist/
+/apps/*/.stage/
+/pkg/
+**/pkg/
+wasm-pack.log
+
+# Generated validation projects
+/apps/test-project/
+
+# Local browser and render-smoke artifacts
+/tmp/
+/.tmp/
+/.cache/
+/target/cube-smoke-chrome-profile/
+/target/cube-smoke-render.png
+/target/cube-smoke-playwright*.png
+
+# Coverage and reports
+/coverage/
+/tarpaulin-report.html
+/lcov.info
+
+# Logs
+*.log
+*.trace
+*.pid
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Secrets / credentials
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+.netrc
+.pgpass
+secrets.json
+secrets.yaml
+secrets.yml
+credentials.json
+service-account*.json
+
+# JetBrains / RustRover
+.idea/
+*.iml
+.run/
+
+# Other editors
+.vscode/
+.fleet/
+.zed/
+*.swp
+*.swo
+*~
+
+# OS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini

@@ -1,0 +1,3 @@
+# rs-dean {{name}}
+
+Generated Leptos CSR app template for static browser deployment.

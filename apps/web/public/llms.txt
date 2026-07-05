@@ -1,0 +1,5 @@
+# rs-dean
+
+Rust/WASM browser-game scaffold for Dean. Static GitHub Pages deploy, Leptos CSR
+for the DOM shell, Bevy 0.19 for canvas scenes, and IndexedDB-first local state.
+

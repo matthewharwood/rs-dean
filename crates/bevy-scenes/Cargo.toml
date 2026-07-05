@@ -1,0 +1,13 @@
+[package]
+name = "rs-dean-bevy-scenes"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+bevy.workspace = true
+
+[lints]
+workspace = true
