@@ -1,4 +1,5 @@
 pub mod catalog;
+pub mod kit;
 pub mod spec;
 pub mod theme;
 
@@ -12,6 +13,10 @@ pub use catalog::{
 #[cfg(feature = "leptos")]
 pub use components::{
     HealthCard, ShadcnComponentGallery, ShadcnComponentPreview, ThemeCycleButton, ThemeScope,
+};
+pub use kit::{
+    ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
+    component_implementation, implementation_issue_marker, implemented_components,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

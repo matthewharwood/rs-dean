@@ -41,8 +41,8 @@ design-scale utilities such as `text-sm`, `px-6`, `gap-4`, `rounded-lg`, or
 story, template, and shared component surfaces.
 
 The shadcn-inspired catalog lives in `crates/ui`. Keep its Rust definitions,
-Leptos previews, Bevy primitive adapters, `apps/stories` gallery, and `_issues/`
-component task files in sync.
+implementation recipes, Leptos previews, Bevy primitive adapters,
+`apps/stories` gallery, `_issues/` component task files, and sweep log in sync.
 
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
@@ -99,7 +99,8 @@ remove the old wording from docs/skills.
   `rs-dean-ui` token utilities for design scales instead of stock Tailwind
   scale classes.
 - The shadcn-inspired catalog has one `_issues/` task file per component, and
-  every catalog component can build a shared spec for Leptos and Bevy consumers.
+  every catalog component can build a shared implementation recipe and spec for
+  Leptos and Bevy consumers.
 - Shared UI themes switch through Tailwind tokens in Leptos and through the
   same Rust palette in Bevy without adding Leptos to `rs-dean-game`.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.
