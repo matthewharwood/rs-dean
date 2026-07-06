@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use rs_dean_ui::{HealthCard, ThemeCycleButton, ThemeId, ThemeScope};
+use rs_dean_ui::{HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope};
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
 const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
@@ -9,6 +9,10 @@ const STORIES_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
 const STORIES_TITLE: &str = "m-0 text-3 font-7 text-text-1";
 const STORIES_GRID: &str = "grid gap-m";
 const STORY_FRAME: &str = "max-w-md";
+const STORY_SECTION: &str = "grid gap-s";
+const STORY_SECTION_HEADER: &str = "grid gap-2xs";
+const STORY_SECTION_TITLE: &str = "m-0 text-2 font-7 leading-2 text-text-1";
+const STORY_SECTION_BODY: &str = "m-0 max-w-2xl text-0 leading-0 text-text-2";
 const THEME_GALLERY: &str = "grid grid-cols-1 gap-s sm:grid-cols-2 lg:grid-cols-3";
 const THEME_CARD: &str =
     "min-h-4xl rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
@@ -37,6 +41,15 @@ fn Stories() -> impl IntoView {
                             title="HealthCard"
                             body="A minimal shared component rendered through the same Leptos code path as the app."
                         />
+                    </section>
+                    <section data-story-id="shadcn-components" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"shadcn component catalog"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Every official shadcn component is represented by a shared Rust spec, a token-only Leptos renderer, and a Bevy primitive adapter."
+                            </p>
+                        </header>
+                        <ShadcnComponentGallery />
                     </section>
                     <section data-story-id="ui-theme-gallery" class=THEME_GALLERY>
                         {ThemeId::ALL.into_iter().map(theme_card).collect_view()}

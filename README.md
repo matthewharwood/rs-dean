@@ -41,7 +41,8 @@ centered square canvas, WebGPU startup, and the lit green-cube scene contract.
   hello-world scene.
 - `apps/stories`: required independent story harness for reusable UI and scene
   proofs. Leptos stories use the same Trunk Tailwind asset path as marketing
-  and include a theme gallery for every `rs-dean-ui` theme.
+  and include a theme gallery for every `rs-dean-ui` theme plus the full
+  shadcn-inspired component catalog.
 - `apps/test-project`: ignored generated proof from `templates/app`; it contains
   a generated Leptos app with Tailwind already wired, plus the generated
   cube-smoke app used by the render gate.
@@ -62,6 +63,11 @@ or `font-bold` in reusable UI so generated components follow the token system.
 Bevy consumers depend on `rs-dean-ui` with `default-features = false` and
 `features = ["bevy"]`, which keeps `apps/game` Bevy-only while sharing the same
 palette and semantic token methods.
+
+The shadcn-inspired component catalog is Rust data in `crates/ui`. Each entry
+has a component definition, shared anatomy/spec blocks, a token-only Leptos
+preview, and Bevy primitive derivation for scene consumers. `_issues/` mirrors
+the catalog with one technical-program-management task per component.
 
 ## Doctor
 
