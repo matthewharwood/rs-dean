@@ -1,20 +1,23 @@
 use leptos::prelude::*;
 use rs_dean_schema::{AppSnapshot, validate_snapshot};
 use rs_dean_state::{APP_SNAPSHOT_KEY, DB_NAME, SNAPSHOTS_STORE};
+use rs_dean_ui::{HealthCard, ThemeCycleButton};
 
 #[cfg(target_arch = "wasm32")]
 use rs_dean_state::ensure_durable_snapshot;
 
-const GENERATED_SHELL: &str = "min-h-screen bg-teal-50 px-6 py-8 text-slate-950";
-const GENERATED_SHELL_INNER: &str = "mx-auto max-w-3xl";
-const GENERATED_EYEBROW: &str =
-    "m-0 text-sm font-bold uppercase tracking-widest text-emerald-700";
-const GENERATED_TITLE: &str = "m-0 mt-3 text-5xl font-bold leading-none md:text-6xl";
-const GENERATED_BODY: &str = "m-0 mt-4 max-w-2xl text-base leading-7 text-slate-600";
+const GENERATED_SHELL: &str = "min-h-screen bg-surface-1 px-6 py-8 text-text-1";
+const GENERATED_SHELL_INNER: &str = "mx-auto grid max-w-3xl gap-6";
+const GENERATED_TOPBAR: &str = "flex items-center justify-end";
+const GENERATED_HEADER: &str = "grid gap-3";
+const GENERATED_EYEBROW: &str = "m-0 text-sm font-bold uppercase text-brand";
+const GENERATED_TITLE: &str = "m-0 text-5 font-bold leading-none text-text-1 md:text-6";
+const GENERATED_BODY: &str = "m-0 max-w-2xl text-base leading-7 text-text-2";
 const GENERATED_STATE: &str = "mt-6 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2";
-const GENERATED_STATE_ITEM: &str = "min-w-0 rounded-lg border border-slate-200 bg-white p-4";
-const GENERATED_STATE_TERM: &str = "m-0 text-xs font-bold uppercase text-slate-500";
-const GENERATED_STATE_VALUE: &str = "m-0 mt-2 break-words text-sm text-slate-950";
+const GENERATED_STATE_ITEM: &str =
+    "min-w-0 rounded-box border border-border-subtle bg-surface-elevated p-4";
+const GENERATED_STATE_TERM: &str = "m-0 text-xs font-bold uppercase text-text-muted";
+const GENERATED_STATE_VALUE: &str = "m-0 mt-2 break-words text-sm text-text-1";
 
 #[component]
 fn App() -> impl IntoView {
@@ -30,13 +33,22 @@ fn App() -> impl IntoView {
     view! {
         <main class=GENERATED_SHELL>
             <div class=GENERATED_SHELL_INNER>
-                <p class=GENERATED_EYEBROW>
-                    "rs-dean generated app"
-                </p>
-                <h1 class=GENERATED_TITLE>"{{name}}"</h1>
-                <p class=GENERATED_BODY>
-                    "This app starts with a validated state snapshot and the shared durable storage contract."
-                </p>
+                <div class=GENERATED_TOPBAR>
+                    <ThemeCycleButton />
+                </div>
+                <header class=GENERATED_HEADER>
+                    <p class=GENERATED_EYEBROW>
+                        "rs-dean generated app"
+                    </p>
+                    <h1 class=GENERATED_TITLE>"{{name}}"</h1>
+                    <p class=GENERATED_BODY>
+                        "This app starts with a validated state snapshot and the shared durable storage contract."
+                    </p>
+                </header>
+                <HealthCard
+                    title="Shared UI contract"
+                    body="The scaffold uses the same token-backed Leptos components as the repo apps."
+                />
                 <dl class=GENERATED_STATE>
                     <div class=GENERATED_STATE_ITEM>
                         <dt class=GENERATED_STATE_TERM>"database"</dt>

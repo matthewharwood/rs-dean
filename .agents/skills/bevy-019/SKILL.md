@@ -20,6 +20,9 @@ WebGL features.
   component APIs directly.
 - Keep browser-only scene crates compiling on `wasm32-unknown-unknown`.
 - Do not enable `webgl2`; the gate enforces `webgpu` and rejects `webgl`.
+- Themeable scene colors that correspond to app UI themes must come from
+  `rs-dean-ui` with `default-features = false` and `features = ["bevy"]`; do
+  not pull Leptos into the game dependency tree.
 - Prefer deterministic math and explicit checked/strict arithmetic for gameplay
   rules. Rendering-only interpolation can use normal floating-point math.
 

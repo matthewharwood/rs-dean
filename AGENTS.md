@@ -22,6 +22,10 @@ with a Leptos marketing app plus a Bevy-only game app.
    and Bevy resources are only caches over durable state.
 6. **One-pass gate first**: `cargo xtask gate` is the only quality gate. It must
    be green before any task is considered complete. `just check` is an alias.
+7. **Shared-theme first**: design tokens and theme palettes belong in
+   `crates/ui`. Leptos consumes them through Tailwind theme variables; Bevy
+   consumes the same Rust palette through the `bevy` feature without depending
+   on Leptos.
 
 ## Stack
 
@@ -31,6 +35,10 @@ with a Leptos marketing app plus a Bevy-only game app.
 - Leptos app and template styles use Tailwind through Trunk's
   `rel="tailwind-css"` asset type. Keep the standalone `tailwindcss` CLI on
   `PATH`; `just bootstrap` installs it.
+- `crates/ui` owns shared design tokens, semantic colors, theme cycling, and
+  all theme palettes. The Tailwind token stylesheet lives at
+  `crates/ui/styles/theme.css`; Bevy callers use `rs-dean-ui` with
+  `default-features = false` and `features = ["bevy"]`.
 - `apps/game` is the required Bevy WebGPU game binary. It must not depend on
   Leptos.
 - `apps/stories` is the required independent story harness for reusable UI and
