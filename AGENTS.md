@@ -28,6 +28,9 @@ with a Leptos marketing app plus a Bevy-only game app.
 - Rust 2024 with Cargo workspace resolver 3.
 - `apps/marketing` is the required Leptos marketing app. It may use Bevy for
   browser canvas moments, but it owns the marketing DOM surface.
+- Leptos app and template styles use Tailwind through Trunk's
+  `rel="tailwind-css"` asset type. Keep the standalone `tailwindcss` CLI on
+  `PATH`; `just bootstrap` installs it.
 - `apps/game` is the required Bevy WebGPU game binary. It must not depend on
   Leptos.
 - `apps/stories` is the required independent story harness for reusable UI and
@@ -64,26 +67,27 @@ The pass runs, in order:
 1. `cargo fmt --all -- --check`
 2. Bevy WebGPU-only feature-tree check
 3. required app persistent-state wiring check
-4. native `cargo clippy` for workspace crates except browser-only Bevy crates
-5. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
+4. Leptos Tailwind asset wiring check for apps and generated templates
+5. native `cargo clippy` for workspace crates except browser-only Bevy crates
+6. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-6. native `cargo nextest` for workspace crates except browser-only Bevy crates
-7. native `cargo test --doc` for workspace crates except browser-only Bevy
+7. native `cargo nextest` for workspace crates except browser-only Bevy crates
+8. native `cargo test --doc` for workspace crates except browser-only Bevy
    crates
-8. wasm `cargo check` for browser crates
-9. wasm compile of the browser refresh hydration regression
-10. strict rustdoc build
-11. `cargo deny check`
-12. `cargo machete`
-13. regenerate `apps/test-project` from `templates/app`
-14. assert the generated template keeps the shared schema/state contract
-15. build and verify generated template output
-16. build and verify `apps/marketing` static output, including Pages artifacts
-17. build and verify `apps/game` static output
-18. build and verify `apps/stories` static output
-19. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
+9. wasm `cargo check` for browser crates
+10. wasm compile of the browser refresh hydration regression
+11. strict rustdoc build
+12. `cargo deny check`
+13. `cargo machete`
+14. regenerate `apps/test-project` from `templates/app`
+15. assert the generated template keeps the shared schema/state contract
+16. build and verify generated template output
+17. build and verify `apps/marketing` static output, including Pages artifacts
+18. build and verify `apps/game` static output
+19. build and verify `apps/stories` static output
+20. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
-20. docs and skill sweep for stale non-Rust stack references
+21. docs and skill sweep for stale non-Rust stack references
 
 Warnings fail. Missing expected artifacts fail. Missing gate tools fail with a
 clear install message. Do not bypass a failing step; fix the source of the

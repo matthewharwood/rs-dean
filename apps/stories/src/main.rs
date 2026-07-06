@@ -1,18 +1,25 @@
 use leptos::prelude::*;
 use rs_dean_ui::HealthCard;
 
+const STORIES_SHELL: &str = "min-h-screen bg-slate-50 px-6 py-8 text-slate-950";
+const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
+const STORIES_HEADER: &str = "mb-6";
+const STORIES_EYEBROW: &str = "m-0 text-sm font-bold uppercase tracking-widest text-sky-700";
+const STORIES_TITLE: &str = "m-0 mt-2 text-3xl font-bold";
+const STORY_FRAME: &str = "max-w-md";
+
 #[component]
 fn Stories() -> impl IntoView {
     view! {
-        <main class="stories-shell">
-            <div class="stories-shell__inner">
-                <header class="stories-header">
-                    <p class="stories-header__eyebrow">
+        <main class=STORIES_SHELL>
+            <div class=STORIES_SHELL_INNER>
+                <header class=STORIES_HEADER>
+                    <p class=STORIES_EYEBROW>
                         "Developer workbench"
                     </p>
-                    <h1 class="stories-header__title">"rs-dean stories"</h1>
+                    <h1 class=STORIES_TITLE>"rs-dean stories"</h1>
                 </header>
-                <section data-story-id="ui-health-card" class="story-frame">
+                <section data-story-id="ui-health-card" class=STORY_FRAME>
                     <HealthCard
                         title="HealthCard"
                         body="A minimal shared component rendered through the same Leptos code path as the app."
