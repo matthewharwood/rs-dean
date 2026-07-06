@@ -281,10 +281,10 @@ pub mod bevy_adapter {
     use bevy::prelude::{Color, Vec2};
 
     use crate::{
-        AccordionMode, AccordionModel, AccordionPart, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, component_implementation, default_accordion_items, scale,
-        widget_for_component,
+        AccordionMode, AccordionModel, AccordionPart, AlertPart, RenderContract, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_render_nodes, component_implementation,
+        default_accordion_items, default_alert_model, scale, widget_for_component,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -313,6 +313,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Alert {
+            return bevy_primitives_for_alert(theme, implementation.render, implementation.state);
+        }
         widget_for_component(id)
             .slots
             .into_iter()
@@ -330,6 +333,34 @@ pub mod bevy_adapter {
                 intent: slot.intent,
                 selected: slot.selected,
                 disabled: slot.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_alert(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        alert_render_nodes(&default_alert_model())
+            .into_iter()
+            .map(|node| {
+                let role = alert_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: alert_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: size_for_role(role),
+                    fill: fill_for_tone(alert_tone_for_part(node.part, node.tone), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: alert_intent_for_part(node.part),
+                    selected: node.loading,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -363,6 +394,45 @@ pub mod bevy_adapter {
                 }
             })
             .collect()
+    }
+
+    const fn alert_kind_for_part(part: AlertPart) -> UiWidgetSlotKind {
+        match part {
+            AlertPart::Root => UiWidgetSlotKind::Section,
+            AlertPart::Title => UiWidgetSlotKind::Title,
+            AlertPart::Description => UiWidgetSlotKind::Description,
+            AlertPart::Action => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn alert_role_for_part(part: AlertPart) -> UiBlockRole {
+        match part {
+            AlertPart::Root => UiBlockRole::Root,
+            AlertPart::Title => UiBlockRole::Header,
+            AlertPart::Description => UiBlockRole::Content,
+            AlertPart::Action => UiBlockRole::Action,
+        }
+    }
+
+    const fn alert_tone_for_part(part: AlertPart, tone: crate::AlertTone) -> UiBlockTone {
+        match part {
+            AlertPart::Root => match tone {
+                crate::AlertTone::Default => UiBlockTone::Surface,
+                crate::AlertTone::Info => UiBlockTone::Info,
+                crate::AlertTone::Success => UiBlockTone::Success,
+                crate::AlertTone::Warning => UiBlockTone::Warning,
+                crate::AlertTone::Destructive => UiBlockTone::Danger,
+            },
+            AlertPart::Title | AlertPart::Description => UiBlockTone::Surface,
+            AlertPart::Action => UiBlockTone::Brand,
+        }
+    }
+
+    const fn alert_intent_for_part(part: AlertPart) -> UiWidgetIntent {
+        match part {
+            AlertPart::Action => UiWidgetIntent::Activate,
+            AlertPart::Root | AlertPart::Title | AlertPart::Description => UiWidgetIntent::None,
+        }
     }
 
     const fn accordion_kind_for_part(part: AccordionPart) -> UiWidgetSlotKind {

@@ -1,4 +1,5 @@
 pub mod accordion;
+pub mod alert;
 pub mod catalog;
 pub mod kit;
 pub mod spec;
@@ -12,6 +13,10 @@ pub use accordion::{
     AccordionChange, AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AccordionPart,
     AccordionRenderNode, AccordionState, accordion_dom_id, accordion_render_nodes,
     default_accordion_items, validate_accordion_model,
+};
+pub use alert::{
+    AlertAction, AlertDensity, AlertIntent, AlertModel, AlertPart, AlertRenderNode, AlertTone,
+    alert_render_nodes, default_alert_model, validate_alert_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

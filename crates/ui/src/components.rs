@@ -1,10 +1,11 @@
 use leptos::prelude::*;
 
 use crate::{
-    AccordionIntent, AccordionItem, AccordionMode, AccordionModel, ComponentImplementation,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget, UiWidgetPattern,
-    UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id, component_implementation, component_spec,
-    default_accordion_items, validate_accordion_model, widget_for_component,
+    AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertModel,
+    AlertTone, ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidget, UiWidgetPattern, UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id,
+    component_implementation, component_spec, default_accordion_items, default_alert_model,
+    validate_accordion_model, validate_alert_model, widget_for_component,
 };
 
 const HEALTH_CARD: &str =
@@ -72,6 +73,31 @@ const ACCORDION_INDICATOR: &str =
 const ACCORDION_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-2 p-s text-0 leading-0 text-text-muted";
 const ACCORDION_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const ALERT_STANDARD_DEFAULT: &str = "relative grid w-full gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const ALERT_STANDARD_INFO: &str = "relative grid w-full gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-1";
+const ALERT_STANDARD_SUCCESS: &str = "relative grid w-full gap-xs rounded-box border border-success bg-success-soft p-s text-text-1 shadow-1";
+const ALERT_STANDARD_WARNING: &str = "relative grid w-full gap-xs rounded-box border border-warning bg-warning-soft p-s text-text-1 shadow-1";
+const ALERT_STANDARD_DESTRUCTIVE: &str = "relative grid w-full gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const ALERT_DENSE_DEFAULT: &str = "relative grid w-full gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const ALERT_DENSE_INFO: &str = "relative grid w-full gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const ALERT_DENSE_SUCCESS: &str = "relative grid w-full gap-2xs rounded-field border border-success bg-success-soft p-xs text-text-1 shadow-1";
+const ALERT_DENSE_WARNING: &str = "relative grid w-full gap-2xs rounded-field border border-warning bg-warning-soft p-xs text-text-1 shadow-1";
+const ALERT_DENSE_DESTRUCTIVE: &str = "relative grid w-full gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1";
+const ALERT_ROW: &str = "flex min-w-0 flex-wrap items-start gap-xs";
+const ALERT_BODY: &str = "grid min-w-0 flex-1 gap-2xs";
+const ALERT_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const ALERT_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const ALERT_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const ALERT_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const ALERT_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_MARKER_DEFAULT: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
+const ALERT_MARKER_INFO: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-info text-00 font-7 text-text-on-brand";
+const ALERT_MARKER_SUCCESS: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-success text-00 font-7 text-text-on-brand";
+const ALERT_MARKER_WARNING: &str =
+    "grid size-s shrink-0 place-items-center rounded-pill bg-warning text-00 font-7 text-text-1";
+const ALERT_MARKER_DESTRUCTIVE: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-danger text-00 font-7 text-text-on-brand";
+const ALERT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[component]
@@ -208,6 +234,7 @@ fn block_class(tone: UiBlockTone) -> &'static str {
 pub fn ComponentDemo(id: UiComponentId) -> AnyView {
     match id {
         UiComponentId::Accordion => view! { <Accordion /> }.into_any(),
+        UiComponentId::Alert => view! { <Alert /> }.into_any(),
         _ => render_widget(widget_for_component(id)).into_any(),
     }
 }
@@ -472,6 +499,147 @@ macro_rules! literal_component {
 }
 
 #[component]
+pub fn Alert(#[prop(optional, default = default_alert_model())] model: AlertModel) -> AnyView {
+    if let Err(report) = validate_alert_model(&model) {
+        let message = format!("Alert validation failed: {report}");
+        return view! {
+            <section class=ALERT_STANDARD_DESTRUCTIVE data-ui-component="alert" data-ui-state="invalid" role="alert">
+                <p class=ALERT_ERROR>{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
+    let root_class = alert_root_class(model.tone, model.density);
+    let marker_class = alert_marker_class(model.tone);
+    let marker_label = alert_marker_label(model.tone);
+    let title_class = alert_title_class(model.density);
+    let description_class = alert_description_class(model.density);
+    let role = alert_role(model.tone);
+    let state = alert_state(&model);
+    let title = model.title;
+    let description = model.description;
+    let tone = model.tone.label();
+    let density = model.density.label();
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let action = model.action;
+
+    view! {
+        <section
+            class=root_class
+            data-ui-component="alert"
+            data-ui-part="Alert"
+            data-ui-tone=tone
+            data-ui-density=density
+            data-ui-state=state
+            role=role
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            <div class=ALERT_ROW>
+                <span class=marker_class aria-hidden="true">{marker_label}</span>
+                <div class=ALERT_BODY>
+                    <h3 class=title_class data-ui-part="AlertTitle">{title}</h3>
+                    <p class=description_class data-ui-part="AlertDescription">{description}</p>
+                </div>
+                {if let Some(action) = action {
+                    let action_disabled = disabled || loading || action.disabled;
+                    let action_state = if action_disabled { "disabled" } else { "ready" };
+                    let label = if loading {
+                        "Loading".to_owned()
+                    } else {
+                        action.label
+                    };
+
+                    view! {
+                        <button
+                            type="button"
+                            class=ALERT_ACTION
+                            data-ui-part="AlertAction"
+                            data-ui-intent="activate"
+                            data-ui-action=action.value
+                            data-ui-state=action_state
+                            disabled=action_disabled
+                        >
+                            {label}
+                        </button>
+                    }
+                        .into_any()
+                } else {
+                    ().into_any()
+                }}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+fn alert_root_class(tone: AlertTone, density: AlertDensity) -> &'static str {
+    match (density, tone) {
+        (AlertDensity::Standard, AlertTone::Default) => ALERT_STANDARD_DEFAULT,
+        (AlertDensity::Standard, AlertTone::Info) => ALERT_STANDARD_INFO,
+        (AlertDensity::Standard, AlertTone::Success) => ALERT_STANDARD_SUCCESS,
+        (AlertDensity::Standard, AlertTone::Warning) => ALERT_STANDARD_WARNING,
+        (AlertDensity::Standard, AlertTone::Destructive) => ALERT_STANDARD_DESTRUCTIVE,
+        (AlertDensity::Dense, AlertTone::Default) => ALERT_DENSE_DEFAULT,
+        (AlertDensity::Dense, AlertTone::Info) => ALERT_DENSE_INFO,
+        (AlertDensity::Dense, AlertTone::Success) => ALERT_DENSE_SUCCESS,
+        (AlertDensity::Dense, AlertTone::Warning) => ALERT_DENSE_WARNING,
+        (AlertDensity::Dense, AlertTone::Destructive) => ALERT_DENSE_DESTRUCTIVE,
+    }
+}
+
+const fn alert_marker_class(tone: AlertTone) -> &'static str {
+    match tone {
+        AlertTone::Default => ALERT_MARKER_DEFAULT,
+        AlertTone::Info => ALERT_MARKER_INFO,
+        AlertTone::Success => ALERT_MARKER_SUCCESS,
+        AlertTone::Warning => ALERT_MARKER_WARNING,
+        AlertTone::Destructive => ALERT_MARKER_DESTRUCTIVE,
+    }
+}
+
+const fn alert_marker_label(tone: AlertTone) -> &'static str {
+    match tone {
+        AlertTone::Default | AlertTone::Info => "i",
+        AlertTone::Success => "+",
+        AlertTone::Warning | AlertTone::Destructive => "!",
+    }
+}
+
+const fn alert_title_class(density: AlertDensity) -> &'static str {
+    match density {
+        AlertDensity::Standard => ALERT_TITLE,
+        AlertDensity::Dense => ALERT_TITLE_DENSE,
+    }
+}
+
+const fn alert_description_class(density: AlertDensity) -> &'static str {
+    match density {
+        AlertDensity::Standard => ALERT_DESCRIPTION,
+        AlertDensity::Dense => ALERT_DESCRIPTION_DENSE,
+    }
+}
+
+const fn alert_role(tone: AlertTone) -> &'static str {
+    match tone {
+        AlertTone::Warning | AlertTone::Destructive => "alert",
+        AlertTone::Default | AlertTone::Info | AlertTone::Success => "status",
+    }
+}
+
+const fn alert_state(model: &AlertModel) -> &'static str {
+    if model.loading {
+        "loading"
+    } else if model.disabled {
+        "disabled"
+    } else {
+        "ready"
+    }
+}
+
+#[component]
 pub fn Accordion(
     #[prop(optional, default = default_accordion_items())] items: Vec<AccordionItem>,
     #[prop(optional, default = AccordionMode::Single)] mode: AccordionMode,
@@ -593,7 +761,6 @@ pub fn Accordion(
     .into_any()
 }
 
-literal_component!(Alert, Alert);
 literal_component!(AlertDialog, AlertDialog);
 literal_component!(AspectRatio, AspectRatio);
 literal_component!(Attachment, Attachment);

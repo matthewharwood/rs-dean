@@ -40,4 +40,7 @@ Ship a Rust-first `Alert` component that follows the shadcn composition model wh
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Concrete `Alert` model, action contract, render nodes, and token-only Leptos component implemented.
+- [x] `garde` validation enforces alert copy and optional action fields before rendering.
+- [x] Dedicated `apps/stories` Alert proof covers default, dense, disabled/error, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.
