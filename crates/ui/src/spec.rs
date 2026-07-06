@@ -280,7 +280,10 @@ impl UiBlockRole {
 pub mod bevy_adapter {
     use bevy::prelude::{Color, Vec2};
 
-    use crate::{Theme, UiBlockRole, UiBlockTone, UiComponentId, component_spec, scale};
+    use crate::{
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        component_implementation, component_spec, scale,
+    };
 
     #[derive(Debug, Clone, PartialEq)]
     pub struct BevyUiPrimitive {
@@ -290,9 +293,12 @@ pub mod bevy_adapter {
         pub size: Vec2,
         pub fill: Color,
         pub text: Color,
+        pub render: RenderContract,
+        pub state: StateContract,
     }
 
     pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
+        let implementation = component_implementation(id);
         component_spec(id)
             .blocks
             .into_iter()
@@ -303,6 +309,8 @@ pub mod bevy_adapter {
                 size: size_for_role(block.role),
                 fill: fill_for_tone(block.tone, theme),
                 text: theme.text_1().to_bevy(),
+                render: implementation.render,
+                state: implementation.state,
             })
             .collect()
     }

@@ -65,9 +65,10 @@ Bevy consumers depend on `rs-dean-ui` with `default-features = false` and
 palette and semantic token methods.
 
 The shadcn-inspired component catalog is Rust data in `crates/ui`. Each entry
-has a component definition, shared anatomy/spec blocks, a token-only Leptos
-preview, and Bevy primitive derivation for scene consumers. `_issues/` mirrors
-the catalog with one technical-program-management task per component.
+has a component definition, shared anatomy/spec blocks, an implementation
+recipe, a token-only Leptos preview, and Bevy primitive derivation for scene
+consumers. `_issues/` mirrors the catalog with one technical-program-management
+task per component plus a sweep log for the repeated first-to-current audit.
 
 ## Doctor
 

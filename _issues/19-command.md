@@ -33,3 +33,10 @@ Ship a Rust-first `Command` component that follows the shadcn composition model 
 - Leptos output uses only `rs-dean-ui` token utilities for design scales.
 - Bevy adapter can derive scene primitives from the same component spec.
 - `cargo xtask five-phase-pass` passes.
+
+## Implementation Status
+
+- [x] Shared Rust implementation recipe.
+- [x] Token-only Leptos rendering path.
+- [x] Bevy primitive derivation path.
+- [x] Sweep review complete through the current implemented catalog.

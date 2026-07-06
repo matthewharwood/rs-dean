@@ -40,8 +40,10 @@ with a Leptos marketing app plus a Bevy-only game app.
   `crates/ui/styles/theme.css`; Bevy callers use `rs-dean-ui` with
   `default-features = false` and `features = ["bevy"]`.
 - `crates/ui` also owns the shadcn-inspired component catalog. Every catalog
-  entry has a shared Rust spec, a Leptos renderer path, a Bevy primitive adapter
-  when scene rendering is appropriate, and a matching task in `_issues/`.
+  entry has a shared Rust implementation recipe, a Leptos renderer path, a Bevy
+  primitive adapter when scene rendering is appropriate, and a matching task in
+  `_issues/`. `_issues/sweep-log.md` records the repeated first-to-current
+  audit loop for component implementation work.
 - Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
   typography, spacing, radius, shadow, and motion scales, such as `text-0`,
   `gap-m`, `p-s`, `rounded-box`, `font-7`, `leading-0`, and `shadow-2`.

@@ -4,6 +4,7 @@ Source inventory: https://ui.shadcn.com/docs/components
 
 Each task tracks the dual Leptos/Bevy component contract for rs-dean.
 
+- [Implementation Sweep Log](sweep-log.md)
 - [Accordion](01-accordion.md) - Disclosure, Ephemeral.
 - [Alert](02-alert.md) - Feedback, Stateless.
 - [Alert Dialog](03-alert-dialog.md) - Overlay, Ephemeral.

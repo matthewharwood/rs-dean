@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 
-use crate::{ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, component_spec};
+use crate::{
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    component_implementation, component_spec,
+};
 
 const HEALTH_CARD: &str =
     "rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
@@ -18,6 +21,10 @@ const COMPONENT_PILL: &str = "rounded-pill border border-border-subtle bg-surfac
 const COMPONENT_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const COMPONENT_SUMMARY: &str = "m-0 text-0 leading-0 text-text-2";
 const COMPONENT_BLOCKS: &str = "grid gap-2xs";
+const COMPONENT_RECIPE: &str = "grid gap-2xs border-t border-border-subtle pt-s";
+const COMPONENT_RECIPE_TITLE: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const COMPONENT_TAG_ROW: &str = "flex flex-wrap gap-2xs";
+const COMPONENT_TAG: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-2";
 const BLOCK_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const BLOCK_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 
@@ -47,6 +54,7 @@ pub fn ShadcnComponentGallery() -> impl IntoView {
 #[component]
 pub fn ShadcnComponentPreview(id: UiComponentId) -> impl IntoView {
     let spec = component_spec(id);
+    let implementation = component_implementation(id);
     let definition = spec.definition;
     let category = definition.category.label();
     let framework = definition.framework.label();
@@ -69,7 +77,42 @@ pub fn ShadcnComponentPreview(id: UiComponentId) -> impl IntoView {
             <div class=COMPONENT_BLOCKS>
                 {spec.blocks.into_iter().map(component_block).collect_view()}
             </div>
+            {implementation_recipe(implementation)}
         </article>
+    }
+}
+
+fn implementation_recipe(implementation: ComponentImplementation) -> impl IntoView {
+    view! {
+        <section class=COMPONENT_RECIPE>
+            <h3 class=COMPONENT_RECIPE_TITLE>"Implementation"</h3>
+            <p class=BLOCK_DETAIL>{implementation.end_user_outcome}</p>
+            <p class=BLOCK_DETAIL>{implementation.consumer_contract}</p>
+            <div class=COMPONENT_META>
+                <span class=COMPONENT_PILL>{implementation.maturity.label()}</span>
+                <span class=COMPONENT_PILL>{implementation.render.label()}</span>
+                <span class=COMPONENT_PILL>{implementation.state.label()}</span>
+                <span class=COMPONENT_PILL>{implementation.layout.label()}</span>
+            </div>
+            <TokenList title="Variants" values=implementation.variants />
+            <TokenList title="States" values=implementation.states />
+            <TokenList title="Accessibility" values=implementation.accessibility />
+        </section>
+    }
+}
+
+#[component]
+fn TokenList(title: &'static str, values: &'static [&'static str]) -> impl IntoView {
+    view! {
+        <div class="grid gap-2xs">
+            <h4 class=COMPONENT_RECIPE_TITLE>{title}</h4>
+            <div class=COMPONENT_TAG_ROW>
+                {values
+                    .iter()
+                    .map(|value| view! { <span class=COMPONENT_TAG>{*value}</span> })
+                    .collect_view()}
+            </div>
+        </div>
     }
 }
 
