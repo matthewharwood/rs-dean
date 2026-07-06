@@ -553,6 +553,8 @@ fn check_bevy_webgpu_only() -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
+            "--color",
+            "never",
             "--target",
             "wasm32-unknown-unknown",
             "-e",
@@ -579,6 +581,8 @@ fn check_game_bevy_only() -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
+            "--color",
+            "never",
             "--target",
             "wasm32-unknown-unknown",
             "-p",
