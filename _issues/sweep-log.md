@@ -4,6 +4,11 @@ Protocol: implement one component, then re-audit every previously implemented co
 
 Completed pass: Accordion through Typography.
 
+Concrete component pass: Accordion complete. The first issue now has a
+component-specific Rust model, state transition API, render nodes, token-only
+Leptos component, dedicated story proof, and Bevy primitive derivation from the
+same model.
+
 ## Consolidated Learnings
 
 - Bespoke one-off APIs would drift across Leptos and Bevy, so the implementation source of truth is the combination of `ComponentImplementation` in `crates/ui/src/kit.rs` and literal `UiWidget` constructors in `crates/ui/src/widgets.rs`.

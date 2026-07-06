@@ -1,3 +1,4 @@
+pub mod accordion;
 pub mod catalog;
 pub mod kit;
 pub mod spec;
@@ -7,6 +8,11 @@ pub mod widgets;
 #[cfg(feature = "leptos")]
 mod components;
 
+pub use accordion::{
+    AccordionChange, AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AccordionPart,
+    AccordionRenderNode, AccordionState, accordion_dom_id, accordion_render_nodes,
+    default_accordion_items,
+};
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,
     UiComponentCategory, UiComponentId, UiStateModel,

@@ -1,5 +1,8 @@
 use leptos::prelude::*;
-use rs_dean_ui::{HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope};
+use rs_dean_ui::{
+    Accordion, AccordionItem, AccordionMode, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
+};
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
 const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
@@ -42,6 +45,21 @@ fn Stories() -> impl IntoView {
                             body="A minimal shared component rendered through the same Leptos code path as the app."
                         />
                     </section>
+                    <section data-story-id="ui-accordion" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Accordion"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 01 implemented as a real token-only Leptos component backed by shared Rust state transitions."
+                            </p>
+                        </header>
+                        <div class=STORY_FRAME>
+                            <Accordion
+                                items=accordion_story_items()
+                                mode=AccordionMode::Multiple
+                                default_open=vec!["tokens".to_owned(), "bevy".to_owned()]
+                            />
+                        </div>
+                    </section>
                     <section data-story-id="shadcn-components" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"shadcn component catalog"</h2>
@@ -58,6 +76,27 @@ fn Stories() -> impl IntoView {
             </div>
         </main>
     }
+}
+
+fn accordion_story_items() -> Vec<AccordionItem> {
+    vec![
+        AccordionItem::new(
+            "tokens",
+            "Token-only styling",
+            "The trigger, content, focus ring, border, and text all use rs-dean-ui Tailwind token utilities.",
+        ),
+        AccordionItem::new(
+            "local-state",
+            "Renderer-local state",
+            "Accordion open state is ephemeral by default and does not bypass the durable app state layer.",
+        )
+        .disabled(),
+        AccordionItem::new(
+            "bevy",
+            "Shared Rust contract",
+            "The same model exposes render nodes that can be consumed outside the Leptos DOM path.",
+        ),
+    ]
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

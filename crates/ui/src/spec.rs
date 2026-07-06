@@ -281,17 +281,19 @@ pub mod bevy_adapter {
     use bevy::prelude::{Color, Vec2};
 
     use crate::{
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, component_implementation, scale, widget_for_component,
+        AccordionMode, AccordionModel, AccordionPart, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, component_implementation, default_accordion_items, scale,
+        widget_for_component,
     };
 
     #[derive(Debug, Clone, PartialEq)]
     pub struct BevyUiPrimitive {
-        pub part: &'static str,
+        pub part: String,
         pub kind: UiWidgetSlotKind,
         pub role: UiBlockRole,
-        pub label: &'static str,
-        pub value: &'static str,
+        pub label: String,
+        pub value: String,
         pub size: Vec2,
         pub fill: Color,
         pub text: Color,
@@ -304,15 +306,22 @@ pub mod bevy_adapter {
 
     pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
         let implementation = component_implementation(id);
+        if id == UiComponentId::Accordion {
+            return bevy_primitives_for_accordion(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         widget_for_component(id)
             .slots
             .into_iter()
             .map(|slot| BevyUiPrimitive {
-                part: slot.part,
+                part: slot.part.to_owned(),
                 kind: slot.kind,
                 role: slot.role,
-                label: slot.label,
-                value: slot.value,
+                label: slot.label.to_owned(),
+                value: slot.value.to_owned(),
                 size: size_for_role(slot.role),
                 fill: fill_for_tone(slot.tone, theme),
                 text: theme.text_1().to_bevy(),
@@ -323,6 +332,73 @@ pub mod bevy_adapter {
                 disabled: slot.disabled,
             })
             .collect()
+    }
+
+    fn bevy_primitives_for_accordion(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = AccordionModel::new(AccordionMode::Single, default_accordion_items())
+            .with_default_open(vec!["tokens".to_owned()]);
+        let accordion_state = model.state();
+        accordion_render_nodes(&model, &accordion_state)
+            .into_iter()
+            .map(|node| {
+                let role = accordion_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: accordion_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: size_for_role(role),
+                    fill: fill_for_tone(accordion_tone_for_part(node.part), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: accordion_intent_for_part(node.part),
+                    selected: node.open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    const fn accordion_kind_for_part(part: AccordionPart) -> UiWidgetSlotKind {
+        match part {
+            AccordionPart::Root => UiWidgetSlotKind::Section,
+            AccordionPart::Item => UiWidgetSlotKind::Panel,
+            AccordionPart::Trigger => UiWidgetSlotKind::Button,
+            AccordionPart::Content => UiWidgetSlotKind::Description,
+        }
+    }
+
+    const fn accordion_role_for_part(part: AccordionPart) -> UiBlockRole {
+        match part {
+            AccordionPart::Root => UiBlockRole::Root,
+            AccordionPart::Item => UiBlockRole::Item,
+            AccordionPart::Trigger => UiBlockRole::Action,
+            AccordionPart::Content => UiBlockRole::Content,
+        }
+    }
+
+    const fn accordion_tone_for_part(part: AccordionPart) -> UiBlockTone {
+        match part {
+            AccordionPart::Root | AccordionPart::Item | AccordionPart::Content => {
+                UiBlockTone::Surface
+            }
+            AccordionPart::Trigger => UiBlockTone::Brand,
+        }
+    }
+
+    const fn accordion_intent_for_part(part: AccordionPart) -> UiWidgetIntent {
+        match part {
+            AccordionPart::Trigger => UiWidgetIntent::Toggle,
+            AccordionPart::Root | AccordionPart::Item | AccordionPart::Content => {
+                UiWidgetIntent::None
+            }
+        }
     }
 
     fn size_for_role(role: UiBlockRole) -> Vec2 {

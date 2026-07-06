@@ -1,9 +1,10 @@
 use leptos::prelude::*;
 
 use crate::{
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget,
-    UiWidgetPattern, UiWidgetSlot, UiWidgetSlotKind, component_implementation, component_spec,
-    widget_for_component,
+    AccordionIntent, AccordionItem, AccordionMode, AccordionModel, ComponentImplementation,
+    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget, UiWidgetPattern,
+    UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id, component_implementation, component_spec,
+    default_accordion_items, widget_for_component,
 };
 
 const HEALTH_CARD: &str =
@@ -59,6 +60,17 @@ const WIDGET_PROGRESS: &str = "h-xs w-full rounded-pill accent-brand";
 const WIDGET_RANGE: &str = "w-full accent-brand";
 const WIDGET_SKELETON: &str = "h-s rounded-field bg-surface-3";
 const WIDGET_SPINNER: &str = "size-s rounded-pill border border-border-muted border-t-brand";
+const ACCORDION_ROOT: &str =
+    "grid w-full gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1";
+const ACCORDION_ITEM: &str = "grid gap-0 rounded-field border border-border-faint bg-surface-1";
+const ACCORDION_ITEM_OPEN: &str = "grid gap-0 rounded-field border border-brand bg-primary-soft";
+const ACCORDION_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const ACCORDION_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const ACCORDION_CONTENT: &str = "grid gap-2xs px-xs pb-xs text-0 leading-0 text-text-2";
+const ACCORDION_INDICATOR: &str =
+    "grid size-s place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
+const ACCORDION_EMPTY: &str =
+    "rounded-field border border-border-subtle bg-surface-2 p-s text-0 leading-0 text-text-muted";
 
 #[component]
 pub fn HealthCard(title: &'static str, body: &'static str) -> impl IntoView {
@@ -191,8 +203,11 @@ fn block_class(tone: UiBlockTone) -> &'static str {
 }
 
 #[component]
-pub fn ComponentDemo(id: UiComponentId) -> impl IntoView {
-    render_widget(widget_for_component(id))
+pub fn ComponentDemo(id: UiComponentId) -> AnyView {
+    match id {
+        UiComponentId::Accordion => view! { <Accordion /> }.into_any(),
+        _ => render_widget(widget_for_component(id)).into_any(),
+    }
 }
 
 fn render_widget(widget: UiWidget) -> impl IntoView {
@@ -454,7 +469,117 @@ macro_rules! literal_component {
     };
 }
 
-literal_component!(Accordion, Accordion);
+#[component]
+pub fn Accordion(
+    #[prop(optional, default = default_accordion_items())] items: Vec<AccordionItem>,
+    #[prop(optional, default = AccordionMode::Single)] mode: AccordionMode,
+    #[prop(optional, default = vec!["tokens".to_owned()])] default_open: Vec<String>,
+) -> impl IntoView {
+    let model = AccordionModel::new(mode, items).with_default_open(default_open);
+    let (state, set_state) = signal(model.state());
+    let items = model.items;
+
+    view! {
+        <section class=ACCORDION_ROOT data-ui-component="accordion" data-ui-mode=mode.label()>
+            {if items.is_empty() {
+                view! {
+                    <p class=ACCORDION_EMPTY data-ui-part="AccordionEmpty">
+                        "No accordion sections are available."
+                    </p>
+                }
+                    .into_any()
+            } else {
+                items
+                    .into_iter()
+                    .map(move |item| {
+                        let value = item.value.clone();
+                        let title = item.title;
+                        let content = item.content;
+                        let disabled = item.disabled;
+                        let trigger_id = accordion_dom_id("accordion-trigger", &value);
+                        let panel_id = accordion_dom_id("accordion-panel", &value);
+                        let open_value = value.clone();
+                        let is_open = Memo::new(move |_| {
+                            state.with(|state| state.is_open(&open_value))
+                        });
+                        let toggle_value = value.clone();
+                        let on_click = move |_| {
+                            if disabled {
+                                return;
+                            }
+                            set_state.update(|state| {
+                                let _ = state.apply(AccordionIntent::Toggle(toggle_value.clone()));
+                            });
+                        };
+                        let is_open_for_item = is_open;
+                        let is_open_for_trigger = is_open;
+                        let is_open_for_indicator = is_open;
+                        let is_open_for_hidden = is_open;
+
+                        view! {
+                            <article
+                                class=move || {
+                                    if is_open_for_item.get() {
+                                        ACCORDION_ITEM_OPEN
+                                    } else {
+                                        ACCORDION_ITEM
+                                    }
+                                }
+                                data-ui-part="AccordionItem"
+                                data-value=value
+                                data-state=move || {
+                                    if is_open_for_trigger.get() {
+                                        "open"
+                                    } else {
+                                        "closed"
+                                    }
+                                }
+                            >
+                                <h3 class="m-0">
+                                    <button
+                                        id=trigger_id.clone()
+                                        type="button"
+                                        class=move || {
+                                            if is_open_for_trigger.get() {
+                                                ACCORDION_TRIGGER_OPEN
+                                            } else {
+                                                ACCORDION_TRIGGER
+                                            }
+                                        }
+                                        aria-expanded=move || {
+                                            is_open_for_trigger.get().to_string()
+                                        }
+                                        aria-controls=panel_id.clone()
+                                        aria-disabled=disabled.to_string()
+                                        disabled=disabled
+                                        on:click=on_click
+                                    >
+                                        <span>{title}</span>
+                                        <span class=ACCORDION_INDICATOR aria-hidden="true">
+                                            {move || if is_open_for_indicator.get() { "-" } else { "+" }}
+                                        </span>
+                                    </button>
+                                </h3>
+                                <div
+                                    id=panel_id
+                                    role="region"
+                                    class=ACCORDION_CONTENT
+                                    aria-labelledby=trigger_id
+                                    hidden=move || !is_open_for_hidden.get()
+                                    data-ui-part="AccordionContent"
+                                >
+                                    <p class="m-0">{content}</p>
+                                </div>
+                            </article>
+                        }
+                    })
+                    .collect_view()
+                    .into_any()
+            }}
+        </section>
+    }
+}
+
 literal_component!(Alert, Alert);
 literal_component!(AlertDialog, AlertDialog);
 literal_component!(AspectRatio, AspectRatio);
