@@ -762,12 +762,12 @@ fn check_leptos_tailwind_assets() -> Result<()> {
 }
 
 fn check_ui_design_token_classes() -> Result<()> {
-    let source_paths = [
-        Path::new("crates/ui/src/components.rs"),
-        Path::new("apps/marketing/src/main.rs"),
-        Path::new("apps/stories/src/main.rs"),
-        Path::new("templates/app/src/main.rs"),
-    ];
+    let mut source_paths = Vec::from([
+        PathBuf::from("apps/marketing/src/main.rs"),
+        PathBuf::from("apps/stories/src/main.rs"),
+        PathBuf::from("templates/app/src/main.rs"),
+    ]);
+    collect_rust_files(Path::new("crates/ui/src"), &mut source_paths)?;
     let stock_design_scale_classes = [
         "text-xs",
         "text-sm",
@@ -810,7 +810,7 @@ fn check_ui_design_token_classes() -> Result<()> {
         "shadow-md",
         "shadow-lg",
     ];
-    for path in source_paths {
+    for path in &source_paths {
         let contents =
             fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
         for class in stock_design_scale_classes {
@@ -820,6 +820,19 @@ fn check_ui_design_token_classes() -> Result<()> {
                     path.display()
                 );
             }
+        }
+    }
+    Ok(())
+}
+
+fn collect_rust_files(root: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
+    for entry in fs::read_dir(root).with_context(|| format!("read {}", root.display()))? {
+        let entry = entry.with_context(|| format!("read entry in {}", root.display()))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_rust_files(&path, files)?;
+        } else if path.extension().is_some_and(|extension| extension == "rs") {
+            files.push(path);
         }
     }
     Ok(())
