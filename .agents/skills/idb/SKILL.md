@@ -71,12 +71,19 @@ For app snapshots:
 
 - Open the database through `open_state_database`.
 - Load with `hydrate_from_database`.
+- Ensure boot state exists with `ensure_durable_snapshot`.
 - Persist with `persist_snapshot`.
+- Mutate resumable app state with `update_snapshot` or
+  `update_snapshot_in_database`; do not update Leptos signals or Bevy resources
+  as the only source of truth.
 - Keep native tests for round-trip persistence.
 - Keep `crates/state/tests/refresh_hydration.rs` green. It proves that a
   durable snapshot can hydrate separate Leptos-style and Bevy-style caches,
   survive dropped in-memory state, reopen the same database, and resume both
   caches from the persisted snapshot.
+- Required app surfaces (`apps/marketing` and `apps/game`) must depend on
+  `rs-dean-state`, call `ensure_durable_snapshot` on browser boot, and keep
+  `require_persistent_state = true` in package metadata.
 - Add browser-level tests when native tests cannot exercise the behavior. The
   refresh hydration regression has a wasm browser test; the gate compiles it,
   and it can be run on machines with working browser automation via:

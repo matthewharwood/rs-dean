@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 pub struct DeanScenePlugin;
 
@@ -12,5 +12,15 @@ impl Plugin for DeanScenePlugin {
 struct SceneMarker;
 
 fn setup_scene(mut commands: Commands) {
-    commands.spawn((Camera2d, SceneMarker));
+    commands.spawn(Camera2d);
+    commands.spawn((
+        Text2d::new("Hello world"),
+        TextFont {
+            font_size: FontSize::Px(72.0),
+            ..default()
+        },
+        TextColor(WHITE.into()),
+        Transform::default(),
+        SceneMarker,
+    ));
 }

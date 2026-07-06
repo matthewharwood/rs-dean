@@ -1,0 +1,28 @@
+[package]
+name = "rs-dean-game"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[package.metadata.rs-dean.pages]
+kind = "game"
+publish = true
+route = "game"
+title = "Game"
+
+[package.metadata.rs-dean.constraints]
+forbid_leptos = true
+require_bevy = true
+require_persistent_state = true
+
+[dependencies]
+bevy.workspace = true
+console_error_panic_hook.workspace = true
+rs-dean-bevy-scenes = { path = "../../crates/bevy-scenes", version = "0.1.0" }
+rs-dean-state = { path = "../../crates/state", version = "0.1.0" }
+wasm-bindgen-futures.workspace = true
+
+[lints]
+workspace = true

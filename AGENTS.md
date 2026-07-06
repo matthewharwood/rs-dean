@@ -1,33 +1,42 @@
 # AGENTS.md
 
-`rs-dean` is a Rust/WASM browser-game workspace. It is static-only, targets
-GitHub Pages, stores durable state in IndexedDB, and renders browser scenes
-with Leptos plus Bevy WebGPU.
+`rs-dean` is a Rust/WASM browser-game scaffold workspace. It is static-only,
+targets GitHub Pages, stores durable state in IndexedDB, and ships every clone
+with a Leptos marketing app plus a Bevy-only game app.
 
 ## Non-Negotiables
 
 1. **Rust-first**: source, gates, generated templates, and local orchestration
    stay in Rust/Cargo unless a browser standard requires a Rust binding crate.
 2. **Story-harness first**: reusable UI and scene work gets a matching route in
-   `apps/stories` before being wired into `apps/web`.
+   `apps/stories` before being wired into `apps/marketing` or `apps/game`.
 3. **Serde + validation first**: persisted records, browser messages, and
    generated data cross typed Rust boundaries and validate at the edge.
 4. **IDB-first state**: `rs-dean-idb` is the only durable storage boundary.
    It uses IndexedDB in wasm browser bundles and a native embedded store in
    native bundles. Leptos signals and Bevy resources are hydrated caches, not
    alternate sources of truth.
-5. **One-pass gate first**: `cargo xtask gate` is the only quality gate. It must
+5. **Persistent updates first**: every app update that represents user progress,
+   settings, unlocks, completion, or other resumable state must go through
+   `crates/state` and persist through `rs-dean-idb`. In-memory Leptos signals
+   and Bevy resources are only caches over durable state.
+6. **One-pass gate first**: `cargo xtask gate` is the only quality gate. It must
    be green before any task is considered complete. `just check` is an alias.
 
 ## Stack
 
 - Rust 2024 with Cargo workspace resolver 3.
-- Leptos CSR mounted by Trunk.
+- `apps/marketing` is the required Leptos marketing app. It may use Bevy for
+  browser canvas moments, but it owns the marketing DOM surface.
+- `apps/game` is the required Bevy WebGPU game binary. It must not depend on
+  Leptos.
+- `apps/stories` is the required independent story harness for reusable UI and
+  scene proofs.
 - Bevy `0.19.0` for browser scenes, WebGPU-only. The gate fails if a WebGL
   feature appears in the Bevy wasm feature tree.
-- `apps/cube-smoke` is the browser render smoke surface: one centered square
-  canvas, one lit green cube, WebGPU startup verification, and a green material
-  scene assertion.
+- `templates/app/cube-smoke` is copied into generated `apps/test-project` as
+  the browser render smoke surface: one centered square canvas, one lit green
+  cube, WebGPU startup verification, and a green material scene assertion.
 - `crates/idb` owns the shared async storage API. It exposes one object-store
   interface for wasm IndexedDB and native bundles, so Leptos UI code, Bevy
   systems, and state crates do not import storage backends directly.
@@ -54,25 +63,27 @@ The pass runs, in order:
 
 1. `cargo fmt --all -- --check`
 2. Bevy WebGPU-only feature-tree check
-3. native `cargo clippy` for workspace crates except browser-only Bevy crates
-4. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
+3. required app persistent-state wiring check
+4. native `cargo clippy` for workspace crates except browser-only Bevy crates
+5. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-5. native `cargo nextest` for workspace crates except browser-only Bevy crates
-6. native `cargo test --doc` for workspace crates except browser-only Bevy
+6. native `cargo nextest` for workspace crates except browser-only Bevy crates
+7. native `cargo test --doc` for workspace crates except browser-only Bevy
    crates
-7. wasm `cargo check` for browser crates
-8. wasm compile of the browser refresh hydration regression
-9. strict rustdoc build
-10. `cargo deny check`
-11. `cargo machete`
-12. regenerate `apps/test-project` from `templates/app`
-13. assert the generated template keeps the shared schema/state contract
-14. build and verify generated template output
-15. build and verify `apps/web` static output, including Pages artifacts
-16. build and verify `apps/stories` static output
-17. build `apps/cube-smoke`, verify the centered canvas, WebGPU renderer, and
-    green cube scene contract
-18. docs and skill sweep for stale non-Rust stack references
+8. wasm `cargo check` for browser crates
+9. wasm compile of the browser refresh hydration regression
+10. strict rustdoc build
+11. `cargo deny check`
+12. `cargo machete`
+13. regenerate `apps/test-project` from `templates/app`
+14. assert the generated template keeps the shared schema/state contract
+15. build and verify generated template output
+16. build and verify `apps/marketing` static output, including Pages artifacts
+17. build and verify `apps/game` static output
+18. build and verify `apps/stories` static output
+19. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
+    WebGPU renderer, and green cube scene contract
+20. docs and skill sweep for stale non-Rust stack references
 
 Warnings fail. Missing expected artifacts fail. Missing gate tools fail with a
 clear install message. Do not bypass a failing step; fix the source of the
@@ -102,11 +113,13 @@ committed.
 
 | Command | Purpose |
 |---|---|
-| `just dev` | Run the web app with Trunk on LAN-friendly host/port. |
+| `just dev` | Run the marketing app with Trunk on LAN-friendly host/port. |
+| `just game` | Run the Bevy game app with Trunk on LAN-friendly host/port. |
 | `just stories` | Run the Rust story harness. |
-| `just cube-smoke` | Build the green-cube page and verify the WebGPU scene contract. |
+| `just cube-smoke` | Generate the test project, build its green-cube page, and verify the WebGPU scene contract. |
 | `just doctor` | Run the fast local environment preflight. |
-| `just build` | Build static app output and Pages artifacts. |
+| `just build` | Build static marketing/game output and Pages artifacts. |
+| `just pages` | Build the aggregate GitHub Pages artifact under `target/pages`. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |
 | `just five-phase-pass` | Run the Rust five-phase pass. |

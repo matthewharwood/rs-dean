@@ -4684,19 +4684,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "rs-dean-cube-smoke"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "console_error_panic_hook",
-]
-
-[[package]]
 name = "rs-dean-curriculum"
 version = "0.1.0"
 dependencies = [
  "garde",
  "serde",
+]
+
+[[package]]
+name = "rs-dean-game"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "console_error_panic_hook",
+ "rs-dean-bevy-scenes",
+ "rs-dean-state",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -4711,6 +4714,16 @@ dependencies = [
  "thiserror 2.0.18",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "rs-dean-marketing"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "leptos",
+ "rs-dean-state",
+ "rs-dean-ui",
 ]
 
 [[package]]
@@ -4753,25 +4766,6 @@ name = "rs-dean-ui"
 version = "0.1.0"
 dependencies = [
  "leptos",
-]
-
-[[package]]
-name = "rs-dean-vector-dungeon"
-version = "0.1.0"
-dependencies = [
- "garde",
- "serde",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "rs-dean-web"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "leptos",
- "rs-dean-curriculum",
- "rs-dean-ui",
 ]
 
 [[package]]

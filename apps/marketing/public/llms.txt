@@ -1,0 +1,5 @@
+# rs-dean marketing
+
+Rust/WASM browser-game marketing surface for Dean. Static GitHub Pages deploy,
+Leptos for the marketing shell, optional Bevy 0.19 canvas scenes, and
+IndexedDB-first local state.

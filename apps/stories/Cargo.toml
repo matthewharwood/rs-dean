@@ -6,6 +6,12 @@ publish.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
+[package.metadata.rs-dean.pages]
+kind = "stories"
+publish = false
+route = "stories"
+title = "Stories"
+
 [dependencies]
 console_error_panic_hook.workspace = true
 leptos.workspace = true

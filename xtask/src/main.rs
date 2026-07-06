@@ -16,10 +16,11 @@ use command_fds::{CommandFdExt, FdMapping};
 use os_pipe::{PipeReader, PipeWriter};
 use serde_json::{Value, json};
 
-const WEB_APP: &str = "apps/web";
+const MARKETING_APP: &str = "apps/marketing";
+const GAME_APP: &str = "apps/game";
 const STORIES_APP: &str = "apps/stories";
-const CUBE_SMOKE_APP: &str = "apps/cube-smoke";
 const TEST_PROJECT: &str = "apps/test-project";
+const CUBE_SMOKE_APP: &str = "apps/test-project/cube-smoke";
 
 fn main() -> Result<()> {
     let mut args = env::args().skip(1);
@@ -32,11 +33,13 @@ fn main() -> Result<()> {
         Some("dev") => dev(),
         Some("docs-sweep") => docs_sweep(),
         Some("five-phase-pass") => five_phase_pass(),
+        Some("game") => game(),
         Some("gen-app") => {
             let name = args.next().unwrap_or_else(|| "test-project".to_owned());
             gen_app(&name)
         }
         Some("preview") => preview(),
+        Some("pages") => pages(),
         Some("stories") => stories(),
         Some("help") | None => {
             print_help();
@@ -52,14 +55,16 @@ fn print_help() {
 rs-dean xtask
 
 Commands:
-  dev              run the Leptos app on :5173
+  dev              run the Leptos marketing app on :5173
+  game             run the Bevy game app on :5174
   stories          run the Rust story harness on :6106
   preview          serve the release app on :3100
-  build            build static app output and GitHub Pages artifacts
+  build            build static marketing/game output and GitHub Pages artifacts
+  pages            build aggregate GitHub Pages artifact in target/pages
   gate             one-pass Rust gate
   check            alias for gate
   check-fast       alias for gate
-  cube-smoke       build the green-cube page and assert rendered pixels
+  cube-smoke       generate test project, build green-cube page, and assert rendered pixels
   doctor           verify local tools, wasm target, Chrome, ports, and repo wiring
   five-phase-pass  regenerate template, run gate, and sweep docs
   docs-sweep       fail on retired stack references
@@ -71,9 +76,17 @@ Commands:
 
 fn dev() -> Result<()> {
     run_in(
-        WEB_APP,
+        MARKETING_APP,
         "trunk",
         ["serve", "--address", "0.0.0.0", "--port", "5173"],
+    )
+}
+
+fn game() -> Result<()> {
+    run_in(
+        GAME_APP,
+        "trunk",
+        ["serve", "--address", "0.0.0.0", "--port", "5174"],
     )
 }
 
@@ -87,7 +100,7 @@ fn stories() -> Result<()> {
 
 fn preview() -> Result<()> {
     run_in(
-        WEB_APP,
+        MARKETING_APP,
         "trunk",
         [
             "serve",
@@ -101,10 +114,7 @@ fn preview() -> Result<()> {
 }
 
 fn build() -> Result<()> {
-    run_in(WEB_APP, "trunk", ["build", "--release"])?;
-    let dist = Path::new(WEB_APP).join("dist");
-    postprocess_dist(&dist)?;
-    verify_pages_dist(&dist)
+    pages()
 }
 
 fn five_phase_pass() -> Result<()> {
@@ -143,7 +153,8 @@ fn doctor() -> Result<()> {
         check_bevy_webgpu_only().map(|()| "feature tree is WebGPU-only".to_owned()),
     );
     for (label, port) in [
-        ("web dev port", 5173),
+        ("marketing dev port", 5173),
+        ("game dev port", 5174),
         ("story harness port", 6106),
         ("preview port", 3100),
         ("cube smoke port", 6173),
@@ -154,10 +165,11 @@ fn doctor() -> Result<()> {
         ".cargo/config.toml",
         "AGENTS.md",
         "templates/app/Cargo.toml",
-        "apps/web/Trunk.toml",
+        "templates/app/cube-smoke/Cargo.toml",
+        "apps/marketing/Trunk.toml",
+        "apps/game/Trunk.toml",
         "apps/stories/Trunk.toml",
         "apps/stories/public/.gitkeep",
-        "apps/cube-smoke/Trunk.toml",
     ] {
         report.check(
             path,
@@ -167,7 +179,12 @@ fn doctor() -> Result<()> {
                 .with_context(|| format!("missing {path}")),
         );
     }
-    for path in ["target", "apps/test-project", "apps/web/dist"] {
+    for path in [
+        "target",
+        "apps/test-project",
+        "apps/marketing/dist",
+        "apps/game/dist",
+    ] {
         report.check(
             &format!("ignore {path}"),
             git_check_ignore(path).and_then(|ignored| {
@@ -277,13 +294,15 @@ fn gate() -> Result<()> {
 
     run("cargo", ["fmt", "--all", "--", "--check"])?;
     check_bevy_webgpu_only()?;
+    check_game_bevy_only()?;
+    check_required_app_persistence()?;
     run(
         "cargo",
         [
             "clippy",
             "--workspace",
             "--exclude",
-            "rs-dean-cube-smoke",
+            "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
             "--all-targets",
@@ -299,11 +318,11 @@ fn gate() -> Result<()> {
             "--target",
             "wasm32-unknown-unknown",
             "-p",
-            "rs-dean-web",
+            "rs-dean-marketing",
+            "-p",
+            "rs-dean-game",
             "-p",
             "rs-dean-stories",
-            "-p",
-            "rs-dean-cube-smoke",
             "-p",
             "rs-dean-bevy-scenes",
             "-p",
@@ -322,7 +341,7 @@ fn gate() -> Result<()> {
             "run",
             "--workspace",
             "--exclude",
-            "rs-dean-cube-smoke",
+            "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
         ],
@@ -333,7 +352,7 @@ fn gate() -> Result<()> {
             "test",
             "--workspace",
             "--exclude",
-            "rs-dean-cube-smoke",
+            "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
             "--doc",
@@ -346,11 +365,11 @@ fn gate() -> Result<()> {
             "--target",
             "wasm32-unknown-unknown",
             "-p",
-            "rs-dean-web",
+            "rs-dean-marketing",
+            "-p",
+            "rs-dean-game",
             "-p",
             "rs-dean-stories",
-            "-p",
-            "rs-dean-cube-smoke",
             "-p",
             "rs-dean-bevy-scenes",
             "-p",
@@ -378,7 +397,7 @@ fn gate() -> Result<()> {
             "doc",
             "--workspace",
             "--exclude",
-            "rs-dean-cube-smoke",
+            "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
             "--no-deps",
@@ -401,7 +420,121 @@ fn build_stories() -> Result<()> {
     verify_trunk_dist(&Path::new(STORIES_APP).join("dist"))
 }
 
+fn pages() -> Result<()> {
+    let target = Path::new("target/pages");
+    if target.exists() {
+        fs::remove_dir_all(target).context("remove old target/pages")?;
+    }
+    fs::create_dir_all(target).context("create target/pages")?;
+
+    let base = pages_base_path();
+    build_pages_app(MARKETING_APP, target, "marketing", &base)?;
+    build_pages_app(GAME_APP, target, "game", &base)?;
+    write_pages_index(target, &base)?;
+    write_pages_support_files(target, &base)?;
+    verify_pages_site(target)
+}
+
+fn pages_base_path() -> String {
+    env::var("RS_DEAN_PAGES_BASE")
+        .ok()
+        .filter(|base| !base.trim().is_empty())
+        .map(|base| normalize_public_base(&base))
+        .unwrap_or_else(|| "/".to_owned())
+}
+
+fn normalize_public_base(base: &str) -> String {
+    let mut normalized = base.trim().to_owned();
+    if !normalized.starts_with('/') {
+        normalized.insert(0, '/');
+    }
+    if !normalized.ends_with('/') {
+        normalized.push('/');
+    }
+    normalized
+}
+
+fn build_pages_app(app: &str, target: &Path, route: &str, base: &str) -> Result<()> {
+    let dist = env::current_dir()
+        .context("resolve repository root")?
+        .join(target)
+        .join(route);
+    let public_url = format!("{base}{route}/");
+    run_in(
+        app,
+        "trunk",
+        vec![
+            "build".to_owned(),
+            "--release".to_owned(),
+            "--dist".to_owned(),
+            dist.display().to_string(),
+            "--public-url".to_owned(),
+            public_url,
+        ],
+    )?;
+    verify_trunk_dist(&dist)
+}
+
+fn write_pages_index(target: &Path, base: &str) -> Result<()> {
+    fs::write(
+        target.join("index.html"),
+        format!(
+            r#"<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rs-dean</title>
+  </head>
+  <body>
+    <main>
+      <h1>Hello world</h1>
+      <ul>
+        <li><a href="{base}marketing/">Marketing</a></li>
+        <li><a href="{base}game/">Game</a></li>
+      </ul>
+    </main>
+  </body>
+</html>
+"#
+        ),
+    )
+    .with_context(|| format!("write {}", target.join("index.html").display()))
+}
+
+fn write_pages_support_files(target: &Path, base: &str) -> Result<()> {
+    fs::write(target.join(".nojekyll"), "")
+        .with_context(|| format!("write {}", target.join(".nojekyll").display()))?;
+    fs::copy(target.join("index.html"), target.join("404.html"))
+        .with_context(|| format!("copy {}", target.join("404.html").display()))?;
+    fs::write(
+        target.join("sitemap.xml"),
+        format!(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>{base}</loc></url>
+  <url><loc>{base}marketing/</loc></url>
+  <url><loc>{base}game/</loc></url>
+</urlset>
+"#
+        ),
+    )
+    .with_context(|| format!("write {}", target.join("sitemap.xml").display()))
+}
+
+fn verify_pages_site(target: &Path) -> Result<()> {
+    for relative in ["index.html", "404.html", ".nojekyll", "sitemap.xml"] {
+        let path = target.join(relative);
+        if !path.exists() {
+            bail!("missing Pages artifact {}", path.display());
+        }
+    }
+    verify_trunk_dist(&target.join("marketing"))?;
+    verify_trunk_dist(&target.join("game"))
+}
+
 fn cube_smoke() -> Result<()> {
+    ensure_test_project()?;
     build_cube_smoke()?;
     check_cube_smoke_render()
 }
@@ -420,6 +553,8 @@ fn check_bevy_webgpu_only() -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
+            "--color",
+            "never",
             "--target",
             "wasm32-unknown-unknown",
             "-e",
@@ -440,6 +575,69 @@ fn check_bevy_webgpu_only() -> Result<()> {
         bail!("Bevy wasm feature tree does not include WebGPU");
     }
     Ok(())
+}
+
+fn check_game_bevy_only() -> Result<()> {
+    let output = Command::new("cargo")
+        .args([
+            "tree",
+            "--color",
+            "never",
+            "--target",
+            "wasm32-unknown-unknown",
+            "-p",
+            "rs-dean-game",
+        ])
+        .output()
+        .context("inspect game wasm dependency tree")?;
+    if !output.status.success() {
+        bail!("cargo tree exited with {}", output.status);
+    }
+    let stdout = String::from_utf8(output.stdout).context("cargo tree output was not UTF-8")?;
+    if !cargo_tree_has_package(&stdout, "bevy") {
+        bail!("rs-dean-game must depend on Bevy");
+    }
+    if cargo_tree_has_package(&stdout, "leptos") {
+        bail!("rs-dean-game must stay Bevy-only and cannot depend on Leptos");
+    }
+    Ok(())
+}
+
+fn check_required_app_persistence() -> Result<()> {
+    for app in [
+        RequiredPersistentApp {
+            manifest: Path::new("apps/marketing/Cargo.toml"),
+            source: Path::new("apps/marketing/src/main.rs"),
+        },
+        RequiredPersistentApp {
+            manifest: Path::new("apps/game/Cargo.toml"),
+            source: Path::new("apps/game/src/main.rs"),
+        },
+    ] {
+        assert_file_contains(app.manifest, "require_persistent_state = true")?;
+        assert_file_contains(app.manifest, "rs-dean-state")?;
+        assert_file_contains(app.source, "ensure_durable_snapshot")?;
+    }
+    assert_file_contains(
+        Path::new("templates/app/src/main.rs"),
+        "ensure_durable_snapshot",
+    )?;
+    Ok(())
+}
+
+struct RequiredPersistentApp {
+    manifest: &'static Path,
+    source: &'static Path,
+}
+
+fn cargo_tree_has_package(tree: &str, package: &str) -> bool {
+    let prefix = format!("{package} v");
+    tree.lines().any(|line| {
+        line.trim_start_matches(|character: char| {
+            !character.is_ascii_alphanumeric() && character != '_'
+        })
+        .starts_with(&prefix)
+    })
 }
 
 fn check_cube_smoke_render() -> Result<()> {
@@ -1332,6 +1530,11 @@ fn check_template() -> Result<()> {
         "src/main.rs",
         "styles/index.css",
         "public/llms.txt",
+        "cube-smoke/Cargo.toml",
+        "cube-smoke/Trunk.toml",
+        "cube-smoke/index.html",
+        "cube-smoke/src/main.rs",
+        "cube-smoke/styles/index.css",
     ] {
         let path = test_project.join(relative);
         if !path.exists() {
@@ -1342,6 +1545,18 @@ fn check_template() -> Result<()> {
     assert_file_contains(&test_project.join("Cargo.toml"), "rs-dean-state")?;
     assert_file_contains(&test_project.join("src/main.rs"), "validate_snapshot")?;
     assert_file_contains(&test_project.join("src/main.rs"), "APP_SNAPSHOT_KEY")?;
+    assert_file_contains(&test_project.join("cube-smoke/Cargo.toml"), "webgpu")?;
+    assert_file_contains(
+        &test_project.join("cube-smoke/src/main.rs"),
+        "GREEN_CUBE_READY",
+    )?;
+    Ok(())
+}
+
+fn ensure_test_project() -> Result<()> {
+    if !Path::new(CUBE_SMOKE_APP).join("Cargo.toml").exists() {
+        check_template()?;
+    }
     Ok(())
 }
 
@@ -1361,38 +1576,6 @@ fn gen_app(name: &str) -> Result<()> {
     let mut replacements = Vec::from([("{{name}}", name.to_owned())]);
     replacements.push(("{{crate_name}}", name.replace('-', "_")));
     copy_template_dir(Path::new("templates/app"), &destination, &replacements)
-}
-
-fn postprocess_dist(dist: &Path) -> Result<()> {
-    fs::copy(dist.join("index.html"), dist.join("404.html"))
-        .with_context(|| format!("copy {} to 404.html", dist.display()))?;
-    fs::write(dist.join(".nojekyll"), "").with_context(|| {
-        format!(
-            "write GitHub Pages marker at {}",
-            dist.join(".nojekyll").display()
-        )
-    })?;
-    fs::write(
-        dist.join("sitemap.xml"),
-        r#"<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://example.com/</loc></url>
-</urlset>
-"#,
-    )
-    .with_context(|| format!("write {}", dist.join("sitemap.xml").display()))?;
-    Ok(())
-}
-
-fn verify_pages_dist(dist: &Path) -> Result<()> {
-    verify_trunk_dist(dist)?;
-    for relative in ["404.html", ".nojekyll", "sitemap.xml"] {
-        let path = dist.join(relative);
-        if !path.exists() {
-            bail!("missing Pages artifact {}", path.display());
-        }
-    }
-    Ok(())
 }
 
 fn verify_trunk_dist(dist: &Path) -> Result<()> {
