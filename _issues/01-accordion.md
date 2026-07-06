@@ -41,5 +41,6 @@ Ship a Rust-first `Accordion` component that follows the shadcn composition mode
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Concrete `Accordion` model, state transition API, render nodes, and Leptos component implemented.
+- [x] `garde` validation enforces item fields, unique values, and valid default-open references.
 - [x] Dedicated `apps/stories` Accordion proof covers open, multi-open, and disabled states.
 - [x] Sweep review complete through the current implemented catalog.

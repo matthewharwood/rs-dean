@@ -1,4 +1,8 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+use garde::Validate;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum AccordionMode {
     Single,
     Multiple,
@@ -24,18 +28,25 @@ impl AccordionPart {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, Serialize, Validate)]
 pub struct AccordionItem {
+    #[garde(length(min = 1, max = 128))]
     pub value: String,
+    #[garde(length(min = 1, max = 160))]
     pub title: String,
+    #[garde(length(min = 1, max = 2_000))]
     pub content: String,
+    #[garde(skip)]
     pub disabled: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, Serialize, Validate)]
 pub struct AccordionModel {
+    #[garde(skip)]
     pub mode: AccordionMode,
+    #[garde(length(min = 1), dive, custom(unique_accordion_values))]
     pub items: Vec<AccordionItem>,
+    #[garde(custom(default_open_references_items(&self.items)))]
     pub default_open: Vec<String>,
 }
 
@@ -124,6 +135,10 @@ impl AccordionModel {
     pub fn state(&self) -> AccordionState {
         AccordionState::new(self.mode, self.default_open.clone())
     }
+}
+
+pub fn validate_accordion_model(model: &AccordionModel) -> Result<(), garde::Report> {
+    model.validate()
 }
 
 impl AccordionState {
@@ -282,6 +297,54 @@ pub fn default_accordion_items() -> Vec<AccordionItem> {
     ]
 }
 
+fn unique_accordion_values(items: &[AccordionItem], _context: &()) -> garde::Result {
+    for (index, item) in items.iter().enumerate() {
+        if items
+            .iter()
+            .skip(index.saturating_add(1))
+            .any(|candidate| candidate.value == item.value)
+        {
+            return Err(garde::Error::new(format!(
+                "duplicate accordion item value `{}`",
+                item.value
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn default_open_references_items<'a>(
+    items: &'a [AccordionItem],
+) -> impl FnOnce(&[String], &()) -> garde::Result + 'a {
+    move |default_open, _context| {
+        for (index, value) in default_open.iter().enumerate() {
+            if value.is_empty() {
+                return Err(garde::Error::new("default open value cannot be empty"));
+            }
+            if default_open
+                .iter()
+                .skip(index.saturating_add(1))
+                .any(|candidate| candidate == value)
+            {
+                return Err(garde::Error::new(format!(
+                    "duplicate default open value `{value}`"
+                )));
+            }
+            let Some(item) = items.iter().find(|item| item.value == *value) else {
+                return Err(garde::Error::new(format!(
+                    "default open value `{value}` does not match an accordion item"
+                )));
+            };
+            if item.disabled {
+                return Err(garde::Error::new(format!(
+                    "default open value `{value}` references a disabled item"
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
 fn normalize_open(mode: AccordionMode, open: Vec<String>) -> Vec<String> {
     let mut normalized = Vec::new();
     for value in open {
@@ -378,5 +441,44 @@ mod tests {
             accordion_dom_id("accordion-panel", "Billing & Plans"),
             "accordion-panel-billing-plans"
         );
+    }
+
+    #[test]
+    fn default_model_validates_with_garde() {
+        let model = AccordionModel::single(default_accordion_items())
+            .with_default_open(vec!["tokens".to_owned()]);
+        assert!(validate_accordion_model(&model).is_ok());
+    }
+
+    #[test]
+    fn garde_rejects_empty_item_fields() {
+        let model = AccordionModel::single(vec![AccordionItem::new("", "Title", "Content")]);
+        assert!(validate_accordion_model(&model).is_err());
+    }
+
+    #[test]
+    fn garde_rejects_duplicate_item_values() {
+        let model = AccordionModel::multiple(vec![
+            AccordionItem::new("same", "First", "First content"),
+            AccordionItem::new("same", "Second", "Second content"),
+        ]);
+        assert!(validate_accordion_model(&model).is_err());
+    }
+
+    #[test]
+    fn garde_rejects_unknown_default_open_values() {
+        let model = AccordionModel::single(default_accordion_items())
+            .with_default_open(vec!["missing".to_owned()]);
+        assert!(validate_accordion_model(&model).is_err());
+    }
+
+    #[test]
+    fn garde_rejects_disabled_default_open_values() {
+        let model = AccordionModel::single(vec![
+            AccordionItem::new("active", "Active", "Active content"),
+            AccordionItem::new("disabled", "Disabled", "Disabled content").disabled(),
+        ])
+        .with_default_open(vec!["disabled".to_owned()]);
+        assert!(validate_accordion_model(&model).is_err());
     }
 }

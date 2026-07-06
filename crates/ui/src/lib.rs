@@ -11,7 +11,7 @@ mod components;
 pub use accordion::{
     AccordionChange, AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AccordionPart,
     AccordionRenderNode, AccordionState, accordion_dom_id, accordion_render_nodes,
-    default_accordion_items,
+    default_accordion_items, validate_accordion_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

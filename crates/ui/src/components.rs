@@ -4,7 +4,7 @@ use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, ComponentImplementation,
     ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget, UiWidgetPattern,
     UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id, component_implementation, component_spec,
-    default_accordion_items, widget_for_component,
+    default_accordion_items, validate_accordion_model, widget_for_component,
 };
 
 const HEALTH_CARD: &str =
@@ -71,6 +71,8 @@ const ACCORDION_INDICATOR: &str =
     "grid size-s place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
 const ACCORDION_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-2 p-s text-0 leading-0 text-text-muted";
+const ACCORDION_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[component]
 pub fn HealthCard(title: &'static str, body: &'static str) -> impl IntoView {
@@ -474,8 +476,18 @@ pub fn Accordion(
     #[prop(optional, default = default_accordion_items())] items: Vec<AccordionItem>,
     #[prop(optional, default = AccordionMode::Single)] mode: AccordionMode,
     #[prop(optional, default = vec!["tokens".to_owned()])] default_open: Vec<String>,
-) -> impl IntoView {
+) -> AnyView {
     let model = AccordionModel::new(mode, items).with_default_open(default_open);
+    if let Err(report) = validate_accordion_model(&model) {
+        let message = format!("Accordion validation failed: {report}");
+        return view! {
+            <section class=ACCORDION_ROOT data-ui-component="accordion" data-ui-state="invalid">
+                <p class=ACCORDION_ERROR role="alert">{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
     let (state, set_state) = signal(model.state());
     let items = model.items;
 
@@ -578,6 +590,7 @@ pub fn Accordion(
             }}
         </section>
     }
+    .into_any()
 }
 
 literal_component!(Alert, Alert);

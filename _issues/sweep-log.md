@@ -7,7 +7,8 @@ Completed pass: Accordion through Typography.
 Concrete component pass: Accordion complete. The first issue now has a
 component-specific Rust model, state transition API, render nodes, token-only
 Leptos component, dedicated story proof, and Bevy primitive derivation from the
-same model.
+same model. Follow-up validation pass added `garde::Validate` to the shared
+Accordion model and item types so component props are checked before rendering.
 
 ## Consolidated Learnings
 
