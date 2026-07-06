@@ -66,9 +66,10 @@ palette and semantic token methods.
 
 The shadcn-inspired component catalog is Rust data in `crates/ui`. Each entry
 has a component definition, shared anatomy/spec blocks, an implementation
-recipe, a token-only Leptos preview, and Bevy primitive derivation for scene
-consumers. `_issues/` mirrors the catalog with one technical-program-management
-task per component plus a sweep log for the repeated first-to-current audit.
+recipe, a literal Rust widget constructor, a named token-only Leptos component,
+and Bevy primitive derivation from the same widget slots for scene consumers.
+`_issues/` mirrors the catalog with one technical-program-management task per
+component plus a sweep log for the repeated first-to-current audit.
 
 ## Doctor
 

@@ -46,7 +46,7 @@ fn Stories() -> impl IntoView {
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"shadcn component catalog"</h2>
                             <p class=STORY_SECTION_BODY>
-                                "Every official shadcn component is represented by a shared Rust spec, a token-only Leptos renderer, and a Bevy primitive adapter."
+                                "Every official shadcn component has a literal Rust widget constructor, a token-only Leptos component, and a Bevy primitive adapter over the same slots."
                             </p>
                         </header>
                         <ShadcnComponentGallery />

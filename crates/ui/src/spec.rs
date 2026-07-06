@@ -282,35 +282,45 @@ pub mod bevy_adapter {
 
     use crate::{
         RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        component_implementation, component_spec, scale,
+        UiWidgetIntent, UiWidgetSlotKind, component_implementation, scale, widget_for_component,
     };
 
     #[derive(Debug, Clone, PartialEq)]
     pub struct BevyUiPrimitive {
+        pub part: &'static str,
+        pub kind: UiWidgetSlotKind,
         pub role: UiBlockRole,
         pub label: &'static str,
-        pub detail: &'static str,
+        pub value: &'static str,
         pub size: Vec2,
         pub fill: Color,
         pub text: Color,
         pub render: RenderContract,
         pub state: StateContract,
+        pub intent: UiWidgetIntent,
+        pub selected: bool,
+        pub disabled: bool,
     }
 
     pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
         let implementation = component_implementation(id);
-        component_spec(id)
-            .blocks
+        widget_for_component(id)
+            .slots
             .into_iter()
-            .map(|block| BevyUiPrimitive {
-                role: block.role,
-                label: block.label,
-                detail: block.detail,
-                size: size_for_role(block.role),
-                fill: fill_for_tone(block.tone, theme),
+            .map(|slot| BevyUiPrimitive {
+                part: slot.part,
+                kind: slot.kind,
+                role: slot.role,
+                label: slot.label,
+                value: slot.value,
+                size: size_for_role(slot.role),
+                fill: fill_for_tone(slot.tone, theme),
                 text: theme.text_1().to_bevy(),
                 render: implementation.render,
                 state: implementation.state,
+                intent: slot.intent,
+                selected: slot.selected,
+                disabled: slot.disabled,
             })
             .collect()
     }

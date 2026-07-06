@@ -31,12 +31,13 @@ Ship a Rust-first `Bubble` component that follows the shadcn composition model w
 - `Bubble` appears in the story gallery and `_issues` index.
 - The shared spec exposes all anatomy parts listed above.
 - Leptos output uses only `rs-dean-ui` token utilities for design scales.
-- Bevy adapter can derive scene primitives from the same component spec.
+- Bevy adapter can derive scene primitives from the same literal widget slots.
 - `cargo xtask five-phase-pass` passes.
 
 ## Implementation Status
 
 - [x] Shared Rust implementation recipe.
-- [x] Token-only Leptos rendering path.
-- [x] Bevy primitive derivation path.
+- [x] Literal Rust widget constructor exported from `rs-dean-ui`.
+- [x] Named token-only Leptos component exported for consumer code.
+- [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Sweep review complete through the current implemented catalog.
