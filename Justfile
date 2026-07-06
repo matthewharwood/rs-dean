@@ -39,9 +39,6 @@ build:
 pages:
     cargo xtask pages
 
-pages:
-    cargo xtask pages
-
 gate:
     cargo xtask gate
 
