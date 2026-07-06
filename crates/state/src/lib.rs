@@ -33,6 +33,18 @@ pub async fn hydrate() -> Result<HydratedState, StateError> {
     hydrate_from_database(&database).await
 }
 
+pub async fn ensure_durable_snapshot() -> Result<HydratedState, StateError> {
+    let database = open_state_database().await?;
+    ensure_durable_snapshot_in_database(&database).await
+}
+
+pub async fn update_snapshot(
+    mut update: impl FnMut(&mut AppSnapshot),
+) -> Result<HydratedState, StateError> {
+    let database = open_state_database().await?;
+    update_snapshot_in_database(&database, &mut update).await
+}
+
 pub async fn open_state_database() -> Result<Database, StateError> {
     Database::open(database_config()).await.map_err(Into::into)
 }
@@ -65,10 +77,29 @@ pub async fn persist_snapshot(
     Ok(())
 }
 
+pub async fn ensure_durable_snapshot_in_database(
+    database: &Database,
+) -> Result<HydratedState, StateError> {
+    let hydrated = hydrate_from_database(database).await?;
+    persist_snapshot(database, &hydrated.snapshot).await?;
+    Ok(hydrated)
+}
+
+pub async fn update_snapshot_in_database(
+    database: &Database,
+    update: &mut impl FnMut(&mut AppSnapshot),
+) -> Result<HydratedState, StateError> {
+    let mut hydrated = hydrate_from_database(database).await?;
+    update(&mut hydrated.snapshot);
+    persist_snapshot(database, &hydrated.snapshot).await?;
+    Ok(hydrated)
+}
+
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::{
-        HydratedState, database_config_with_native_path, hydrate_from_database, persist_snapshot,
+        HydratedState, database_config_with_native_path, ensure_durable_snapshot_in_database,
+        hydrate_from_database, persist_snapshot, update_snapshot_in_database,
     };
     use rs_dean_idb::Database;
     use rs_dean_schema::AppSnapshot;
@@ -97,6 +128,68 @@ mod tests {
 
             let hydrated = hydrate_from_database(&database).await.unwrap();
             assert_eq!(hydrated.snapshot, snapshot);
+        });
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_update_mutates_and_persists_snapshot() {
+        let path =
+            std::env::temp_dir().join(format!("rs-dean-state-{}-update.redb", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+
+        poll(async {
+            let database = Database::open(database_config_with_native_path(&path))
+                .await
+                .unwrap();
+            let mut mark_complete = |snapshot: &mut AppSnapshot| {
+                snapshot.progress[0].level = 3;
+                snapshot.progress[0].completed = true;
+            };
+            let updated = update_snapshot_in_database(&database, &mut mark_complete)
+                .await
+                .unwrap();
+            assert_eq!(updated.snapshot.progress[0].level, 3);
+            assert!(updated.snapshot.progress[0].completed);
+            database.close();
+
+            let reopened = Database::open(database_config_with_native_path(&path))
+                .await
+                .unwrap();
+            let hydrated = hydrate_from_database(&reopened).await.unwrap();
+            assert_eq!(hydrated.snapshot.progress[0].level, 3);
+            assert!(hydrated.snapshot.progress[0].completed);
+        });
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_ensure_writes_default_snapshot() {
+        let path =
+            std::env::temp_dir().join(format!("rs-dean-state-{}-ensure.redb", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+
+        poll(async {
+            let database = Database::open(database_config_with_native_path(&path))
+                .await
+                .unwrap();
+            let hydrated = ensure_durable_snapshot_in_database(&database)
+                .await
+                .unwrap();
+            assert_eq!(hydrated, HydratedState::default());
+            database.close();
+
+            let reopened = Database::open(database_config_with_native_path(&path))
+                .await
+                .unwrap();
+            assert_eq!(
+                hydrate_from_database(&reopened).await.unwrap(),
+                HydratedState::default()
+            );
         });
 
         let _ = std::fs::remove_file(path);

@@ -2,6 +2,9 @@ use leptos::prelude::*;
 use rs_dean_schema::{AppSnapshot, validate_snapshot};
 use rs_dean_state::{APP_SNAPSHOT_KEY, DB_NAME, SNAPSHOTS_STORE};
 
+#[cfg(target_arch = "wasm32")]
+use rs_dean_state::ensure_durable_snapshot;
+
 #[component]
 fn App() -> impl IntoView {
     let snapshot = AppSnapshot::default();
@@ -53,6 +56,11 @@ fn App() -> impl IntoView {
 #[cfg(target_arch = "wasm32")]
 fn main() {
     console_error_panic_hook::set_once();
+    leptos::task::spawn_local(async {
+        if let Err(error) = ensure_durable_snapshot().await {
+            leptos::logging::error!("failed to hydrate persistent app state: {error}");
+        }
+    });
     leptos::mount::mount_to_body(App);
 }
 

@@ -16,7 +16,8 @@ and local skills all agree.
 
 Implement the change in the owning app or crate:
 
-- `apps/web` for the shipped browser app.
+- `apps/marketing` for the required Leptos marketing app.
+- `apps/game` for the required Bevy-only game app.
 - `apps/stories` for isolated UI or scene proofs.
 - `crates/*` for reusable Rust logic.
 - `xtask` for commands, gates, generated templates, and artifact checks.
@@ -70,6 +71,8 @@ remove the old wording from docs/skills.
   prerequisites.
 - `cargo xtask docs-sweep` passes.
 - Template regeneration succeeds and `apps/test-project` remains untracked.
-- `apps/web` and `apps/stories` both produce Trunk `.wasm`, glue, and CSS
-  artifacts.
+- `apps/marketing`, `apps/game`, and `apps/stories` produce Trunk `.wasm`,
+  glue, and CSS artifacts.
+- Required app packages keep persistent-state wiring through `rs-dean-state`.
+- Generated `apps/test-project/cube-smoke` verifies the WebGPU smoke surface.
 - The Bevy wasm feature tree contains WebGPU and no WebGL.

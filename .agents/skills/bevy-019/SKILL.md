@@ -25,7 +25,9 @@ WebGL features.
 
 ## App Shape
 
-For reusable scene crates, expose a plugin:
+For reusable scene crates, expose a plugin. `apps/game` is the required
+Bevy-only game binary and must not depend on Leptos. `apps/marketing` may use
+Bevy for canvas moments, but it owns the Leptos marketing surface.
 
 ```rust
 use bevy::prelude::*;
@@ -58,8 +60,8 @@ fn main() {
 }
 ```
 
-In `rs-dean`, Bevy is currently a crate-level scene layer, not the Leptos shell.
-Do not move app routing or persisted state into Bevy.
+In `rs-dean`, Bevy is the game and scene layer, not the marketing shell. Do not
+move marketing routing or persisted state into Bevy.
 
 ## Components Instead Of Bundles
 
@@ -181,14 +183,15 @@ The gate checks the wasm feature tree and fails if WebGL is present.
 ## Testing Boundaries
 
 - Pure gameplay logic belongs in native unit tests under crates such as
-  `crates/vector-dungeon`, `crates/srs`, or future domain crates.
+  `crates/srs`, `crates/cards`, or future domain crates.
 - Bevy scene wiring should have compile tests via `cargo check` and story-harness
   proofs when visible output matters.
-- `apps/cube-smoke` is the required visible 3D smoke surface. It renders one
-  green `StandardMaterial` cube in a centered square canvas with a light and
-  camera, then `cargo xtask cube-smoke` verifies the WebGPU renderer, centered
-  canvas layout, and green material scene marker. It attempts green-pixel
-  readback first where headless browser capture supports it.
+- `templates/app/cube-smoke` is copied into generated `apps/test-project` as
+  the required visible 3D smoke surface. It renders one green
+  `StandardMaterial` cube in a centered square canvas with a light and camera,
+  then `cargo xtask cube-smoke` verifies the WebGPU renderer, centered canvas
+  layout, and green material scene marker. It attempts green-pixel readback
+  first where headless browser capture supports it.
 - Browser-only compile guarantees are provided by the wasm clippy/check steps in
   `cargo xtask gate`.
 - Keep renderer tests deterministic. Avoid real time, ambient randomness, and

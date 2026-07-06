@@ -1,0 +1,25 @@
+[package]
+name = "rs-dean-{{name}}-cube-smoke"
+edition = "2024"
+publish = false
+rust-version = "1.96.1"
+version = "0.1.0"
+
+[dependencies]
+bevy = { version = "0.19.0", default-features = false, features = [
+    "3d_bevy_render",
+    "bevy_winit",
+    "default_app",
+    "png",
+    "web",
+    "webgpu",
+] }
+console_error_panic_hook = "0.1.7"
+
+[lints.rust]
+unsafe_code = "forbid"
+unused_imports = "warn"
+
+[lints.rustdoc]
+broken_intra_doc_links = "warn"
+private_intra_doc_links = "warn"
