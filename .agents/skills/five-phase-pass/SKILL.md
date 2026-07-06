@@ -27,6 +27,19 @@ Leptos app and template styling uses Tailwind through Trunk's
 every Leptos scaffold; `xtask` owns the policy check and standalone CLI
 installer.
 
+Shared app theme work belongs in `crates/ui`: keep the Rust token/theme model,
+the Tailwind token stylesheet, Leptos components, and any Bevy-facing feature
+usage in sync. Bevy consumers must enable `rs-dean-ui` with
+`default-features = false` and `features = ["bevy"]` so the game tree stays
+Leptos-free.
+
+Shared Leptos UI examples must use the `rs-dean-ui` Tailwind token vocabulary
+for design scales: `text-0`, `gap-m`, `p-s`, `rounded-box`, `font-7`,
+`leading-0`, `shadow-2`, and similar tokens. Do not mix stock Tailwind
+design-scale utilities such as `text-sm`, `px-6`, `gap-4`, `rounded-lg`, or
+`font-bold` into reusable UI examples; `xtask` enforces this on the app,
+story, template, and shared component surfaces.
+
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
 ### P2 — Template
@@ -78,6 +91,11 @@ remove the old wording from docs/skills.
 - Template regeneration succeeds and `apps/test-project` remains untracked.
 - `apps/marketing`, `apps/game`, and `apps/stories` produce Trunk `.wasm`,
   glue, and CSS artifacts; Leptos CSS artifacts are compiled through Tailwind.
+- Leptos app, story, template, and shared component examples use
+  `rs-dean-ui` token utilities for design scales instead of stock Tailwind
+  scale classes.
+- Shared UI themes switch through Tailwind tokens in Leptos and through the
+  same Rust palette in Bevy without adding Leptos to `rs-dean-game`.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.
 - Generated `apps/test-project/cube-smoke` verifies the WebGPU smoke surface.
 - The Bevy wasm feature tree contains WebGPU and no WebGL.

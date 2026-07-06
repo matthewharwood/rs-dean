@@ -414,6 +414,7 @@ fn gate() -> Result<()> {
     check_game_bevy_only()?;
     check_required_app_persistence()?;
     check_leptos_tailwind_assets()?;
+    check_ui_design_token_classes()?;
     run(
         "cargo",
         [
@@ -758,6 +759,98 @@ fn check_leptos_tailwind_assets() -> Result<()> {
         assert_file_contains(styles, "@import \"tailwindcss\"")?;
     }
     Ok(())
+}
+
+fn check_ui_design_token_classes() -> Result<()> {
+    let source_paths = [
+        Path::new("crates/ui/src/components.rs"),
+        Path::new("apps/marketing/src/main.rs"),
+        Path::new("apps/stories/src/main.rs"),
+        Path::new("templates/app/src/main.rs"),
+    ];
+    let stock_design_scale_classes = [
+        "text-xs",
+        "text-sm",
+        "text-base",
+        "text-lg",
+        "text-xl",
+        "text-2xl",
+        "text-3xl",
+        "font-bold",
+        "font-semibold",
+        "leading-none",
+        "leading-tight",
+        "leading-snug",
+        "leading-normal",
+        "leading-relaxed",
+        "leading-loose",
+        "p-4",
+        "p-5",
+        "px-3",
+        "px-6",
+        "py-2",
+        "py-8",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "mt-2",
+        "mt-3",
+        "mt-4",
+        "mt-6",
+        "mb-6",
+        "h-8",
+        "w-8",
+        "min-h-40",
+        "rounded-sm",
+        "rounded-md",
+        "rounded-lg",
+        "rounded-xl",
+        "shadow-sm",
+        "shadow-md",
+        "shadow-lg",
+    ];
+    for path in source_paths {
+        let contents =
+            fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+        for class in stock_design_scale_classes {
+            if class_token_is_present(&contents, class) {
+                bail!(
+                    "{} uses stock Tailwind design-scale class `{class}`; use rs-dean-ui token utilities instead",
+                    path.display()
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
+fn class_token_is_present(contents: &str, class: &str) -> bool {
+    contents.match_indices(class).any(|(start, _)| {
+        let end = start + class.len();
+        let before = contents[..start].chars().next_back();
+        let after = contents[end..].chars().next();
+        is_class_boundary(before) && is_class_boundary(after)
+    })
+}
+
+fn is_class_boundary(character: Option<char>) -> bool {
+    matches!(
+        character,
+        None | Some('"')
+            | Some('\'')
+            | Some('`')
+            | Some(':')
+            | Some('/')
+            | Some('{')
+            | Some('}')
+            | Some('(')
+            | Some(')')
+            | Some(' ')
+            | Some('\n')
+            | Some('\r')
+            | Some('\t')
+    )
 }
 
 struct RequiredPersistentApp {

@@ -8,6 +8,9 @@ version.workspace = true
 
 [dependencies]
 bevy.workspace = true
+rs-dean-ui = { path = "../ui", version = "0.1.0", default-features = false, features = [
+    "bevy",
+] }
 
 [lints]
 workspace = true

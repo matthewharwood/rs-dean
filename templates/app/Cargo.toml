@@ -10,6 +10,7 @@ console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8.20", features = ["csr"] }
 rs-dean-schema = { path = "../../crates/schema" }
 rs-dean-state = { path = "../../crates/state" }
+rs-dean-ui = { path = "../../crates/ui" }
 
 [lints.rust]
 unsafe_code = "forbid"

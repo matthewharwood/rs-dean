@@ -4,8 +4,9 @@ Rust/WASM browser-game scaffold for Dean.
 
 Every clone has a static GitHub Pages shape: `apps/marketing` for the Leptos
 marketing surface, `apps/game` for the Bevy-only WebGPU game, `apps/stories` for
-independent UI and scene proofs, `rs-dean-idb` for isomorphic durable state, and
-generated template proof under ignored `apps/test-project`.
+independent UI and scene proofs, `rs-dean-ui` for shared Leptos/Bevy design
+tokens and themes, `rs-dean-idb` for isomorphic durable state, and generated
+template proof under ignored `apps/test-project`.
 
 ## First Run
 
@@ -39,10 +40,28 @@ centered square canvas, WebGPU startup, and the lit green-cube scene contract.
   Leptos or drops the persistent-state wiring. It currently renders a Bevy
   hello-world scene.
 - `apps/stories`: required independent story harness for reusable UI and scene
-  proofs. Leptos stories use the same Trunk Tailwind asset path as marketing.
+  proofs. Leptos stories use the same Trunk Tailwind asset path as marketing
+  and include a theme gallery for every `rs-dean-ui` theme.
 - `apps/test-project`: ignored generated proof from `templates/app`; it contains
   a generated Leptos app with Tailwind already wired, plus the generated
   cube-smoke app used by the render gate.
+
+## Design Tokens
+
+`crates/ui` owns the shared theme contract. Its Rust model contains the
+EngManager-style primitive palettes, semantic aliases, theme cycle, and Bevy
+color conversion. Its Tailwind v4 stylesheet at `crates/ui/styles/theme.css`
+exports those semantics as theme variables, so Leptos components use normal
+utilities such as `bg-surface-1`, `text-text-1`, `rounded-box`, and `shadow-2`.
+Shared Leptos examples use the `rs-dean-ui` token scales for type, space,
+radii, weight, leading, and elevation: `text-0`, `text-5`, `gap-m`, `p-s`,
+`rounded-box`, `font-7`, `leading-0`, and `shadow-2`. Avoid mixing stock
+Tailwind design-scale utilities like `text-sm`, `px-6`, `gap-4`, `rounded-lg`,
+or `font-bold` in reusable UI so generated components follow the token system.
+
+Bevy consumers depend on `rs-dean-ui` with `default-features = false` and
+`features = ["bevy"]`, which keeps `apps/game` Bevy-only while sharing the same
+palette and semantic token methods.
 
 ## Doctor
 

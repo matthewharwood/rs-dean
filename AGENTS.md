@@ -22,6 +22,10 @@ with a Leptos marketing app plus a Bevy-only game app.
    and Bevy resources are only caches over durable state.
 6. **One-pass gate first**: `cargo xtask gate` is the only quality gate. It must
    be green before any task is considered complete. `just check` is an alias.
+7. **Shared-theme first**: design tokens and theme palettes belong in
+   `crates/ui`. Leptos consumes them through Tailwind theme variables; Bevy
+   consumes the same Rust palette through the `bevy` feature without depending
+   on Leptos.
 
 ## Stack
 
@@ -31,6 +35,15 @@ with a Leptos marketing app plus a Bevy-only game app.
 - Leptos app and template styles use Tailwind through Trunk's
   `rel="tailwind-css"` asset type. Keep the standalone `tailwindcss` CLI on
   `PATH`; `just bootstrap` installs it.
+- `crates/ui` owns shared design tokens, semantic colors, theme cycling, and
+  all theme palettes. The Tailwind token stylesheet lives at
+  `crates/ui/styles/theme.css`; Bevy callers use `rs-dean-ui` with
+  `default-features = false` and `features = ["bevy"]`.
+- Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
+  typography, spacing, radius, shadow, and motion scales, such as `text-0`,
+  `gap-m`, `p-s`, `rounded-box`, `font-7`, `leading-0`, and `shadow-2`.
+  Avoid stock design-scale utilities such as `text-sm`, `px-6`, `gap-4`,
+  `rounded-lg`, and `font-bold` in shared UI examples.
 - `apps/game` is the required Bevy WebGPU game binary. It must not depend on
   Leptos.
 - `apps/stories` is the required independent story harness for reusable UI and
@@ -68,26 +81,27 @@ The pass runs, in order:
 2. Bevy WebGPU-only feature-tree check
 3. required app persistent-state wiring check
 4. Leptos Tailwind asset wiring check for apps and generated templates
-5. native `cargo clippy` for workspace crates except browser-only Bevy crates
-6. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
+5. Leptos/UI design-token class usage check
+6. native `cargo clippy` for workspace crates except browser-only Bevy crates
+7. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-7. native `cargo nextest` for workspace crates except browser-only Bevy crates
-8. native `cargo test --doc` for workspace crates except browser-only Bevy
+8. native `cargo nextest` for workspace crates except browser-only Bevy crates
+9. native `cargo test --doc` for workspace crates except browser-only Bevy
    crates
-9. wasm `cargo check` for browser crates
-10. wasm compile of the browser refresh hydration regression
-11. strict rustdoc build
-12. `cargo deny check`
-13. `cargo machete`
-14. regenerate `apps/test-project` from `templates/app`
-15. assert the generated template keeps the shared schema/state contract
-16. build and verify generated template output
-17. build and verify `apps/marketing` static output, including Pages artifacts
-18. build and verify `apps/game` static output
-19. build and verify `apps/stories` static output
-20. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
+10. wasm `cargo check` for browser crates
+11. wasm compile of the browser refresh hydration regression
+12. strict rustdoc build
+13. `cargo deny check`
+14. `cargo machete`
+15. regenerate `apps/test-project` from `templates/app`
+16. assert the generated template keeps the shared schema/state contract
+17. build and verify generated template output
+18. build and verify `apps/marketing` static output, including Pages artifacts
+19. build and verify `apps/game` static output
+20. build and verify `apps/stories` static output
+21. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
-21. docs and skill sweep for stale non-Rust stack references
+22. docs and skill sweep for stale non-Rust stack references
 
 Warnings fail. Missing expected artifacts fail. Missing gate tools fail with a
 clear install message. Do not bypass a failing step; fix the source of the

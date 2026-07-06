@@ -7,6 +7,8 @@ use bevy::{
 use rs_dean_bevy_scenes::DeanScenePlugin;
 #[cfg(target_arch = "wasm32")]
 use rs_dean_state::ensure_durable_snapshot;
+#[cfg(target_arch = "wasm32")]
+use rs_dean_ui::{ActiveTheme, ThemeId};
 
 #[cfg(target_arch = "wasm32")]
 fn main() {
@@ -16,8 +18,10 @@ fn main() {
             bevy::log::error!("failed to hydrate persistent game state: {error}");
         }
     });
+    let theme = ThemeId::Dark.palette();
     App::new()
-        .insert_resource(ClearColor(Color::srgb(0.03, 0.04, 0.05)))
+        .insert_resource(ActiveTheme(ThemeId::Dark))
+        .insert_resource(ClearColor(theme.surface_1().to_bevy()))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "rs-dean game".to_owned(),

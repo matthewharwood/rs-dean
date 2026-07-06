@@ -6,8 +6,19 @@ publish.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
+[features]
+default = ["leptos"]
+bevy = ["dep:bevy"]
+leptos = ["dep:leptos", "dep:web-sys"]
+
 [dependencies]
-leptos.workspace = true
+bevy = { workspace = true, optional = true }
+leptos = { workspace = true, optional = true }
+web-sys = { workspace = true, features = [
+    "Document",
+    "Element",
+    "Window",
+], optional = true }
 
 [lints]
 workspace = true

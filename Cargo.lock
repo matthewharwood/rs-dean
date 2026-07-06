@@ -4673,6 +4673,7 @@ name = "rs-dean-bevy-scenes"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rs-dean-ui",
 ]
 
 [[package]]
@@ -4699,6 +4700,7 @@ dependencies = [
  "console_error_panic_hook",
  "rs-dean-bevy-scenes",
  "rs-dean-state",
+ "rs-dean-ui",
  "wasm-bindgen-futures",
 ]
 
@@ -4765,7 +4767,9 @@ dependencies = [
 name = "rs-dean-ui"
 version = "0.1.0"
 dependencies = [
+ "bevy",
  "leptos",
+ "web-sys",
 ]
 
 [[package]]
