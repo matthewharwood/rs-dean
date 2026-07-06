@@ -56,3 +56,4 @@ bootstrap:
     cargo install --locked cargo-deny
     cargo install --locked cargo-machete
     cargo install --locked trunk
+    cargo xtask install-tailwindcss

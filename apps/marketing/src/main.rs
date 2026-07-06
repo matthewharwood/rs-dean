@@ -4,17 +4,24 @@ use rs_dean_ui::HealthCard;
 #[cfg(target_arch = "wasm32")]
 use rs_dean_state::ensure_durable_snapshot;
 
+const APP_SHELL: &str = "rs-dean-marketing-bg min-h-screen px-6 py-8 text-slate-50";
+const APP_SHELL_INNER: &str = "mx-auto grid max-w-4xl gap-6";
+const HERO: &str = "grid gap-3";
+const HERO_EYEBROW: &str = "m-0 text-sm font-bold uppercase tracking-widest text-cyan-300";
+const HERO_TITLE: &str = "m-0 text-5xl font-bold leading-none md:text-6xl";
+const HERO_BODY: &str = "m-0 max-w-2xl text-base leading-7 text-slate-300";
+
 #[component]
 fn App() -> impl IntoView {
     view! {
-        <main class="app-shell">
-            <div class="app-shell__inner">
-                <header class="hero">
-                    <p class="hero__eyebrow">
+        <main class=APP_SHELL>
+            <div class=APP_SHELL_INNER>
+                <header class=HERO>
+                    <p class=HERO_EYEBROW>
                         "Leptos marketing"
                     </p>
-                    <h1 class="hero__title">"Hello world"</h1>
-                    <p class="hero__body">
+                    <h1 class=HERO_TITLE>"Hello world"</h1>
+                    <p class=HERO_BODY>
                         "Static GitHub Pages output with durable local state."
                     </p>
                 </header>

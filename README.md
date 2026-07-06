@@ -31,23 +31,26 @@ centered square canvas, WebGPU startup, and the lit green-cube scene contract.
 ## App Surfaces
 
 - `apps/marketing`: required Leptos marketing app. It may host Bevy canvas
-  moments, but owns the marketing DOM surface. It currently renders a
-  hello-world page and boots through `rs-dean-state`
+  moments, but owns the marketing DOM surface. Styling is compiled by Trunk
+  from the Tailwind entrypoint at `apps/marketing/styles/index.css`. It
+  currently renders a hello-world page and boots through `rs-dean-state`
   so browser refreshes resume from durable local state.
 - `apps/game`: required Bevy-only game app. The gate fails if it pulls in
   Leptos or drops the persistent-state wiring. It currently renders a Bevy
   hello-world scene.
 - `apps/stories`: required independent story harness for reusable UI and scene
-  proofs.
+  proofs. Leptos stories use the same Trunk Tailwind asset path as marketing.
 - `apps/test-project`: ignored generated proof from `templates/app`; it contains
-  the generated cube-smoke app used by the render gate.
+  a generated Leptos app with Tailwind already wired, plus the generated
+  cube-smoke app used by the render gate.
 
 ## Doctor
 
-`just doctor` is the fast local preflight. It checks tool availability, the wasm
-target, Chrome discovery, WebGPU feature wiring, common local ports, ignored
-generated outputs, and required repo files. Use it before a long gate when a
-machine or checkout may be stale.
+`just doctor` is the fast local preflight. It checks tool availability,
+including the standalone Tailwind CLI, the wasm target, Chrome discovery,
+WebGPU feature wiring, common local ports, ignored generated outputs, and
+required repo files. Use it before a long gate when a machine or checkout may be
+stale.
 
 ## Durable State
 

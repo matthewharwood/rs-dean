@@ -22,6 +22,11 @@ Implement the change in the owning app or crate:
 - `crates/*` for reusable Rust logic.
 - `xtask` for commands, gates, generated templates, and artifact checks.
 
+Leptos app and template styling uses Tailwind through Trunk's
+`rel="tailwind-css"` asset type. Keep that link and the Tailwind import in
+every Leptos scaffold; `xtask` owns the policy check and standalone CLI
+installer.
+
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
 ### P2 — Template
@@ -72,7 +77,7 @@ remove the old wording from docs/skills.
 - `cargo xtask docs-sweep` passes.
 - Template regeneration succeeds and `apps/test-project` remains untracked.
 - `apps/marketing`, `apps/game`, and `apps/stories` produce Trunk `.wasm`,
-  glue, and CSS artifacts.
+  glue, and CSS artifacts; Leptos CSS artifacts are compiled through Tailwind.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.
 - Generated `apps/test-project/cube-smoke` verifies the WebGPU smoke surface.
 - The Bevy wasm feature tree contains WebGPU and no WebGL.

@@ -10,6 +10,9 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
 use anyhow::{Context, Result, bail};
 use base64::Engine as _;
 use command_fds::{CommandFdExt, FdMapping};
@@ -34,6 +37,7 @@ fn main() -> Result<()> {
         Some("docs-sweep") => docs_sweep(),
         Some("five-phase-pass") => five_phase_pass(),
         Some("game") => game(),
+        Some("install-tailwindcss") => install_tailwindcss(),
         Some("gen-app") => {
             let name = args.next().unwrap_or_else(|| "test-project".to_owned());
             gen_app(&name)
@@ -68,6 +72,8 @@ Commands:
   doctor           verify local tools, wasm target, Chrome, ports, and repo wiring
   five-phase-pass  regenerate template, run gate, and sweep docs
   docs-sweep       fail on retired stack references
+  install-tailwindcss
+                  install the standalone Tailwind CLI into Cargo's bin dir
   gen-app <name>   copy templates/app into apps/<name>
   check-template   regenerate apps/test-project from templates/app
 "
@@ -129,6 +135,7 @@ fn doctor() -> Result<()> {
     report.command("rustc", ["--version"]);
     report.command("rustup", ["--version"]);
     report.command("trunk", ["--version"]);
+    report.check("tailwindcss", check_tailwindcss_cli());
     report.command("cargo-nextest", ["--version"]);
     report.command("cargo-deny", ["--version"]);
     report.command("cargo-machete", ["--version"]);
@@ -253,6 +260,112 @@ where
     Ok(message.trim().to_owned())
 }
 
+fn check_tailwindcss_cli() -> Result<String> {
+    let version = command_output("tailwindcss", ["--help"])
+        .context("run `cargo xtask install-tailwindcss` or put Tailwind CSS v4 on PATH")?;
+    let version = strip_ansi_codes(&version);
+    let major = first_semver_major(&version)
+        .with_context(|| format!("could not parse tailwindcss version from `{version}`"))?;
+    if major < 4 {
+        bail!(
+            "tailwindcss CLI must be v4 or newer; found `{version}`. Run `cargo xtask install-tailwindcss`."
+        );
+    }
+    Ok(version)
+}
+
+fn strip_ansi_codes(text: &str) -> String {
+    let mut stripped = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(character) = chars.next() {
+        if character == '\x1b' && chars.peek() == Some(&'[') {
+            chars.next();
+            for code in chars.by_ref() {
+                if ('@'..='~').contains(&code) {
+                    break;
+                }
+            }
+            continue;
+        }
+        stripped.push(character);
+    }
+    stripped
+}
+
+fn first_semver_major(text: &str) -> Option<u32> {
+    text.split(|character: char| !(character.is_ascii_alphanumeric() || character == '.'))
+        .map(|token| token.strip_prefix('v').unwrap_or(token))
+        .filter_map(|token| token.split_once('.').map(|(major, _)| major))
+        .find_map(|major| major.parse().ok())
+}
+
+fn install_tailwindcss() -> Result<()> {
+    let asset = tailwindcss_asset_name()?;
+    let bin_dir = cargo_bin_dir()?;
+    fs::create_dir_all(&bin_dir).with_context(|| format!("create {}", bin_dir.display()))?;
+
+    let binary_name = if cfg!(windows) {
+        "tailwindcss.exe"
+    } else {
+        "tailwindcss"
+    };
+    let destination = bin_dir.join(binary_name);
+    let download = destination.with_extension("download");
+    let url =
+        format!("https://github.com/tailwindlabs/tailwindcss/releases/latest/download/{asset}");
+
+    println!("installing Tailwind CSS CLI from {url}");
+    run(
+        "curl",
+        vec![
+            "-fL".to_owned(),
+            "-o".to_owned(),
+            download.display().to_string(),
+            url,
+        ],
+    )?;
+
+    #[cfg(unix)]
+    {
+        let mut permissions = fs::metadata(&download)
+            .with_context(|| format!("read {}", download.display()))?
+            .permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(&download, permissions)
+            .with_context(|| format!("chmod {}", download.display()))?;
+    }
+
+    fs::rename(&download, &destination).with_context(|| {
+        format!(
+            "move downloaded Tailwind CSS CLI to {}",
+            destination.display()
+        )
+    })?;
+    println!("installed {}", destination.display());
+    Ok(())
+}
+
+fn tailwindcss_asset_name() -> Result<&'static str> {
+    match (env::consts::OS, env::consts::ARCH) {
+        ("linux", "x86_64") => Ok("tailwindcss-linux-x64"),
+        ("linux", "aarch64") => Ok("tailwindcss-linux-arm64"),
+        ("macos", "x86_64") => Ok("tailwindcss-macos-x64"),
+        ("macos", "aarch64") => Ok("tailwindcss-macos-arm64"),
+        ("windows", "x86_64") => Ok("tailwindcss-windows-x64.exe"),
+        (os, arch) => bail!("unsupported Tailwind CSS standalone target {os}/{arch}"),
+    }
+}
+
+fn cargo_bin_dir() -> Result<PathBuf> {
+    if let Some(cargo_home) = env::var_os("CARGO_HOME") {
+        return Ok(PathBuf::from(cargo_home).join("bin"));
+    }
+    let home = env::var_os("HOME")
+        .or_else(|| env::var_os("USERPROFILE"))
+        .context("CARGO_HOME, HOME, and USERPROFILE are unset")?;
+    Ok(PathBuf::from(home).join(".cargo").join("bin"))
+}
+
 fn installed_rust_targets() -> Result<String> {
     let output = Command::new("rustup")
         .args(["target", "list", "--installed"])
@@ -275,19 +388,23 @@ fn check_port_available(port: u16) -> Result<String> {
 }
 
 fn git_check_ignore(path: &str) -> Result<bool> {
-    let status = Command::new("git")
-        .args(["check-ignore", "-q", path])
-        .status()
-        .with_context(|| format!("run git check-ignore for {path}"))?;
-    match status.code() {
-        Some(0) => Ok(true),
-        Some(1) => Ok(false),
-        _ => bail!("git check-ignore exited with {status}"),
+    for candidate in [path.to_owned(), format!("{path}/")] {
+        let status = Command::new("git")
+            .args(["check-ignore", "-q", &candidate])
+            .status()
+            .with_context(|| format!("run git check-ignore for {candidate}"))?;
+        match status.code() {
+            Some(0) => return Ok(true),
+            Some(1) => {}
+            _ => bail!("git check-ignore exited with {status}"),
+        }
     }
+    Ok(false)
 }
 
 fn gate() -> Result<()> {
     require_tool("trunk")?;
+    check_tailwindcss_cli()?;
     require_cargo_subcommand("cargo-nextest")?;
     require_cargo_subcommand("cargo-deny")?;
     require_cargo_subcommand("cargo-machete")?;
@@ -296,6 +413,7 @@ fn gate() -> Result<()> {
     check_bevy_webgpu_only()?;
     check_game_bevy_only()?;
     check_required_app_persistence()?;
+    check_leptos_tailwind_assets()?;
     run(
         "cargo",
         [
@@ -553,8 +671,6 @@ fn check_bevy_webgpu_only() -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
-            "--color",
-            "never",
             "--target",
             "wasm32-unknown-unknown",
             "-e",
@@ -568,6 +684,7 @@ fn check_bevy_webgpu_only() -> Result<()> {
         bail!("cargo tree exited with {}", output.status);
     }
     let stdout = String::from_utf8(output.stdout).context("cargo tree output was not UTF-8")?;
+    let stdout = strip_ansi_codes(&stdout);
     if stdout.contains("webgl") {
         bail!("Bevy wasm feature tree includes WebGL; keep `webgl2` disabled");
     }
@@ -581,8 +698,6 @@ fn check_game_bevy_only() -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
-            "--color",
-            "never",
             "--target",
             "wasm32-unknown-unknown",
             "-p",
@@ -594,6 +709,7 @@ fn check_game_bevy_only() -> Result<()> {
         bail!("cargo tree exited with {}", output.status);
     }
     let stdout = String::from_utf8(output.stdout).context("cargo tree output was not UTF-8")?;
+    let stdout = strip_ansi_codes(&stdout);
     if !cargo_tree_has_package(&stdout, "bevy") {
         bail!("rs-dean-game must depend on Bevy");
     }
@@ -622,6 +738,25 @@ fn check_required_app_persistence() -> Result<()> {
         Path::new("templates/app/src/main.rs"),
         "ensure_durable_snapshot",
     )?;
+    Ok(())
+}
+
+fn check_leptos_tailwind_assets() -> Result<()> {
+    for (index, styles) in [
+        (
+            "apps/marketing/index.html",
+            "apps/marketing/styles/index.css",
+        ),
+        ("apps/stories/index.html", "apps/stories/styles/index.css"),
+        ("templates/app/index.html", "templates/app/styles/index.css"),
+    ] {
+        let index = Path::new(index);
+        let styles = Path::new(styles);
+        assert_file_contains(index, "rel=\"tailwind-css\"")?;
+        assert_file_contains(index, "href=\"styles/index.css\"")?;
+        assert_file_not_contains(index, "rel=\"css\"")?;
+        assert_file_contains(styles, "@import \"tailwindcss\"")?;
+    }
     Ok(())
 }
 
@@ -1392,13 +1527,11 @@ fn docs_sweep() -> Result<()> {
         ForbiddenTerm::word("Storybook"),
         ForbiddenTerm::word("Playwright"),
         ForbiddenTerm::word("Stylelint"),
-        ForbiddenTerm::word("Tailwind"),
         ForbiddenTerm::literal("package.json"),
         ForbiddenTerm::literal("node_modules"),
         ForbiddenTerm::word("bunx"),
         ForbiddenTerm::literal("js-sys"),
         ForbiddenTerm::word("stylelint"),
-        ForbiddenTerm::word("tailwindcss"),
         ForbiddenTerm::word("playwright"),
         ForbiddenTerm::word("turbo"),
     ];
@@ -1543,6 +1676,11 @@ fn check_template() -> Result<()> {
     }
     assert_file_contains(&test_project.join("Cargo.toml"), "rs-dean-schema")?;
     assert_file_contains(&test_project.join("Cargo.toml"), "rs-dean-state")?;
+    assert_file_contains(&test_project.join("index.html"), "rel=\"tailwind-css\"")?;
+    assert_file_contains(
+        &test_project.join("styles/index.css"),
+        "@import \"tailwindcss\"",
+    )?;
     assert_file_contains(&test_project.join("src/main.rs"), "validate_snapshot")?;
     assert_file_contains(&test_project.join("src/main.rs"), "APP_SNAPSHOT_KEY")?;
     assert_file_contains(&test_project.join("cube-smoke/Cargo.toml"), "webgpu")?;
@@ -1564,6 +1702,14 @@ fn assert_file_contains(path: &Path, expected: &str) -> Result<()> {
     let contents = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
     if !contents.contains(expected) {
         bail!("{} does not contain `{expected}`", path.display());
+    }
+    Ok(())
+}
+
+fn assert_file_not_contains(path: &Path, unexpected: &str) -> Result<()> {
+    let contents = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    if contents.contains(unexpected) {
+        bail!("{} contains retired `{unexpected}`", path.display());
     }
     Ok(())
 }
