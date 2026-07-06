@@ -1,21 +1,21 @@
 use leptos::prelude::*;
 use rs_dean_ui::{HealthCard, ThemeCycleButton, ThemeId, ThemeScope};
 
-const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-6 py-8 text-text-1";
+const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
 const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
-const STORIES_HEADER: &str = "mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between";
-const STORIES_HEADER_COPY: &str = "grid gap-2";
-const STORIES_EYEBROW: &str = "m-0 text-sm font-bold uppercase text-brand";
-const STORIES_TITLE: &str = "m-0 text-3xl font-bold text-text-1";
-const STORIES_GRID: &str = "grid gap-6";
+const STORIES_HEADER: &str = "mb-m flex flex-col gap-s sm:flex-row sm:items-end sm:justify-between";
+const STORIES_HEADER_COPY: &str = "grid gap-2xs";
+const STORIES_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
+const STORIES_TITLE: &str = "m-0 text-3 font-7 text-text-1";
+const STORIES_GRID: &str = "grid gap-m";
 const STORY_FRAME: &str = "max-w-md";
-const THEME_GALLERY: &str = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+const THEME_GALLERY: &str = "grid grid-cols-1 gap-s sm:grid-cols-2 lg:grid-cols-3";
 const THEME_CARD: &str =
-    "min-h-40 rounded-box border border-border-subtle bg-surface-1 p-4 text-text-1 shadow-1";
-const THEME_NAME: &str = "m-0 text-sm font-bold uppercase text-brand";
-const THEME_BODY: &str = "m-0 mt-3 text-sm leading-6 text-text-2";
-const THEME_SWATCH_ROW: &str = "mt-4 flex gap-2";
-const THEME_SWATCH: &str = "h-8 w-8 rounded-field border border-border-subtle";
+    "min-h-4xl rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const THEME_NAME: &str = "m-0 text-00 font-7 uppercase text-brand";
+const THEME_BODY: &str = "m-0 mt-xs text-0 leading-0 text-text-2";
+const THEME_SWATCH_ROW: &str = "mt-s flex gap-2xs";
+const THEME_SWATCH: &str = "size-l rounded-field border border-border-subtle";
 
 #[component]
 fn Stories() -> impl IntoView {

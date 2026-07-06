@@ -3,11 +3,11 @@ use leptos::prelude::*;
 use crate::{ThemeChoice, ThemeId};
 
 const HEALTH_CARD: &str =
-    "rounded-box border border-border-subtle bg-surface-elevated p-5 text-text-1 shadow-2";
-const HEALTH_CARD_EYEBROW: &str = "m-0 text-xs font-bold uppercase text-brand";
-const HEALTH_CARD_TITLE: &str = "m-0 mt-2 text-xl font-bold text-text-1";
-const HEALTH_CARD_BODY: &str = "m-0 mt-3 text-sm leading-6 text-text-2";
-const THEME_BUTTON: &str = "inline-flex items-center gap-2 rounded-field border border-border-strong bg-surface-2 px-3 py-2 text-sm font-semibold text-text-1 shadow-sm transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+    "rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
+const HEALTH_CARD_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
+const HEALTH_CARD_TITLE: &str = "m-0 mt-2xs text-1 font-7 text-text-1";
+const HEALTH_CARD_BODY: &str = "m-0 mt-xs text-0 leading-0 text-text-2";
+const THEME_BUTTON: &str = "inline-flex items-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const THEME_BUTTON_LABEL: &str = "text-text-muted";
 const THEME_SCOPE: &str = "contents";
 

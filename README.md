@@ -53,6 +53,11 @@ EngManager-style primitive palettes, semantic aliases, theme cycle, and Bevy
 color conversion. Its Tailwind v4 stylesheet at `crates/ui/styles/theme.css`
 exports those semantics as theme variables, so Leptos components use normal
 utilities such as `bg-surface-1`, `text-text-1`, `rounded-box`, and `shadow-2`.
+Shared Leptos examples use the `rs-dean-ui` token scales for type, space,
+radii, weight, leading, and elevation: `text-0`, `text-5`, `gap-m`, `p-s`,
+`rounded-box`, `font-7`, `leading-0`, and `shadow-2`. Avoid mixing stock
+Tailwind design-scale utilities like `text-sm`, `px-6`, `gap-4`, `rounded-lg`,
+or `font-bold` in reusable UI so generated components follow the token system.
 
 Bevy consumers depend on `rs-dean-ui` with `default-features = false` and
 `features = ["bevy"]`, which keeps `apps/game` Bevy-only while sharing the same
