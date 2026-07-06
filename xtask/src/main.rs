@@ -156,6 +156,7 @@ fn doctor() -> Result<()> {
         "templates/app/Cargo.toml",
         "apps/web/Trunk.toml",
         "apps/stories/Trunk.toml",
+        "apps/stories/public/.gitkeep",
         "apps/cube-smoke/Trunk.toml",
     ] {
         report.check(
