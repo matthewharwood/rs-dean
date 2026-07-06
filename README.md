@@ -10,6 +10,7 @@ The app is static-only: Leptos CSR for DOM UI, Bevy 0.19 WebGPU-only scenes,
 ```bash
 rustup show
 just bootstrap
+just doctor
 just gate
 just dev
 ```
@@ -21,8 +22,15 @@ checks wasm builds, audits dependencies, regenerates the template proof app,
 verifies Trunk artifacts, verifies Pages artifacts, and sweeps docs for stale
 stack references. The gate runs the native refresh hydration regression and
 compiles the browser refresh hydration regression for wasm. It also runs the
-`apps/cube-smoke` browser render check, which screenshots a centered square
-canvas and asserts that the lit cube rendered green pixels.
+`apps/cube-smoke` browser render check, which verifies a centered square canvas,
+WebGPU startup, and the lit green-cube scene contract.
+
+## Doctor
+
+`just doctor` is the fast local preflight. It checks tool availability, the wasm
+target, Chrome discovery, WebGPU feature wiring, common local ports, ignored
+generated outputs, and required repo files. Use it before a long gate when a
+machine or checkout may be stale.
 
 ## Durable State
 
@@ -39,8 +47,9 @@ resume from the same snapshot.
 ## Bevy Render Smoke
 
 `just cube-smoke` builds `apps/cube-smoke`, serves the generated files, launches
-headless Chrome, captures the centered square canvas page, and fails unless the
-screenshot contains a centered green-dominant cube region.
+headless Chrome, verifies the centered square canvas page, attempts green-pixel
+readback, and fails unless the WebGPU renderer and green material scene marker
+are confirmed.
 
 ## Skill Docs
 

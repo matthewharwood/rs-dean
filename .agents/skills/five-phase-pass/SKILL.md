@@ -30,6 +30,12 @@ born with the same gate and browser assumptions as the shipped app.
 
 ### P3 — Generated Proof And Gate
 
+For a stale local checkout or a new machine, run the fast preflight first:
+
+```bash
+cargo xtask doctor
+```
+
 Run:
 
 ```bash
@@ -60,6 +66,8 @@ remove the old wording from docs/skills.
 ## Acceptance Criteria
 
 - `cargo xtask gate` passes.
+- `cargo xtask doctor` passes when the task changes local tooling or gate
+  prerequisites.
 - `cargo xtask docs-sweep` passes.
 - Template regeneration succeeds and `apps/test-project` remains untracked.
 - `apps/web` and `apps/stories` both produce Trunk `.wasm`, glue, and CSS

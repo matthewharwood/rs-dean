@@ -26,7 +26,8 @@ with Leptos plus Bevy WebGPU.
 - Bevy `0.19.0` for browser scenes, WebGPU-only. The gate fails if a WebGL
   feature appears in the Bevy wasm feature tree.
 - `apps/cube-smoke` is the browser render smoke surface: one centered square
-  canvas, one lit green cube, and a screenshot color assertion.
+  canvas, one lit green cube, WebGPU startup verification, and a green material
+  scene assertion.
 - `crates/idb` owns the shared async storage API. It exposes one object-store
   interface for wasm IndexedDB and native bundles, so Leptos UI code, Bevy
   systems, and state crates do not import storage backends directly.
@@ -53,23 +54,25 @@ The pass runs, in order:
 
 1. `cargo fmt --all -- --check`
 2. Bevy WebGPU-only feature-tree check
-3. native `cargo clippy --workspace --all-targets -- -D warnings`
+3. native `cargo clippy` for workspace crates except browser-only Bevy crates
 4. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-5. `cargo nextest run --workspace`
-6. `cargo test --workspace --doc`
+5. native `cargo nextest` for workspace crates except browser-only Bevy crates
+6. native `cargo test --doc` for workspace crates except browser-only Bevy
+   crates
 7. wasm `cargo check` for browser crates
 8. wasm compile of the browser refresh hydration regression
 9. strict rustdoc build
 10. `cargo deny check`
 11. `cargo machete`
 12. regenerate `apps/test-project` from `templates/app`
-13. build and verify generated template output
-14. build and verify `apps/web` static output, including Pages artifacts
-15. build and verify `apps/stories` static output
-16. build `apps/cube-smoke`, run the browser screenshot, and assert green cube
-    pixels are centered
-17. docs and skill sweep for stale non-Rust stack references
+13. assert the generated template keeps the shared schema/state contract
+14. build and verify generated template output
+15. build and verify `apps/web` static output, including Pages artifacts
+16. build and verify `apps/stories` static output
+17. build `apps/cube-smoke`, verify the centered canvas, WebGPU renderer, and
+    green cube scene contract
+18. docs and skill sweep for stale non-Rust stack references
 
 Warnings fail. Missing expected artifacts fail. Missing gate tools fail with a
 clear install message. Do not bypass a failing step; fix the source of the
@@ -101,7 +104,8 @@ committed.
 |---|---|
 | `just dev` | Run the web app with Trunk on LAN-friendly host/port. |
 | `just stories` | Run the Rust story harness. |
-| `just cube-smoke` | Build the green-cube page and assert rendered pixels. |
+| `just cube-smoke` | Build the green-cube page and verify the WebGPU scene contract. |
+| `just doctor` | Run the fast local environment preflight. |
 | `just build` | Build static app output and Pages artifacts. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |

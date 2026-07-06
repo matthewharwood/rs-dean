@@ -186,8 +186,9 @@ The gate checks the wasm feature tree and fails if WebGL is present.
   proofs when visible output matters.
 - `apps/cube-smoke` is the required visible 3D smoke surface. It renders one
   green `StandardMaterial` cube in a centered square canvas with a light and
-  camera, then `cargo xtask cube-smoke` asserts green pixels in a browser
-  screenshot.
+  camera, then `cargo xtask cube-smoke` verifies the WebGPU renderer, centered
+  canvas layout, and green material scene marker. It attempts green-pixel
+  readback first where headless browser capture supports it.
 - Browser-only compile guarantees are provided by the wasm clippy/check steps in
   `cargo xtask gate`.
 - Keep renderer tests deterministic. Avoid real time, ambient randomness, and

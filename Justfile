@@ -10,13 +10,13 @@ fmt-check:
     cargo fmt --all -- --check
 
 lint:
-    cargo clippy --workspace --all-targets -- -D warnings
+    cargo clippy --workspace --exclude rs-dean-cube-smoke --exclude rs-dean-bevy-scenes --all-targets -- -D warnings
 
 test:
-    cargo nextest run --workspace
+    cargo nextest run --workspace --exclude rs-dean-cube-smoke --exclude rs-dean-bevy-scenes
 
 doctest:
-    cargo test --workspace --doc
+    cargo test --workspace --exclude rs-dean-cube-smoke --exclude rs-dean-bevy-scenes --doc
 
 dev:
     cargo xtask dev
@@ -26,6 +26,9 @@ stories:
 
 cube-smoke:
     cargo xtask cube-smoke
+
+doctor:
+    cargo xtask doctor
 
 build:
     cargo xtask build

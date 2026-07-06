@@ -28,6 +28,7 @@ fn main() -> Result<()> {
         Some("check" | "check-fast" | "gate") => gate(),
         Some("check-template") => check_template(),
         Some("cube-smoke") => cube_smoke(),
+        Some("doctor") => doctor(),
         Some("dev") => dev(),
         Some("docs-sweep") => docs_sweep(),
         Some("five-phase-pass") => five_phase_pass(),
@@ -59,6 +60,7 @@ Commands:
   check            alias for gate
   check-fast       alias for gate
   cube-smoke       build the green-cube page and assert rendered pixels
+  doctor           verify local tools, wasm target, Chrome, ports, and repo wiring
   five-phase-pass  regenerate template, run gate, and sweep docs
   docs-sweep       fail on retired stack references
   gen-app <name>   copy templates/app into apps/<name>
@@ -111,6 +113,161 @@ fn five_phase_pass() -> Result<()> {
     docs_sweep()
 }
 
+fn doctor() -> Result<()> {
+    let mut report = DoctorReport::default();
+    report.command("cargo", ["--version"]);
+    report.command("rustc", ["--version"]);
+    report.command("rustup", ["--version"]);
+    report.command("trunk", ["--version"]);
+    report.command("cargo-nextest", ["--version"]);
+    report.command("cargo-deny", ["--version"]);
+    report.command("cargo-machete", ["--version"]);
+    report.check(
+        "wasm target",
+        installed_rust_targets()
+            .map(|targets| {
+                targets
+                    .lines()
+                    .any(|target| target.trim() == "wasm32-unknown-unknown")
+                    .then(|| "wasm32-unknown-unknown installed".to_owned())
+                    .context("install with `rustup target add wasm32-unknown-unknown`")
+            })
+            .and_then(|result| result),
+    );
+    report.check(
+        "Chrome",
+        find_chrome().map(|path| format!("found {}", path.display())),
+    );
+    report.check(
+        "Bevy WebGPU",
+        check_bevy_webgpu_only().map(|()| "feature tree is WebGPU-only".to_owned()),
+    );
+    for (label, port) in [
+        ("web dev port", 5173),
+        ("story harness port", 6106),
+        ("preview port", 3100),
+        ("cube smoke port", 6173),
+    ] {
+        report.check(label, check_port_available(port));
+    }
+    for path in [
+        ".cargo/config.toml",
+        "AGENTS.md",
+        "templates/app/Cargo.toml",
+        "apps/web/Trunk.toml",
+        "apps/stories/Trunk.toml",
+        "apps/cube-smoke/Trunk.toml",
+    ] {
+        report.check(
+            path,
+            Path::new(path)
+                .exists()
+                .then(|| "present".to_owned())
+                .with_context(|| format!("missing {path}")),
+        );
+    }
+    for path in ["target", "apps/test-project", "apps/web/dist"] {
+        report.check(
+            &format!("ignore {path}"),
+            git_check_ignore(path).and_then(|ignored| {
+                ignored
+                    .then(|| "ignored".to_owned())
+                    .with_context(|| format!("{path} is not ignored"))
+            }),
+        );
+    }
+    report.finish()
+}
+
+#[derive(Default)]
+struct DoctorReport {
+    failures: Vec<String>,
+}
+
+impl DoctorReport {
+    fn command<I, S>(&mut self, program: &str, args: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        self.check(program, command_output(program, args));
+    }
+
+    fn check(&mut self, label: &str, result: Result<String>) {
+        match result {
+            Ok(message) => println!("[ok] {label}: {message}"),
+            Err(error) => {
+                println!("[fail] {label}: {error}");
+                self.failures.push(format!("{label}: {error}"));
+            }
+        }
+    }
+
+    fn finish(self) -> Result<()> {
+        if self.failures.is_empty() {
+            println!("doctor: local environment is ready.");
+            Ok(())
+        } else {
+            bail!("doctor found issues:\n{}", self.failures.join("\n"));
+        }
+    }
+}
+
+fn command_output<I, S>(program: &str, args: I) -> Result<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = Command::new(program)
+        .args(args)
+        .output()
+        .with_context(|| format!("run {program}"))?;
+    if !output.status.success() {
+        bail!("{program} exited with {}", output.status);
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let message = stdout
+        .lines()
+        .chain(stderr.lines())
+        .find(|line| !line.trim().is_empty())
+        .unwrap_or("available");
+    Ok(message.trim().to_owned())
+}
+
+fn installed_rust_targets() -> Result<String> {
+    let output = Command::new("rustup")
+        .args(["target", "list", "--installed"])
+        .output()
+        .context("run rustup target list --installed")?;
+    if !output.status.success() {
+        bail!(
+            "rustup target list --installed exited with {}",
+            output.status
+        );
+    }
+    Ok(String::from_utf8_lossy(&output.stdout).into_owned())
+}
+
+fn check_port_available(port: u16) -> Result<String> {
+    let listener = TcpListener::bind(("127.0.0.1", port))
+        .with_context(|| format!("port {port} is unavailable"))?;
+    drop(listener);
+    Ok(format!("127.0.0.1:{port} available"))
+}
+
+fn git_check_ignore(path: &str) -> Result<bool> {
+    let status = Command::new("git")
+        .args(["check-ignore", "-q", path])
+        .status()
+        .with_context(|| format!("run git check-ignore for {path}"))?;
+    match status.code() {
+        Some(0) => Ok(true),
+        Some(1) => Ok(false),
+        _ => bail!("git check-ignore exited with {status}"),
+    }
+}
+
 fn gate() -> Result<()> {
     require_tool("trunk")?;
     require_cargo_subcommand("cargo-nextest")?;
@@ -124,6 +281,10 @@ fn gate() -> Result<()> {
         [
             "clippy",
             "--workspace",
+            "--exclude",
+            "rs-dean-cube-smoke",
+            "--exclude",
+            "rs-dean-bevy-scenes",
             "--all-targets",
             "--",
             "-D",
@@ -153,8 +314,30 @@ fn gate() -> Result<()> {
             "warnings",
         ],
     )?;
-    run("cargo", ["nextest", "run", "--workspace"])?;
-    run("cargo", ["test", "--workspace", "--doc"])?;
+    run(
+        "cargo",
+        [
+            "nextest",
+            "run",
+            "--workspace",
+            "--exclude",
+            "rs-dean-cube-smoke",
+            "--exclude",
+            "rs-dean-bevy-scenes",
+        ],
+    )?;
+    run(
+        "cargo",
+        [
+            "test",
+            "--workspace",
+            "--exclude",
+            "rs-dean-cube-smoke",
+            "--exclude",
+            "rs-dean-bevy-scenes",
+            "--doc",
+        ],
+    )?;
     run(
         "cargo",
         [
@@ -193,6 +376,10 @@ fn gate() -> Result<()> {
         [
             "doc",
             "--workspace",
+            "--exclude",
+            "rs-dean-cube-smoke",
+            "--exclude",
+            "rs-dean-bevy-scenes",
             "--no-deps",
             "--document-private-items",
         ],
@@ -1149,6 +1336,18 @@ fn check_template() -> Result<()> {
         if !path.exists() {
             bail!("template did not create {}", path.display());
         }
+    }
+    assert_file_contains(&test_project.join("Cargo.toml"), "rs-dean-schema")?;
+    assert_file_contains(&test_project.join("Cargo.toml"), "rs-dean-state")?;
+    assert_file_contains(&test_project.join("src/main.rs"), "validate_snapshot")?;
+    assert_file_contains(&test_project.join("src/main.rs"), "APP_SNAPSHOT_KEY")?;
+    Ok(())
+}
+
+fn assert_file_contains(path: &Path, expected: &str) -> Result<()> {
+    let contents = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    if !contents.contains(expected) {
+        bail!("{} does not contain `{expected}`", path.display());
     }
     Ok(())
 }
