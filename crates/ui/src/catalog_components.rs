@@ -504,25 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    direction,
-    Direction,
-    DirectionModel,
-    DirectionPart,
-    DirectionRenderNode,
-    DirectionState,
-    DirectionIntent,
-    DirectionChange,
-    validate_direction_model,
-    direction_render_nodes,
-    default_direction_model,
-    [
-        Provider => "DirectionProvider",
-        Scope => "DirectionScope",
-        AwareContent => "DirectionAwareContent",
-    ]
-);
-
-define_catalog_component!(
     drawer,
     Drawer,
     DrawerModel,
@@ -1349,10 +1330,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::ContextMenu
         | UiComponentId::DataTable
         | UiComponentId::DatePicker
-        | UiComponentId::Dialog => None,
-        UiComponentId::Direction => Some(any_nodes(direction_render_nodes(
-            &default_direction_model(),
-        ))),
+        | UiComponentId::Dialog
+        | UiComponentId::Direction => None,
         UiComponentId::Drawer => Some(any_nodes(drawer_render_nodes(&default_drawer_model()))),
         UiComponentId::DropdownMenu => Some(any_nodes(dropdown_menu_render_nodes(
             &default_dropdown_menu_model(),
@@ -1473,6 +1452,7 @@ mod tests {
                     | UiComponentId::DataTable
                     | UiComponentId::DatePicker
                     | UiComponentId::Dialog
+                    | UiComponentId::Direction
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1489,17 +1469,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_direction_model().state();
-        assert!(!state.is_active(DirectionPart::Provider));
+        let mut state = default_drawer_model().state();
+        assert!(!state.is_active(DrawerPart::Trigger));
         assert_eq!(
-            state.apply(DirectionIntent::Toggle(DirectionPart::Provider)),
-            DirectionChange::Opened(DirectionPart::Provider)
+            state.apply(DrawerIntent::Toggle(DrawerPart::Trigger)),
+            DrawerChange::Opened(DrawerPart::Trigger)
         );
-        assert!(state.is_active(DirectionPart::Provider));
+        assert!(state.is_active(DrawerPart::Trigger));
         assert_eq!(
-            state.apply(DirectionIntent::Toggle(DirectionPart::Provider)),
-            DirectionChange::Closed(DirectionPart::Provider)
+            state.apply(DrawerIntent::Toggle(DrawerPart::Trigger)),
+            DrawerChange::Closed(DrawerPart::Trigger)
         );
-        assert!(!state.is_active(DirectionPart::Provider));
+        assert!(!state.is_active(DrawerPart::Trigger));
     }
 }

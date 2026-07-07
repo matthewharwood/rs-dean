@@ -20,13 +20,13 @@ use crate::{
     ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
     DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
     DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
-    DialogState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
-    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, ThemeChoice,
+    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -34,7 +34,8 @@ use crate::{
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     default_combobox_model, default_command_model, default_context_menu_model,
-    default_data_table_model, default_date_picker_model, default_dialog_model, dialog_render_nodes,
+    default_data_table_model, default_date_picker_model, default_dialog_model,
+    default_direction_model, dialog_render_nodes, direction_render_nodes,
     max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
     validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
     validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
@@ -42,7 +43,7 @@ use crate::{
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model,
+    validate_dialog_model, validate_direction_model,
 };
 
 const HEALTH_CARD: &str =
@@ -576,6 +577,26 @@ const DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center
 const DIALOG_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DIALOG_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DIALOG_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DIRECTION_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-start text-text-1 shadow-1";
+const DIRECTION_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-start text-text-disabled shadow-1";
+const DIRECTION_HEADER: &str = "grid gap-2xs";
+const DIRECTION_EYEBROW: &str = "m-0 text-00 font-7 uppercase tracking-label text-brand";
+const DIRECTION_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const DIRECTION_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
+const DIRECTION_ACTIONS: &str = "flex flex-wrap items-center gap-2xs";
+const DIRECTION_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIRECTION_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIRECTION_SCOPE: &str =
+    "grid gap-xs rounded-field border border-border-subtle bg-surface-2 p-xs text-start";
+const DIRECTION_SCOPE_ACTIVE: &str =
+    "grid gap-xs rounded-field border border-brand bg-selected-tint p-xs text-start";
+const DIRECTION_SCOPE_DISABLED: &str = "grid gap-xs rounded-field border border-border-muted bg-surface-2 p-xs text-start text-text-disabled";
+const DIRECTION_CONTENT: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-start text-text-1";
+const DIRECTION_CONTENT_RTL: &str =
+    "grid gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-start text-text-1";
+const DIRECTION_BADGE: &str = "inline-flex w-fit items-center rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
+const DIRECTION_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -5602,11 +5623,273 @@ const fn dialog_state_label(loading: bool, disabled: bool, open: bool) -> &'stat
     }
 }
 
-catalog_component!(
-    Direction,
-    crate::DirectionModel,
-    crate::default_direction_model
-);
+#[component]
+pub fn Direction(
+    #[prop(optional, default = default_direction_model())] model: DirectionModel,
+) -> AnyView {
+    if let Err(report) = validate_direction_model(&model) {
+        let message = format!("Direction validation failed: {report}");
+        return view! {
+            <div class=DIRECTION_ERROR data-ui-component="direction" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let nodes = direction_render_nodes(&model, &model.state());
+    let provider = nodes
+        .iter()
+        .find(|node| node.part == DirectionPart::Provider)
+        .expect("invariant: direction render nodes include provider")
+        .clone();
+    let scope = nodes
+        .iter()
+        .find(|node| node.part == DirectionPart::Scope)
+        .expect("invariant: direction render nodes include scope")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == DirectionPart::AwareContent)
+        .expect("invariant: direction render nodes include aware content")
+        .clone();
+    let scope_direction = model.scope_direction;
+    let scope_detail_model = model.clone();
+    let content_class_model = model.clone();
+    let content_dir_model = model.clone();
+    let content_value_model = model.clone();
+    let content_badge_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=direction_root_class(disabled)
+            dir=move || state.with(|state| state.direction().label())
+            data-ui-component="direction"
+            data-ui-part=DirectionPart::Provider.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    direction_state_label(loading, disabled, state.direction(), state.scope_active()).to_owned()
+                })
+            }
+            data-ui-value=provider.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <header class=DIRECTION_HEADER>
+                <p class=DIRECTION_EYEBROW>{provider.label}</p>
+                <h3 class=DIRECTION_TITLE>
+                    {move || state.with(|state| state.direction().name())}
+                </h3>
+                <p class=DIRECTION_DETAIL>
+                    {move || {
+                        state.with(|state| {
+                            format!(
+                                "Provider dir=\"{}\". Nested scope target is {}.",
+                                state.direction().label(),
+                                scope_direction.name(),
+                            )
+                        })
+                    }}
+                </p>
+            </header>
+            <div class=DIRECTION_ACTIONS>
+                <button
+                    type="button"
+                    class=move || {
+                        state.with(|state| {
+                            direction_action_class(state.direction().is_rtl()).to_owned()
+                        })
+                    }
+                    data-ui-part=DirectionPart::Provider.label()
+                    data-ui-value=move || state.with(|state| state.direction().label())
+                    aria-pressed=move || state.with(|state| state.direction().is_rtl().to_string())
+                    disabled=blocked
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::Focus(DirectionPart::Provider));
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::Blur);
+                            });
+                        }
+                    }
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::Toggle);
+                            });
+                        }
+                    }
+                >
+                    {move || {
+                        state.with(|state| {
+                            format!("Switch to {}", state.direction().next().label())
+                        })
+                    }}
+                </button>
+                <button
+                    type="button"
+                    class=move || {
+                        state.with(|state| direction_action_class(state.scope_active()).to_owned())
+                    }
+                    data-ui-part=DirectionPart::Scope.label()
+                    data-ui-value=scope.value.clone()
+                    aria-pressed=move || state.with(|state| state.scope_active().to_string())
+                    disabled=blocked
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::Focus(DirectionPart::Scope));
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::Blur);
+                            });
+                        }
+                    }
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DirectionIntent::ToggleScope);
+                            });
+                        }
+                    }
+                >
+                    {move || {
+                        state.with(|state| {
+                            if state.scope_active() {
+                                "Use provider flow".to_owned()
+                            } else {
+                                format!("Use {} scope", scope_direction.label())
+                            }
+                        })
+                    }}
+                </button>
+            </div>
+            <article
+                class=move || {
+                    state.with(|state| {
+                        direction_scope_class(state.scope_active(), disabled).to_owned()
+                    })
+                }
+                dir=scope_direction.label()
+                data-ui-part=DirectionPart::Scope.label()
+                data-ui-value=scope.value
+            >
+                <span class=DIRECTION_BADGE>
+                    {move || {
+                        state.with(|state| {
+                            if state.scope_active() {
+                                format!("scope {}", scope_direction.label())
+                            } else {
+                                "scope idle".to_owned()
+                            }
+                        })
+                    }}
+                </span>
+                <p class=DIRECTION_DETAIL>
+                    {move || {
+                        state.with(|state| {
+                            direction_render_nodes(&scope_detail_model, state)
+                                .into_iter()
+                                .find(|node| node.part == DirectionPart::Scope)
+                                .map(|node| node.detail)
+                                .unwrap_or_else(|| "Direction scope unavailable".to_owned())
+                        })
+                    }}
+                </p>
+                <div
+                    class=move || {
+                        state.with(|state| {
+                            direction_content_class(state.effective_direction(&content_class_model)).to_owned()
+                        })
+                    }
+                    dir=move || state.with(|state| state.effective_direction(&content_dir_model).label())
+                    data-ui-part=DirectionPart::AwareContent.label()
+                    data-ui-value=move || {
+                        state.with(|state| state.effective_direction(&content_value_model).label())
+                    }
+                >
+                    <span class=DIRECTION_BADGE>
+                        {move || {
+                            state.with(|state| {
+                                format!(
+                                    "effective {}",
+                                    state.effective_direction(&content_badge_model).label()
+                                )
+                            })
+                        }}
+                    </span>
+                    <p class=DIRECTION_DETAIL>{content.detail}</p>
+                </div>
+            </article>
+        </section>
+    }
+    .into_any()
+}
+
+const fn direction_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        DIRECTION_ROOT_DISABLED
+    } else {
+        DIRECTION_ROOT
+    }
+}
+
+const fn direction_action_class(active: bool) -> &'static str {
+    if active {
+        DIRECTION_ACTION_ACTIVE
+    } else {
+        DIRECTION_ACTION
+    }
+}
+
+const fn direction_scope_class(active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        DIRECTION_SCOPE_DISABLED
+    } else if active {
+        DIRECTION_SCOPE_ACTIVE
+    } else {
+        DIRECTION_SCOPE
+    }
+}
+
+const fn direction_content_class(direction: DirectionValue) -> &'static str {
+    match direction {
+        DirectionValue::Ltr => DIRECTION_CONTENT,
+        DirectionValue::Rtl => DIRECTION_CONTENT_RTL,
+    }
+}
+
+const fn direction_state_label(
+    loading: bool,
+    disabled: bool,
+    direction: DirectionValue,
+    scope_active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if scope_active {
+        "scoped"
+    } else {
+        direction.label()
+    }
+}
+
 catalog_component!(Drawer, crate::DrawerModel, crate::default_drawer_model);
 catalog_component!(
     DropdownMenu,

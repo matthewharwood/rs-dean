@@ -290,10 +290,11 @@ pub mod bevy_adapter {
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
-        DialogPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        DialogPart, DirectionPart, DirectionValue, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -306,7 +307,7 @@ pub mod bevy_adapter {
         default_chart_model, default_checkbox_model, default_collapsible_model,
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
-        dialog_render_nodes, scale,
+        default_direction_model, dialog_render_nodes, direction_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -452,6 +453,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Dialog {
             return bevy_primitives_for_dialog(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Direction {
+            return bevy_primitives_for_direction(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
@@ -750,6 +758,44 @@ pub mod bevy_adapter {
                     state,
                     intent: dialog_intent_for_part(node.part, node.actionable, node.close_dialog),
                     selected: node.selected || node.open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_direction(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_direction_model().with_default_scope_active(true);
+        let direction_state = model.state();
+        direction_render_nodes(&model, &direction_state)
+            .into_iter()
+            .map(|node| {
+                let role = direction_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: direction_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: direction_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        direction_tone_for_part(
+                            node.part,
+                            node.direction,
+                            node.scope_active,
+                            node.disabled,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: direction_intent_for_part(node.part),
+                    selected: node.selected || node.scope_active,
                     disabled: node.disabled,
                 }
             })
@@ -2277,6 +2323,55 @@ pub mod bevy_adapter {
             DialogPart::Title => Vec2::new(scale::space::XL2, scale::space::M),
             DialogPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
             DialogPart::Footer => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    const fn direction_kind_for_part(part: DirectionPart) -> UiWidgetSlotKind {
+        match part {
+            DirectionPart::Provider | DirectionPart::Scope => UiWidgetSlotKind::Button,
+            DirectionPart::AwareContent => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn direction_role_for_part(part: DirectionPart) -> UiBlockRole {
+        match part {
+            DirectionPart::Provider => UiBlockRole::Root,
+            DirectionPart::Scope => UiBlockRole::Layout,
+            DirectionPart::AwareContent => UiBlockRole::Text,
+        }
+    }
+
+    const fn direction_tone_for_part(
+        part: DirectionPart,
+        direction: DirectionValue,
+        scope_active: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            DirectionPart::Provider if direction.is_rtl() => UiBlockTone::Brand,
+            DirectionPart::Scope if scope_active => UiBlockTone::Brand,
+            DirectionPart::AwareContent if direction.is_rtl() => UiBlockTone::Brand,
+            DirectionPart::Provider | DirectionPart::Scope | DirectionPart::AwareContent => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn direction_intent_for_part(part: DirectionPart) -> UiWidgetIntent {
+        match part {
+            DirectionPart::Provider | DirectionPart::Scope => UiWidgetIntent::Toggle,
+            DirectionPart::AwareContent => UiWidgetIntent::None,
+        }
+    }
+
+    fn direction_size_for_part(part: DirectionPart) -> Vec2 {
+        match part {
+            DirectionPart::Provider => Vec2::new(scale::space::XL3, scale::space::L),
+            DirectionPart::Scope => Vec2::new(scale::space::XL3, scale::space::XL),
+            DirectionPart::AwareContent => Vec2::new(scale::space::XL3, scale::space::L),
         }
     }
 

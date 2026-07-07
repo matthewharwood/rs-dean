@@ -16,7 +16,8 @@ use rs_dean_ui::{
     ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, DataTable, DataTableColumn,
     DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, DatePicker,
     DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
-    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    Direction, DirectionModel, DirectionValue, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -470,6 +471,25 @@ fn Stories() -> impl IntoView {
                             <Dialog model=invalid_dialog_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Dialog model=themed_dialog_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-direction" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Direction"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 24 implemented as a direction provider, nested scope, and aware-content utility backed by validated shared Rust direction state and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Direction model=default_direction_story_model() />
+                            <Direction model=rtl_direction_story_model() />
+                            <Direction model=scoped_direction_story_model() />
+                            <Direction model=loading_direction_story_model() />
+                            <Direction model=disabled_direction_story_model() />
+                            <Direction model=invalid_direction_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Direction model=themed_direction_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1762,6 +1782,61 @@ fn themed_dialog_story_model() -> DialogModel {
         DialogAction::new("Apply", "apply-theme"),
         DialogAction::new("Dismiss", "dismiss-theme"),
     ])
+}
+
+fn default_direction_story_model() -> DirectionModel {
+    DirectionModel::new(
+        "Application direction",
+        "RTL article scope",
+        "The default provider starts left-to-right while the nested scope can opt into right-to-left flow.",
+    )
+}
+
+fn rtl_direction_story_model() -> DirectionModel {
+    DirectionModel::new(
+        "Arabic locale",
+        "LTR code sample",
+        "مرحبا بكم في واجهة تدعم اتجاه النص من اليمين إلى اليسار.",
+    )
+    .with_direction(DirectionValue::Rtl)
+    .with_scope_direction(DirectionValue::Ltr)
+}
+
+fn scoped_direction_story_model() -> DirectionModel {
+    DirectionModel::new(
+        "LTR shell",
+        "RTL preview pane",
+        "A nested scope can override the provider direction without rebuilding the component tree.",
+    )
+    .with_default_scope_active(true)
+}
+
+fn loading_direction_story_model() -> DirectionModel {
+    default_direction_story_model().loading()
+}
+
+fn disabled_direction_story_model() -> DirectionModel {
+    DirectionModel::new(
+        "Locked locale",
+        "Locked scope",
+        "Direction controls are disabled while app-level locale hydration is unavailable.",
+    )
+    .with_direction(DirectionValue::Rtl)
+    .with_default_scope_active(true)
+    .disabled()
+}
+
+fn invalid_direction_story_model() -> DirectionModel {
+    DirectionModel::new("", "Broken scope", "Missing provider label")
+}
+
+fn themed_direction_story_model() -> DirectionModel {
+    DirectionModel::new(
+        "Theme direction",
+        "Theme RTL scope",
+        "Semantic tokens and direction attributes stay independent so theme switching does not break RTL rendering.",
+    )
+    .with_default_scope_active(true)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

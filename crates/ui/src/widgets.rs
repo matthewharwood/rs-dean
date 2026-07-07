@@ -1213,6 +1213,14 @@ pub fn direction_widget() -> UiWidget {
         vec![
             slot(
                 id,
+                "DirectionProvider",
+                UiWidgetSlotKind::Panel,
+                "dir=ltr",
+                "Application direction provider",
+                UiWidgetIntent::Toggle,
+            ),
+            slot(
+                id,
                 "DirectionScope",
                 UiWidgetSlotKind::Panel,
                 "dir=rtl",

@@ -23,6 +23,7 @@ pub mod context_menu;
 pub mod data_table;
 pub mod date_picker;
 pub mod dialog;
+pub mod direction;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -147,6 +148,11 @@ pub use dialog::{
     DialogAction, DialogChange, DialogIntent, DialogMode, DialogModel, DialogPart,
     DialogRenderNode, DialogSize, DialogState, default_dialog_model, dialog_render_nodes,
     validate_dialog_model,
+};
+pub use direction::{
+    DirectionChange, DirectionIntent, DirectionModel, DirectionPart, DirectionRenderNode,
+    DirectionState, DirectionValue, default_direction_model, direction_render_nodes,
+    validate_direction_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
