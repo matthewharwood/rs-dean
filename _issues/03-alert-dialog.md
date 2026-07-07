@@ -40,6 +40,7 @@ Ship a Rust-first `Alert Dialog` component that follows the shadcn composition m
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete `Alert Dialog` model, button contract, renderer-local state transitions, render nodes, and token-only Leptos component implemented.
 - [x] `garde` validation enforces trigger, title, description, and distinct action/cancel contracts before rendering.
 - [x] Stable dialog title and description ids route through the shared internal UI id helper.

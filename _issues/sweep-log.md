@@ -33,6 +33,14 @@ Accordion. The second sweep found no further Accordion, Alert, or Alert Dialog
 changes were needed because their validator boundary, render-node root
 convention, story proof, and Bevy adapter shape now match.
 
+All-issue sweep pass: Aspect Ratio through Typography complete. The shared
+literal widget path now validates every catalog entry with `garde`, then
+projects validated render nodes into the Leptos story/component renderer and
+the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
+intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
+validator rejects unknown and missing anatomy while allowing repeated catalog
+parts.
+
 ## Consolidated Learnings
 
 - Bespoke one-off APIs would drift across Leptos and Bevy, so the implementation source of truth is the combination of `ComponentImplementation` in `crates/ui/src/kit.rs` and literal `UiWidget` constructors in `crates/ui/src/widgets.rs`.
@@ -41,9 +49,11 @@ convention, story proof, and Bevy adapter shape now match.
 - Consumer-durable state is documented as app-owned and persisted through `crates/state` / `rs-dean-idb`; component renderers only emit typed intent boundaries.
 - The token-class guard scans every `crates/ui/src` Rust file so later component work cannot reintroduce stock Tailwind design-scale utilities.
 - Concrete components use `garde` at the shared Rust model boundary before a renderer accepts props, so Leptos and Bevy consume the same validated component contract.
+- Generic catalog components use `garde` at the literal `UiWidget` boundary before Leptos or Bevy renders them.
+- Repeatable shadcn anatomy parts are valid component structure; validation enforces catalog membership and full coverage instead of uniqueness.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, named Leptos components, the story renderer, Bevy primitive adapters, and issue-file status checklists. The repeated sweep found two cross-cutting improvements: keep per-component APIs thin and centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found three cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, and validate generic widgets before framework-specific rendering.

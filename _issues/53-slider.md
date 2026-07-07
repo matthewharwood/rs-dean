@@ -40,4 +40,5 @@ Ship a Rust-first `Slider` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Sweep review complete through the current implemented catalog.

@@ -286,6 +286,7 @@ pub mod bevy_adapter {
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
         alert_render_nodes, component_implementation, default_accordion_items,
         default_alert_dialog_model, default_alert_model, scale, widget_for_component,
+        widget_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -324,23 +325,24 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
-        widget_for_component(id)
-            .slots
+        let widget = widget_for_component(id);
+        widget_render_nodes(&widget)
+            .expect("invariant: literal widget contract validates before Bevy primitive derivation")
             .into_iter()
-            .map(|slot| BevyUiPrimitive {
-                part: slot.part.to_owned(),
-                kind: slot.kind,
-                role: slot.role,
-                label: slot.label.to_owned(),
-                value: slot.value.to_owned(),
-                size: size_for_role(slot.role),
-                fill: fill_for_tone(slot.tone, theme),
+            .map(|node| BevyUiPrimitive {
+                part: node.part.to_owned(),
+                kind: node.kind,
+                role: node.role,
+                label: node.label.to_owned(),
+                value: node.value.to_owned(),
+                size: size_for_role(node.role),
+                fill: fill_for_tone(node.tone, theme),
                 text: theme.text_1().to_bevy(),
                 render: implementation.render,
                 state: implementation.state,
-                intent: slot.intent,
-                selected: slot.selected,
-                disabled: slot.disabled,
+                intent: node.intent,
+                selected: node.selected,
+                disabled: node.disabled,
             })
             .collect()
     }

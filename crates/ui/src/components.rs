@@ -4,10 +4,10 @@ use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone,
     ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget,
-    UiWidgetPattern, UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    UiWidgetPattern, UiWidgetRenderNode, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
     default_alert_model, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, widget_for_component,
+    validate_alert_model, widget_for_component, widget_render_nodes,
 };
 
 const HEALTH_CARD: &str =
@@ -63,6 +63,8 @@ const WIDGET_PROGRESS: &str = "h-xs w-full rounded-pill accent-brand";
 const WIDGET_RANGE: &str = "w-full accent-brand";
 const WIDGET_SKELETON: &str = "h-s rounded-field bg-surface-3";
 const WIDGET_SPINNER: &str = "size-s rounded-pill border border-border-muted border-t-brand";
+const WIDGET_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const ACCORDION_ROOT: &str =
     "grid w-full gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1";
 const ACCORDION_ITEM: &str = "grid gap-0 rounded-field border border-border-faint bg-surface-1";
@@ -261,15 +263,29 @@ pub fn ComponentDemo(id: UiComponentId) -> AnyView {
     }
 }
 
-fn render_widget(widget: UiWidget) -> impl IntoView {
+fn render_widget(widget: UiWidget) -> AnyView {
     let slug = widget.id.definition().slug;
     let pattern = widget.pattern.label();
-    let root = *widget
-        .slots
+    let nodes = match widget_render_nodes(&widget) {
+        Ok(nodes) => nodes,
+        Err(report) => {
+            let message = format!(
+                "{} widget validation failed: {report}",
+                widget.id.definition().name
+            );
+            return view! {
+                <section class=WIDGET_SHELL data-ui-widget=slug data-ui-state="invalid">
+                    <p class=WIDGET_ERROR role="alert">{message}</p>
+                </section>
+            }
+            .into_any();
+        }
+    };
+    let root = *nodes
         .first()
-        .expect("invariant: literal widgets always include a root slot");
+        .expect("invariant: validated widgets always include a root node");
     let content_class = content_class(widget.pattern);
-    let slots = widget.slots.into_iter().skip(1).collect::<Vec<_>>();
+    let slots = nodes.into_iter().skip(1).collect::<Vec<_>>();
 
     view! {
         <section class=widget_class(widget.pattern) data-ui-widget=slug data-ui-pattern=pattern>
@@ -283,9 +299,10 @@ fn render_widget(widget: UiWidget) -> impl IntoView {
             </div>
         </section>
     }
+    .into_any()
 }
 
-fn slot_view(slot: UiWidgetSlot) -> AnyView {
+fn slot_view(slot: UiWidgetRenderNode) -> AnyView {
     let part = slot.part;
     let kind = slot.kind.label();
     let intent = slot.intent.label();
@@ -495,7 +512,7 @@ fn content_class(pattern: UiWidgetPattern) -> &'static str {
     }
 }
 
-fn slot_class(slot: UiWidgetSlot) -> &'static str {
+fn slot_class(slot: UiWidgetRenderNode) -> &'static str {
     if slot.selected {
         WIDGET_SLOT_ACTIVE
     } else {
@@ -503,7 +520,7 @@ fn slot_class(slot: UiWidgetSlot) -> &'static str {
     }
 }
 
-fn button_class(slot: UiWidgetSlot) -> &'static str {
+fn button_class(slot: UiWidgetRenderNode) -> &'static str {
     if slot.selected {
         WIDGET_BUTTON_ACTIVE
     } else {
