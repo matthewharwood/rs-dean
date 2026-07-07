@@ -19,8 +19,9 @@ use crate::{
     ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
     ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
     DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
-    DatePickerPart, DatePickerState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
+    DialogState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
     calendar_render_nodes, card_render_nodes, carousel_render_nodes,
@@ -33,14 +34,15 @@ use crate::{
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     default_combobox_model, default_command_model, default_context_menu_model,
-    default_data_table_model, default_date_picker_model, max_data_table_page_index, month_name,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_data_table_model, default_date_picker_model, default_dialog_model, dialog_render_nodes,
+    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model,
 };
 
 const HEALTH_CARD: &str =
@@ -552,6 +554,28 @@ const DATE_PICKER_POPOVER_HIDDEN: &str = "hidden";
 const DATE_PICKER_POPOVER_HEADER: &str = "flex items-center justify-between gap-2xs";
 const DATE_PICKER_CLEAR: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DATE_PICKER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DIALOG_ROOT: &str = "grid w-full gap-2xs text-text-1";
+const DIALOG_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
+const DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_OVERLAY_MODAL: &str =
+    "grid w-full place-items-center rounded-box bg-surface-overlay p-s";
+const DIALOG_OVERLAY_NON_MODAL: &str =
+    "grid w-full place-items-center rounded-box border border-border-subtle bg-surface-2 p-s";
+const DIALOG_CONTENT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const DIALOG_CONTENT_SMALL: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const DIALOG_HEADER: &str = "grid gap-2xs";
+const DIALOG_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const DIALOG_TITLE_SMALL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const DIALOG_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const DIALOG_DESCRIPTION_SMALL: &str = "m-0 text-00 leading-0 text-text-2";
+const DIALOG_BODY: &str = "m-0 text-0 leading-0 text-text-2";
+const DIALOG_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
+const DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -5343,7 +5367,241 @@ const fn date_picker_state_label(
     }
 }
 
-catalog_component!(Dialog, crate::DialogModel, crate::default_dialog_model);
+#[component]
+pub fn Dialog(#[prop(optional, default = default_dialog_model())] model: DialogModel) -> AnyView {
+    if let Err(report) = validate_dialog_model(&model) {
+        let message = format!("Dialog validation failed: {report}");
+        return view! {
+            <div class=DIALOG_ERROR data-ui-component="dialog" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let size = model.size;
+    let mode = model.mode;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let nodes = dialog_render_nodes(&model, &model.state());
+    let root = nodes
+        .iter()
+        .find(|node| node.part == DialogPart::Root)
+        .expect("invariant: dialog render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == DialogPart::Trigger)
+        .expect("invariant: dialog render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == DialogPart::Content)
+        .expect("invariant: dialog render nodes include content")
+        .clone();
+    let title = nodes
+        .iter()
+        .find(|node| node.part == DialogPart::Title)
+        .expect("invariant: dialog render nodes include title")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == DialogPart::Description)
+        .expect("invariant: dialog render nodes include description")
+        .clone();
+    let footer_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=dialog_root_class(disabled)
+            data-ui-component="dialog"
+            data-ui-part=DialogPart::Root.label()
+            data-ui-size=size.label()
+            data-ui-mode=mode.label()
+            data-ui-state=move || {
+                state.with(|state| dialog_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || state.with(|state| dialog_trigger_class(state.is_open()).to_owned())
+                data-ui-part=DialogPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-haspopup="dialog"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DialogIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DialogIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DialogIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger.label}
+            </button>
+            {move || {
+                state.with(|state| {
+                    if !state.is_open() {
+                        return ().into_any();
+                    }
+                    let footer_nodes = dialog_render_nodes(&footer_model, state)
+                        .into_iter()
+                        .filter(|node| node.part == DialogPart::Footer)
+                        .collect::<Vec<_>>();
+                    view! {
+                        <div class=dialog_overlay_class(mode) data-ui-part=DialogPart::Root.label()>
+                            <article
+                                role="dialog"
+                                aria-modal=(mode == DialogMode::Modal).to_string()
+                                class=dialog_content_class(size)
+                                data-ui-part=DialogPart::Content.label()
+                                data-ui-value=content.value.clone()
+                            >
+                                <header class=DIALOG_HEADER data-ui-part=DialogPart::Header.label()>
+                                    <h3 class=dialog_title_class(size) data-ui-part=DialogPart::Title.label()>
+                                        {title.label.clone()}
+                                    </h3>
+                                    <p class=dialog_description_class(size) data-ui-part=DialogPart::Description.label()>
+                                        {description.detail.clone()}
+                                    </p>
+                                </header>
+                                <p class=DIALOG_BODY>{content.detail.clone()}</p>
+                                <footer class=DIALOG_FOOTER data-ui-part=DialogPart::Footer.label()>
+                                    {footer_nodes
+                                        .into_iter()
+                                        .map(|node| dialog_footer_action_view(node, blocked, set_state))
+                                        .collect_view()}
+                                </footer>
+                            </article>
+                        </div>
+                    }
+                    .into_any()
+                })
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+fn dialog_footer_action_view(
+    node: crate::DialogRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<DialogState>,
+) -> AnyView {
+    let value_for_click = node.value.clone();
+    let close_dialog = node.close_dialog;
+    let disabled = node.disabled || blocked || !node.actionable;
+    view! {
+        <button
+            type="button"
+            class=dialog_action_class(node.index, node.selected)
+            data-ui-part=DialogPart::Footer.label()
+            data-ui-value=node.value
+            disabled=disabled
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(DialogIntent::ActivateFooter(value));
+                        if close_dialog {
+                            let _ = state.apply(DialogIntent::Close);
+                        }
+                    });
+                }
+            }
+        >
+            {node.label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn dialog_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        DIALOG_ROOT_DISABLED
+    } else {
+        DIALOG_ROOT
+    }
+}
+
+const fn dialog_overlay_class(mode: DialogMode) -> &'static str {
+    match mode {
+        DialogMode::Modal => DIALOG_OVERLAY_MODAL,
+        DialogMode::NonModal => DIALOG_OVERLAY_NON_MODAL,
+    }
+}
+
+const fn dialog_content_class(size: DialogSize) -> &'static str {
+    match size {
+        DialogSize::Default => DIALOG_CONTENT,
+        DialogSize::Small => DIALOG_CONTENT_SMALL,
+    }
+}
+
+const fn dialog_title_class(size: DialogSize) -> &'static str {
+    match size {
+        DialogSize::Default => DIALOG_TITLE,
+        DialogSize::Small => DIALOG_TITLE_SMALL,
+    }
+}
+
+const fn dialog_description_class(size: DialogSize) -> &'static str {
+    match size {
+        DialogSize::Default => DIALOG_DESCRIPTION,
+        DialogSize::Small => DIALOG_DESCRIPTION_SMALL,
+    }
+}
+
+const fn dialog_trigger_class(open: bool) -> &'static str {
+    if open {
+        DIALOG_TRIGGER_OPEN
+    } else {
+        DIALOG_TRIGGER
+    }
+}
+
+const fn dialog_action_class(index: usize, selected: bool) -> &'static str {
+    if selected {
+        DIALOG_ACTION_ACTIVE
+    } else if index == 0 {
+        DIALOG_ACTION
+    } else {
+        DIALOG_ACTION_SECONDARY
+    }
+}
+
+const fn dialog_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     Direction,
     crate::DirectionModel,

@@ -233,7 +233,18 @@ Issues 01 through 21 were re-audited against this learning; no earlier API
 changes were needed because Calendar already owns month math and Data Table's
 page math remains a separate tabular concern.
 
-All-issue sweep pass: Dialog through Typography complete. The shared
+Concrete component pass: Dialog complete. The twenty-third issue now has a
+typed modal/non-modal model, trigger/content/header/title/description/footer
+contracts, footer action contracts, renderer-local open/focus/footer-action
+state, `garde` validation, token-only Leptos dialog rendering, dedicated story
+proof, and Bevy primitive derivation from the same model. The sweep found that
+workflow overlays need their own action contract and close-on-activate behavior
+instead of generic footer slots so Leptos and Bevy agree on modal state and
+footer intent. Issues 01 through 22 were re-audited against this learning; no
+earlier API changes were needed because Alert Dialog owns destructive
+confirmation semantics while Dialog owns general workflow overlays.
+
+All-issue sweep pass: Direction through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -241,7 +252,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Dialog through Typography now have
+Concrete all-issue sweep pass: Direction through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -279,9 +290,10 @@ uses a renderer-neutral owned view node.
 - Pointer-triggered nested menus need shared entry, separator, submenu, and destructive-action contracts so Leptos overlay behavior and Bevy menu primitives agree.
 - Tabular data surfaces need typed columns, typed rows, selected-row validation, and shared page math so filtering, sorting, pagination, empty state, and row selection do not drift across Leptos and Bevy.
 - Composed date-input controls reuse the shared calendar date arithmetic while owning picker-specific trigger, popover, selected-value, and close-on-select semantics in their own contract.
+- Workflow overlays need a typed footer action contract with close-on-activate semantics so general Dialog behavior stays distinct from destructive Alert Dialog confirmation.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found nineteen cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, put input-backed filtering in the shared picker contract instead of renderer-local list logic, model searchable command palettes with grouped action and shortcut contracts instead of generated catalog slots, model pointer-triggered nested menus with shared entry, separator, submenu, and destructive-action contracts, model tabular data with typed columns, rows, selected-row validation, and shared page math instead of generic table slots, and compose date pickers from shared calendar date math plus picker-owned trigger, popover, and selected-value semantics.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found twenty cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, put input-backed filtering in the shared picker contract instead of renderer-local list logic, model searchable command palettes with grouped action and shortcut contracts instead of generated catalog slots, model pointer-triggered nested menus with shared entry, separator, submenu, and destructive-action contracts, model tabular data with typed columns, rows, selected-row validation, and shared page math instead of generic table slots, compose date pickers from shared calendar date math plus picker-owned trigger, popover, and selected-value semantics, and keep general workflow Dialog footer actions distinct from destructive Alert Dialog confirmation.

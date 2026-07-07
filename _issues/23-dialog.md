@@ -41,5 +41,5 @@ Ship a Rust-first `Dialog` component that follows the shadcn composition model w
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
-- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Concrete typed modal/non-modal model, action contract, part enum, render nodes, `garde` validation, renderer-local open/focus/footer-action state, token-only Leptos component, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

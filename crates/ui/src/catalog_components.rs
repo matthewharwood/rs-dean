@@ -504,29 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    dialog,
-    Dialog,
-    DialogModel,
-    DialogPart,
-    DialogRenderNode,
-    DialogState,
-    DialogIntent,
-    DialogChange,
-    validate_dialog_model,
-    dialog_render_nodes,
-    default_dialog_model,
-    [
-        Root => "Dialog",
-        Trigger => "DialogTrigger",
-        Content => "DialogContent",
-        Header => "DialogHeader",
-        Title => "DialogTitle",
-        Description => "DialogDescription",
-        Footer => "DialogFooter",
-    ]
-);
-
-define_catalog_component!(
     direction,
     Direction,
     DirectionModel,
@@ -1371,8 +1348,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Command
         | UiComponentId::ContextMenu
         | UiComponentId::DataTable
-        | UiComponentId::DatePicker => None,
-        UiComponentId::Dialog => Some(any_nodes(dialog_render_nodes(&default_dialog_model()))),
+        | UiComponentId::DatePicker
+        | UiComponentId::Dialog => None,
         UiComponentId::Direction => Some(any_nodes(direction_render_nodes(
             &default_direction_model(),
         ))),
@@ -1495,6 +1472,7 @@ mod tests {
                     | UiComponentId::ContextMenu
                     | UiComponentId::DataTable
                     | UiComponentId::DatePicker
+                    | UiComponentId::Dialog
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1511,17 +1489,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_dialog_model().state();
-        assert!(!state.is_active(DialogPart::Root));
+        let mut state = default_direction_model().state();
+        assert!(!state.is_active(DirectionPart::Provider));
         assert_eq!(
-            state.apply(DialogIntent::Toggle(DialogPart::Root)),
-            DialogChange::Opened(DialogPart::Root)
+            state.apply(DirectionIntent::Toggle(DirectionPart::Provider)),
+            DirectionChange::Opened(DirectionPart::Provider)
         );
-        assert!(state.is_active(DialogPart::Root));
+        assert!(state.is_active(DirectionPart::Provider));
         assert_eq!(
-            state.apply(DialogIntent::Toggle(DialogPart::Root)),
-            DialogChange::Closed(DialogPart::Root)
+            state.apply(DirectionIntent::Toggle(DirectionPart::Provider)),
+            DirectionChange::Closed(DirectionPart::Provider)
         );
-        assert!(!state.is_active(DialogPart::Root));
+        assert!(!state.is_active(DirectionPart::Provider));
     }
 }

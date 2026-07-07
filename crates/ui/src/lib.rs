@@ -22,6 +22,7 @@ pub mod command;
 pub mod context_menu;
 pub mod data_table;
 pub mod date_picker;
+pub mod dialog;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -141,6 +142,11 @@ pub use date_picker::{
     DatePickerChange, DatePickerDensity, DatePickerIntent, DatePickerModel, DatePickerPart,
     DatePickerRenderNode, DatePickerState, date_picker_date_label, date_picker_render_nodes,
     date_picker_value_label, default_date_picker_model, validate_date_picker_model,
+};
+pub use dialog::{
+    DialogAction, DialogChange, DialogIntent, DialogMode, DialogModel, DialogPart,
+    DialogRenderNode, DialogSize, DialogState, default_dialog_model, dialog_render_nodes,
+    validate_dialog_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

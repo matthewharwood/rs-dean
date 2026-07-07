@@ -15,8 +15,8 @@ use rs_dean_ui::{
     CommandItem, CommandModel, ContextMenu, ContextMenuAction, ContextMenuDensity,
     ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, DataTable, DataTableColumn,
     DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, DatePicker,
-    DatePickerDensity, DatePickerModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
+    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -452,6 +452,24 @@ fn Stories() -> impl IntoView {
                             <DatePicker model=invalid_date_picker_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <DatePicker model=themed_date_picker_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-dialog" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Dialog"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 23 implemented as a modal or non-modal workflow overlay backed by validated shared Rust copy/actions, renderer-local open/focus/action state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Dialog model=default_dialog_story_model() />
+                            <Dialog model=open_small_dialog_story_model() />
+                            <Dialog model=loading_dialog_story_model() />
+                            <Dialog model=disabled_dialog_story_model() />
+                            <Dialog model=invalid_dialog_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Dialog model=themed_dialog_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1680,6 +1698,70 @@ fn themed_date_picker_story_model() -> DatePickerModel {
         .with_placeholder("Choose themed date")
         .with_selected(CalendarDate::new(2026, 10, 21))
         .with_default_open(true)
+}
+
+fn default_dialog_story_model() -> DialogModel {
+    DialogModel::new(
+        "Edit profile",
+        "Edit profile",
+        "Make changes to the shared profile.",
+        "This story exercises trigger, content, header, title, description, body, and footer action nodes.",
+    )
+    .with_actions(vec![
+        DialogAction::new("Save", "save-profile"),
+        DialogAction::new("Cancel", "cancel-profile"),
+    ])
+}
+
+fn open_small_dialog_story_model() -> DialogModel {
+    DialogModel::new(
+        "Open small dialog",
+        "Small workflow",
+        "A compact non-modal dialog stays open after preview.",
+        "The primary footer action records local action state without closing the overlay.",
+    )
+    .with_size(DialogSize::Small)
+    .with_mode(DialogMode::NonModal)
+    .with_default_open(true)
+    .with_actions(vec![
+        DialogAction::new("Preview", "preview").keep_open(),
+        DialogAction::new("Close", "close-preview"),
+    ])
+}
+
+fn loading_dialog_story_model() -> DialogModel {
+    default_dialog_story_model()
+        .with_default_open(true)
+        .loading()
+}
+
+fn disabled_dialog_story_model() -> DialogModel {
+    DialogModel::new(
+        "Locked dialog",
+        "Locked workflow",
+        "This dialog is disabled.",
+        "The trigger and footer actions are disabled through the shared model.",
+    )
+    .with_default_open(true)
+    .disabled()
+}
+
+fn invalid_dialog_story_model() -> DialogModel {
+    DialogModel::new("Broken dialog", "", "Description", "Body")
+}
+
+fn themed_dialog_story_model() -> DialogModel {
+    DialogModel::new(
+        "Theme dialog",
+        "Theme scoped dialog",
+        "Semantic tokens resolve through the active theme.",
+        "The same Dialog model drives Leptos DOM and Bevy primitive projections.",
+    )
+    .with_default_open(true)
+    .with_actions(vec![
+        DialogAction::new("Apply", "apply-theme"),
+        DialogAction::new("Dismiss", "dismiss-theme"),
+    ])
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

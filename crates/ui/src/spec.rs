@@ -290,7 +290,7 @@ pub mod bevy_adapter {
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        DialogPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
         alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
         avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -305,7 +305,8 @@ pub mod bevy_adapter {
         default_button_model, default_calendar_model, default_card_model, default_carousel_model,
         default_chart_model, default_checkbox_model, default_collapsible_model,
         default_combobox_model, default_command_model, default_context_menu_model,
-        default_data_table_model, default_date_picker_model, scale,
+        default_data_table_model, default_date_picker_model, default_dialog_model,
+        dialog_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -448,6 +449,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Dialog {
+            return bevy_primitives_for_dialog(theme, implementation.render, implementation.state);
         }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
@@ -712,6 +716,39 @@ pub mod bevy_adapter {
                     render,
                     state,
                     intent: date_picker_intent_for_part(node.part, node.date.is_some()),
+                    selected: node.selected || node.open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_dialog(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_dialog_model().with_default_open(true);
+        let dialog_state = model.state();
+        dialog_render_nodes(&model, &dialog_state)
+            .into_iter()
+            .map(|node| {
+                let role = dialog_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: dialog_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: dialog_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        dialog_tone_for_part(node.part, node.selected, node.open, node.disabled),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: dialog_intent_for_part(node.part, node.actionable, node.close_dialog),
                     selected: node.selected || node.open,
                     disabled: node.disabled,
                 }
@@ -2164,6 +2201,82 @@ pub mod bevy_adapter {
             DatePickerPart::Calendar if day_node => Vec2::new(scale::space::L, scale::space::L),
             DatePickerPart::Calendar => Vec2::new(scale::space::XL3, scale::space::XL2),
             DatePickerPart::Value => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    const fn dialog_kind_for_part(part: DialogPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            DialogPart::Root => UiWidgetSlotKind::Section,
+            DialogPart::Trigger => UiWidgetSlotKind::Button,
+            DialogPart::Content => UiWidgetSlotKind::Overlay,
+            DialogPart::Header => UiWidgetSlotKind::Header,
+            DialogPart::Title => UiWidgetSlotKind::Title,
+            DialogPart::Description => UiWidgetSlotKind::Description,
+            DialogPart::Footer if actionable => UiWidgetSlotKind::Button,
+            DialogPart::Footer => UiWidgetSlotKind::Panel,
+        }
+    }
+
+    const fn dialog_role_for_part(part: DialogPart) -> UiBlockRole {
+        match part {
+            DialogPart::Root => UiBlockRole::Root,
+            DialogPart::Trigger => UiBlockRole::Action,
+            DialogPart::Content => UiBlockRole::Overlay,
+            DialogPart::Header | DialogPart::Title => UiBlockRole::Header,
+            DialogPart::Description => UiBlockRole::Text,
+            DialogPart::Footer => UiBlockRole::Layout,
+        }
+    }
+
+    const fn dialog_tone_for_part(
+        part: DialogPart,
+        selected: bool,
+        open: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            DialogPart::Trigger if open || selected => UiBlockTone::Brand,
+            DialogPart::Footer if selected => UiBlockTone::Brand,
+            DialogPart::Content if open => UiBlockTone::Surface,
+            DialogPart::Trigger | DialogPart::Footer => UiBlockTone::Brand,
+            DialogPart::Root
+            | DialogPart::Content
+            | DialogPart::Header
+            | DialogPart::Title
+            | DialogPart::Description => UiBlockTone::Surface,
+        }
+    }
+
+    const fn dialog_intent_for_part(
+        part: DialogPart,
+        actionable: bool,
+        close_dialog: bool,
+    ) -> UiWidgetIntent {
+        match part {
+            DialogPart::Trigger => UiWidgetIntent::Toggle,
+            DialogPart::Footer if actionable && close_dialog => UiWidgetIntent::Close,
+            DialogPart::Footer if actionable => UiWidgetIntent::Activate,
+            DialogPart::Root
+            | DialogPart::Content
+            | DialogPart::Header
+            | DialogPart::Title
+            | DialogPart::Description
+            | DialogPart::Footer => UiWidgetIntent::None,
+        }
+    }
+
+    fn dialog_size_for_part(part: DialogPart) -> Vec2 {
+        match part {
+            DialogPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            DialogPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            DialogPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
+            DialogPart::Header => Vec2::new(scale::space::XL3, scale::space::L),
+            DialogPart::Title => Vec2::new(scale::space::XL2, scale::space::M),
+            DialogPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
+            DialogPart::Footer => Vec2::new(scale::space::XL3, scale::space::L),
         }
     }
 
