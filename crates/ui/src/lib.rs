@@ -47,6 +47,7 @@ pub mod pagination;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
+pub mod resizable;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -278,6 +279,12 @@ pub use radio_group::{
     RadioGroupOrientation, RadioGroupPart, RadioGroupRenderNode, RadioGroupState,
     default_radio_group_model, default_radio_group_options, radio_group_render_nodes,
     selected_radio_group_label, validate_radio_group_model,
+};
+pub use resizable::{
+    ResizableChange, ResizableDensity, ResizableIntent, ResizableModel, ResizableOrientation,
+    ResizablePanel, ResizablePart, ResizableRenderNode, ResizableState, default_resizable_model,
+    default_resizable_panels, resizable_panel_flex_style, resizable_render_nodes,
+    resizable_sizes_label, validate_resizable_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

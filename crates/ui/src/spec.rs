@@ -294,8 +294,8 @@ pub mod bevy_adapter {
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
         accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -318,14 +318,14 @@ pub mod bevy_adapter {
         default_menubar_model, default_message_model, default_message_scroller_model,
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_resizable_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
-        radio_group_render_nodes, scale,
+        radio_group_render_nodes, resizable_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -550,6 +550,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::RadioGroup {
             return bevy_primitives_for_radio_group(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::Resizable {
+            return bevy_primitives_for_resizable(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1454,6 +1461,37 @@ pub mod bevy_adapter {
                     state,
                     intent: radio_group_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.focused || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_resizable(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_resizable_model();
+        let resizable_state = model.state();
+        resizable_render_nodes(&model, &resizable_state)
+            .into_iter()
+            .map(|node| {
+                let role = resizable_role_for_part(node.part);
+                let tone = resizable_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: resizable_primitive_part(&node),
+                    kind: resizable_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: resizable_size_for_part(node.part, node.percent, node.orientation),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: resizable_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.resizing || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -4195,6 +4233,82 @@ pub mod bevy_adapter {
             RadioGroupPart::Item => Vec2::new(scale::space::XL2, scale::space::M),
             RadioGroupPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
             RadioGroupPart::Label => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    fn resizable_primitive_part(node: &crate::ResizableRenderNode) -> String {
+        match node.part {
+            ResizablePart::Panel | ResizablePart::Handle => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            ResizablePart::PanelGroup => node.part.label().to_owned(),
+        }
+    }
+
+    const fn resizable_kind_for_part(part: ResizablePart) -> UiWidgetSlotKind {
+        match part {
+            ResizablePart::PanelGroup => UiWidgetSlotKind::Section,
+            ResizablePart::Panel => UiWidgetSlotKind::Panel,
+            ResizablePart::Handle => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn resizable_role_for_part(part: ResizablePart) -> UiBlockRole {
+        match part {
+            ResizablePart::PanelGroup | ResizablePart::Handle => UiBlockRole::Layout,
+            ResizablePart::Panel => UiBlockRole::Content,
+        }
+    }
+
+    fn resizable_tone_for_node(node: &crate::ResizableRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.resizing {
+            return UiBlockTone::Accent;
+        }
+        if node.selected {
+            return UiBlockTone::Brand;
+        }
+        UiBlockTone::Surface
+    }
+
+    const fn resizable_intent_for_part(part: ResizablePart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (ResizablePart::Handle, true) => UiWidgetIntent::Resize,
+            (ResizablePart::Panel, true) => UiWidgetIntent::Select,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn resizable_size_for_part(
+        part: ResizablePart,
+        percent: u8,
+        orientation: crate::ResizableOrientation,
+    ) -> Vec2 {
+        let basis = scale::space::XL3 * (f32::from(percent).max(20.0) / 100.0);
+        match (part, orientation) {
+            (ResizablePart::PanelGroup, crate::ResizableOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL3, scale::space::XL)
+            }
+            (ResizablePart::PanelGroup, crate::ResizableOrientation::Vertical) => {
+                Vec2::new(scale::space::XL2, scale::space::XL3)
+            }
+            (ResizablePart::Panel, crate::ResizableOrientation::Horizontal) => {
+                Vec2::new(basis, scale::space::XL)
+            }
+            (ResizablePart::Panel, crate::ResizableOrientation::Vertical) => {
+                Vec2::new(scale::space::XL2, basis)
+            }
+            (ResizablePart::Handle, crate::ResizableOrientation::Horizontal) => {
+                Vec2::new(scale::space::XS, scale::space::XL)
+            }
+            (ResizablePart::Handle, crate::ResizableOrientation::Vertical) => {
+                Vec2::new(scale::space::XL2, scale::space::XS)
+            }
         }
     }
 

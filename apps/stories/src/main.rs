@@ -29,8 +29,9 @@ use rs_dean_ui::{
     NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
     Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel, RadioGroup,
-    RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation, Resizable,
+    ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -882,6 +883,25 @@ fn Stories() -> impl IntoView {
                             <RadioGroup model=invalid_radio_group_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <RadioGroup model=themed_radio_group_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-resizable" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Resizable"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 46 implemented as a split-panel layout backed by validated shared Rust panel bounds, renderer-local resize state, and Bevy-readable panel primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Resizable model=default_resizable_story_model() />
+                            <Resizable model=dense_resizable_story_model() />
+                            <Resizable model=vertical_resizable_story_model() />
+                            <Resizable model=loading_resizable_story_model() />
+                            <Resizable model=disabled_resizable_story_model() />
+                            <Resizable model=invalid_resizable_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Resizable model=themed_resizable_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3326,6 +3346,68 @@ fn themed_radio_group_story_model() -> RadioGroupModel {
         .with_label("Theme scope")
         .with_orientation(RadioGroupOrientation::Horizontal)
         .with_selected_value("dark")
+}
+
+fn resizable_story_panels() -> Vec<ResizablePanel> {
+    vec![
+        ResizablePanel::new("Outline", "outline", 34)
+            .with_detail("Navigation and lesson structure.")
+            .with_bounds(20, 70),
+        ResizablePanel::new("Workspace", "workspace", 66)
+            .with_detail("Primary activity and preview surface.")
+            .with_bounds(30, 80),
+    ]
+}
+
+fn three_panel_resizable_story_panels() -> Vec<ResizablePanel> {
+    vec![
+        ResizablePanel::new("Queue", "queue", 24)
+            .with_detail("Local-first pending items.")
+            .with_bounds(15, 45),
+        ResizablePanel::new("Editor", "editor", 46)
+            .with_detail("Focused work panel.")
+            .with_bounds(30, 65),
+        ResizablePanel::new("Inspector", "inspector", 30)
+            .with_detail("Context and metadata.")
+            .with_bounds(20, 45),
+    ]
+}
+
+fn default_resizable_story_model() -> ResizableModel {
+    ResizableModel::new(resizable_story_panels())
+        .with_label("Workspace split")
+        .with_active_panel("workspace")
+}
+
+fn dense_resizable_story_model() -> ResizableModel {
+    ResizableModel::new(resizable_story_panels())
+        .with_density(ResizableDensity::Dense)
+        .with_label("Compact split")
+}
+
+fn vertical_resizable_story_model() -> ResizableModel {
+    ResizableModel::new(three_panel_resizable_story_panels())
+        .with_orientation(ResizableOrientation::Vertical)
+        .with_label("Stacked panels")
+        .with_resizing_handle(1)
+}
+
+fn loading_resizable_story_model() -> ResizableModel {
+    default_resizable_story_model().loading()
+}
+
+fn disabled_resizable_story_model() -> ResizableModel {
+    ResizableModel::new(resizable_story_panels())
+        .with_label("Locked split")
+        .disabled()
+}
+
+fn invalid_resizable_story_model() -> ResizableModel {
+    default_resizable_story_model().with_error("Panel layout must be reviewed before persistence.")
+}
+
+fn themed_resizable_story_model() -> ResizableModel {
+    ResizableModel::new(three_panel_resizable_story_panels()).with_label("Theme scoped split")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

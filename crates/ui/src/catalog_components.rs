@@ -504,25 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    resizable,
-    Resizable,
-    ResizableModel,
-    ResizablePart,
-    ResizableRenderNode,
-    ResizableState,
-    ResizableIntent,
-    ResizableChange,
-    validate_resizable_model,
-    resizable_render_nodes,
-    default_resizable_model,
-    [
-        PanelGroup => "ResizablePanelGroup",
-        Panel => "ResizablePanel",
-        Handle => "ResizableHandle",
-    ]
-);
-
-define_catalog_component!(
     scroll_area,
     ScrollArea,
     ScrollAreaModel,
@@ -926,10 +907,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Pagination
         | UiComponentId::Popover
         | UiComponentId::Progress
-        | UiComponentId::RadioGroup => None,
-        UiComponentId::Resizable => Some(any_nodes(resizable_render_nodes(
-            &default_resizable_model(),
-        ))),
+        | UiComponentId::RadioGroup
+        | UiComponentId::Resizable => None,
         UiComponentId::ScrollArea => Some(any_nodes(scroll_area_render_nodes(
             &default_scroll_area_model(),
         ))),
@@ -1028,6 +1007,7 @@ mod tests {
                     | UiComponentId::Popover
                     | UiComponentId::Progress
                     | UiComponentId::RadioGroup
+                    | UiComponentId::Resizable
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1044,17 +1024,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_resizable_model().state();
-        assert!(!state.is_active(ResizablePart::PanelGroup));
+        let mut state = default_scroll_area_model().state();
+        assert!(!state.is_active(ScrollAreaPart::Root));
         assert_eq!(
-            state.apply(ResizableIntent::Toggle(ResizablePart::PanelGroup)),
-            ResizableChange::Opened(ResizablePart::PanelGroup)
+            state.apply(ScrollAreaIntent::Toggle(ScrollAreaPart::Root)),
+            ScrollAreaChange::Opened(ScrollAreaPart::Root)
         );
-        assert!(state.is_active(ResizablePart::PanelGroup));
+        assert!(state.is_active(ScrollAreaPart::Root));
         assert_eq!(
-            state.apply(ResizableIntent::Toggle(ResizablePart::PanelGroup)),
-            ResizableChange::Closed(ResizablePart::PanelGroup)
+            state.apply(ScrollAreaIntent::Toggle(ScrollAreaPart::Root)),
+            ScrollAreaChange::Closed(ScrollAreaPart::Root)
         );
-        assert!(!state.is_active(ResizablePart::PanelGroup));
+        assert!(!state.is_active(ScrollAreaPart::Root));
     }
 }

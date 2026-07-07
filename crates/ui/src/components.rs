@@ -38,11 +38,12 @@ use crate::{
     PaginationDensity, PaginationIntent, PaginationModel, PaginationPart, PaginationState,
     PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ProgressDensity, ProgressIntent,
     ProgressModel, ProgressPart, RadioGroupDensity, RadioGroupIntent, RadioGroupModel,
-    RadioGroupOrientation, RadioGroupPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    RadioGroupOrientation, RadioGroupPart, ResizableDensity, ResizableIntent, ResizableModel,
+    ResizableOrientation, ResizablePart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -59,28 +60,30 @@ use crate::{
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
-    default_radio_group_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
-    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
-    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model, validate_menubar_model, validate_message_model,
-    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model, validate_popover_model, validate_progress_model,
-    validate_radio_group_model,
+    default_radio_group_model, default_resizable_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
+    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
+    resizable_render_nodes, resizable_sizes_label, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model, validate_message_model, validate_message_scroller_model,
+    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
+    validate_popover_model, validate_progress_model, validate_radio_group_model,
+    validate_resizable_model,
 };
 
 const HEALTH_CARD: &str =
@@ -923,6 +926,45 @@ const RADIO_GROUP_LABEL_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-
 const RADIO_GROUP_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const RADIO_GROUP_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const RADIO_GROUP_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const RESIZABLE_ROOT: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const RESIZABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const RESIZABLE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const RESIZABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const RESIZABLE_HEADER: &str = "flex flex-wrap items-center justify-between gap-2xs";
+const RESIZABLE_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const RESIZABLE_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const RESIZABLE_STATUS: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
+const RESIZABLE_STATUS_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const RESIZABLE_STATUS_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
+const RESIZABLE_GROUP_HORIZONTAL: &str = "flex min-h-2xl w-full overflow-hidden rounded-field border border-border-subtle bg-surface-2 text-text-1";
+const RESIZABLE_GROUP_VERTICAL: &str = "flex min-h-4xl w-full flex-col overflow-hidden rounded-field border border-border-subtle bg-surface-2 text-text-1";
+const RESIZABLE_GROUP_DENSE_HORIZONTAL: &str = "flex min-h-xl w-full overflow-hidden rounded-field border border-border-subtle bg-surface-2 text-text-1";
+const RESIZABLE_GROUP_DENSE_VERTICAL: &str = "flex min-h-3xl w-full flex-col overflow-hidden rounded-field border border-border-subtle bg-surface-2 text-text-1";
+const RESIZABLE_PANEL: &str = "relative grid min-w-0 content-start gap-2xs border-border-subtle bg-surface-1 p-s text-text-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const RESIZABLE_PANEL_DENSE: &str = "relative grid min-w-0 content-start gap-3xs border-border-subtle bg-surface-1 p-xs text-text-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const RESIZABLE_PANEL_ACTIVE: &str = "relative grid min-w-0 content-start gap-2xs border border-brand bg-primary-soft p-s text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const RESIZABLE_PANEL_INVALID: &str = "relative grid min-w-0 content-start gap-2xs border border-danger bg-error-soft p-s text-text-1 outline-none";
+const RESIZABLE_PANEL_DISABLED: &str = "relative grid min-w-0 content-start gap-2xs border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled outline-none";
+const RESIZABLE_PANEL_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const RESIZABLE_PANEL_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const RESIZABLE_PANEL_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const RESIZABLE_PANEL_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const RESIZABLE_PANEL_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const RESIZABLE_PANEL_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const RESIZABLE_PANEL_META: &str = "m-0 text-00 font-6 leading-0 text-brand";
+const RESIZABLE_PANEL_META_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
+const RESIZABLE_HANDLE: &str =
+    "mt-xs grid gap-3xs rounded-field border border-border-subtle bg-surface-2 p-2xs text-text-2";
+const RESIZABLE_HANDLE_DENSE: &str =
+    "mt-2xs grid gap-3xs rounded-field border border-border-subtle bg-surface-2 p-3xs text-text-2";
+const RESIZABLE_HANDLE_ACTIVE: &str = "mt-xs grid gap-3xs rounded-field border border-brand bg-primary-soft p-2xs text-text-1 shadow-1";
+const RESIZABLE_HANDLE_INVALID: &str =
+    "mt-xs grid gap-3xs rounded-field border border-danger bg-error-soft p-2xs text-danger";
+const RESIZABLE_HANDLE_DISABLED: &str = "mt-xs grid gap-3xs rounded-field border border-border-muted bg-surface-3 p-2xs text-text-disabled opacity-disabled";
+const RESIZABLE_HANDLE_LABEL: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
+const RESIZABLE_HANDLE_LABEL_ACTIVE: &str = "m-0 text-00 font-7 leading-0 text-brand";
+const RESIZABLE_HANDLE_LABEL_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
+const RESIZABLE_RANGE: &str = "w-full accent-brand";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -12377,11 +12419,440 @@ fn radio_group_state_label(
         "unselected".to_owned()
     }
 }
-catalog_component!(
-    Resizable,
-    crate::ResizableModel,
-    crate::default_resizable_model
-);
+
+#[component]
+pub fn Resizable(
+    #[prop(optional, default = default_resizable_model())] model: ResizableModel,
+) -> AnyView {
+    if let Err(report) = validate_resizable_model(&model) {
+        let message = format!("Resizable validation failed: {report}");
+        return view! {
+            <div class=RESIZABLE_ROOT_INVALID data-ui-component="resizable" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let orientation = model.orientation;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = resizable_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ResizablePart::PanelGroup)
+        .expect("invariant: resizable render nodes include panel group")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_aria_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let panels = model.panels.clone();
+    let panel_count = panels.len();
+    let handle_labels = panels
+        .windows(2)
+        .map(|pair| format!("Resize {} and {}", pair[0].title, pair[1].title))
+        .collect::<Vec<_>>();
+    let handle_disableds = panels
+        .windows(2)
+        .map(|pair| blocked || pair[0].disabled || pair[1].disabled)
+        .collect::<Vec<_>>();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=resizable_root_class(density, invalid, disabled)
+            data-ui-component="resizable"
+            data-ui-part=ResizablePart::PanelGroup.label()
+            data-ui-density=density.label()
+            data-ui-orientation=orientation.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    resizable_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.active_panel(),
+                        state.resizing_handle(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_aria_label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <div class=RESIZABLE_HEADER>
+                <p class=resizable_title_class(density)>{root_label}</p>
+                <p class=resizable_status_class(invalid, disabled)>
+                    {move || {
+                        state.with(|state| {
+                            if invalid {
+                                root_detail.clone()
+                            } else {
+                                format!("{} ({})", root_detail, resizable_sizes_label(state.panel_sizes()))
+                            }
+                        })
+                    }}
+                </p>
+            </div>
+            <div
+                class=resizable_group_class(density, orientation)
+                data-ui-part=ResizablePart::PanelGroup.label()
+                role="group"
+                aria-orientation=orientation.label()
+            >
+                {panels
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, panel)| {
+                        let panel_title = panel.title.clone();
+                        let panel_detail = panel.detail.clone();
+                        let panel_value_for_class = panel.value.clone();
+                        let panel_value_for_focus = panel.value.clone();
+                        let panel_value_for_data = panel.value.clone();
+                        let panel_disabled = blocked || panel.disabled;
+                        let panel_tab_index = if panel_disabled { "-1" } else { "0" };
+                        let initial_size = panel.size_percent;
+                        let has_handle = index + 1 < panel_count;
+                        let handle_label = handle_labels.get(index).cloned().unwrap_or_default();
+                        let handle_disabled = handle_disableds.get(index).copied().unwrap_or(true);
+                        let handle_value = format!("handle-{index}");
+                        let handle_value_for_input = handle_value.clone();
+                        let handle_label_for_display = handle_label.clone();
+                        let handle_label_for_input = handle_label.clone();
+                        let handle_view = has_handle.then_some(view! {
+                            <label
+                                class=move || {
+                                    state.with(|state| {
+                                        resizable_handle_class(
+                                            density,
+                                            state.is_resizing_handle(index),
+                                            handle_disabled,
+                                            invalid,
+                                        )
+                                        .to_owned()
+                                    })
+                                }
+                                data-ui-part=ResizablePart::Handle.label()
+                                data-ui-value=handle_value
+                            >
+                                <span
+                                    class=move || {
+                                        state.with(|state| {
+                                            resizable_handle_label_class(
+                                                state.is_resizing_handle(index),
+                                                handle_disabled,
+                                            )
+                                            .to_owned()
+                                        })
+                                    }
+                                >
+                                    {move || {
+                                        state.with(|state| {
+                                            format!(
+                                                "{} ({}%)",
+                                                handle_label_for_display,
+                                                state.panel_size(index).unwrap_or(initial_size),
+                                            )
+                                        })
+                                    }}
+                                </span>
+                                <input
+                                    type="range"
+                                    class=RESIZABLE_RANGE
+                                    data-ui-part=ResizablePart::Handle.label()
+                                    data-ui-value=handle_value_for_input
+                                    min=move || {
+                                        state.with(|state| {
+                                            state
+                                                .handle_range(index)
+                                                .map(|(min, _)| min)
+                                                .unwrap_or(panel.min_percent)
+                                                .to_string()
+                                        })
+                                    }
+                                    max=move || {
+                                        state.with(|state| {
+                                            state
+                                                .handle_range(index)
+                                                .map(|(_, max)| max)
+                                                .unwrap_or(panel.max_percent)
+                                                .to_string()
+                                        })
+                                    }
+                                    prop:value=move || {
+                                        state.with(|state| {
+                                            state.panel_size(index).unwrap_or(initial_size).to_string()
+                                        })
+                                    }
+                                    aria-label=handle_label_for_input
+                                    aria-valuetext=move || {
+                                        state.with(|state| resizable_sizes_label(state.panel_sizes()))
+                                    }
+                                    disabled=handle_disabled
+                                    on:focus=move |_| {
+                                        if !handle_disabled {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(ResizableIntent::StartResize(index));
+                                            });
+                                        }
+                                    }
+                                    on:input=move |event| {
+                                        if !handle_disabled
+                                            && let Ok(value) = event_target_value(&event).parse::<u8>()
+                                        {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(ResizableIntent::Resize {
+                                                    handle_index: index,
+                                                    leading_percent: value,
+                                                });
+                                            });
+                                        }
+                                    }
+                                    on:change=move |_| {
+                                        if !handle_disabled {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(ResizableIntent::EndResize);
+                                            });
+                                        }
+                                    }
+                                    on:blur=move |_| {
+                                        if !handle_disabled {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(ResizableIntent::EndResize);
+                                            });
+                                        }
+                                    }
+                                />
+                            </label>
+                        });
+                        view! {
+                            <article
+                                class=move || {
+                                    state.with(|state| {
+                                        resizable_panel_class(
+                                            density,
+                                            state.is_active_panel(&panel_value_for_class),
+                                            panel_disabled,
+                                            invalid,
+                                        )
+                                        .to_owned()
+                                    })
+                                }
+                                style=move || {
+                                    state.with(|state| {
+                                        resizable_panel_flex_style(
+                                            state.panel_size(index).unwrap_or(initial_size),
+                                        )
+                                    })
+                                }
+                                data-ui-part=ResizablePart::Panel.label()
+                                data-ui-value=panel_value_for_data
+                                data-ui-index=index.to_string()
+                                tabindex=panel_tab_index
+                                aria-disabled=panel_disabled.to_string()
+                                on:focus=move |_| {
+                                    if !panel_disabled {
+                                        let value = panel_value_for_focus.clone();
+                                        set_state.update(|state| {
+                                            let _ = state.apply(ResizableIntent::FocusPanel(value));
+                                        });
+                                    }
+                                }
+                                on:blur=move |_| {
+                                    if !panel_disabled {
+                                        set_state.update(|state| {
+                                            let _ = state.apply(ResizableIntent::BlurPanel);
+                                        });
+                                    }
+                                }
+                            >
+                                <p class=resizable_panel_title_class(density, panel_disabled)>
+                                    {panel_title}
+                                </p>
+                                <p class=resizable_panel_detail_class(invalid, panel_disabled)>
+                                    {panel_detail}
+                                </p>
+                                <p class=resizable_panel_meta_class(panel_disabled)>
+                                    {move || {
+                                        state.with(|state| {
+                                            format!(
+                                                "{} of {}",
+                                                state.panel_size(index).unwrap_or(initial_size),
+                                                100,
+                                            )
+                                        })
+                                    }}
+                                </p>
+                                {handle_view}
+                            </article>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn resizable_root_class(
+    density: ResizableDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return RESIZABLE_ROOT_DISABLED;
+    }
+    if invalid {
+        return RESIZABLE_ROOT_INVALID;
+    }
+    match density {
+        ResizableDensity::Standard => RESIZABLE_ROOT,
+        ResizableDensity::Dense => RESIZABLE_ROOT_DENSE,
+    }
+}
+
+const fn resizable_title_class(density: ResizableDensity) -> &'static str {
+    match density {
+        ResizableDensity::Standard => RESIZABLE_TITLE,
+        ResizableDensity::Dense => RESIZABLE_TITLE_DENSE,
+    }
+}
+
+const fn resizable_status_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        RESIZABLE_STATUS_DISABLED
+    } else if invalid {
+        RESIZABLE_STATUS_INVALID
+    } else {
+        RESIZABLE_STATUS
+    }
+}
+
+const fn resizable_group_class(
+    density: ResizableDensity,
+    orientation: ResizableOrientation,
+) -> &'static str {
+    match (density, orientation) {
+        (ResizableDensity::Standard, ResizableOrientation::Horizontal) => {
+            RESIZABLE_GROUP_HORIZONTAL
+        }
+        (ResizableDensity::Standard, ResizableOrientation::Vertical) => RESIZABLE_GROUP_VERTICAL,
+        (ResizableDensity::Dense, ResizableOrientation::Horizontal) => {
+            RESIZABLE_GROUP_DENSE_HORIZONTAL
+        }
+        (ResizableDensity::Dense, ResizableOrientation::Vertical) => RESIZABLE_GROUP_DENSE_VERTICAL,
+    }
+}
+
+const fn resizable_panel_class(
+    density: ResizableDensity,
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return RESIZABLE_PANEL_DISABLED;
+    }
+    if invalid {
+        return RESIZABLE_PANEL_INVALID;
+    }
+    if active {
+        return RESIZABLE_PANEL_ACTIVE;
+    }
+    match density {
+        ResizableDensity::Standard => RESIZABLE_PANEL,
+        ResizableDensity::Dense => RESIZABLE_PANEL_DENSE,
+    }
+}
+
+const fn resizable_panel_title_class(density: ResizableDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return RESIZABLE_PANEL_TITLE_DISABLED;
+    }
+    match density {
+        ResizableDensity::Standard => RESIZABLE_PANEL_TITLE,
+        ResizableDensity::Dense => RESIZABLE_PANEL_TITLE_DENSE,
+    }
+}
+
+const fn resizable_panel_detail_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        RESIZABLE_PANEL_DETAIL_DISABLED
+    } else if invalid {
+        RESIZABLE_PANEL_DETAIL_INVALID
+    } else {
+        RESIZABLE_PANEL_DETAIL
+    }
+}
+
+const fn resizable_panel_meta_class(disabled: bool) -> &'static str {
+    if disabled {
+        RESIZABLE_PANEL_META_DISABLED
+    } else {
+        RESIZABLE_PANEL_META
+    }
+}
+
+const fn resizable_handle_class(
+    density: ResizableDensity,
+    resizing: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return RESIZABLE_HANDLE_DISABLED;
+    }
+    if invalid {
+        return RESIZABLE_HANDLE_INVALID;
+    }
+    if resizing {
+        return RESIZABLE_HANDLE_ACTIVE;
+    }
+    match density {
+        ResizableDensity::Standard => RESIZABLE_HANDLE,
+        ResizableDensity::Dense => RESIZABLE_HANDLE_DENSE,
+    }
+}
+
+const fn resizable_handle_label_class(resizing: bool, disabled: bool) -> &'static str {
+    if disabled {
+        RESIZABLE_HANDLE_LABEL_DISABLED
+    } else if resizing {
+        RESIZABLE_HANDLE_LABEL_ACTIVE
+    } else {
+        RESIZABLE_HANDLE_LABEL
+    }
+}
+
+fn resizable_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active_panel: Option<&str>,
+    resizing_handle: Option<usize>,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if let Some(handle) = resizing_handle {
+        format!("resizing-{handle}")
+    } else if let Some(panel) = active_panel {
+        format!("focused-{panel}")
+    } else {
+        "idle".to_owned()
+    }
+}
+
 catalog_component!(
     ScrollArea,
     crate::ScrollAreaModel,
