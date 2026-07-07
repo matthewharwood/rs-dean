@@ -17,6 +17,7 @@ use rs_dean_ui::{
     DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, DatePicker,
     DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
     Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
+    DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
@@ -508,6 +509,24 @@ fn Stories() -> impl IntoView {
                             <Drawer model=invalid_drawer_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Drawer model=themed_drawer_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-dropdown-menu" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Dropdown Menu"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 26 implemented as a trigger-attached action menu backed by validated shared Rust entries, renderer-local open/focus/select state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <DropdownMenu model=default_dropdown_menu_story_model() />
+                            <DropdownMenu model=dense_dropdown_menu_story_model() />
+                            <DropdownMenu model=loading_dropdown_menu_story_model() />
+                            <DropdownMenu model=disabled_dropdown_menu_story_model() />
+                            <DropdownMenu model=invalid_dropdown_menu_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <DropdownMenu model=themed_dropdown_menu_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1918,6 +1937,63 @@ fn themed_drawer_story_model() -> DrawerModel {
         DrawerAction::new("Apply", "apply-drawer"),
         DrawerAction::new("Dismiss", "dismiss-drawer"),
     ])
+}
+
+fn dropdown_menu_story_entries() -> Vec<DropdownMenuEntry> {
+    vec![
+        DropdownMenuEntry::label("File", "file"),
+        DropdownMenuEntry::item(
+            DropdownMenuItem::new("Rename", "rename")
+                .with_detail("Update the component name.")
+                .with_shortcut("R"),
+        ),
+        DropdownMenuEntry::item(
+            DropdownMenuItem::new("Duplicate", "duplicate")
+                .with_detail("Create a copy.")
+                .with_shortcut("D"),
+        ),
+        DropdownMenuEntry::separator("file-separator"),
+        DropdownMenuEntry::item(
+            DropdownMenuItem::new("Delete", "delete")
+                .with_detail("Remove this component.")
+                .destructive(),
+        ),
+    ]
+}
+
+fn default_dropdown_menu_story_model() -> DropdownMenuModel {
+    DropdownMenuModel::new(dropdown_menu_story_entries())
+        .with_trigger_label("Open actions")
+        .with_selected_value("rename")
+        .with_active_value("duplicate")
+}
+
+fn dense_dropdown_menu_story_model() -> DropdownMenuModel {
+    DropdownMenuModel::new(dropdown_menu_story_entries())
+        .with_density(DropdownMenuDensity::Dense)
+        .with_trigger_label("Dense actions")
+        .with_selected_value("duplicate")
+}
+
+fn loading_dropdown_menu_story_model() -> DropdownMenuModel {
+    default_dropdown_menu_story_model().loading()
+}
+
+fn disabled_dropdown_menu_story_model() -> DropdownMenuModel {
+    DropdownMenuModel::new(dropdown_menu_story_entries())
+        .with_trigger_label("Locked actions")
+        .disabled()
+}
+
+fn invalid_dropdown_menu_story_model() -> DropdownMenuModel {
+    DropdownMenuModel::new(vec![DropdownMenuEntry::separator("only-separator")])
+}
+
+fn themed_dropdown_menu_story_model() -> DropdownMenuModel {
+    DropdownMenuModel::new(dropdown_menu_story_entries())
+        .with_trigger_label("Theme actions")
+        .with_content_label("Theme menu actions")
+        .with_selected_value("delete")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

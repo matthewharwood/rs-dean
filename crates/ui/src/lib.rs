@@ -26,6 +26,7 @@ pub mod dialog;
 pub mod direction;
 mod dom;
 pub mod drawer;
+pub mod dropdown_menu;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -158,6 +159,12 @@ pub use direction::{
 pub use drawer::{
     DrawerAction, DrawerChange, DrawerIntent, DrawerModel, DrawerPart, DrawerRenderNode,
     DrawerSide, DrawerState, default_drawer_model, drawer_render_nodes, validate_drawer_model,
+};
+pub use dropdown_menu::{
+    DropdownMenuChange, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuIntent,
+    DropdownMenuItem, DropdownMenuModel, DropdownMenuPart, DropdownMenuRenderNode,
+    DropdownMenuState, default_dropdown_menu_model, dropdown_menu_render_nodes,
+    validate_dropdown_menu_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

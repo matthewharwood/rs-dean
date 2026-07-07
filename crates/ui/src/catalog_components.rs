@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    dropdown_menu,
-    DropdownMenu,
-    DropdownMenuModel,
-    DropdownMenuPart,
-    DropdownMenuRenderNode,
-    DropdownMenuState,
-    DropdownMenuIntent,
-    DropdownMenuChange,
-    validate_dropdown_menu_model,
-    dropdown_menu_render_nodes,
-    default_dropdown_menu_model,
-    [
-        Root => "DropdownMenu",
-        Trigger => "DropdownMenuTrigger",
-        Content => "DropdownMenuContent",
-        Item => "DropdownMenuItem",
-        Label => "DropdownMenuLabel",
-        Separator => "DropdownMenuSeparator",
-    ]
-);
-
-define_catalog_component!(
     empty,
     Empty,
     EmptyModel,
@@ -1310,10 +1288,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::DatePicker
         | UiComponentId::Dialog
         | UiComponentId::Direction
-        | UiComponentId::Drawer => None,
-        UiComponentId::DropdownMenu => Some(any_nodes(dropdown_menu_render_nodes(
-            &default_dropdown_menu_model(),
-        ))),
+        | UiComponentId::Drawer
+        | UiComponentId::DropdownMenu => None,
         UiComponentId::Empty => Some(any_nodes(empty_render_nodes(&default_empty_model()))),
         UiComponentId::Field => Some(any_nodes(field_render_nodes(&default_field_model()))),
         UiComponentId::HoverCard => Some(any_nodes(hover_card_render_nodes(
@@ -1432,6 +1408,7 @@ mod tests {
                     | UiComponentId::Dialog
                     | UiComponentId::Direction
                     | UiComponentId::Drawer
+                    | UiComponentId::DropdownMenu
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1448,17 +1425,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_dropdown_menu_model().state();
-        assert!(!state.is_active(DropdownMenuPart::Trigger));
+        let mut state = default_empty_model().state();
+        assert!(!state.is_active(EmptyPart::Root));
         assert_eq!(
-            state.apply(DropdownMenuIntent::Toggle(DropdownMenuPart::Trigger)),
-            DropdownMenuChange::Opened(DropdownMenuPart::Trigger)
+            state.apply(EmptyIntent::Toggle(EmptyPart::Root)),
+            EmptyChange::Opened(EmptyPart::Root)
         );
-        assert!(state.is_active(DropdownMenuPart::Trigger));
+        assert!(state.is_active(EmptyPart::Root));
         assert_eq!(
-            state.apply(DropdownMenuIntent::Toggle(DropdownMenuPart::Trigger)),
-            DropdownMenuChange::Closed(DropdownMenuPart::Trigger)
+            state.apply(EmptyIntent::Toggle(EmptyPart::Root)),
+            EmptyChange::Closed(EmptyPart::Root)
         );
-        assert!(!state.is_active(DropdownMenuPart::Trigger));
+        assert!(!state.is_active(EmptyPart::Root));
     }
 }

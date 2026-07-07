@@ -21,13 +21,14 @@ use crate::{
     DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
     DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
     DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, DrawerIntent,
-    DrawerModel, DrawerPart, DrawerSide, DrawerState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
+    DropdownMenuModel, DropdownMenuPart, DropdownMenuState, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -36,16 +37,17 @@ use crate::{
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
-    default_direction_model, default_drawer_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model,
+    default_direction_model, default_drawer_model, default_dropdown_menu_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model,
 };
 
 const HEALTH_CARD: &str =
@@ -626,6 +628,31 @@ const DRAWER_ACTION: &str = "inline-flex min-h-field items-center justify-center
 const DRAWER_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DRAWER_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DRAWER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
+const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
+const DROPDOWN_MENU_ROOT_DISABLED: &str =
+    "relative grid w-full max-w-md gap-2xs text-text-disabled";
+const DROPDOWN_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DROPDOWN_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DROPDOWN_MENU_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DROPDOWN_MENU_CONTENT: &str = "absolute start-0 top-full z-50 mt-2xs grid w-full gap-3xs rounded-box border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-3";
+const DROPDOWN_MENU_CONTENT_DENSE: &str = "absolute start-0 top-full z-50 mt-2xs grid w-full gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs text-text-1 shadow-2";
+const DROPDOWN_MENU_CONTENT_HIDDEN: &str = "hidden";
+const DROPDOWN_MENU_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field px-xs py-2xs text-left text-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const DROPDOWN_MENU_ITEM_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field px-2xs py-3xs text-left text-00 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const DROPDOWN_MENU_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const DROPDOWN_MENU_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const DROPDOWN_MENU_ITEM_DESTRUCTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field bg-error-soft px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const DROPDOWN_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field px-xs py-2xs text-left text-0 text-text-disabled opacity-disabled";
+const DROPDOWN_MENU_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
+const DROPDOWN_MENU_ITEM_LABEL: &str = "truncate";
+const DROPDOWN_MENU_ITEM_DETAIL: &str = "truncate text-00 leading-0 text-text-muted";
+const DROPDOWN_MENU_SHORTCUT: &str = "shrink-0 rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs font-mono text-00 text-text-muted";
+const DROPDOWN_MENU_LABEL: &str =
+    "px-xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
+const DROPDOWN_MENU_SEPARATOR: &str = "my-3xs h-3xs rounded-pill bg-border-subtle";
+const DROPDOWN_MENU_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -6187,11 +6214,247 @@ const fn drawer_state_label(
     }
 }
 
-catalog_component!(
-    DropdownMenu,
-    crate::DropdownMenuModel,
-    crate::default_dropdown_menu_model
-);
+#[component]
+pub fn DropdownMenu(
+    #[prop(optional, default = default_dropdown_menu_model())] model: DropdownMenuModel,
+) -> AnyView {
+    if let Err(report) = validate_dropdown_menu_model(&model) {
+        let message = format!("DropdownMenu validation failed: {report}");
+        return view! {
+            <div class=DROPDOWN_MENU_ERROR data-ui-component="dropdown-menu" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = dropdown_menu_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == DropdownMenuPart::Root)
+        .expect("invariant: dropdown menu render nodes include root")
+        .clone();
+    let trigger = input_nodes
+        .iter()
+        .find(|node| node.part == DropdownMenuPart::Trigger)
+        .expect("invariant: dropdown menu render nodes include trigger")
+        .clone();
+    let list_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=dropdown_menu_root_class(density, disabled)
+            data-ui-component="dropdown-menu"
+            data-ui-part=DropdownMenuPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| dropdown_menu_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || state.with(|state| dropdown_menu_trigger_class(density, state.is_open()).to_owned())
+                data-ui-part=DropdownMenuPart::Trigger.label()
+                aria-haspopup="menu"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DropdownMenuIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger.label}
+            </button>
+            <div
+                role="menu"
+                class=move || {
+                    state.with(|state| dropdown_menu_content_class(density, state.is_open()).to_owned())
+                }
+                data-ui-part=DropdownMenuPart::Content.label()
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                {move || {
+                    state.with(|state| {
+                        dropdown_menu_render_nodes(&list_model, state)
+                            .into_iter()
+                            .filter(|node| {
+                                matches!(
+                                    node.part,
+                                    DropdownMenuPart::Item
+                                        | DropdownMenuPart::Label
+                                        | DropdownMenuPart::Separator
+                                ) && node.visible
+                            })
+                            .map(|node| match node.part {
+                                DropdownMenuPart::Item => dropdown_menu_item_view(node, blocked, set_state),
+                                DropdownMenuPart::Label => view! {
+                                    <p
+                                        class=DROPDOWN_MENU_LABEL
+                                        data-ui-part=DropdownMenuPart::Label.label()
+                                        data-ui-value=node.value
+                                    >
+                                        {node.label}
+                                    </p>
+                                }
+                                .into_any(),
+                                DropdownMenuPart::Separator => view! {
+                                    <div
+                                        role="separator"
+                                        class=DROPDOWN_MENU_SEPARATOR
+                                        data-ui-part=DropdownMenuPart::Separator.label()
+                                        data-ui-value=node.value
+                                    ></div>
+                                }
+                                .into_any(),
+                                DropdownMenuPart::Root
+                                | DropdownMenuPart::Trigger
+                                | DropdownMenuPart::Content => view! { <span></span> }.into_any(),
+                            })
+                            .collect_view()
+                    })
+                }}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+fn dropdown_menu_item_view(
+    node: crate::DropdownMenuRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<DropdownMenuState>,
+) -> AnyView {
+    let value_for_focus = node.value.clone();
+    let value_for_click = node.value.clone();
+    let label = node.label.clone();
+    let detail = node.detail.clone();
+    let shortcut = node.shortcut.clone();
+    let selected = node.selected;
+    let active = node.active;
+    let disabled = node.disabled;
+    let destructive = node.destructive;
+    let density = node.density;
+    view! {
+        <button
+            type="button"
+            role="menuitem"
+            class=dropdown_menu_item_class(density, selected, active, disabled, destructive)
+            data-ui-part=DropdownMenuPart::Item.label()
+            data-ui-value=node.value
+            aria-selected=(selected || active).to_string()
+            disabled=disabled
+            on:focus=move |_| {
+                if !blocked {
+                    let value = value_for_focus.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(DropdownMenuIntent::Focus(value));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !blocked {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(DropdownMenuIntent::Select(value));
+                    });
+                }
+            }
+        >
+            <span class=DROPDOWN_MENU_ITEM_BODY>
+                <span class=DROPDOWN_MENU_ITEM_LABEL>{label}</span>
+                {if detail.is_empty() {
+                    view! { <span></span> }.into_any()
+                } else {
+                    view! { <span class=DROPDOWN_MENU_ITEM_DETAIL>{detail}</span> }.into_any()
+                }}
+            </span>
+            {if shortcut.is_empty() {
+                view! { <span></span> }.into_any()
+            } else {
+                view! { <span class=DROPDOWN_MENU_SHORTCUT>{shortcut}</span> }.into_any()
+            }}
+        </button>
+    }
+    .into_any()
+}
+
+const fn dropdown_menu_root_class(density: DropdownMenuDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return DROPDOWN_MENU_ROOT_DISABLED;
+    }
+    match density {
+        DropdownMenuDensity::Standard => DROPDOWN_MENU_ROOT,
+        DropdownMenuDensity::Dense => DROPDOWN_MENU_ROOT_DENSE,
+    }
+}
+
+const fn dropdown_menu_trigger_class(density: DropdownMenuDensity, open: bool) -> &'static str {
+    if open {
+        DROPDOWN_MENU_TRIGGER_OPEN
+    } else {
+        match density {
+            DropdownMenuDensity::Standard => DROPDOWN_MENU_TRIGGER,
+            DropdownMenuDensity::Dense => DROPDOWN_MENU_TRIGGER_DENSE,
+        }
+    }
+}
+
+const fn dropdown_menu_content_class(density: DropdownMenuDensity, open: bool) -> &'static str {
+    if !open {
+        return DROPDOWN_MENU_CONTENT_HIDDEN;
+    }
+    match density {
+        DropdownMenuDensity::Standard => DROPDOWN_MENU_CONTENT,
+        DropdownMenuDensity::Dense => DROPDOWN_MENU_CONTENT_DENSE,
+    }
+}
+
+const fn dropdown_menu_item_class(
+    density: DropdownMenuDensity,
+    selected: bool,
+    active: bool,
+    disabled: bool,
+    destructive: bool,
+) -> &'static str {
+    if disabled {
+        DROPDOWN_MENU_ITEM_DISABLED
+    } else if destructive {
+        DROPDOWN_MENU_ITEM_DESTRUCTIVE
+    } else if selected {
+        DROPDOWN_MENU_ITEM_SELECTED
+    } else if active {
+        DROPDOWN_MENU_ITEM_ACTIVE
+    } else {
+        match density {
+            DropdownMenuDensity::Standard => DROPDOWN_MENU_ITEM,
+            DropdownMenuDensity::Dense => DROPDOWN_MENU_ITEM_DENSE,
+        }
+    }
+}
+
+const fn dropdown_menu_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(Empty, crate::EmptyModel, crate::default_empty_model);
 catalog_component!(Field, crate::FieldModel, crate::default_field_model);
 catalog_component!(

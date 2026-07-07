@@ -290,11 +290,11 @@ pub mod bevy_adapter {
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
-        DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, RenderContract,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -307,8 +307,9 @@ pub mod bevy_adapter {
         default_chart_model, default_checkbox_model, default_collapsible_model,
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
-        default_direction_model, default_drawer_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, scale,
+        default_direction_model, default_drawer_model, default_dropdown_menu_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -433,6 +434,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::ContextMenu {
             return bevy_primitives_for_context_menu(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::DropdownMenu {
+            return bevy_primitives_for_dropdown_menu(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -657,6 +665,45 @@ pub mod bevy_adapter {
                     state,
                     intent: context_menu_intent_for_part(node.part),
                     selected: node.selected || node.active || node.submenu_open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_dropdown_menu(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_dropdown_menu_model();
+        let dropdown_menu_state = model.state();
+        dropdown_menu_render_nodes(&model, &dropdown_menu_state)
+            .into_iter()
+            .map(|node| {
+                let role = dropdown_menu_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: dropdown_menu_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: dropdown_menu_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        dropdown_menu_tone_for_part(
+                            node.part,
+                            node.active,
+                            node.selected,
+                            node.destructive,
+                            node.visible,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: dropdown_menu_intent_for_part(node.part),
+                    selected: node.selected || node.active,
                     disabled: node.disabled,
                 }
             })
@@ -2163,6 +2210,80 @@ pub mod bevy_adapter {
             ContextMenuPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
             ContextMenuPart::Separator => Vec2::new(scale::space::XL3, scale::space::XS),
             ContextMenuPart::Submenu => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    const fn dropdown_menu_kind_for_part(part: DropdownMenuPart) -> UiWidgetSlotKind {
+        match part {
+            DropdownMenuPart::Root => UiWidgetSlotKind::Section,
+            DropdownMenuPart::Trigger => UiWidgetSlotKind::Button,
+            DropdownMenuPart::Content => UiWidgetSlotKind::List,
+            DropdownMenuPart::Item => UiWidgetSlotKind::Button,
+            DropdownMenuPart::Label => UiWidgetSlotKind::Header,
+            DropdownMenuPart::Separator => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn dropdown_menu_role_for_part(part: DropdownMenuPart) -> UiBlockRole {
+        match part {
+            DropdownMenuPart::Root => UiBlockRole::Root,
+            DropdownMenuPart::Trigger => UiBlockRole::Action,
+            DropdownMenuPart::Content => UiBlockRole::Overlay,
+            DropdownMenuPart::Item => UiBlockRole::Item,
+            DropdownMenuPart::Label => UiBlockRole::Header,
+            DropdownMenuPart::Separator => UiBlockRole::Layout,
+        }
+    }
+
+    const fn dropdown_menu_tone_for_part(
+        part: DropdownMenuPart,
+        active: bool,
+        selected: bool,
+        destructive: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            DropdownMenuPart::Item => {
+                if destructive {
+                    UiBlockTone::Danger
+                } else if selected || active {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            DropdownMenuPart::Content => {
+                if visible {
+                    UiBlockTone::Surface
+                } else {
+                    UiBlockTone::Muted
+                }
+            }
+            DropdownMenuPart::Trigger => UiBlockTone::Brand,
+            DropdownMenuPart::Label | DropdownMenuPart::Separator => UiBlockTone::Muted,
+            DropdownMenuPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn dropdown_menu_intent_for_part(part: DropdownMenuPart) -> UiWidgetIntent {
+        match part {
+            DropdownMenuPart::Trigger => UiWidgetIntent::Toggle,
+            DropdownMenuPart::Item => UiWidgetIntent::Select,
+            DropdownMenuPart::Root
+            | DropdownMenuPart::Content
+            | DropdownMenuPart::Label
+            | DropdownMenuPart::Separator => UiWidgetIntent::None,
+        }
+    }
+
+    fn dropdown_menu_size_for_part(part: DropdownMenuPart) -> Vec2 {
+        match part {
+            DropdownMenuPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            DropdownMenuPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            DropdownMenuPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
+            DropdownMenuPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
+            DropdownMenuPart::Label => Vec2::new(scale::space::XL3, scale::space::S),
+            DropdownMenuPart::Separator => Vec2::new(scale::space::XL3, scale::space::XS),
         }
     }
 
