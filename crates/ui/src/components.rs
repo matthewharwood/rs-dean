@@ -23,13 +23,13 @@ use crate::{
     DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, DrawerIntent,
     DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
     DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
-    EmptyPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
-    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -39,17 +39,17 @@ use crate::{
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
-    default_empty_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, max_data_table_page_index, month_name,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_empty_model, default_field_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
     validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
 };
 
 const HEALTH_CARD: &str =
@@ -677,6 +677,32 @@ const EMPTY_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-cente
 const EMPTY_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const EMPTY_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
 const EMPTY_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const FIELD_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const FIELD_ROOT_DENSE: &str = "grid w-full max-w-md gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const FIELD_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const FIELD_ROOT_LOADING: &str = "grid w-full max-w-md gap-2xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-1";
+const FIELD_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const FIELD_LABEL: &str = "m-0 flex items-center gap-2xs text-0 font-7 leading-0 text-text-1";
+const FIELD_LABEL_DENSE: &str =
+    "m-0 flex items-center gap-2xs text-00 font-7 leading-0 text-text-1";
+const FIELD_LABEL_DISABLED: &str =
+    "m-0 flex items-center gap-2xs text-0 font-7 leading-0 text-text-disabled";
+const FIELD_REQUIRED: &str = "text-danger";
+const FIELD_CONTROL: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_FOCUSED: &str = "min-h-field w-full rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_DENSE_FOCUSED: &str = "min-h-s w-full rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_INVALID: &str = "min-h-field w-full rounded-field border border-danger bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_DENSE_INVALID: &str = "min-h-s w-full rounded-field border border-danger bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const FIELD_CONTROL_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-3 px-xs py-2xs text-0 leading-0 text-text-disabled outline-none opacity-disabled";
+const FIELD_CONTROL_DENSE_DISABLED: &str = "min-h-s w-full rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs text-00 leading-0 text-text-disabled outline-none opacity-disabled";
+const FIELD_DESCRIPTION: &str = "m-0 text-00 leading-0 text-text-2";
+const FIELD_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-muted";
+const FIELD_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const FIELD_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const FIELD_ERROR_HIDDEN: &str = "hidden";
+const FIELD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -6709,7 +6735,221 @@ const fn empty_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Field, crate::FieldModel, crate::default_field_model);
+#[component]
+pub fn Field(#[prop(optional, default = default_field_model())] model: FieldModel) -> AnyView {
+    if let Err(report) = validate_field_model(&model) {
+        let message = format!("Field validation failed: {report}");
+        return view! {
+            <div class=FIELD_ERROR data-ui-component="field" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let input_kind = model.input_kind;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let required = model.required;
+    let state_model = model.state();
+    let nodes = field_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == FieldPart::Root)
+        .expect("invariant: field render nodes include root")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == FieldPart::Label)
+        .expect("invariant: field render nodes include label")
+        .clone();
+    let control = nodes
+        .iter()
+        .find(|node| node.part == FieldPart::Control)
+        .expect("invariant: field render nodes include control")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == FieldPart::Description)
+        .expect("invariant: field render nodes include description")
+        .clone();
+    let error = nodes
+        .iter()
+        .find(|node| node.part == FieldPart::Error)
+        .expect("invariant: field render nodes include error")
+        .clone();
+    let invalid = root.invalid;
+    let (state, set_state) = signal(state_model);
+    let placeholder = control.label.clone();
+    let label_text = label.label.clone();
+
+    view! {
+        <section
+            class=field_root_class(density, invalid, loading, disabled)
+            data-ui-component="field"
+            data-ui-part=FieldPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-kind=input_kind.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    field_state_label(loading, disabled, invalid, state.is_focused()).to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <label class=field_label_class(density, disabled) data-ui-part=label.part.label()>
+                <span>{label_text.clone()}</span>
+                {if required {
+                    view! { <span class=FIELD_REQUIRED aria-hidden="true">"*"</span> }.into_any()
+                } else {
+                    ().into_any()
+                }}
+            </label>
+            <input
+                type=input_kind.label()
+                class=move || {
+                    state.with(|state| {
+                        field_control_class(density, state.is_focused(), invalid, blocked).to_owned()
+                    })
+                }
+                data-ui-part=control.part.label()
+                placeholder=placeholder
+                aria-label=label_text
+                aria-invalid=invalid.to_string()
+                required=required
+                disabled=blocked
+                prop:value=move || state.with(|state| state.value().to_owned())
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(FieldIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(FieldIntent::Blur);
+                        });
+                    }
+                }
+                on:input=move |event| {
+                    if !blocked {
+                        let value = event_target_value(&event);
+                        set_state.update(|state| {
+                            let _ = state.apply(FieldIntent::Input(value));
+                        });
+                    }
+                }
+            />
+            <p
+                class=field_description_class(density, disabled)
+                data-ui-part=description.part.label()
+            >
+                {description.detail}
+            </p>
+            <p
+                class=field_error_class(error.visible)
+                data-ui-part=error.part.label()
+                aria-hidden=(!error.visible).to_string()
+            >
+                {error.detail}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+const fn field_root_class(
+    density: FieldDensity,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return FIELD_ROOT_DISABLED;
+    }
+    if loading {
+        return FIELD_ROOT_LOADING;
+    }
+    if invalid {
+        return FIELD_ROOT_INVALID;
+    }
+    match density {
+        FieldDensity::Standard => FIELD_ROOT,
+        FieldDensity::Dense => FIELD_ROOT_DENSE,
+    }
+}
+
+const fn field_label_class(density: FieldDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return FIELD_LABEL_DISABLED;
+    }
+    match density {
+        FieldDensity::Standard => FIELD_LABEL,
+        FieldDensity::Dense => FIELD_LABEL_DENSE,
+    }
+}
+
+const fn field_control_class(
+    density: FieldDensity,
+    focused: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match (density, disabled, invalid, focused) {
+        (FieldDensity::Standard, true, _, _) => FIELD_CONTROL_DISABLED,
+        (FieldDensity::Dense, true, _, _) => FIELD_CONTROL_DENSE_DISABLED,
+        (FieldDensity::Standard, false, true, _) => FIELD_CONTROL_INVALID,
+        (FieldDensity::Dense, false, true, _) => FIELD_CONTROL_DENSE_INVALID,
+        (FieldDensity::Standard, false, false, true) => FIELD_CONTROL_FOCUSED,
+        (FieldDensity::Dense, false, false, true) => FIELD_CONTROL_DENSE_FOCUSED,
+        (FieldDensity::Standard, false, false, false) => FIELD_CONTROL,
+        (FieldDensity::Dense, false, false, false) => FIELD_CONTROL_DENSE,
+    }
+}
+
+const fn field_description_class(density: FieldDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return FIELD_DESCRIPTION_DISABLED;
+    }
+    match density {
+        FieldDensity::Standard => FIELD_DESCRIPTION,
+        FieldDensity::Dense => FIELD_DESCRIPTION_DENSE,
+    }
+}
+
+const fn field_error_class(visible: bool) -> &'static str {
+    if visible {
+        FIELD_ERROR_TEXT
+    } else {
+        FIELD_ERROR_HIDDEN
+    }
+}
+
+const fn field_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     HoverCard,
     crate::HoverCardModel,

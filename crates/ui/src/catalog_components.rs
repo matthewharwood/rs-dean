@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    field,
-    Field,
-    FieldModel,
-    FieldPart,
-    FieldRenderNode,
-    FieldState,
-    FieldIntent,
-    FieldChange,
-    validate_field_model,
-    field_render_nodes,
-    default_field_model,
-    [
-        Root => "Field",
-        Label => "FieldLabel",
-        Control => "FieldControl",
-        Description => "FieldDescription",
-        Error => "FieldError",
-    ]
-);
-
-define_catalog_component!(
     hover_card,
     HoverCard,
     HoverCardModel,
@@ -1268,8 +1247,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Direction
         | UiComponentId::Drawer
         | UiComponentId::DropdownMenu
-        | UiComponentId::Empty => None,
-        UiComponentId::Field => Some(any_nodes(field_render_nodes(&default_field_model()))),
+        | UiComponentId::Empty
+        | UiComponentId::Field => None,
         UiComponentId::HoverCard => Some(any_nodes(hover_card_render_nodes(
             &default_hover_card_model(),
         ))),
@@ -1388,6 +1367,7 @@ mod tests {
                     | UiComponentId::Drawer
                     | UiComponentId::DropdownMenu
                     | UiComponentId::Empty
+                    | UiComponentId::Field
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1404,17 +1384,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_field_model().state();
-        assert!(!state.is_active(FieldPart::Root));
+        let mut state = default_hover_card_model().state();
+        assert!(!state.is_active(HoverCardPart::Root));
         assert_eq!(
-            state.apply(FieldIntent::Toggle(FieldPart::Root)),
-            FieldChange::Opened(FieldPart::Root)
+            state.apply(HoverCardIntent::Toggle(HoverCardPart::Root)),
+            HoverCardChange::Opened(HoverCardPart::Root)
         );
-        assert!(state.is_active(FieldPart::Root));
+        assert!(state.is_active(HoverCardPart::Root));
         assert_eq!(
-            state.apply(FieldIntent::Toggle(FieldPart::Root)),
-            FieldChange::Closed(FieldPart::Root)
+            state.apply(HoverCardIntent::Toggle(HoverCardPart::Root)),
+            HoverCardChange::Closed(HoverCardPart::Root)
         );
-        assert!(!state.is_active(FieldPart::Root));
+        assert!(!state.is_active(HoverCardPart::Root));
     }
 }

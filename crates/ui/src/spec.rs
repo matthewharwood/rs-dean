@@ -291,12 +291,12 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        EmptyPart, FieldPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -308,8 +308,9 @@ pub mod bevy_adapter {
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
-        default_empty_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, scale,
+        default_empty_model, default_field_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -448,6 +449,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Empty {
             return bevy_primitives_for_empty(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Field {
+            return bevy_primitives_for_field(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -740,6 +744,39 @@ pub mod bevy_adapter {
                     state,
                     intent: empty_intent_for_part(node.part, node.actionable),
                     selected: node.active,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_field(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_field_model();
+        let field_state = model.state();
+        field_render_nodes(&model, &field_state)
+            .into_iter()
+            .map(|node| {
+                let role = field_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: field_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: field_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        field_tone_for_part(node.part, node.focused, node.invalid, node.visible),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: field_intent_for_part(node.part),
+                    selected: node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -2380,6 +2417,60 @@ pub mod bevy_adapter {
             EmptyPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
             EmptyPart::Content => Vec2::new(scale::space::XL3, scale::space::XL),
             EmptyPart::Action => Vec2::new(scale::space::XL2, scale::space::L),
+        }
+    }
+
+    const fn field_kind_for_part(part: FieldPart) -> UiWidgetSlotKind {
+        match part {
+            FieldPart::Root => UiWidgetSlotKind::Section,
+            FieldPart::Label => UiWidgetSlotKind::Text,
+            FieldPart::Control => UiWidgetSlotKind::Input,
+            FieldPart::Description | FieldPart::Error => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn field_role_for_part(part: FieldPart) -> UiBlockRole {
+        match part {
+            FieldPart::Root => UiBlockRole::Root,
+            FieldPart::Label => UiBlockRole::Header,
+            FieldPart::Control => UiBlockRole::Control,
+            FieldPart::Description => UiBlockRole::Text,
+            FieldPart::Error => UiBlockRole::Feedback,
+        }
+    }
+
+    const fn field_tone_for_part(
+        part: FieldPart,
+        focused: bool,
+        invalid: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            FieldPart::Root | FieldPart::Control if invalid => UiBlockTone::Danger,
+            FieldPart::Control if focused => UiBlockTone::Brand,
+            FieldPart::Error if visible => UiBlockTone::Danger,
+            FieldPart::Error => UiBlockTone::Muted,
+            FieldPart::Label | FieldPart::Description | FieldPart::Root => UiBlockTone::Surface,
+            FieldPart::Control => UiBlockTone::Brand,
+        }
+    }
+
+    const fn field_intent_for_part(part: FieldPart) -> UiWidgetIntent {
+        match part {
+            FieldPart::Control => UiWidgetIntent::Input,
+            FieldPart::Root | FieldPart::Label | FieldPart::Description | FieldPart::Error => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn field_size_for_part(part: FieldPart) -> Vec2 {
+        match part {
+            FieldPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            FieldPart::Label => Vec2::new(scale::space::XL3, scale::space::S),
+            FieldPart::Control => Vec2::new(scale::space::XL3, scale::space::L),
+            FieldPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
+            FieldPart::Error => Vec2::new(scale::space::XL3, scale::space::S),
         }
     }
 

@@ -18,8 +18,8 @@ use rs_dean_ui::{
     DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
     Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
-    Empty, EmptyAction, EmptyDensity, EmptyModel, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
+    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -546,6 +546,24 @@ fn Stories() -> impl IntoView {
                             <Empty model=invalid_empty_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Empty model=themed_empty_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-field" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Field"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 28 implemented as a form-field composition wrapper backed by validated shared Rust label/control/error state, renderer-local focus/input draft state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Field model=default_field_story_model() />
+                            <Field model=dense_field_story_model() />
+                            <Field model=loading_field_story_model() />
+                            <Field model=disabled_field_story_model() />
+                            <Field model=invalid_field_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Field model=themed_field_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2061,6 +2079,56 @@ fn themed_empty_story_model() -> EmptyModel {
     .with_illustration_label("UI")
     .with_content("Leptos DOM and Bevy primitives consume the same Empty render nodes.")
     .with_action(EmptyAction::new("Inspect", "inspect-empty-theme"))
+}
+
+fn default_field_story_model() -> FieldModel {
+    FieldModel::new(
+        "Project name",
+        "This value stays renderer-local until a consumer persists form state.",
+    )
+    .with_placeholder("rs-dean-ui")
+    .with_value("rs-dean")
+    .required()
+}
+
+fn dense_field_story_model() -> FieldModel {
+    FieldModel::new(
+        "Search",
+        "Dense field spacing keeps label, control, hint, and error anatomy stable.",
+    )
+    .with_density(FieldDensity::Dense)
+    .with_input_kind(FieldInputKind::Search)
+    .with_placeholder("Search components")
+}
+
+fn loading_field_story_model() -> FieldModel {
+    default_field_story_model().loading()
+}
+
+fn disabled_field_story_model() -> FieldModel {
+    FieldModel::new(
+        "Locked slug",
+        "Disabled fields keep copy visible while the control is unavailable.",
+    )
+    .with_value("stable-id")
+    .disabled()
+}
+
+fn invalid_field_story_model() -> FieldModel {
+    FieldModel::new("Email", "Use a reachable address for invitations.")
+        .with_input_kind(FieldInputKind::Email)
+        .with_placeholder("name@example.com")
+        .with_error("Email address is required.")
+        .required()
+}
+
+fn themed_field_story_model() -> FieldModel {
+    FieldModel::new(
+        "Theme token",
+        "The same Field model drives Leptos control styling and Bevy primitive projection.",
+    )
+    .with_placeholder("surface-elevated")
+    .with_value("brand")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -28,6 +28,7 @@ mod dom;
 pub mod drawer;
 pub mod dropdown_menu;
 pub mod empty;
+pub mod field;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -170,6 +171,10 @@ pub use dropdown_menu::{
 pub use empty::{
     EmptyAction, EmptyChange, EmptyDensity, EmptyIntent, EmptyModel, EmptyPart, EmptyRenderNode,
     EmptyState, default_empty_model, empty_render_nodes, validate_empty_model,
+};
+pub use field::{
+    FieldChange, FieldDensity, FieldInputKind, FieldIntent, FieldModel, FieldPart, FieldRenderNode,
+    FieldState, default_field_model, field_render_nodes, validate_field_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
