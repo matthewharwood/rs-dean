@@ -36,11 +36,12 @@ use crate::{
     NativeSelectModel, NativeSelectPart, NativeSelectState, NavigationMenuDensity,
     NavigationMenuIntent, NavigationMenuModel, NavigationMenuPart, NavigationMenuState,
     PaginationDensity, PaginationIntent, PaginationModel, PaginationPart, PaginationState,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -55,12 +56,13 @@ use crate::{
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
-    default_pagination_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
-    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    default_pagination_model, default_popover_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
     validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
     validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
@@ -74,7 +76,7 @@ use crate::{
     validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
     validate_marker_model, validate_menubar_model, validate_message_model,
     validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model,
+    validate_pagination_model, validate_popover_model,
 };
 
 const HEALTH_CARD: &str =
@@ -841,6 +843,29 @@ const PAGINATION_CONTROL_INVALID: &str = "inline-flex min-h-field min-w-field it
 const PAGINATION_CONTROL_DISABLED: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
 const PAGINATION_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const PAGINATION_ERROR_HIDDEN: &str = "hidden";
+const POPOVER_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
+const POPOVER_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
+const POPOVER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const POPOVER_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const POPOVER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const POPOVER_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const POPOVER_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const POPOVER_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const POPOVER_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const POPOVER_CONTENT_DENSE: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const POPOVER_CONTENT_LOADING: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
+const POPOVER_CONTENT_INVALID: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-2";
+const POPOVER_CONTENT_DISABLED: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled shadow-1";
+const POPOVER_CONTENT_HIDDEN: &str = "hidden";
+const POPOVER_META: &str = "m-0 text-00 font-7 uppercase tracking-label text-brand";
+const POPOVER_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const POPOVER_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const POPOVER_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
+const POPOVER_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const POPOVER_ARROW: &str = "grid size-s place-items-center rounded-field border border-border-subtle bg-surface-elevated text-00 font-7 text-text-muted shadow-1";
+const POPOVER_ARROW_HIDDEN: &str = "hidden";
+const POPOVER_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const POPOVER_ERROR_HIDDEN: &str = "hidden";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -11471,7 +11496,279 @@ const fn message_scroller_state_label(
     }
 }
 
-catalog_component!(Popover, crate::PopoverModel, crate::default_popover_model);
+#[component]
+pub fn Popover(
+    #[prop(optional, default = default_popover_model())] model: PopoverModel,
+) -> AnyView {
+    if let Err(report) = validate_popover_model(&model) {
+        let message = format!("Popover validation failed: {report}");
+        return view! {
+            <div class=POPOVER_CONTENT_INVALID data-ui-component="popover" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let error_message = model.error.clone().unwrap_or_default();
+    let state_model = model.state();
+    let nodes = popover_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == PopoverPart::Root)
+        .expect("invariant: popover render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == PopoverPart::Trigger)
+        .expect("invariant: popover render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == PopoverPart::Content)
+        .expect("invariant: popover render nodes include content")
+        .clone();
+    let arrow = nodes
+        .iter()
+        .find(|node| node.part == PopoverPart::Arrow)
+        .expect("invariant: popover render nodes include arrow")
+        .clone();
+    let (state, set_state) = signal(state_model);
+    let trigger_label = if loading {
+        "Loading controls".to_owned()
+    } else {
+        trigger.label.clone()
+    };
+    let content_value = content.value.clone();
+    let content_label = if loading {
+        "Loading".to_owned()
+    } else {
+        content.label.clone()
+    };
+    let content_detail = if loading {
+        "Preparing popover content.".to_owned()
+    } else {
+        content.detail.clone()
+    };
+    let arrow_value = arrow.value.clone();
+    let arrow_label = arrow.label.clone();
+    let arrow_detail = arrow.detail.clone();
+
+    view! {
+        <section
+            class=popover_root_class(disabled)
+            data-ui-component="popover"
+            data-ui-part=PopoverPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    popover_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_open(),
+                        state.is_active(PopoverPart::Trigger),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        popover_trigger_class(density, state.is_open(), invalid, blocked)
+                            .to_owned()
+                    })
+                }
+                data-ui-part=PopoverPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-haspopup="dialog"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(PopoverIntent::Focus(PopoverPart::Trigger));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(PopoverIntent::ClearFocus);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(PopoverIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger_label}
+            </button>
+            <article
+                role="dialog"
+                tabindex="-1"
+                class=move || {
+                    state.with(|state| {
+                        popover_content_class(
+                            density,
+                            state.is_open(),
+                            loading,
+                            disabled,
+                            invalid,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=PopoverPart::Content.label()
+                data-ui-value=content_value
+                aria-hidden=move || state.with(|state| (!state.is_open()).to_string())
+                aria-invalid=invalid.to_string()
+                hidden=move || state.with(|state| !state.is_open())
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(PopoverIntent::Focus(PopoverPart::Content));
+                        });
+                    }
+                }
+            >
+                <span
+                    class=move || state.with(|state| popover_arrow_class(state.is_open()).to_owned())
+                    data-ui-part=PopoverPart::Arrow.label()
+                    data-ui-value=arrow_value
+                    aria-label=arrow_detail
+                >
+                    {arrow_label}
+                </span>
+                <p class=POPOVER_META>{content.value}</p>
+                <h3 class=popover_title_class(density)>{content_label}</h3>
+                <p class=popover_detail_class(density)>{content_detail}</p>
+                <p class=popover_error_class(invalid)>{error_message}</p>
+            </article>
+        </section>
+    }
+    .into_any()
+}
+
+const fn popover_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        POPOVER_ROOT_DISABLED
+    } else {
+        POPOVER_ROOT
+    }
+}
+
+const fn popover_trigger_class(
+    density: PopoverDensity,
+    open: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return POPOVER_TRIGGER_DISABLED;
+    }
+    if invalid {
+        return POPOVER_TRIGGER_INVALID;
+    }
+    match (density, open) {
+        (PopoverDensity::Standard, true) => POPOVER_TRIGGER_OPEN,
+        (PopoverDensity::Dense, true) => POPOVER_TRIGGER_DENSE_OPEN,
+        (PopoverDensity::Standard, false) => POPOVER_TRIGGER,
+        (PopoverDensity::Dense, false) => POPOVER_TRIGGER_DENSE,
+    }
+}
+
+const fn popover_content_class(
+    density: PopoverDensity,
+    open: bool,
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if !open {
+        return POPOVER_CONTENT_HIDDEN;
+    }
+    if disabled {
+        return POPOVER_CONTENT_DISABLED;
+    }
+    if loading {
+        return POPOVER_CONTENT_LOADING;
+    }
+    if invalid {
+        return POPOVER_CONTENT_INVALID;
+    }
+    match density {
+        PopoverDensity::Standard => POPOVER_CONTENT,
+        PopoverDensity::Dense => POPOVER_CONTENT_DENSE,
+    }
+}
+
+const fn popover_title_class(density: PopoverDensity) -> &'static str {
+    match density {
+        PopoverDensity::Standard => POPOVER_TITLE,
+        PopoverDensity::Dense => POPOVER_TITLE_DENSE,
+    }
+}
+
+const fn popover_detail_class(density: PopoverDensity) -> &'static str {
+    match density {
+        PopoverDensity::Standard => POPOVER_DETAIL,
+        PopoverDensity::Dense => POPOVER_DETAIL_DENSE,
+    }
+}
+
+const fn popover_arrow_class(open: bool) -> &'static str {
+    if open {
+        POPOVER_ARROW
+    } else {
+        POPOVER_ARROW_HIDDEN
+    }
+}
+
+const fn popover_error_class(visible: bool) -> &'static str {
+    if visible {
+        POPOVER_ERROR
+    } else {
+        POPOVER_ERROR_HIDDEN
+    }
+}
+
+const fn popover_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    trigger_active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if open {
+        "open"
+    } else if trigger_active {
+        "focused"
+    } else {
+        "closed"
+    }
+}
 catalog_component!(
     Progress,
     crate::ProgressModel,

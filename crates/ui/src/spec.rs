@@ -294,7 +294,7 @@ pub mod bevy_adapter {
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        PopoverPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
         alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
         avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -316,13 +316,13 @@ pub mod bevy_adapter {
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_popover_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
-        pagination_render_nodes, scale,
+        pagination_render_nodes, popover_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -534,6 +534,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Popover {
+            return bevy_primitives_for_popover(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1341,6 +1344,37 @@ pub mod bevy_adapter {
                     state,
                     intent: pagination_intent_for_part(node.part, node.actionable),
                     selected: node.current || node.focused || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_popover(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_popover_model();
+        let popover_state = model.state();
+        popover_render_nodes(&model, &popover_state)
+            .into_iter()
+            .map(|node| {
+                let role = popover_role_for_part(node.part);
+                let tone = popover_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: popover_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: popover_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: popover_intent_for_part(node.part, node.actionable),
+                    selected: node.open || node.active || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3929,6 +3963,56 @@ pub mod bevy_adapter {
                 Vec2::new(scale::space::M, scale::space::S)
             }
             PaginationPart::Link => Vec2::new(scale::space::S, scale::space::S),
+        }
+    }
+
+    const fn popover_kind_for_part(part: PopoverPart) -> UiWidgetSlotKind {
+        match part {
+            PopoverPart::Root => UiWidgetSlotKind::Section,
+            PopoverPart::Trigger => UiWidgetSlotKind::Button,
+            PopoverPart::Content => UiWidgetSlotKind::Overlay,
+            PopoverPart::Arrow => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn popover_role_for_part(part: PopoverPart) -> UiBlockRole {
+        match part {
+            PopoverPart::Root => UiBlockRole::Root,
+            PopoverPart::Trigger => UiBlockRole::Action,
+            PopoverPart::Content => UiBlockRole::Overlay,
+            PopoverPart::Arrow => UiBlockRole::Indicator,
+        }
+    }
+
+    fn popover_tone_for_node(node: &crate::PopoverRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        match node.part {
+            PopoverPart::Trigger if node.open || node.active => UiBlockTone::Brand,
+            PopoverPart::Trigger => UiBlockTone::Surface,
+            PopoverPart::Content => UiBlockTone::Surface,
+            PopoverPart::Arrow => UiBlockTone::Accent,
+            PopoverPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn popover_intent_for_part(part: PopoverPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (PopoverPart::Trigger, true) => UiWidgetIntent::Open,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn popover_size_for_part(part: PopoverPart) -> Vec2 {
+        match part {
+            PopoverPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            PopoverPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            PopoverPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
+            PopoverPart::Arrow => Vec2::new(scale::space::S, scale::space::S),
         }
     }
 

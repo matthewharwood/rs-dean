@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    popover,
-    Popover,
-    PopoverModel,
-    PopoverPart,
-    PopoverRenderNode,
-    PopoverState,
-    PopoverIntent,
-    PopoverChange,
-    validate_popover_model,
-    popover_render_nodes,
-    default_popover_model,
-    [
-        Root => "Popover",
-        Trigger => "PopoverTrigger",
-        Content => "PopoverContent",
-        Arrow => "PopoverArrow",
-    ]
-);
-
-define_catalog_component!(
     progress,
     Progress,
     ProgressModel,
@@ -983,8 +963,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::MessageScroller
         | UiComponentId::NativeSelect
         | UiComponentId::NavigationMenu
-        | UiComponentId::Pagination => None,
-        UiComponentId::Popover => Some(any_nodes(popover_render_nodes(&default_popover_model()))),
+        | UiComponentId::Pagination
+        | UiComponentId::Popover => None,
         UiComponentId::Progress => {
             Some(any_nodes(progress_render_nodes(&default_progress_model())))
         }
@@ -1089,6 +1069,7 @@ mod tests {
                     | UiComponentId::NativeSelect
                     | UiComponentId::NavigationMenu
                     | UiComponentId::Pagination
+                    | UiComponentId::Popover
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1105,17 +1086,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_popover_model().state();
-        assert!(!state.is_active(PopoverPart::Root));
+        let mut state = default_progress_model().state();
+        assert!(!state.is_active(ProgressPart::Root));
         assert_eq!(
-            state.apply(PopoverIntent::Toggle(PopoverPart::Root)),
-            PopoverChange::Opened(PopoverPart::Root)
+            state.apply(ProgressIntent::Toggle(ProgressPart::Root)),
+            ProgressChange::Opened(ProgressPart::Root)
         );
-        assert!(state.is_active(PopoverPart::Root));
+        assert!(state.is_active(ProgressPart::Root));
         assert_eq!(
-            state.apply(PopoverIntent::Toggle(PopoverPart::Root)),
-            PopoverChange::Closed(PopoverPart::Root)
+            state.apply(ProgressIntent::Toggle(ProgressPart::Root)),
+            ProgressChange::Closed(ProgressPart::Root)
         );
-        assert!(!state.is_active(PopoverPart::Root));
+        assert!(!state.is_active(ProgressPart::Root));
     }
 }

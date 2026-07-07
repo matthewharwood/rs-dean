@@ -456,7 +456,18 @@ Data Table already keeps pagination state in the collection owner and
 Navigation Menu already exposes local navigation affordances without durable
 storage.
 
-All-issue sweep pass: Popover through Typography complete. The shared
+Concrete component pass: Popover complete. The component now has a typed Rust
+trigger/content model, `garde` validation for overlay copy and error text,
+token-only Leptos trigger/content/arrow rendering, dedicated story proof, and
+Bevy primitive derivation from the same render nodes. The sweep found that
+click-open overlays share Hover Card's anchored anatomy but need a distinct
+renderer-local toggle/focus contract so hover previews and explicit popovers
+do not collapse into one API. Issues 01 through 42 were re-audited against
+this learning; no earlier API changes were needed because Hover Card already
+owns hover/focus preview state separately and Dialog/Dropdown Menu keep their
+workflow and selection semantics in their own contracts.
+
+All-issue sweep pass: Progress through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -464,7 +475,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Popover through Typography now have
+Concrete all-issue sweep pass: Progress through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

@@ -28,7 +28,8 @@ use rs_dean_ui::{
     MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
     NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    Popover, PopoverDensity, PopoverModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -825,6 +826,24 @@ fn Stories() -> impl IntoView {
                             <Pagination model=invalid_pagination_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Pagination model=themed_pagination_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-popover" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Popover"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 43 implemented as a trigger-attached overlay backed by validated shared Rust copy, renderer-local open/focus state, and Bevy-readable overlay primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Popover model=default_popover_story_model() />
+                            <Popover model=dense_popover_story_model() />
+                            <Popover model=loading_popover_story_model() />
+                            <Popover model=disabled_popover_story_model() />
+                            <Popover model=invalid_popover_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Popover model=themed_popover_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3135,6 +3154,53 @@ fn themed_pagination_story_model() -> PaginationModel {
         .with_sibling_count(1)
         .with_previous_label("Earlier")
         .with_next_label("Later")
+}
+
+fn default_popover_story_model() -> PopoverModel {
+    PopoverModel::new(
+        "Open controls",
+        "Shared overlay controls",
+        "Popover state stays renderer-local while durable choices remain with the consuming app.",
+    )
+    .with_eyebrow("Issue 43")
+}
+
+fn dense_popover_story_model() -> PopoverModel {
+    PopoverModel::new(
+        "Dense controls",
+        "Compact overlay",
+        "Dense spacing keeps the trigger, content, and arrow anatomy stable across themes.",
+    )
+    .with_density(PopoverDensity::Dense)
+    .with_eyebrow("Dense")
+}
+
+fn loading_popover_story_model() -> PopoverModel {
+    default_popover_story_model().loading()
+}
+
+fn disabled_popover_story_model() -> PopoverModel {
+    PopoverModel::new(
+        "Locked controls",
+        "Unavailable overlay",
+        "Disabled popovers keep trigger copy visible while suppressing local open changes.",
+    )
+    .with_eyebrow("Disabled")
+    .disabled()
+}
+
+fn invalid_popover_story_model() -> PopoverModel {
+    default_popover_story_model().with_error("Popover content failed validation upstream.")
+}
+
+fn themed_popover_story_model() -> PopoverModel {
+    PopoverModel::new(
+        "Palette controls",
+        "Theme scoped overlay",
+        "The same Popover model resolves semantic tokens through the nested Luxury theme.",
+    )
+    .with_eyebrow("Luxury")
+    .with_arrow_label("Theme arrow")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
