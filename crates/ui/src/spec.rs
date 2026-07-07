@@ -294,12 +294,12 @@ pub mod bevy_adapter {
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        PopoverPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        PopoverPart, ProgressPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -316,13 +316,13 @@ pub mod bevy_adapter {
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
-        default_popover_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_popover_model, default_progress_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
-        pagination_render_nodes, popover_render_nodes, scale,
+        pagination_render_nodes, popover_render_nodes, progress_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -537,6 +537,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Popover {
             return bevy_primitives_for_popover(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Progress {
+            return bevy_primitives_for_progress(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1375,6 +1382,37 @@ pub mod bevy_adapter {
                     state,
                     intent: popover_intent_for_part(node.part, node.actionable),
                     selected: node.open || node.active || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_progress(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_progress_model();
+        let progress_state = model.state();
+        progress_render_nodes(&model, &progress_state)
+            .into_iter()
+            .map(|node| {
+                let role = progress_role_for_part(node.part);
+                let tone = progress_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: progress_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: progress_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: UiWidgetIntent::None,
+                    selected: node.highlighted || node.invalid || node.loading,
                     disabled: node.disabled,
                 }
             })
@@ -4013,6 +4051,51 @@ pub mod bevy_adapter {
             PopoverPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
             PopoverPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
             PopoverPart::Arrow => Vec2::new(scale::space::S, scale::space::S),
+        }
+    }
+
+    const fn progress_kind_for_part(part: ProgressPart) -> UiWidgetSlotKind {
+        match part {
+            ProgressPart::Root => UiWidgetSlotKind::Section,
+            ProgressPart::Track => UiWidgetSlotKind::Progress,
+            ProgressPart::Indicator => UiWidgetSlotKind::Marker,
+            ProgressPart::Label => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn progress_role_for_part(part: ProgressPart) -> UiBlockRole {
+        match part {
+            ProgressPart::Root => UiBlockRole::Feedback,
+            ProgressPart::Track | ProgressPart::Indicator => UiBlockRole::Indicator,
+            ProgressPart::Label => UiBlockRole::Text,
+        }
+    }
+
+    fn progress_tone_for_node(node: &crate::ProgressRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.loading {
+            return UiBlockTone::Info;
+        }
+        if node.highlighted {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            ProgressPart::Indicator => UiBlockTone::Brand,
+            ProgressPart::Root | ProgressPart::Track | ProgressPart::Label => UiBlockTone::Surface,
+        }
+    }
+
+    fn progress_size_for_part(part: ProgressPart) -> Vec2 {
+        match part {
+            ProgressPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            ProgressPart::Track => Vec2::new(scale::space::XL3, scale::space::XS),
+            ProgressPart::Indicator => Vec2::new(scale::space::XL, scale::space::XS),
+            ProgressPart::Label => Vec2::new(scale::space::XL3, scale::space::S),
         }
     }
 

@@ -467,7 +467,17 @@ this learning; no earlier API changes were needed because Hover Card already
 owns hover/focus preview state separately and Dialog/Dropdown Menu keep their
 workflow and selection semantics in their own contracts.
 
-All-issue sweep pass: Progress through Typography complete. The shared
+Concrete component pass: Progress complete. The component now has a typed Rust
+determinate/indeterminate value model, `garde` validation for value range and
+status copy, token-only Leptos progressbar rendering, dedicated story proof,
+and Bevy primitive derivation from the same render nodes. The sweep found that
+Progress value ownership is consumer durable while only highlight/focus
+feedback belongs in renderer-local state. Issues 01 through 43 were
+re-audited against this learning; no earlier API changes were needed because
+Data Table and Pagination already keep durable collection position with the
+consumer and expose only renderer-local focus affordances in their components.
+
+All-issue sweep pass: Radio Group through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -475,7 +485,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Progress through Typography now have
+Concrete all-issue sweep pass: Radio Group through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

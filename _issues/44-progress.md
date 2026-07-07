@@ -42,4 +42,5 @@ Ship a Rust-first `Progress` component that follows the shadcn composition model
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Issue 44 concrete pass implemented a bespoke Progress model, determinate/indeterminate value contract, token-only progressbar rendering, Bevy primitive path, and stories.
 - [x] Sweep review complete through the current implemented catalog.

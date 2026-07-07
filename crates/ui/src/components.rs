@@ -36,13 +36,14 @@ use crate::{
     NativeSelectModel, NativeSelectPart, NativeSelectState, NavigationMenuDensity,
     NavigationMenuIntent, NavigationMenuModel, NavigationMenuPart, NavigationMenuState,
     PaginationDensity, PaginationIntent, PaginationModel, PaginationPart, PaginationState,
-    PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ProgressDensity, ProgressIntent,
+    ProgressModel, ProgressPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -56,16 +57,16 @@ use crate::{
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
-    default_pagination_model, default_popover_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
-    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    default_pagination_model, default_popover_model, default_progress_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
     message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    progress_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -76,7 +77,7 @@ use crate::{
     validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
     validate_marker_model, validate_menubar_model, validate_message_model,
     validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model, validate_popover_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
 };
 
 const HEALTH_CARD: &str =
@@ -866,6 +867,30 @@ const POPOVER_ARROW: &str = "grid size-s place-items-center rounded-field border
 const POPOVER_ARROW_HIDDEN: &str = "hidden";
 const POPOVER_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const POPOVER_ERROR_HIDDEN: &str = "hidden";
+const PROGRESS_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const PROGRESS_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const PROGRESS_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const PROGRESS_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const PROGRESS_TRACK: &str = "h-s w-full overflow-hidden rounded-pill bg-surface-3";
+const PROGRESS_TRACK_DENSE: &str = "h-xs w-full overflow-hidden rounded-pill bg-surface-3";
+const PROGRESS_TRACK_LOADING: &str = "h-s w-full overflow-hidden rounded-pill bg-info-soft";
+const PROGRESS_TRACK_INVALID: &str = "h-s w-full overflow-hidden rounded-pill bg-error-soft";
+const PROGRESS_TRACK_DISABLED: &str = "h-s w-full overflow-hidden rounded-pill bg-border-muted";
+const PROGRESS_INDICATOR: &str = "block h-full rounded-pill bg-brand transition-all";
+const PROGRESS_INDICATOR_HIGHLIGHTED: &str =
+    "block h-full rounded-pill bg-accent shadow-1 transition-all";
+const PROGRESS_INDICATOR_LOADING: &str = "block h-full rounded-pill bg-info transition-all";
+const PROGRESS_INDICATOR_INVALID: &str = "block h-full rounded-pill bg-danger transition-all";
+const PROGRESS_INDICATOR_DISABLED: &str = "block h-full rounded-pill bg-surface-3";
+const PROGRESS_LABEL_ROW: &str = "flex flex-wrap items-start justify-between gap-2xs";
+const PROGRESS_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const PROGRESS_LABEL_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const PROGRESS_VALUE: &str = "m-0 text-0 font-6 leading-0 text-brand";
+const PROGRESS_VALUE_DENSE: &str = "m-0 text-00 font-6 leading-0 text-brand";
+const PROGRESS_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
+const PROGRESS_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const PROGRESS_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const PROGRESS_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -11769,11 +11794,271 @@ const fn popover_state_label(
         "closed"
     }
 }
-catalog_component!(
-    Progress,
-    crate::ProgressModel,
-    crate::default_progress_model
-);
+#[component]
+pub fn Progress(
+    #[prop(optional, default = default_progress_model())] model: ProgressModel,
+) -> AnyView {
+    if let Err(report) = validate_progress_model(&model) {
+        let message = format!("Progress validation failed: {report}");
+        return view! {
+            <div class=PROGRESS_ROOT_INVALID data-ui-component="progress" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let state_model = model.state();
+    let nodes = progress_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ProgressPart::Root)
+        .expect("invariant: progress render nodes include root")
+        .clone();
+    let track = nodes
+        .iter()
+        .find(|node| node.part == ProgressPart::Track)
+        .expect("invariant: progress render nodes include track")
+        .clone();
+    let indicator = nodes
+        .iter()
+        .find(|node| node.part == ProgressPart::Indicator)
+        .expect("invariant: progress render nodes include indicator")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == ProgressPart::Label)
+        .expect("invariant: progress render nodes include label")
+        .clone();
+    let (state, set_state) = signal(state_model);
+    let percent = indicator.percent;
+    let determinate = indicator.determinate;
+    let value_label = indicator.value.clone();
+    let label_text = if loading {
+        "Loading".to_owned()
+    } else {
+        label.label.clone()
+    };
+    let detail = label.detail.clone();
+    let aria_value_now = if determinate {
+        percent.to_string()
+    } else {
+        String::new()
+    };
+
+    view! {
+        <section
+            class=progress_root_class(density, invalid, disabled)
+            data-ui-component="progress"
+            data-ui-part=ProgressPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    progress_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        determinate,
+                        state.is_highlighted(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=disabled.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ProgressIntent::Hover);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ProgressIntent::Leave);
+                    });
+                }
+            }
+        >
+            <div
+                role="progressbar"
+                tabindex="0"
+                class=progress_track_class(density, loading, invalid, disabled)
+                data-ui-part=ProgressPart::Track.label()
+                data-ui-value=track.value
+                aria-label=label_text.clone()
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow=aria_value_now
+                aria-valuetext=value_label.clone()
+                on:focus=move |_| {
+                    if !disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(ProgressIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(ProgressIntent::Blur);
+                        });
+                    }
+                }
+            >
+                <span
+                    class=move || {
+                        state.with(|state| {
+                            progress_indicator_class(
+                                loading,
+                                invalid,
+                                disabled,
+                                state.is_highlighted(),
+                            )
+                            .to_owned()
+                        })
+                    }
+                    style=progress_indicator_style(percent, determinate)
+                    data-ui-part=ProgressPart::Indicator.label()
+                    data-ui-value=indicator.value
+                ></span>
+            </div>
+            <div class=PROGRESS_LABEL_ROW data-ui-part=ProgressPart::Label.label() data-ui-value=label.value>
+                <p class=progress_label_class(density)>{label_text}</p>
+                <p class=progress_value_class(density)>{value_label}</p>
+            </div>
+            <p class=progress_detail_class(density, invalid, disabled)>{detail}</p>
+        </section>
+    }
+    .into_any()
+}
+
+const fn progress_root_class(
+    density: ProgressDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return PROGRESS_ROOT_DISABLED;
+    }
+    if invalid {
+        return PROGRESS_ROOT_INVALID;
+    }
+    match density {
+        ProgressDensity::Standard => PROGRESS_ROOT,
+        ProgressDensity::Dense => PROGRESS_ROOT_DENSE,
+    }
+}
+
+const fn progress_track_class(
+    density: ProgressDensity,
+    loading: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return PROGRESS_TRACK_DISABLED;
+    }
+    if invalid {
+        return PROGRESS_TRACK_INVALID;
+    }
+    if loading {
+        return PROGRESS_TRACK_LOADING;
+    }
+    match density {
+        ProgressDensity::Standard => PROGRESS_TRACK,
+        ProgressDensity::Dense => PROGRESS_TRACK_DENSE,
+    }
+}
+
+const fn progress_indicator_class(
+    loading: bool,
+    invalid: bool,
+    disabled: bool,
+    highlighted: bool,
+) -> &'static str {
+    if disabled {
+        return PROGRESS_INDICATOR_DISABLED;
+    }
+    if invalid {
+        return PROGRESS_INDICATOR_INVALID;
+    }
+    if loading {
+        return PROGRESS_INDICATOR_LOADING;
+    }
+    if highlighted {
+        return PROGRESS_INDICATOR_HIGHLIGHTED;
+    }
+    PROGRESS_INDICATOR
+}
+
+fn progress_indicator_style(percent: u8, determinate: bool) -> String {
+    if determinate {
+        format!("inline-size: {percent}%;")
+    } else {
+        "inline-size: 100%;".to_owned()
+    }
+}
+
+const fn progress_label_class(density: ProgressDensity) -> &'static str {
+    match density {
+        ProgressDensity::Standard => PROGRESS_LABEL,
+        ProgressDensity::Dense => PROGRESS_LABEL_DENSE,
+    }
+}
+
+const fn progress_value_class(density: ProgressDensity) -> &'static str {
+    match density {
+        ProgressDensity::Standard => PROGRESS_VALUE,
+        ProgressDensity::Dense => PROGRESS_VALUE_DENSE,
+    }
+}
+
+const fn progress_detail_class(
+    density: ProgressDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return PROGRESS_DETAIL_DISABLED;
+    }
+    if invalid {
+        return PROGRESS_DETAIL_INVALID;
+    }
+    match density {
+        ProgressDensity::Standard => PROGRESS_DETAIL,
+        ProgressDensity::Dense => PROGRESS_DETAIL_DENSE,
+    }
+}
+
+const fn progress_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    determinate: bool,
+    highlighted: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if highlighted {
+        "highlighted"
+    } else if determinate {
+        "determinate"
+    } else {
+        "indeterminate"
+    }
+}
 catalog_component!(
     RadioGroup,
     crate::RadioGroupModel,

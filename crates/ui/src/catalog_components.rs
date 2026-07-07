@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    progress,
-    Progress,
-    ProgressModel,
-    ProgressPart,
-    ProgressRenderNode,
-    ProgressState,
-    ProgressIntent,
-    ProgressChange,
-    validate_progress_model,
-    progress_render_nodes,
-    default_progress_model,
-    [
-        Root => "Progress",
-        Track => "ProgressTrack",
-        Indicator => "ProgressIndicator",
-        Label => "ProgressLabel",
-    ]
-);
-
-define_catalog_component!(
     radio_group,
     RadioGroup,
     RadioGroupModel,
@@ -964,10 +944,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::NativeSelect
         | UiComponentId::NavigationMenu
         | UiComponentId::Pagination
-        | UiComponentId::Popover => None,
-        UiComponentId::Progress => {
-            Some(any_nodes(progress_render_nodes(&default_progress_model())))
-        }
+        | UiComponentId::Popover
+        | UiComponentId::Progress => None,
         UiComponentId::RadioGroup => Some(any_nodes(radio_group_render_nodes(
             &default_radio_group_model(),
         ))),
@@ -1070,6 +1048,7 @@ mod tests {
                     | UiComponentId::NavigationMenu
                     | UiComponentId::Pagination
                     | UiComponentId::Popover
+                    | UiComponentId::Progress
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1086,17 +1065,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_progress_model().state();
-        assert!(!state.is_active(ProgressPart::Root));
+        let mut state = default_radio_group_model().state();
+        assert!(!state.is_active(RadioGroupPart::Root));
         assert_eq!(
-            state.apply(ProgressIntent::Toggle(ProgressPart::Root)),
-            ProgressChange::Opened(ProgressPart::Root)
+            state.apply(RadioGroupIntent::Toggle(RadioGroupPart::Root)),
+            RadioGroupChange::Opened(RadioGroupPart::Root)
         );
-        assert!(state.is_active(ProgressPart::Root));
+        assert!(state.is_active(RadioGroupPart::Root));
         assert_eq!(
-            state.apply(ProgressIntent::Toggle(ProgressPart::Root)),
-            ProgressChange::Closed(ProgressPart::Root)
+            state.apply(RadioGroupIntent::Toggle(RadioGroupPart::Root)),
+            RadioGroupChange::Closed(RadioGroupPart::Root)
         );
-        assert!(!state.is_active(ProgressPart::Root));
+        assert!(!state.is_active(RadioGroupPart::Root));
     }
 }

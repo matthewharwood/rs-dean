@@ -28,8 +28,8 @@ use rs_dean_ui::{
     MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
     NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
-    Popover, PopoverDensity, PopoverModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -844,6 +844,25 @@ fn Stories() -> impl IntoView {
                             <Popover model=invalid_popover_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Popover model=themed_popover_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-progress" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Progress"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 44 implemented as a consumer-owned progress value backed by validated shared Rust state, renderer-local highlight state, and Bevy-readable progress primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Progress model=default_progress_story_model() />
+                            <Progress model=dense_progress_story_model() />
+                            <Progress model=loading_progress_story_model() />
+                            <Progress model=disabled_progress_story_model() />
+                            <Progress model=invalid_progress_story_model() />
+                            <Progress model=indeterminate_progress_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Progress model=themed_progress_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3201,6 +3220,49 @@ fn themed_popover_story_model() -> PopoverModel {
     )
     .with_eyebrow("Luxury")
     .with_arrow_label("Theme arrow")
+}
+
+fn default_progress_story_model() -> ProgressModel {
+    ProgressModel::new(64)
+        .with_label("Upload")
+        .with_detail("64 percent complete")
+}
+
+fn dense_progress_story_model() -> ProgressModel {
+    ProgressModel::new(38)
+        .with_density(ProgressDensity::Dense)
+        .with_label("Sync")
+        .with_detail("38 percent complete")
+}
+
+fn loading_progress_story_model() -> ProgressModel {
+    default_progress_story_model().loading()
+}
+
+fn disabled_progress_story_model() -> ProgressModel {
+    ProgressModel::new(22)
+        .with_label("Locked task")
+        .with_detail("Progress is visible but not focus-highlightable.")
+        .disabled()
+}
+
+fn invalid_progress_story_model() -> ProgressModel {
+    ProgressModel::new(72)
+        .with_label("Import")
+        .with_detail("Import progress is paused.")
+        .with_error("The consumer reported a recoverable progress error.")
+}
+
+fn indeterminate_progress_story_model() -> ProgressModel {
+    ProgressModel::indeterminate()
+        .with_label("Preparing")
+        .with_detail("The consumer has not provided a determinate value yet.")
+}
+
+fn themed_progress_story_model() -> ProgressModel {
+    ProgressModel::new(86)
+        .with_label("Theme build")
+        .with_detail("86 percent complete inside the Catppuccin theme scope.")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

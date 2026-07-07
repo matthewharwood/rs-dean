@@ -45,6 +45,7 @@ pub mod native_select;
 pub mod navigation_menu;
 pub mod pagination;
 pub mod popover;
+pub mod progress;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -265,6 +266,11 @@ pub use pagination::{
 pub use popover::{
     PopoverChange, PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, PopoverRenderNode,
     PopoverState, default_popover_model, popover_render_nodes, validate_popover_model,
+};
+pub use progress::{
+    ProgressChange, ProgressDensity, ProgressIntent, ProgressModel, ProgressPart,
+    ProgressRenderNode, ProgressState, default_progress_model, progress_is_determinate,
+    progress_percent, progress_render_nodes, progress_value_label, validate_progress_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};
