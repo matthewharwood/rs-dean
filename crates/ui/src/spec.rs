@@ -286,13 +286,14 @@ pub mod bevy_adapter {
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, catalog_component_any_render_nodes_for_component,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model,
-        default_avatar_model, default_badge_model, scale,
+        BreadcrumbPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        catalog_component_any_render_nodes_for_component, component_implementation,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+        default_badge_model, default_breadcrumb_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -351,6 +352,13 @@ pub mod bevy_adapter {
         if id == UiComponentId::Badge {
             return bevy_primitives_for_badge(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::Breadcrumb {
+            return bevy_primitives_for_breadcrumb(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -368,6 +376,36 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_breadcrumb(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_breadcrumb_model();
+        let breadcrumb_state = model.state();
+        breadcrumb_render_nodes(&model, &breadcrumb_state)
+            .into_iter()
+            .map(|node| {
+                let role = breadcrumb_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: breadcrumb_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: breadcrumb_size_for_part(node.part),
+                    fill: fill_for_tone(breadcrumb_tone_for_part(node.part, node.current), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: breadcrumb_intent_for_part(node.part),
+                    selected: node.current || node.active,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -721,6 +759,62 @@ pub mod bevy_adapter {
             BadgePart::Root => Vec2::new(scale::space::XL, scale::space::M),
             BadgePart::Icon => Vec2::new(scale::space::S, scale::space::S),
             BadgePart::Text => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    const fn breadcrumb_kind_for_part(part: BreadcrumbPart) -> UiWidgetSlotKind {
+        match part {
+            BreadcrumbPart::Root => UiWidgetSlotKind::Section,
+            BreadcrumbPart::List => UiWidgetSlotKind::List,
+            BreadcrumbPart::Item => UiWidgetSlotKind::ListItem,
+            BreadcrumbPart::Link => UiWidgetSlotKind::Link,
+            BreadcrumbPart::Separator => UiWidgetSlotKind::Separator,
+            BreadcrumbPart::Page => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn breadcrumb_role_for_part(part: BreadcrumbPart) -> UiBlockRole {
+        match part {
+            BreadcrumbPart::Root | BreadcrumbPart::List => UiBlockRole::Navigation,
+            BreadcrumbPart::Item => UiBlockRole::Item,
+            BreadcrumbPart::Link => UiBlockRole::Action,
+            BreadcrumbPart::Separator => UiBlockRole::Indicator,
+            BreadcrumbPart::Page => UiBlockRole::Text,
+        }
+    }
+
+    const fn breadcrumb_tone_for_part(part: BreadcrumbPart, current: bool) -> UiBlockTone {
+        match part {
+            BreadcrumbPart::Root | BreadcrumbPart::List | BreadcrumbPart::Item => {
+                UiBlockTone::Surface
+            }
+            BreadcrumbPart::Link => UiBlockTone::Brand,
+            BreadcrumbPart::Separator => UiBlockTone::Muted,
+            BreadcrumbPart::Page if current => UiBlockTone::Accent,
+            BreadcrumbPart::Page => UiBlockTone::Surface,
+        }
+    }
+
+    const fn breadcrumb_intent_for_part(part: BreadcrumbPart) -> UiWidgetIntent {
+        match part {
+            BreadcrumbPart::Link => UiWidgetIntent::Navigate,
+            BreadcrumbPart::Root
+            | BreadcrumbPart::List
+            | BreadcrumbPart::Item
+            | BreadcrumbPart::Separator
+            | BreadcrumbPart::Page => UiWidgetIntent::None,
+        }
+    }
+
+    fn breadcrumb_size_for_part(part: BreadcrumbPart) -> Vec2 {
+        match part {
+            BreadcrumbPart::Root | BreadcrumbPart::List => {
+                Vec2::new(scale::space::XL, scale::space::M)
+            }
+            BreadcrumbPart::Item | BreadcrumbPart::Link | BreadcrumbPart::Page => {
+                Vec2::new(scale::space::L, scale::space::S)
+            }
+            BreadcrumbPart::Separator => Vec2::new(scale::space::S, scale::space::S),
         }
     }
 

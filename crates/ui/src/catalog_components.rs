@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    breadcrumb,
-    Breadcrumb,
-    BreadcrumbModel,
-    BreadcrumbPart,
-    BreadcrumbRenderNode,
-    BreadcrumbState,
-    BreadcrumbIntent,
-    BreadcrumbChange,
-    validate_breadcrumb_model,
-    breadcrumb_render_nodes,
-    default_breadcrumb_model,
-    [
-        Root => "Breadcrumb",
-        List => "BreadcrumbList",
-        Item => "BreadcrumbItem",
-        Link => "BreadcrumbLink",
-        Separator => "BreadcrumbSeparator",
-        Page => "BreadcrumbPage",
-    ]
-);
-
-define_catalog_component!(
     bubble,
     Bubble,
     BubbleModel,
@@ -1666,10 +1644,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::AspectRatio
         | UiComponentId::Attachment
         | UiComponentId::Avatar
-        | UiComponentId::Badge => None,
-        UiComponentId::Breadcrumb => Some(any_nodes(breadcrumb_render_nodes(
-            &default_breadcrumb_model(),
-        ))),
+        | UiComponentId::Badge
+        | UiComponentId::Breadcrumb => None,
         UiComponentId::Bubble => Some(any_nodes(bubble_render_nodes(&default_bubble_model()))),
         UiComponentId::Button => Some(any_nodes(button_render_nodes(&default_button_model()))),
         UiComponentId::ButtonGroup => Some(any_nodes(button_group_render_nodes(
@@ -1810,6 +1786,7 @@ mod tests {
                     | UiComponentId::Attachment
                     | UiComponentId::Avatar
                     | UiComponentId::Badge
+                    | UiComponentId::Breadcrumb
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

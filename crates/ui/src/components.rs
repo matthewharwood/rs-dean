@@ -5,17 +5,19 @@ use crate::{
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone, AspectRatioFit,
     AspectRatioModel, AspectRatioPart, AttachmentIntent, AttachmentKind, AttachmentModel,
     AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual, BadgeIntent,
-    BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, CatalogComponentModel,
+    BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, BreadcrumbDensity, BreadcrumbEntry,
+    BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, CatalogComponentModel,
     CatalogComponentPart, CatalogComponentRenderNode, ComponentImplementation, ThemeChoice,
     ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
     UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model,
+    default_badge_model, default_breadcrumb_model, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model,
 };
 
 const HEALTH_CARD: &str =
@@ -214,6 +216,24 @@ const BADGE_HIGHLIGHTED: &str = "shadow-1";
 const BADGE_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
 const BADGE_TEXT: &str = "truncate";
 const BADGE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const BREADCRUMB_ROOT: &str = "w-full min-w-0 text-text-1";
+const BREADCRUMB_ROOT_DISABLED: &str = "w-full min-w-0 text-text-disabled";
+const BREADCRUMB_LIST: &str =
+    "m-0 flex min-w-0 list-none flex-wrap items-center gap-2xs p-0 text-0 leading-0";
+const BREADCRUMB_LIST_DENSE: &str =
+    "m-0 flex min-w-0 list-none flex-wrap items-center gap-3xs p-0 text-00 leading-0";
+const BREADCRUMB_ITEM: &str = "inline-flex min-w-0 items-center gap-2xs";
+const BREADCRUMB_LINK: &str = "inline-flex min-h-s max-w-full items-center rounded-field px-2xs py-3xs text-text-2 transition-colors hover:bg-hover-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const BREADCRUMB_LINK_ACTIVE: &str = "inline-flex min-h-s max-w-full items-center rounded-field bg-selected-tint px-2xs py-3xs text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const BREADCRUMB_LINK_DISABLED: &str =
+    "inline-flex min-h-s max-w-full items-center rounded-field px-2xs py-3xs text-text-disabled";
+const BREADCRUMB_PAGE: &str = "max-w-full truncate text-text-1 font-7";
+const BREADCRUMB_PAGE_DISABLED: &str = "max-w-full truncate text-text-disabled font-7";
+const BREADCRUMB_SEPARATOR: &str = "text-text-muted";
+const BREADCRUMB_LOADING: &str =
+    "inline-flex min-h-s items-center rounded-field bg-surface-3 px-xs py-3xs text-text-muted";
+const BREADCRUMB_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1728,11 +1748,232 @@ const fn badge_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(
-    Breadcrumb,
-    crate::BreadcrumbModel,
-    crate::default_breadcrumb_model
-);
+struct BreadcrumbViewContext {
+    entry_count: usize,
+    separator: String,
+    loading: bool,
+    disabled: bool,
+    state: ReadSignal<BreadcrumbState>,
+    set_state: WriteSignal<BreadcrumbState>,
+}
+
+#[component]
+pub fn Breadcrumb(
+    #[prop(optional, default = default_breadcrumb_model())] model: BreadcrumbModel,
+) -> AnyView {
+    if let Err(report) = validate_breadcrumb_model(&model) {
+        let message = format!("Breadcrumb validation failed: {report}");
+        return view! {
+            <nav class=BREADCRUMB_ROOT data-ui-component="breadcrumb" data-ui-state="invalid" aria-label="Breadcrumb">
+                <p class=BREADCRUMB_ERROR role="alert">{message}</p>
+            </nav>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = breadcrumb_render_nodes(&model, &initial_state);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == BreadcrumbPart::Root)
+        .expect("invariant: breadcrumb render nodes include root");
+    let list = nodes
+        .iter()
+        .find(|node| node.part == BreadcrumbPart::List)
+        .expect("invariant: breadcrumb render nodes include list");
+    let root_label = root.label.clone();
+    let list_label = list.label.clone();
+    let density = model.density;
+    let entries = model.entries;
+    let entry_count = entries.len();
+    let separator = model.separator;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let (state, set_state) = signal(initial_state);
+    let context = BreadcrumbViewContext {
+        entry_count,
+        separator,
+        loading,
+        disabled,
+        state,
+        set_state,
+    };
+
+    view! {
+        <nav
+            class=breadcrumb_root_class(disabled)
+            data-ui-component="breadcrumb"
+            data-ui-part="Breadcrumb"
+            data-ui-density=density.label()
+            data-ui-state=breadcrumb_state_label(loading, disabled)
+            aria-label=root_label
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            <ol class=breadcrumb_list_class(density) data-ui-part="BreadcrumbList" aria-label=list_label>
+                {entries
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, entry)| breadcrumb_entry_view(index, entry, &context))
+                    .collect_view()}
+            </ol>
+        </nav>
+    }
+    .into_any()
+}
+
+fn breadcrumb_entry_view(
+    index: usize,
+    entry: BreadcrumbEntry,
+    context: &BreadcrumbViewContext,
+) -> AnyView {
+    let current = index + 1 == context.entry_count;
+    let label = entry.label.clone();
+    let value = entry.value();
+    let href = entry.href.clone().unwrap_or_else(|| "#".to_owned());
+    let item_disabled = context.disabled || context.loading || entry.disabled;
+    let link_disabled = item_disabled || entry.href.is_none();
+    let value_for_focus = value.clone();
+    let value_for_click = value.clone();
+    let value_for_class = value.clone();
+    let loading = context.loading;
+    let separator = context.separator.clone();
+    let state = context.state;
+    let set_state = context.set_state;
+
+    view! {
+        <li
+            class=BREADCRUMB_ITEM
+            data-ui-part="BreadcrumbItem"
+            data-ui-index=index.to_string()
+            data-ui-current=current.to_string()
+        >
+            {if current {
+                view! {
+                    <span
+                        class=breadcrumb_page_class(item_disabled)
+                        data-ui-part="BreadcrumbPage"
+                        aria-current="page"
+                        aria-disabled=item_disabled.to_string()
+                    >
+                        {if loading { "Loading".to_owned() } else { label.clone() }}
+                    </span>
+                }
+                    .into_any()
+            } else if link_disabled {
+                view! {
+                    <span
+                        class=breadcrumb_disabled_link_class(loading)
+                        data-ui-part="BreadcrumbLink"
+                        data-ui-intent="navigate"
+                        aria-disabled="true"
+                    >
+                        {if loading { "Loading".to_owned() } else { label.clone() }}
+                    </span>
+                }
+                    .into_any()
+            } else {
+                view! {
+                    <a
+                        class=move || breadcrumb_link_class(state.with(|state| state.is_active(&value_for_class)))
+                        href=href
+                        data-ui-part="BreadcrumbLink"
+                        data-ui-intent="navigate"
+                        on:mouseenter=move |_| {
+                            set_state.update(|state| {
+                                let _ = state.apply(BreadcrumbIntent::Focus(value_for_focus.clone()));
+                            });
+                        }
+                        on:mouseleave=move |_| {
+                            set_state.update(|state| {
+                                let _ = state.apply(BreadcrumbIntent::Clear);
+                            });
+                        }
+                        on:focus=move |_| {
+                            set_state.update(|state| {
+                                let _ = state.apply(BreadcrumbIntent::Focus(value.clone()));
+                            });
+                        }
+                        on:blur=move |_| {
+                            set_state.update(|state| {
+                                let _ = state.apply(BreadcrumbIntent::Clear);
+                            });
+                        }
+                        on:click=move |_| {
+                            set_state.update(|state| {
+                                let _ = state.apply(BreadcrumbIntent::Navigate(value_for_click.clone()));
+                            });
+                        }
+                    >
+                        {label.clone()}
+                    </a>
+                }
+                    .into_any()
+            }}
+            {if current {
+                ().into_any()
+            } else {
+                view! {
+                    <span class=BREADCRUMB_SEPARATOR data-ui-part="BreadcrumbSeparator" aria-hidden="true">
+                        {separator}
+                    </span>
+                }
+                    .into_any()
+            }}
+        </li>
+    }
+    .into_any()
+}
+
+const fn breadcrumb_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        BREADCRUMB_ROOT_DISABLED
+    } else {
+        BREADCRUMB_ROOT
+    }
+}
+
+const fn breadcrumb_list_class(density: BreadcrumbDensity) -> &'static str {
+    match density {
+        BreadcrumbDensity::Standard => BREADCRUMB_LIST,
+        BreadcrumbDensity::Dense => BREADCRUMB_LIST_DENSE,
+    }
+}
+
+const fn breadcrumb_link_class(active: bool) -> &'static str {
+    if active {
+        BREADCRUMB_LINK_ACTIVE
+    } else {
+        BREADCRUMB_LINK
+    }
+}
+
+const fn breadcrumb_disabled_link_class(loading: bool) -> &'static str {
+    if loading {
+        BREADCRUMB_LOADING
+    } else {
+        BREADCRUMB_LINK_DISABLED
+    }
+}
+
+const fn breadcrumb_page_class(disabled: bool) -> &'static str {
+    if disabled {
+        BREADCRUMB_PAGE_DISABLED
+    } else {
+        BREADCRUMB_PAGE
+    }
+}
+
+const fn breadcrumb_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Bubble, crate::BubbleModel, crate::default_bubble_model);
 catalog_component!(Button, crate::ButtonModel, crate::default_button_model);
 catalog_component!(

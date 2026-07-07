@@ -5,6 +5,7 @@ pub mod aspect_ratio;
 pub mod attachment;
 pub mod avatar;
 pub mod badge;
+pub mod breadcrumb;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -46,6 +47,11 @@ pub use avatar::{
 pub use badge::{
     BadgeChange, BadgeIntent, BadgeModel, BadgePart, BadgeRenderNode, BadgeSize, BadgeState,
     BadgeTone, BadgeVariant, badge_render_nodes, default_badge_model, validate_badge_model,
+};
+pub use breadcrumb::{
+    BreadcrumbChange, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbIntent, BreadcrumbModel,
+    BreadcrumbPart, BreadcrumbRenderNode, BreadcrumbState, breadcrumb_render_nodes,
+    default_breadcrumb_model, validate_breadcrumb_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

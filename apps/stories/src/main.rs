@@ -4,7 +4,8 @@ use rs_dean_ui::{
     AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
     AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
-    BadgeVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, HealthCard,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -169,6 +170,24 @@ fn Stories() -> impl IntoView {
                             <Badge model=invalid_badge_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Badge model=themed_badge_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-breadcrumb" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Breadcrumb"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 08 implemented as a repeatable route-trail contract backed by a validated shared Rust model, renderer-local navigation focus state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Breadcrumb model=default_breadcrumb_story_model() />
+                            <Breadcrumb model=dense_breadcrumb_story_model() />
+                            <Breadcrumb model=loading_breadcrumb_story_model() />
+                            <Breadcrumb model=disabled_breadcrumb_story_model() />
+                            <Breadcrumb model=invalid_breadcrumb_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Breadcrumb model=themed_breadcrumb_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -478,6 +497,49 @@ fn themed_badge_story_model() -> BadgeModel {
         .with_tone(BadgeTone::Destructive)
         .with_variant(BadgeVariant::Solid)
         .with_icon("High")
+}
+
+fn default_breadcrumb_story_model() -> BreadcrumbModel {
+    BreadcrumbModel::new(vec![
+        BreadcrumbEntry::link("Library", "#library"),
+        BreadcrumbEntry::link("Components", "#components"),
+        BreadcrumbEntry::page("Breadcrumb"),
+    ])
+}
+
+fn dense_breadcrumb_story_model() -> BreadcrumbModel {
+    BreadcrumbModel::new(vec![
+        BreadcrumbEntry::link("Docs", "#docs"),
+        BreadcrumbEntry::link("UI", "#ui"),
+        BreadcrumbEntry::page("Tokens"),
+    ])
+    .with_density(BreadcrumbDensity::Dense)
+}
+
+fn loading_breadcrumb_story_model() -> BreadcrumbModel {
+    default_breadcrumb_story_model().loading()
+}
+
+fn disabled_breadcrumb_story_model() -> BreadcrumbModel {
+    BreadcrumbModel::new(vec![
+        BreadcrumbEntry::link("Workspace", "#workspace"),
+        BreadcrumbEntry::link("Project", "#project").disabled(),
+        BreadcrumbEntry::page("Locked route"),
+    ])
+    .disabled()
+}
+
+fn invalid_breadcrumb_story_model() -> BreadcrumbModel {
+    BreadcrumbModel::new(Vec::new())
+}
+
+fn themed_breadcrumb_story_model() -> BreadcrumbModel {
+    BreadcrumbModel::new(vec![
+        BreadcrumbEntry::link("Theme", "#theme"),
+        BreadcrumbEntry::link("Palette", "#palette"),
+        BreadcrumbEntry::page("Catppuccin"),
+    ])
+    .with_separator(">")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
