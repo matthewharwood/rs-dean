@@ -20,13 +20,14 @@ use crate::{
     ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
     DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
     DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
-    DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, ThemeChoice,
-    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, DrawerIntent,
+    DrawerModel, DrawerPart, DrawerSide, DrawerState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -35,15 +36,16 @@ use crate::{
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
-    default_direction_model, dialog_render_nodes, direction_render_nodes,
-    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model,
+    default_direction_model, default_drawer_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model,
 };
 
 const HEALTH_CARD: &str =
@@ -597,6 +599,33 @@ const DIRECTION_CONTENT_RTL: &str =
     "grid gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-start text-text-1";
 const DIRECTION_BADGE: &str = "inline-flex w-fit items-center rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
 const DIRECTION_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DRAWER_ROOT: &str = "grid w-full gap-2xs text-text-1";
+const DRAWER_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
+const DRAWER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_OVERLAY_BOTTOM: &str =
+    "fixed inset-0 z-50 grid items-end justify-items-center bg-overlay p-s text-text-1";
+const DRAWER_OVERLAY_TOP: &str =
+    "fixed inset-0 z-50 grid items-start justify-items-center bg-overlay p-s text-text-1";
+const DRAWER_OVERLAY_RIGHT: &str =
+    "fixed inset-0 z-50 grid items-stretch justify-items-end bg-overlay p-s text-text-1";
+const DRAWER_OVERLAY_LEFT: &str =
+    "fixed inset-0 z-50 grid items-stretch justify-items-start bg-overlay p-s text-text-1";
+const DRAWER_CONTENT_VERTICAL: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const DRAWER_CONTENT_SIDE: &str = "grid h-full w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const DRAWER_HANDLE: &str =
+    "mx-auto h-2xs w-l rounded-pill border border-border-subtle bg-surface-3";
+const DRAWER_HANDLE_ACTIVE: &str = "mx-auto h-2xs w-xl rounded-pill border border-brand bg-brand";
+const DRAWER_HEADER: &str = "grid gap-2xs";
+const DRAWER_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const DRAWER_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const DRAWER_BODY: &str = "m-0 text-0 leading-0 text-text-2";
+const DRAWER_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
+const DRAWER_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -5890,7 +5919,274 @@ const fn direction_state_label(
     }
 }
 
-catalog_component!(Drawer, crate::DrawerModel, crate::default_drawer_model);
+#[component]
+pub fn Drawer(#[prop(optional, default = default_drawer_model())] model: DrawerModel) -> AnyView {
+    if let Err(report) = validate_drawer_model(&model) {
+        let message = format!("Drawer validation failed: {report}");
+        return view! {
+            <div class=DRAWER_ERROR data-ui-component="drawer" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let side = model.side;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let nodes = drawer_render_nodes(&model, &model.state());
+    let root = nodes
+        .iter()
+        .find(|node| node.part == DrawerPart::Root)
+        .expect("invariant: drawer render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == DrawerPart::Trigger)
+        .expect("invariant: drawer render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == DrawerPart::Content)
+        .expect("invariant: drawer render nodes include content")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == DrawerPart::Header)
+        .expect("invariant: drawer render nodes include header")
+        .clone();
+    let handle = nodes
+        .iter()
+        .find(|node| node.part == DrawerPart::Handle)
+        .expect("invariant: drawer render nodes include handle")
+        .clone();
+    let footer_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=drawer_root_class(disabled)
+            data-ui-component="drawer"
+            data-ui-part=DrawerPart::Root.label()
+            data-ui-side=side.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    drawer_state_label(loading, disabled, state.is_open(), state.is_dragging())
+                        .to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || state.with(|state| drawer_trigger_class(state.is_open()).to_owned())
+                data-ui-part=DrawerPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-haspopup="dialog"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DrawerIntent::Focus(DrawerPart::Trigger));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DrawerIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DrawerIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger.label}
+            </button>
+            {move || {
+                state.with(|state| {
+                    if !state.is_open() {
+                        return ().into_any();
+                    }
+                    let footer_nodes = drawer_render_nodes(&footer_model, state)
+                        .into_iter()
+                        .filter(|node| node.part == DrawerPart::Footer)
+                        .collect::<Vec<_>>();
+                    view! {
+                        <div class=drawer_overlay_class(side) data-ui-part=DrawerPart::Root.label()>
+                            <article
+                                role="dialog"
+                                aria-modal="true"
+                                class=drawer_content_class(side)
+                                data-ui-part=DrawerPart::Content.label()
+                                data-ui-value=content.value.clone()
+                            >
+                                <button
+                                    type="button"
+                                    class=drawer_handle_class(state.is_dragging())
+                                    data-ui-part=DrawerPart::Handle.label()
+                                    data-ui-value=handle.value.clone()
+                                    aria-label=handle.detail.clone()
+                                    disabled=blocked
+                                    on:focus=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(DrawerIntent::Focus(DrawerPart::Handle));
+                                            });
+                                        }
+                                    }
+                                    on:blur=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(DrawerIntent::Blur);
+                                            });
+                                        }
+                                    }
+                                    on:click=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                if state.is_dragging() {
+                                                    let _ = state.apply(DrawerIntent::EndDrag);
+                                                } else {
+                                                    let _ = state.apply(DrawerIntent::StartDrag);
+                                                }
+                                            });
+                                        }
+                                    }
+                                ></button>
+                                <header class=DRAWER_HEADER data-ui-part=DrawerPart::Header.label()>
+                                    <h3 class=DRAWER_TITLE>{header.label.clone()}</h3>
+                                    <p class=DRAWER_DESCRIPTION>{header.detail.clone()}</p>
+                                </header>
+                                <p class=DRAWER_BODY>{content.detail.clone()}</p>
+                                <footer class=DRAWER_FOOTER data-ui-part=DrawerPart::Footer.label()>
+                                    {footer_nodes
+                                        .into_iter()
+                                        .map(|node| drawer_footer_action_view(node, blocked, set_state))
+                                        .collect_view()}
+                                </footer>
+                            </article>
+                        </div>
+                    }
+                    .into_any()
+                })
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+fn drawer_footer_action_view(
+    node: crate::DrawerRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<DrawerState>,
+) -> AnyView {
+    let value_for_click = node.value.clone();
+    let close_drawer = node.close_drawer;
+    let disabled = node.disabled || blocked || !node.actionable;
+    view! {
+        <button
+            type="button"
+            class=drawer_action_class(node.index, node.selected)
+            data-ui-part=DrawerPart::Footer.label()
+            data-ui-value=node.value
+            disabled=disabled
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(DrawerIntent::ActivateFooter(value));
+                        if close_drawer {
+                            let _ = state.apply(DrawerIntent::Close);
+                        }
+                    });
+                }
+            }
+        >
+            {node.label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn drawer_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        DRAWER_ROOT_DISABLED
+    } else {
+        DRAWER_ROOT
+    }
+}
+
+const fn drawer_overlay_class(side: DrawerSide) -> &'static str {
+    match side {
+        DrawerSide::Top => DRAWER_OVERLAY_TOP,
+        DrawerSide::Right => DRAWER_OVERLAY_RIGHT,
+        DrawerSide::Bottom => DRAWER_OVERLAY_BOTTOM,
+        DrawerSide::Left => DRAWER_OVERLAY_LEFT,
+    }
+}
+
+const fn drawer_content_class(side: DrawerSide) -> &'static str {
+    match side {
+        DrawerSide::Top | DrawerSide::Bottom => DRAWER_CONTENT_VERTICAL,
+        DrawerSide::Right | DrawerSide::Left => DRAWER_CONTENT_SIDE,
+    }
+}
+
+const fn drawer_trigger_class(open: bool) -> &'static str {
+    if open {
+        DRAWER_TRIGGER_OPEN
+    } else {
+        DRAWER_TRIGGER
+    }
+}
+
+const fn drawer_handle_class(dragging: bool) -> &'static str {
+    if dragging {
+        DRAWER_HANDLE_ACTIVE
+    } else {
+        DRAWER_HANDLE
+    }
+}
+
+const fn drawer_action_class(index: usize, selected: bool) -> &'static str {
+    if selected {
+        DRAWER_ACTION_ACTIVE
+    } else if index == 0 {
+        DRAWER_ACTION
+    } else {
+        DRAWER_ACTION_SECONDARY
+    }
+}
+
+const fn drawer_state_label(
+    loading: bool,
+    disabled: bool,
+    open: bool,
+    dragging: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if dragging {
+        "dragging"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     DropdownMenu,
     crate::DropdownMenuModel,

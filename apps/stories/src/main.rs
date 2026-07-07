@@ -16,8 +16,8 @@ use rs_dean_ui::{
     ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, DataTable, DataTableColumn,
     DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, DatePicker,
     DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
-    Direction, DirectionModel, DirectionValue, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
+    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -490,6 +490,24 @@ fn Stories() -> impl IntoView {
                             <Direction model=invalid_direction_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Direction model=themed_direction_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-drawer" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Drawer"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 25 implemented as a side-aware drawer overlay backed by validated shared Rust copy/actions, renderer-local open/drag/action state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Drawer model=default_drawer_story_model() />
+                            <Drawer model=right_drawer_story_model() />
+                            <Drawer model=loading_drawer_story_model() />
+                            <Drawer model=disabled_drawer_story_model() />
+                            <Drawer model=invalid_drawer_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Drawer model=themed_drawer_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1837,6 +1855,69 @@ fn themed_direction_story_model() -> DirectionModel {
         "Semantic tokens and direction attributes stay independent so theme switching does not break RTL rendering.",
     )
     .with_default_scope_active(true)
+}
+
+fn default_drawer_story_model() -> DrawerModel {
+    DrawerModel::new(
+        "Open task drawer",
+        "Mobile task drawer",
+        "Review a focused workflow in a bottom drawer.",
+        "This story exercises trigger, content, header, footer, and handle nodes from one shared Drawer model.",
+    )
+    .with_default_open(true)
+    .with_actions(vec![
+        DrawerAction::new("Submit", "submit-task"),
+        DrawerAction::new("Cancel", "cancel-task"),
+    ])
+}
+
+fn right_drawer_story_model() -> DrawerModel {
+    DrawerModel::new(
+        "Open side drawer",
+        "Side panel",
+        "A right-side drawer uses the same model with side-specific primitive sizing.",
+        "Side drawers are useful for filters, settings, or mobile navigation.",
+    )
+    .with_side(DrawerSide::Right)
+    .with_default_open(true)
+    .with_actions(vec![
+        DrawerAction::new("Preview", "preview").keep_open(),
+        DrawerAction::new("Close", "close-side"),
+    ])
+}
+
+fn loading_drawer_story_model() -> DrawerModel {
+    default_drawer_story_model().loading()
+}
+
+fn disabled_drawer_story_model() -> DrawerModel {
+    DrawerModel::new(
+        "Locked drawer",
+        "Locked workflow",
+        "The drawer is disabled while durable app state hydrates.",
+        "Trigger, handle, and footer actions are disabled through the shared model.",
+    )
+    .with_default_open(true)
+    .disabled()
+}
+
+fn invalid_drawer_story_model() -> DrawerModel {
+    DrawerModel::new("Broken drawer", "", "Description", "Body")
+}
+
+fn themed_drawer_story_model() -> DrawerModel {
+    DrawerModel::new(
+        "Theme drawer",
+        "Theme scoped drawer",
+        "Drawer surfaces resolve semantic tokens through the active theme.",
+        "The same Drawer model drives Leptos DOM and Bevy primitive projections.",
+    )
+    .with_side(DrawerSide::Left)
+    .with_default_open(true)
+    .with_actions(vec![
+        DrawerAction::new("Apply", "apply-drawer"),
+        DrawerAction::new("Dismiss", "dismiss-drawer"),
+    ])
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    drawer,
-    Drawer,
-    DrawerModel,
-    DrawerPart,
-    DrawerRenderNode,
-    DrawerState,
-    DrawerIntent,
-    DrawerChange,
-    validate_drawer_model,
-    drawer_render_nodes,
-    default_drawer_model,
-    [
-        Root => "Drawer",
-        Trigger => "DrawerTrigger",
-        Content => "DrawerContent",
-        Header => "DrawerHeader",
-        Footer => "DrawerFooter",
-        Handle => "DrawerHandle",
-    ]
-);
-
-define_catalog_component!(
     dropdown_menu,
     DropdownMenu,
     DropdownMenuModel,
@@ -1331,8 +1309,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::DataTable
         | UiComponentId::DatePicker
         | UiComponentId::Dialog
-        | UiComponentId::Direction => None,
-        UiComponentId::Drawer => Some(any_nodes(drawer_render_nodes(&default_drawer_model()))),
+        | UiComponentId::Direction
+        | UiComponentId::Drawer => None,
         UiComponentId::DropdownMenu => Some(any_nodes(dropdown_menu_render_nodes(
             &default_dropdown_menu_model(),
         ))),
@@ -1453,6 +1431,7 @@ mod tests {
                     | UiComponentId::DatePicker
                     | UiComponentId::Dialog
                     | UiComponentId::Direction
+                    | UiComponentId::Drawer
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1469,17 +1448,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_drawer_model().state();
-        assert!(!state.is_active(DrawerPart::Trigger));
+        let mut state = default_dropdown_menu_model().state();
+        assert!(!state.is_active(DropdownMenuPart::Trigger));
         assert_eq!(
-            state.apply(DrawerIntent::Toggle(DrawerPart::Trigger)),
-            DrawerChange::Opened(DrawerPart::Trigger)
+            state.apply(DropdownMenuIntent::Toggle(DropdownMenuPart::Trigger)),
+            DropdownMenuChange::Opened(DropdownMenuPart::Trigger)
         );
-        assert!(state.is_active(DrawerPart::Trigger));
+        assert!(state.is_active(DropdownMenuPart::Trigger));
         assert_eq!(
-            state.apply(DrawerIntent::Toggle(DrawerPart::Trigger)),
-            DrawerChange::Closed(DrawerPart::Trigger)
+            state.apply(DropdownMenuIntent::Toggle(DropdownMenuPart::Trigger)),
+            DropdownMenuChange::Closed(DropdownMenuPart::Trigger)
         );
-        assert!(!state.is_active(DrawerPart::Trigger));
+        assert!(!state.is_active(DropdownMenuPart::Trigger));
     }
 }

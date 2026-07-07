@@ -25,6 +25,7 @@ pub mod date_picker;
 pub mod dialog;
 pub mod direction;
 mod dom;
+pub mod drawer;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -153,6 +154,10 @@ pub use direction::{
     DirectionChange, DirectionIntent, DirectionModel, DirectionPart, DirectionRenderNode,
     DirectionState, DirectionValue, default_direction_model, direction_render_nodes,
     validate_direction_model,
+};
+pub use drawer::{
+    DrawerAction, DrawerChange, DrawerIntent, DrawerModel, DrawerPart, DrawerRenderNode,
+    DrawerSide, DrawerState, default_drawer_model, drawer_render_nodes, validate_drawer_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

@@ -290,9 +290,9 @@ pub mod bevy_adapter {
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
-        DialogPart, DirectionPart, DirectionValue, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, RenderContract,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -307,7 +307,8 @@ pub mod bevy_adapter {
         default_chart_model, default_checkbox_model, default_collapsible_model,
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
-        default_direction_model, dialog_render_nodes, direction_render_nodes, scale,
+        default_direction_model, default_drawer_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -460,6 +461,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Drawer {
+            return bevy_primitives_for_drawer(theme, implementation.render, implementation.state);
         }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
@@ -796,6 +800,45 @@ pub mod bevy_adapter {
                     state,
                     intent: direction_intent_for_part(node.part),
                     selected: node.selected || node.scope_active,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_drawer(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_drawer_model().with_default_open(true);
+        let drawer_state = model.state();
+        drawer_render_nodes(&model, &drawer_state)
+            .into_iter()
+            .map(|node| {
+                let role = drawer_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: drawer_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: drawer_size_for_part(node.part, node.side),
+                    fill: fill_for_tone(
+                        drawer_tone_for_part(
+                            node.part,
+                            node.open,
+                            node.dragging,
+                            node.selected,
+                            node.disabled,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: drawer_intent_for_part(node.part, node.actionable, node.close_drawer),
+                    selected: node.selected || node.open || node.dragging,
                     disabled: node.disabled,
                 }
             })
@@ -2372,6 +2415,82 @@ pub mod bevy_adapter {
             DirectionPart::Provider => Vec2::new(scale::space::XL3, scale::space::L),
             DirectionPart::Scope => Vec2::new(scale::space::XL3, scale::space::XL),
             DirectionPart::AwareContent => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    const fn drawer_kind_for_part(part: DrawerPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            DrawerPart::Root => UiWidgetSlotKind::Section,
+            DrawerPart::Trigger => UiWidgetSlotKind::Button,
+            DrawerPart::Content => UiWidgetSlotKind::Overlay,
+            DrawerPart::Header => UiWidgetSlotKind::Header,
+            DrawerPart::Handle => UiWidgetSlotKind::Button,
+            DrawerPart::Footer if actionable => UiWidgetSlotKind::Button,
+            DrawerPart::Footer => UiWidgetSlotKind::Panel,
+        }
+    }
+
+    const fn drawer_role_for_part(part: DrawerPart) -> UiBlockRole {
+        match part {
+            DrawerPart::Root => UiBlockRole::Root,
+            DrawerPart::Trigger | DrawerPart::Footer => UiBlockRole::Action,
+            DrawerPart::Content => UiBlockRole::Overlay,
+            DrawerPart::Header => UiBlockRole::Header,
+            DrawerPart::Handle => UiBlockRole::Control,
+        }
+    }
+
+    const fn drawer_tone_for_part(
+        part: DrawerPart,
+        open: bool,
+        dragging: bool,
+        selected: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            DrawerPart::Trigger if open => UiBlockTone::Brand,
+            DrawerPart::Handle if dragging => UiBlockTone::Brand,
+            DrawerPart::Footer if selected => UiBlockTone::Brand,
+            DrawerPart::Content if open => UiBlockTone::Surface,
+            DrawerPart::Trigger | DrawerPart::Footer | DrawerPart::Handle => UiBlockTone::Brand,
+            DrawerPart::Root | DrawerPart::Content | DrawerPart::Header => UiBlockTone::Surface,
+        }
+    }
+
+    const fn drawer_intent_for_part(
+        part: DrawerPart,
+        actionable: bool,
+        close_drawer: bool,
+    ) -> UiWidgetIntent {
+        match part {
+            DrawerPart::Trigger => UiWidgetIntent::Toggle,
+            DrawerPart::Handle => UiWidgetIntent::Resize,
+            DrawerPart::Footer if actionable && close_drawer => UiWidgetIntent::Close,
+            DrawerPart::Footer if actionable => UiWidgetIntent::Activate,
+            DrawerPart::Root | DrawerPart::Content | DrawerPart::Header | DrawerPart::Footer => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn drawer_size_for_part(part: DrawerPart, side: DrawerSide) -> Vec2 {
+        match part {
+            DrawerPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            DrawerPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            DrawerPart::Content => match side {
+                DrawerSide::Top | DrawerSide::Bottom => {
+                    Vec2::new(scale::space::XL3, scale::space::XL2)
+                }
+                DrawerSide::Right | DrawerSide::Left => {
+                    Vec2::new(scale::space::XL2, scale::space::XL3)
+                }
+            },
+            DrawerPart::Header => Vec2::new(scale::space::XL3, scale::space::L),
+            DrawerPart::Footer => Vec2::new(scale::space::XL3, scale::space::L),
+            DrawerPart::Handle => Vec2::new(scale::space::L, scale::space::XS),
         }
     }
 
