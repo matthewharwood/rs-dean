@@ -34,7 +34,8 @@ use rs_dean_ui::{
     ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
     SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
     SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
-    SheetSide, ThemeCycleButton, ThemeId, ThemeScope,
+    SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -980,6 +981,25 @@ fn Stories() -> impl IntoView {
                             <Sheet model=invalid_sheet_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Sheet model=themed_sheet_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-sidebar" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Sidebar"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 51 implemented as a grouped navigation rail backed by validated shared Rust groups/items, renderer-local collapse/focus/active state, and Bevy-readable navigation primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Sidebar model=default_sidebar_story_model() />
+                            <Sidebar model=dense_sidebar_story_model() />
+                            <Sidebar model=collapsed_sidebar_story_model() />
+                            <Sidebar model=loading_sidebar_story_model() />
+                            <Sidebar model=disabled_sidebar_story_model() />
+                            <Sidebar model=invalid_sidebar_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Sidebar model=themed_sidebar_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3695,6 +3715,65 @@ fn themed_sheet_story_model() -> SheetModel {
     )
     .with_side(SheetSide::Bottom)
     .with_default_open(true)
+}
+
+fn sidebar_story_groups() -> Vec<SidebarGroup> {
+    vec![
+        SidebarGroup::new(
+            "Workspace",
+            "workspace",
+            vec![
+                SidebarItem::new("Overview", "overview"),
+                SidebarItem::new("Stories", "stories").with_badge("64"),
+                SidebarItem::new("Gate", "gate"),
+            ],
+        ),
+        SidebarGroup::new(
+            "Build",
+            "build",
+            vec![
+                SidebarItem::new("Components", "components"),
+                SidebarItem::new("Themes", "themes"),
+                SidebarItem::new("Bevy scenes", "bevy").with_badge("GPU"),
+            ],
+        ),
+    ]
+}
+
+fn default_sidebar_story_model() -> SidebarModel {
+    SidebarModel::new(sidebar_story_groups())
+        .with_header("rs-dean", "Rust/WASM workspace")
+        .with_active_value("stories")
+}
+
+fn dense_sidebar_story_model() -> SidebarModel {
+    default_sidebar_story_model()
+        .with_density(SidebarDensity::Dense)
+        .with_active_value("components")
+}
+
+fn collapsed_sidebar_story_model() -> SidebarModel {
+    default_sidebar_story_model().collapsed()
+}
+
+fn loading_sidebar_story_model() -> SidebarModel {
+    default_sidebar_story_model().loading()
+}
+
+fn disabled_sidebar_story_model() -> SidebarModel {
+    default_sidebar_story_model()
+        .with_footer("Locked", "Navigation waits for durable state hydration.")
+        .disabled()
+}
+
+fn invalid_sidebar_story_model() -> SidebarModel {
+    SidebarModel::new(Vec::new())
+}
+
+fn themed_sidebar_story_model() -> SidebarModel {
+    SidebarModel::new(sidebar_story_groups())
+        .with_label("Theme scoped navigation")
+        .with_active_value("themes")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -295,8 +295,8 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, SheetPart, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        SelectPart, SeparatorPart, SheetPart, SidebarPart, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
         attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
         bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
@@ -319,15 +319,15 @@ pub mod bevy_adapter {
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
-        default_separator_model, default_sheet_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_separator_model, default_sheet_model, default_sidebar_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
-        select_render_nodes, separator_render_nodes, sheet_render_nodes,
+        select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -583,6 +583,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Sheet {
             return bevy_primitives_for_sheet(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Sidebar {
+            return bevy_primitives_for_sidebar(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1639,6 +1642,37 @@ pub mod bevy_adapter {
                     render,
                     state,
                     intent: sheet_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.focused,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_sidebar(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_sidebar_model();
+        let sidebar_state = model.state();
+        sidebar_render_nodes(&model, &sidebar_state)
+            .into_iter()
+            .map(|node| {
+                let role = sidebar_role_for_part(node.part);
+                let tone = sidebar_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: sidebar_primitive_part(&node),
+                    kind: sidebar_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: sidebar_size_for_part(node.part, node.collapsed),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: sidebar_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.focused,
                     disabled: node.disabled || !node.visible,
                 }
@@ -4723,6 +4757,85 @@ pub mod bevy_adapter {
             (SheetPart::Header, _) => Vec2::new(scale::space::XL2, scale::space::L),
             (SheetPart::Footer, _) => Vec2::new(scale::space::L, scale::space::M),
             (SheetPart::Close, _) => Vec2::new(scale::space::M, scale::space::M),
+        }
+    }
+
+    fn sidebar_primitive_part(node: &crate::SidebarRenderNode) -> String {
+        match node.part {
+            SidebarPart::Group | SidebarPart::Menu => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            SidebarPart::Root
+            | SidebarPart::Header
+            | SidebarPart::Content
+            | SidebarPart::Footer
+            | SidebarPart::Rail => node.part.label().to_owned(),
+        }
+    }
+
+    const fn sidebar_kind_for_part(part: SidebarPart) -> UiWidgetSlotKind {
+        match part {
+            SidebarPart::Root => UiWidgetSlotKind::Section,
+            SidebarPart::Header => UiWidgetSlotKind::Header,
+            SidebarPart::Content | SidebarPart::Group => UiWidgetSlotKind::List,
+            SidebarPart::Menu => UiWidgetSlotKind::Button,
+            SidebarPart::Footer => UiWidgetSlotKind::Text,
+            SidebarPart::Rail => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn sidebar_role_for_part(part: SidebarPart) -> UiBlockRole {
+        match part {
+            SidebarPart::Root | SidebarPart::Rail => UiBlockRole::Navigation,
+            SidebarPart::Header => UiBlockRole::Header,
+            SidebarPart::Content | SidebarPart::Group => UiBlockRole::Layout,
+            SidebarPart::Menu => UiBlockRole::Action,
+            SidebarPart::Footer => UiBlockRole::Text,
+        }
+    }
+
+    fn sidebar_tone_for_node(node: &crate::SidebarRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.selected {
+            return UiBlockTone::Brand;
+        }
+        if node.focused {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            SidebarPart::Rail => UiBlockTone::Brand,
+            SidebarPart::Root
+            | SidebarPart::Header
+            | SidebarPart::Content
+            | SidebarPart::Group
+            | SidebarPart::Menu
+            | SidebarPart::Footer => UiBlockTone::Surface,
+        }
+    }
+
+    const fn sidebar_intent_for_part(part: SidebarPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SidebarPart::Rail, true) => UiWidgetIntent::Toggle,
+            (SidebarPart::Menu, true) => UiWidgetIntent::Navigate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn sidebar_size_for_part(part: SidebarPart, collapsed: bool) -> Vec2 {
+        match (part, collapsed) {
+            (SidebarPart::Root, true) => Vec2::new(scale::space::M, scale::space::XL3),
+            (SidebarPart::Root, false) => Vec2::new(scale::space::XL3, scale::space::XL3),
+            (SidebarPart::Header, _) => Vec2::new(scale::space::XL2, scale::space::L),
+            (SidebarPart::Content, _) => Vec2::new(scale::space::XL2, scale::space::XL2),
+            (SidebarPart::Group, _) => Vec2::new(scale::space::XL2, scale::space::M),
+            (SidebarPart::Menu, _) => Vec2::new(scale::space::XL2, scale::space::M),
+            (SidebarPart::Footer, _) => Vec2::new(scale::space::XL2, scale::space::M),
+            (SidebarPart::Rail, _) => Vec2::new(scale::space::S, scale::space::XL3),
         }
     }
 

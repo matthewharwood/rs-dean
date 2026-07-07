@@ -43,11 +43,12 @@ use crate::{
     ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, SelectDensity, SelectIntent, SelectModel,
     SelectPart, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
     SeparatorPart, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetSide, SheetState,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -64,32 +65,32 @@ use crate::{
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
-    default_select_model, default_separator_model, default_sheet_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, sheet_render_nodes, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
-    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
-    validate_popover_model, validate_progress_model, validate_radio_group_model,
-    validate_resizable_model, validate_scroll_area_model, validate_select_model,
-    validate_separator_model, validate_sheet_model,
+    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
+    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
 };
 
 const HEALTH_CARD: &str =
@@ -701,6 +702,38 @@ const SHEET_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justif
 const SHEET_CLOSE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const SHEET_CLOSE_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
 const SHEET_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const SIDEBAR_ROOT: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const SIDEBAR_ROOT_DENSE: &str = "flex w-full max-w-md overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const SIDEBAR_ROOT_COLLAPSED: &str = "flex w-fit overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const SIDEBAR_ROOT_INVALID: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-danger bg-error-soft text-text-1 shadow-1";
+const SIDEBAR_ROOT_DISABLED: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled opacity-disabled";
+const SIDEBAR_RAIL: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-subtle bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SIDEBAR_RAIL_ACTIVE: &str = "flex min-h-xl w-s items-center justify-center border-r border-brand bg-primary-soft text-00 font-7 text-brand shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SIDEBAR_RAIL_DISABLED: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-disabled";
+const SIDEBAR_PANEL: &str = "grid min-w-0 gap-xs p-xs";
+const SIDEBAR_PANEL_DENSE: &str = "grid min-w-0 gap-2xs p-2xs";
+const SIDEBAR_PANEL_COLLAPSED: &str = "hidden";
+const SIDEBAR_HEADER: &str = "grid gap-3xs border-b border-border-subtle pb-xs";
+const SIDEBAR_HEADER_DENSE: &str = "grid gap-3xs border-b border-border-subtle pb-2xs";
+const SIDEBAR_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const SIDEBAR_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SIDEBAR_DETAIL: &str = "m-0 text-00 leading-0 text-text-muted";
+const SIDEBAR_CONTENT: &str = "grid gap-xs";
+const SIDEBAR_CONTENT_DENSE: &str = "grid gap-2xs";
+const SIDEBAR_GROUP: &str = "grid gap-3xs";
+const SIDEBAR_GROUP_DISABLED: &str = "grid gap-3xs opacity-disabled";
+const SIDEBAR_GROUP_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SIDEBAR_MENU: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-xs py-2xs text-left text-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SIDEBAR_MENU_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-2xs py-3xs text-left text-00 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SIDEBAR_MENU_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SIDEBAR_MENU_FOCUSED: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-brand bg-surface-1 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SIDEBAR_MENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-2 px-xs py-2xs text-left text-0 text-text-disabled opacity-disabled";
+const SIDEBAR_BADGE: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-muted";
+const SIDEBAR_FOOTER: &str = "grid gap-3xs border-t border-border-subtle pt-xs";
+const SIDEBAR_FOOTER_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SIDEBAR_FOOTER_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const SIDEBAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -14212,7 +14245,327 @@ const fn sheet_state_label(loading: bool, disabled: bool, open: bool) -> &'stati
     }
 }
 
-catalog_component!(Sidebar, crate::SidebarModel, crate::default_sidebar_model);
+#[component]
+pub fn Sidebar(
+    #[prop(optional, default = default_sidebar_model())] model: SidebarModel,
+) -> AnyView {
+    if let Err(report) = validate_sidebar_model(&model) {
+        let message = format!("Sidebar validation failed: {report}");
+        return view! {
+            <div class=SIDEBAR_ERROR data-ui-component="sidebar" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = sidebar_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SidebarPart::Root)
+        .expect("invariant: sidebar render nodes include root")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == SidebarPart::Header)
+        .expect("invariant: sidebar render nodes include header")
+        .clone();
+    let footer = nodes
+        .iter()
+        .find(|node| node.part == SidebarPart::Footer)
+        .expect("invariant: sidebar render nodes include footer")
+        .clone();
+    let rail = nodes
+        .iter()
+        .find(|node| node.part == SidebarPart::Rail)
+        .expect("invariant: sidebar render nodes include rail")
+        .clone();
+    let groups = model.groups.clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_error = root.detail.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <aside
+            class=move || {
+                state.with(|state| {
+                    sidebar_root_class(
+                        density,
+                        state.is_collapsed(),
+                        invalid,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="sidebar"
+            data-ui-part=SidebarPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    sidebar_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_collapsed(),
+                        state.active_value(),
+                        state.focused_value(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| sidebar_rail_class(state.is_collapsed(), blocked).to_owned())
+                }
+                data-ui-part=SidebarPart::Rail.label()
+                data-ui-value=rail.value
+                aria-label=rail.label
+                aria-pressed=move || state.with(|state| state.is_collapsed().to_string())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SidebarIntent::ToggleCollapse);
+                        });
+                    }
+                }
+            >
+                "||"
+            </button>
+            <div
+                class=move || {
+                    state.with(|state| sidebar_panel_class(density, state.is_collapsed()).to_owned())
+                }
+                data-ui-part=SidebarPart::Content.label()
+                hidden=move || state.with(|state| state.is_collapsed())
+            >
+                <header class=sidebar_header_class(density) data-ui-part=SidebarPart::Header.label()>
+                    <h3 class=sidebar_title_class(density)>{header.label}</h3>
+                    <p class=SIDEBAR_DETAIL>{header.detail}</p>
+                </header>
+                <nav class=sidebar_content_class(density) aria-label=root.label>
+                    {groups
+                        .into_iter()
+                        .enumerate()
+                        .map(|(group_index, group)| {
+                            let group_disabled = blocked || group.disabled;
+                            let items = group.items.clone();
+                            view! {
+                                <section
+                                    class=sidebar_group_class(group_disabled)
+                                    data-ui-part=SidebarPart::Group.label()
+                                    data-ui-value=group.value
+                                    data-ui-index=group_index.to_string()
+                                >
+                                    <p class=SIDEBAR_GROUP_LABEL>{group.label}</p>
+                                    <div class=sidebar_content_class(density)>
+                                        {items
+                                            .into_iter()
+                                            .enumerate()
+                                            .map(|(item_index, item)| {
+                                                let item_value_for_class = item.value.clone();
+                                                let item_value_for_current = item.value.clone();
+                                                let item_value_for_focus = item.value.clone();
+                                                let item_value_for_click = item.value.clone();
+                                                let item_disabled = group_disabled || item.disabled;
+                                                let badge = item.badge.clone();
+                                                view! {
+                                                    <button
+                                                        type="button"
+                                                        class=move || {
+                                                            state.with(|state| {
+                                                                sidebar_menu_class(
+                                                                    density,
+                                                                    state.is_active(&item_value_for_class),
+                                                                    state.is_focused(&item_value_for_class),
+                                                                    item_disabled,
+                                                                )
+                                                                .to_owned()
+                                                            })
+                                                        }
+                                                        data-ui-part=SidebarPart::Menu.label()
+                                                        data-ui-value=item.value
+                                                        data-ui-index=item_index.to_string()
+                                                        aria-current=move || {
+                                                            state.with(|state| {
+                                                                if state.is_active(&item_value_for_current) {
+                                                                    "page"
+                                                                } else {
+                                                                    "false"
+                                                                }
+                                                            })
+                                                        }
+                                                        disabled=item_disabled
+                                                        on:focus=move |_| {
+                                                            if !item_disabled {
+                                                                let value = item_value_for_focus.clone();
+                                                                set_state.update(|state| {
+                                                                    let _ = state.apply(SidebarIntent::Focus(value));
+                                                                });
+                                                            }
+                                                        }
+                                                        on:click=move |_| {
+                                                            if !item_disabled {
+                                                                let value = item_value_for_click.clone();
+                                                                set_state.update(|state| {
+                                                                    let _ = state.apply(SidebarIntent::Activate(value));
+                                                                });
+                                                            }
+                                                        }
+                                                    >
+                                                        <span>{item.label}</span>
+                                                        {badge
+                                                            .map(|badge| view! { <span class=SIDEBAR_BADGE>{badge}</span> })}
+                                                    </button>
+                                                }
+                                            })
+                                            .collect_view()}
+                                    </div>
+                                </section>
+                            }
+                        })
+                        .collect_view()}
+                </nav>
+                <footer class=SIDEBAR_FOOTER data-ui-part=SidebarPart::Footer.label()>
+                    <p class=SIDEBAR_FOOTER_LABEL>{footer.label}</p>
+                    <p class=SIDEBAR_FOOTER_DETAIL>{footer.detail}</p>
+                </footer>
+                {invalid.then_some(view! { <p class=SIDEBAR_ERROR>{root_error}</p> })}
+            </div>
+        </aside>
+    }
+    .into_any()
+}
+
+const fn sidebar_root_class(
+    density: SidebarDensity,
+    collapsed: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SIDEBAR_ROOT_DISABLED;
+    }
+    if invalid {
+        return SIDEBAR_ROOT_INVALID;
+    }
+    if collapsed {
+        return SIDEBAR_ROOT_COLLAPSED;
+    }
+    match density {
+        SidebarDensity::Standard => SIDEBAR_ROOT,
+        SidebarDensity::Dense => SIDEBAR_ROOT_DENSE,
+    }
+}
+
+const fn sidebar_rail_class(collapsed: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SIDEBAR_RAIL_DISABLED
+    } else if collapsed {
+        SIDEBAR_RAIL_ACTIVE
+    } else {
+        SIDEBAR_RAIL
+    }
+}
+
+const fn sidebar_panel_class(density: SidebarDensity, collapsed: bool) -> &'static str {
+    if collapsed {
+        return SIDEBAR_PANEL_COLLAPSED;
+    }
+    match density {
+        SidebarDensity::Standard => SIDEBAR_PANEL,
+        SidebarDensity::Dense => SIDEBAR_PANEL_DENSE,
+    }
+}
+
+const fn sidebar_header_class(density: SidebarDensity) -> &'static str {
+    match density {
+        SidebarDensity::Standard => SIDEBAR_HEADER,
+        SidebarDensity::Dense => SIDEBAR_HEADER_DENSE,
+    }
+}
+
+const fn sidebar_title_class(density: SidebarDensity) -> &'static str {
+    match density {
+        SidebarDensity::Standard => SIDEBAR_TITLE,
+        SidebarDensity::Dense => SIDEBAR_TITLE_DENSE,
+    }
+}
+
+const fn sidebar_content_class(density: SidebarDensity) -> &'static str {
+    match density {
+        SidebarDensity::Standard => SIDEBAR_CONTENT,
+        SidebarDensity::Dense => SIDEBAR_CONTENT_DENSE,
+    }
+}
+
+const fn sidebar_group_class(disabled: bool) -> &'static str {
+    if disabled {
+        SIDEBAR_GROUP_DISABLED
+    } else {
+        SIDEBAR_GROUP
+    }
+}
+
+const fn sidebar_menu_class(
+    density: SidebarDensity,
+    active: bool,
+    focused: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SIDEBAR_MENU_DISABLED;
+    }
+    if active {
+        return SIDEBAR_MENU_ACTIVE;
+    }
+    if focused {
+        return SIDEBAR_MENU_FOCUSED;
+    }
+    match density {
+        SidebarDensity::Standard => SIDEBAR_MENU,
+        SidebarDensity::Dense => SIDEBAR_MENU_DENSE,
+    }
+}
+
+fn sidebar_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    collapsed: bool,
+    active_value: Option<&str>,
+    focused_value: Option<&str>,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if collapsed {
+        "collapsed".to_owned()
+    } else if let Some(value) = active_value {
+        format!("active-{value}")
+    } else if let Some(value) = focused_value {
+        format!("focused-{value}")
+    } else {
+        "expanded".to_owned()
+    }
+}
+
 catalog_component!(
     Skeleton,
     crate::SkeletonModel,

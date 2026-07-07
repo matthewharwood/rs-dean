@@ -43,3 +43,4 @@ Ship a Rust-first `Sidebar` component that follows the shadcn composition model 
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete component pass complete: typed grouped navigation model, active-item validation, renderer-local collapse/focus state, token-only Leptos rail/menu, story variants, and Bevy primitives now share the same Rust render nodes.

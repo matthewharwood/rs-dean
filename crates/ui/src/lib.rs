@@ -52,6 +52,7 @@ pub mod scroll_area;
 pub mod select;
 pub mod separator;
 pub mod sheet;
+pub mod sidebar;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -309,6 +310,11 @@ pub use separator::{
 pub use sheet::{
     SheetAction, SheetChange, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetRenderNode,
     SheetSide, SheetState, default_sheet_model, sheet_render_nodes, validate_sheet_model,
+};
+pub use sidebar::{
+    SidebarChange, SidebarDensity, SidebarGroup, SidebarIntent, SidebarItem, SidebarModel,
+    SidebarPart, SidebarRenderNode, SidebarState, default_sidebar_groups, default_sidebar_model,
+    sidebar_render_nodes, validate_sidebar_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

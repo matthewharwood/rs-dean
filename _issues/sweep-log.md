@@ -538,7 +538,18 @@ Separator were re-audited against that learning; no earlier changes were
 required because their overlay, edge, and non-interactive layout semantics are
 already modeled in their own typed contracts.
 
-All-issue sweep pass: Sidebar through Typography complete. The shared
+Concrete component pass: Sidebar complete. The component now has typed Rust
+navigation groups/items, active-item validation, optional badges, renderer-local
+collapse/focus/active state, token-only Leptos rail/menu rendering, dedicated
+story proof, and Bevy primitive derivation from the same render nodes. The
+sweep found that app navigation components need grouped domain data rather than
+generic menu slots so collapsed rail state, active item, and badges stay
+portable across Leptos and Bevy. Navigation Menu, Menubar, Breadcrumb, Sheet,
+and Drawer were re-audited against that learning; no earlier changes were
+required because each already owns its navigation or overlay semantics in a
+component-specific Rust contract.
+
+All-issue sweep pass: Skeleton through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -546,7 +557,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Sidebar through Typography now have
+Concrete all-issue sweep pass: Skeleton through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
