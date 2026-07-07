@@ -285,12 +285,12 @@ pub mod bevy_adapter {
 
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
-        AspectRatioPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        AspectRatioPart, AttachmentPart, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        catalog_component_any_render_nodes_for_component, component_implementation,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, scale,
+        attachment_render_nodes, catalog_component_any_render_nodes_for_component,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -336,6 +336,13 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Attachment {
+            return bevy_primitives_for_attachment(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -353,6 +360,34 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_attachment(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        attachment_render_nodes(&default_attachment_model())
+            .into_iter()
+            .map(|node| {
+                let role = attachment_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: attachment_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: size_for_role(role),
+                    fill: fill_for_tone(attachment_tone_for_part(node.part), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: attachment_intent_for_part(node.part),
+                    selected: node.loading,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -506,6 +541,46 @@ pub mod bevy_adapter {
         match part {
             AspectRatioPart::Root | AspectRatioPart::Frame => UiBlockTone::Surface,
             AspectRatioPart::Media => UiBlockTone::Success,
+        }
+    }
+
+    const fn attachment_kind_for_part(part: AttachmentPart) -> UiWidgetSlotKind {
+        match part {
+            AttachmentPart::Root => UiWidgetSlotKind::Section,
+            AttachmentPart::Preview => UiWidgetSlotKind::Media,
+            AttachmentPart::Title => UiWidgetSlotKind::Title,
+            AttachmentPart::Meta => UiWidgetSlotKind::Text,
+            AttachmentPart::Action => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn attachment_role_for_part(part: AttachmentPart) -> UiBlockRole {
+        match part {
+            AttachmentPart::Root => UiBlockRole::Root,
+            AttachmentPart::Preview => UiBlockRole::Media,
+            AttachmentPart::Title => UiBlockRole::Header,
+            AttachmentPart::Meta => UiBlockRole::Text,
+            AttachmentPart::Action => UiBlockRole::Action,
+        }
+    }
+
+    const fn attachment_tone_for_part(part: AttachmentPart) -> UiBlockTone {
+        match part {
+            AttachmentPart::Root | AttachmentPart::Title | AttachmentPart::Meta => {
+                UiBlockTone::Surface
+            }
+            AttachmentPart::Preview => UiBlockTone::Info,
+            AttachmentPart::Action => UiBlockTone::Brand,
+        }
+    }
+
+    const fn attachment_intent_for_part(part: AttachmentPart) -> UiWidgetIntent {
+        match part {
+            AttachmentPart::Action => UiWidgetIntent::Activate,
+            AttachmentPart::Root
+            | AttachmentPart::Preview
+            | AttachmentPart::Title
+            | AttachmentPart::Meta => UiWidgetIntent::None,
         }
     }
 

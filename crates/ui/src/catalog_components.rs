@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    attachment,
-    Attachment,
-    AttachmentModel,
-    AttachmentPart,
-    AttachmentRenderNode,
-    AttachmentState,
-    AttachmentIntent,
-    AttachmentChange,
-    validate_attachment_model,
-    attachment_render_nodes,
-    default_attachment_model,
-    [
-        Root => "Attachment",
-        Preview => "AttachmentPreview",
-        Title => "AttachmentTitle",
-        Meta => "AttachmentMeta",
-        Action => "AttachmentAction",
-    ]
-);
-
-define_catalog_component!(
     avatar,
     Avatar,
     AvatarModel,
@@ -1714,10 +1693,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         UiComponentId::Accordion
         | UiComponentId::Alert
         | UiComponentId::AlertDialog
-        | UiComponentId::AspectRatio => None,
-        UiComponentId::Attachment => Some(any_nodes(attachment_render_nodes(
-            &default_attachment_model(),
-        ))),
+        | UiComponentId::AspectRatio
+        | UiComponentId::Attachment => None,
         UiComponentId::Avatar => Some(any_nodes(avatar_render_nodes(&default_avatar_model()))),
         UiComponentId::Badge => Some(any_nodes(badge_render_nodes(&default_badge_model()))),
         UiComponentId::Breadcrumb => Some(any_nodes(breadcrumb_render_nodes(
@@ -1860,6 +1837,7 @@ mod tests {
                     | UiComponentId::Alert
                     | UiComponentId::AlertDialog
                     | UiComponentId::AspectRatio
+                    | UiComponentId::Attachment
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use rs_dean_ui::{
     Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertDialog,
     AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
-    AspectRatioFit, AspectRatioModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
+    AttachmentModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -114,6 +114,24 @@ fn Stories() -> impl IntoView {
                             <AspectRatio model=invalid_aspect_ratio_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <AspectRatio model=themed_aspect_ratio_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-attachment" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Attachment"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 05 implemented as a message attachment contract backed by a validated shared Rust model, local activation state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Attachment model=default_attachment_story_model() />
+                            <Attachment model=image_attachment_story_model() />
+                            <Attachment model=loading_attachment_story_model() />
+                            <Attachment model=disabled_attachment_story_model() />
+                            <Attachment model=invalid_attachment_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Attachment model=themed_attachment_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -326,6 +344,42 @@ fn themed_aspect_ratio_story_model() -> AspectRatioModel {
     )
     .with_ratio(3, 2)
     .with_fit(AspectRatioFit::Cover)
+}
+
+fn default_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("roadmap-notes.pdf", "2.4 MB")
+        .with_action(AttachmentAction::new("Download", "download-roadmap"))
+}
+
+fn image_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("lesson-cover.png", "842 KB")
+        .with_kind(AttachmentKind::Image)
+        .with_action(AttachmentAction::new("Open", "open-lesson-cover"))
+}
+
+fn loading_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("uploading-transcript.txt", "Preparing")
+        .with_kind(AttachmentKind::Data)
+        .with_action(AttachmentAction::new("Open", "open-transcript"))
+        .loading()
+}
+
+fn disabled_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("locked-export.zip", "12.8 MB")
+        .with_kind(AttachmentKind::Archive)
+        .with_action(AttachmentAction::new("Download", "download-export").disabled())
+        .disabled()
+}
+
+fn invalid_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("", "The validation boundary rejects empty filenames.")
+}
+
+fn themed_attachment_story_model() -> AttachmentModel {
+    AttachmentModel::new("theme-audit.csv", "18 rows")
+        .with_kind(AttachmentKind::Data)
+        .with_preview_label("CSV")
+        .with_action(AttachmentAction::new("Inspect", "inspect-theme-audit"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

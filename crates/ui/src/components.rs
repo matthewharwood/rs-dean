@@ -3,14 +3,15 @@ use leptos::prelude::*;
 use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone, AspectRatioFit,
-    AspectRatioModel, AspectRatioPart, CatalogComponentModel, CatalogComponentPart,
-    CatalogComponentRenderNode, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    catalog_component_render_nodes, component_implementation, component_spec,
-    default_accordion_items, default_alert_dialog_model, default_alert_model,
-    default_aspect_ratio_model, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model,
+    AspectRatioModel, AspectRatioPart, AttachmentIntent, AttachmentKind, AttachmentModel,
+    AttachmentPart, CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, catalog_component_render_nodes,
+    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
+    default_alert_model, default_aspect_ratio_model, default_attachment_model,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model,
 };
 
 const HEALTH_CARD: &str =
@@ -146,6 +147,24 @@ const ASPECT_RATIO_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const ASPECT_RATIO_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const ASPECT_RATIO_BADGE: &str = "inline-flex rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
 const ASPECT_RATIO_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const ATTACHMENT_ROOT: &str = "flex min-w-0 items-center gap-xs rounded-box border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const ATTACHMENT_ROOT_LOADING: &str = "flex min-w-0 items-center gap-xs rounded-box border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const ATTACHMENT_ROOT_DISABLED: &str = "flex min-w-0 items-center gap-xs rounded-box border border-border-muted bg-surface-2 p-xs text-text-disabled";
+const ATTACHMENT_PREVIEW_PDF: &str = "grid size-xl shrink-0 place-items-center rounded-field bg-error-soft text-00 font-7 text-text-1";
+const ATTACHMENT_PREVIEW_IMAGE: &str = "grid size-xl shrink-0 place-items-center rounded-field bg-success-soft text-00 font-7 text-text-1";
+const ATTACHMENT_PREVIEW_ARCHIVE: &str = "grid size-xl shrink-0 place-items-center rounded-field bg-warning-soft text-00 font-7 text-text-1";
+const ATTACHMENT_PREVIEW_DATA: &str = "grid size-xl shrink-0 place-items-center rounded-field bg-info-soft text-00 font-7 text-text-1";
+const ATTACHMENT_PREVIEW_MUTED: &str = "grid size-xl shrink-0 place-items-center rounded-field bg-surface-3 text-00 font-7 text-text-muted";
+const ATTACHMENT_BODY: &str = "grid min-w-0 flex-1 gap-3xs";
+const ATTACHMENT_TITLE: &str =
+    "m-0 overflow-hidden text-ellipsis whitespace-nowrap text-0 font-7 leading-0 text-text-1";
+const ATTACHMENT_TITLE_DISABLED: &str = "m-0 overflow-hidden text-ellipsis whitespace-nowrap text-0 font-7 leading-0 text-text-disabled";
+const ATTACHMENT_META: &str = "m-0 text-00 leading-0 text-text-2";
+const ATTACHMENT_META_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const ATTACHMENT_ACTION: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ATTACHMENT_ACTION_ACTIVE: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ATTACHMENT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1227,11 +1246,179 @@ const fn aspect_ratio_state(model: &AspectRatioModel) -> &'static str {
     }
 }
 
-catalog_component!(
-    Attachment,
-    crate::AttachmentModel,
-    crate::default_attachment_model
-);
+#[component]
+pub fn Attachment(
+    #[prop(optional, default = default_attachment_model())] model: AttachmentModel,
+) -> AnyView {
+    if let Err(report) = validate_attachment_model(&model) {
+        let message = format!("Attachment validation failed: {report}");
+        return view! {
+            <section class=ATTACHMENT_ROOT data-ui-component="attachment" data-ui-state="invalid">
+                <p class=ATTACHMENT_ERROR role="alert">{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
+    let nodes = attachment_render_nodes(&model);
+    let preview = nodes
+        .iter()
+        .find(|node| node.part == AttachmentPart::Preview)
+        .expect("invariant: attachment render nodes include preview");
+    let title = nodes
+        .iter()
+        .find(|node| node.part == AttachmentPart::Title)
+        .expect("invariant: attachment render nodes include title");
+    let meta = nodes
+        .iter()
+        .find(|node| node.part == AttachmentPart::Meta)
+        .expect("invariant: attachment render nodes include metadata");
+    let preview_label = preview.label.clone();
+    let title_value = title.value.clone();
+    let meta_value = meta.value.clone();
+    let root_class = attachment_root_class(model.loading, model.disabled);
+    let preview_class = attachment_preview_class(model.kind, model.loading, model.disabled);
+    let title_class = attachment_title_class(model.disabled);
+    let meta_class = attachment_meta_class(model.disabled);
+    let state_label = attachment_state(&model);
+    let kind = model.kind.label();
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let (state, set_state) = signal(model.state());
+    let action = model.action;
+
+    view! {
+        <section
+            class=root_class
+            data-ui-component="attachment"
+            data-ui-part="Attachment"
+            data-ui-kind=kind
+            data-ui-state=state_label
+            role="group"
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            <span class=preview_class data-ui-part="AttachmentPreview" aria-hidden="true">
+                {if loading { "...".to_owned() } else { preview_label }}
+            </span>
+            <span class=ATTACHMENT_BODY>
+                <span class=title_class data-ui-part="AttachmentTitle">{title_value}</span>
+                <span class=meta_class data-ui-part="AttachmentMeta">
+                    {if loading { "Preparing attachment".to_owned() } else { meta_value }}
+                </span>
+            </span>
+            {if let Some(action) = action {
+                let action_disabled = disabled || loading || action.disabled;
+                let action_label = if loading {
+                    "Loading".to_owned()
+                } else {
+                    action.label
+                };
+                let action_state = if action_disabled { "disabled" } else { "ready" };
+                let action_value = action.value;
+                let action_value_for_memo = action_value.clone();
+                let action_value_for_click = action_value.clone();
+                let is_active = Memo::new(move |_| {
+                    state.with(|state| {
+                        state.activated_value() == Some(action_value_for_memo.as_str())
+                    })
+                });
+                let is_active_for_class = is_active;
+                let is_active_for_pressed = is_active;
+                let on_click = move |_| {
+                    if action_disabled {
+                        return;
+                    }
+                    set_state.update(|state| {
+                        let _ = state.apply(AttachmentIntent::Activate(
+                            action_value_for_click.clone(),
+                        ));
+                    });
+                };
+
+                view! {
+                    <button
+                        type="button"
+                        class=move || {
+                            if is_active_for_class.get() {
+                                ATTACHMENT_ACTION_ACTIVE
+                            } else {
+                                ATTACHMENT_ACTION
+                            }
+                        }
+                        data-ui-part="AttachmentAction"
+                        data-ui-intent="activate"
+                        data-ui-action=action_value
+                        data-ui-state=action_state
+                        aria-pressed=move || is_active_for_pressed.get().to_string()
+                        disabled=action_disabled
+                        on:click=on_click
+                    >
+                        {action_label}
+                    </button>
+                }
+                    .into_any()
+            } else {
+                ().into_any()
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+const fn attachment_root_class(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        ATTACHMENT_ROOT_DISABLED
+    } else if loading {
+        ATTACHMENT_ROOT_LOADING
+    } else {
+        ATTACHMENT_ROOT
+    }
+}
+
+const fn attachment_preview_class(
+    kind: AttachmentKind,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if loading || disabled {
+        ATTACHMENT_PREVIEW_MUTED
+    } else {
+        match kind {
+            AttachmentKind::Pdf => ATTACHMENT_PREVIEW_PDF,
+            AttachmentKind::Image => ATTACHMENT_PREVIEW_IMAGE,
+            AttachmentKind::Archive => ATTACHMENT_PREVIEW_ARCHIVE,
+            AttachmentKind::Data => ATTACHMENT_PREVIEW_DATA,
+        }
+    }
+}
+
+const fn attachment_title_class(disabled: bool) -> &'static str {
+    if disabled {
+        ATTACHMENT_TITLE_DISABLED
+    } else {
+        ATTACHMENT_TITLE
+    }
+}
+
+const fn attachment_meta_class(disabled: bool) -> &'static str {
+    if disabled {
+        ATTACHMENT_META_DISABLED
+    } else {
+        ATTACHMENT_META
+    }
+}
+
+const fn attachment_state(model: &AttachmentModel) -> &'static str {
+    if model.disabled {
+        "disabled"
+    } else if model.loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Avatar, crate::AvatarModel, crate::default_avatar_model);
 catalog_component!(Badge, crate::BadgeModel, crate::default_badge_model);
 catalog_component!(

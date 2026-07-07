@@ -41,5 +41,7 @@ Ship a Rust-first `Attachment` component that follows the shadcn composition mod
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
-- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Concrete `Attachment` model, preview-kind contract, optional action contract, render nodes, validation, local activation state, and named token-only Leptos component implemented.
+- [x] `garde` validation enforces filename, metadata, preview label, and optional action fields before rendering.
+- [x] Dedicated `apps/stories` Attachment proof covers default, image, disabled, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.
