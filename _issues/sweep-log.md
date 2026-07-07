@@ -370,7 +370,17 @@ earlier API changes were needed because repeated-key primitive naming follows
 the same stable indexed convention established for Item, Input OTP, and other
 repeatable components.
 
-All-issue sweep pass: Label through Typography complete. The shared
+Concrete component pass: Label complete. The thirty-fifth issue now has a
+typed form-label model, density/requirement contracts, root/text/requirement
+render nodes, renderer-local hover/focus state, `garde` validation, token-only
+Leptos `<label>` rendering, dedicated story proof, and Bevy primitive
+derivation from the same model. The sweep found that form-adjacent typography
+can expose stateful requirement metadata without owning durable form data.
+Issues 01 through 34 were re-audited against this learning; no earlier API
+changes were needed because optional visible/hidden anatomy and non-durable
+renderer-local focus state were already covered by Field, Input, Item, and Kbd.
+
+All-issue sweep pass: Marker through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -378,7 +388,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Label through Typography now have
+Concrete all-issue sweep pass: Marker through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

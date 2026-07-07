@@ -36,6 +36,7 @@ pub mod input_otp;
 pub mod item;
 pub mod kbd;
 pub mod kit;
+pub mod label;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -211,6 +212,10 @@ pub use kbd::{
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
     component_implementation, implementation_issue_marker, implemented_components,
+};
+pub use label::{
+    LabelChange, LabelDensity, LabelIntent, LabelModel, LabelPart, LabelRenderNode,
+    LabelRequirement, LabelState, default_label_model, label_render_nodes, validate_label_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

@@ -27,7 +27,8 @@ use crate::{
     HoverCardModel, HoverCardPart, InputDensity, InputGroupIntent, InputGroupModel, InputGroupPart,
     InputGroupState, InputIntent, InputModel, InputOtpIntent, InputOtpModel, InputOtpPart,
     InputOtpState, InputPart, InputState, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemState,
-    KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, LabelDensity, LabelIntent, LabelModel,
+    LabelPart, LabelRequirement, LabelState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
     UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
     alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
     badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
@@ -44,21 +45,22 @@ use crate::{
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
-    default_input_otp_model, default_item_model, default_kbd_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, max_data_table_page_index, month_name,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model,
+    default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model,
 };
 
 const HEALTH_CARD: &str =
@@ -817,6 +819,28 @@ const KBD_KEY_LOADING: &str = "inline-flex min-h-s min-w-s items-center justify-
 const KBD_KEY_DISABLED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs font-mono text-00 font-6 leading-0 text-text-disabled opacity-disabled";
 const KBD_SEPARATOR: &str = "text-00 font-6 leading-0 text-text-muted";
 const KBD_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const LABEL_ROOT: &str =
+    "inline-flex max-w-full items-center gap-2xs rounded-field text-text-1 transition-colors";
+const LABEL_ROOT_DENSE: &str =
+    "inline-flex max-w-full items-center gap-3xs rounded-field text-text-1 transition-colors";
+const LABEL_ROOT_ACTIVE: &str = "inline-flex max-w-full items-center gap-2xs rounded-field bg-selected-tint text-text-1 transition-colors";
+const LABEL_ROOT_INVALID: &str =
+    "inline-flex max-w-full items-center gap-2xs rounded-field text-danger transition-colors";
+const LABEL_ROOT_LOADING: &str =
+    "inline-flex max-w-full items-center gap-2xs rounded-field text-info transition-colors";
+const LABEL_ROOT_DISABLED: &str =
+    "inline-flex max-w-full items-center gap-2xs rounded-field text-text-disabled opacity-disabled";
+const LABEL_TEXT: &str = "m-0 text-0 font-7 leading-0 text-inherit";
+const LABEL_TEXT_DENSE: &str = "m-0 text-00 font-7 leading-0 text-inherit";
+const LABEL_TEXT_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const LABEL_REQUIREMENT_REQUIRED: &str = "text-00 font-7 leading-0 text-danger";
+const LABEL_REQUIREMENT_OPTIONAL: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-muted";
+const LABEL_REQUIREMENT_DENSE_REQUIRED: &str = "text-00 font-7 leading-0 text-danger";
+const LABEL_REQUIREMENT_DENSE_OPTIONAL: &str = "rounded-pill border border-border-subtle bg-surface-2 px-3xs py-3xs text-00 font-6 leading-0 text-text-muted";
+const LABEL_REQUIREMENT_HIDDEN: &str = "hidden";
+const LABEL_REQUIREMENT_DISABLED: &str = "text-00 font-6 leading-0 text-text-disabled";
+const LABEL_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -8544,7 +8568,295 @@ const fn kbd_state_label(
     }
 }
 
-catalog_component!(Label, crate::LabelModel, crate::default_label_model);
+#[component]
+pub fn Label(#[prop(optional, default = default_label_model())] model: LabelModel) -> AnyView {
+    if let Err(report) = validate_label_model(&model) {
+        let message = format!("Label validation failed: {report}");
+        return view! {
+            <div class=LABEL_ERROR data-ui-component="label" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let requirement = model.requirement;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = label_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == LabelPart::Root)
+        .expect("invariant: label render nodes include root")
+        .clone();
+    let text = nodes
+        .iter()
+        .find(|node| node.part == LabelPart::Text)
+        .expect("invariant: label render nodes include text")
+        .clone();
+    let requirement_node = nodes
+        .iter()
+        .find(|node| node.part == LabelPart::Requirement)
+        .expect("invariant: label render nodes include requirement")
+        .clone();
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let root_detail = root.detail;
+    let text_value = text.value;
+    let text_label = text.label;
+    let control_for = model.control_id.clone();
+    let control_for_data = model.control_id.unwrap_or_default();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <label
+            class=move || {
+                state.with(|state| {
+                    label_root_class(
+                        density,
+                        state.is_active(LabelPart::Root)
+                            || state.is_active(LabelPart::Text)
+                            || state.is_active(LabelPart::Requirement),
+                        invalid,
+                        loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="label"
+            data-ui-part=LabelPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-requirement=requirement.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    label_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_active(LabelPart::Root)
+                            || state.is_active(LabelPart::Text)
+                            || state.is_active(LabelPart::Requirement),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            data-ui-for=control_for_data
+            for=control_for
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+            title=root_detail
+            on:focus=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Focus(LabelPart::Root));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Hover(LabelPart::Root));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Leave);
+                    });
+                }
+            }
+        >
+            <span
+                class=label_text_class(density, disabled)
+                data-ui-part=LabelPart::Text.label()
+                data-ui-value=text_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(LabelIntent::Hover(LabelPart::Text));
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(LabelIntent::Leave);
+                        });
+                    }
+                }
+            >
+                {text_label}
+            </span>
+            {label_requirement_view(requirement_node, blocked, state, set_state)}
+        </label>
+    }
+    .into_any()
+}
+
+fn label_requirement_view(
+    node: crate::LabelRenderNode,
+    blocked: bool,
+    state: ReadSignal<LabelState>,
+    set_state: WriteSignal<LabelState>,
+) -> AnyView {
+    let density = node.density;
+    let requirement = node.requirement;
+    let visible = node.visible;
+    let disabled = node.disabled || blocked;
+    let loading = node.loading;
+    let invalid = node.invalid;
+    let value = node.value;
+    let label = node.label;
+    let detail = node.detail;
+    view! {
+        <span
+            class=move || {
+                state.with(|state| {
+                    label_requirement_class(
+                        density,
+                        requirement,
+                        visible,
+                        disabled,
+                        state.is_active(LabelPart::Requirement),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=LabelPart::Requirement.label()
+            data-ui-value=value
+            data-ui-state=move || {
+                state.with(|state| {
+                    label_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_active(LabelPart::Requirement),
+                    )
+                    .to_owned()
+                })
+            }
+            aria-hidden=(!visible).to_string()
+            aria-label=label
+            title=detail
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Hover(LabelPart::Requirement));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(LabelIntent::Leave);
+                    });
+                }
+            }
+        >
+            {label_requirement_copy(requirement)}
+        </span>
+    }
+    .into_any()
+}
+
+const fn label_root_class(
+    density: LabelDensity,
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return LABEL_ROOT_DISABLED;
+    }
+    if loading {
+        return LABEL_ROOT_LOADING;
+    }
+    if invalid {
+        return LABEL_ROOT_INVALID;
+    }
+    if active {
+        return LABEL_ROOT_ACTIVE;
+    }
+    match density {
+        LabelDensity::Standard => LABEL_ROOT,
+        LabelDensity::Dense => LABEL_ROOT_DENSE,
+    }
+}
+
+const fn label_text_class(density: LabelDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return LABEL_TEXT_DISABLED;
+    }
+    match density {
+        LabelDensity::Standard => LABEL_TEXT,
+        LabelDensity::Dense => LABEL_TEXT_DENSE,
+    }
+}
+
+const fn label_requirement_class(
+    density: LabelDensity,
+    requirement: LabelRequirement,
+    visible: bool,
+    disabled: bool,
+    _active: bool,
+) -> &'static str {
+    if !visible {
+        return LABEL_REQUIREMENT_HIDDEN;
+    }
+    if disabled {
+        return LABEL_REQUIREMENT_DISABLED;
+    }
+    match (density, requirement) {
+        (LabelDensity::Standard, LabelRequirement::Required) => LABEL_REQUIREMENT_REQUIRED,
+        (LabelDensity::Dense, LabelRequirement::Required) => LABEL_REQUIREMENT_DENSE_REQUIRED,
+        (LabelDensity::Standard, LabelRequirement::Optional) => LABEL_REQUIREMENT_OPTIONAL,
+        (LabelDensity::Dense, LabelRequirement::Optional) => LABEL_REQUIREMENT_DENSE_OPTIONAL,
+        (_, LabelRequirement::None) => LABEL_REQUIREMENT_HIDDEN,
+    }
+}
+
+const fn label_requirement_copy(requirement: LabelRequirement) -> &'static str {
+    match requirement {
+        LabelRequirement::None => "",
+        LabelRequirement::Optional => "Optional",
+        LabelRequirement::Required => "*",
+    }
+}
+
+const fn label_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if active {
+        "active"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Marker, crate::MarkerModel, crate::default_marker_model);
 catalog_component!(Menubar, crate::MenubarModel, crate::default_menubar_model);
 catalog_component!(Message, crate::MessageModel, crate::default_message_model);

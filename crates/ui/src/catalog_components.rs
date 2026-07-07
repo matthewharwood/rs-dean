@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    label,
-    Label,
-    LabelModel,
-    LabelPart,
-    LabelRenderNode,
-    LabelState,
-    LabelIntent,
-    LabelChange,
-    validate_label_model,
-    label_render_nodes,
-    default_label_model,
-    [Root => "Label", Text => "LabelText", Requirement => "LabelRequirement"]
-);
-
-define_catalog_component!(
     marker,
     Marker,
     MarkerModel,
@@ -1137,8 +1122,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::InputGroup
         | UiComponentId::InputOtp
         | UiComponentId::Item
-        | UiComponentId::Kbd => None,
-        UiComponentId::Label => Some(any_nodes(label_render_nodes(&default_label_model()))),
+        | UiComponentId::Kbd
+        | UiComponentId::Label => None,
         UiComponentId::Marker => Some(any_nodes(marker_render_nodes(&default_marker_model()))),
         UiComponentId::Menubar => Some(any_nodes(menubar_render_nodes(&default_menubar_model()))),
         UiComponentId::Message => Some(any_nodes(message_render_nodes(&default_message_model()))),
@@ -1251,6 +1236,7 @@ mod tests {
                     | UiComponentId::InputOtp
                     | UiComponentId::Item
                     | UiComponentId::Kbd
+                    | UiComponentId::Label
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1267,17 +1253,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_label_model().state();
-        assert!(!state.is_active(LabelPart::Root));
+        let mut state = default_marker_model().state();
+        assert!(!state.is_active(MarkerPart::Root));
         assert_eq!(
-            state.apply(LabelIntent::Toggle(LabelPart::Root)),
-            LabelChange::Opened(LabelPart::Root)
+            state.apply(MarkerIntent::Toggle(MarkerPart::Root)),
+            MarkerChange::Opened(MarkerPart::Root)
         );
-        assert!(state.is_active(LabelPart::Root));
+        assert!(state.is_active(MarkerPart::Root));
         assert_eq!(
-            state.apply(LabelIntent::Toggle(LabelPart::Root)),
-            LabelChange::Closed(LabelPart::Root)
+            state.apply(MarkerIntent::Toggle(MarkerPart::Root)),
+            MarkerChange::Closed(MarkerPart::Root)
         );
-        assert!(!state.is_active(LabelPart::Root));
+        assert!(!state.is_active(MarkerPart::Root));
     }
 }

@@ -21,8 +21,8 @@ use rs_dean_ui::{
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
     InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
-    ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, Label, LabelDensity, LabelModel,
+    LabelRequirement, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -675,6 +675,24 @@ fn Stories() -> impl IntoView {
                             <Kbd model=invalid_kbd_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Kbd model=themed_kbd_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-label" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Label"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 35 implemented as a form label primitive backed by validated shared Rust text/requirement nodes, renderer-local hover/focus state, and Bevy-readable label primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Label model=default_label_story_model() />
+                            <Label model=dense_label_story_model() />
+                            <Label model=loading_label_story_model() />
+                            <Label model=disabled_label_story_model() />
+                            <Label model=invalid_label_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Label model=themed_label_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2521,6 +2539,39 @@ fn themed_kbd_story_model() -> KbdModel {
     ])
     .with_separator(" + ")
     .with_aria_label("Toggle diagnostics")
+}
+
+fn default_label_story_model() -> LabelModel {
+    LabelModel::new("Email").with_for("email").required()
+}
+
+fn dense_label_story_model() -> LabelModel {
+    LabelModel::new("Username")
+        .with_density(LabelDensity::Dense)
+        .with_for("username")
+        .optional()
+}
+
+fn loading_label_story_model() -> LabelModel {
+    default_label_story_model().loading()
+}
+
+fn disabled_label_story_model() -> LabelModel {
+    LabelModel::new("Archived email")
+        .with_for("archived_email")
+        .required()
+        .disabled()
+}
+
+fn invalid_label_story_model() -> LabelModel {
+    LabelModel::new("Workspace")
+        .with_for("workspace")
+        .required()
+        .with_error("Workspace is required.")
+}
+
+fn themed_label_story_model() -> LabelModel {
+    LabelModel::new("Theme token").with_requirement(LabelRequirement::Optional)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
