@@ -527,7 +527,18 @@ Area, and Select were re-audited against that learning; no earlier changes were
 required because their durable values remain consumer-owned and renderer
 affordances stay local.
 
-All-issue sweep pass: Sheet through Typography complete. The shared
+Concrete component pass: Sheet complete. The component now has a typed Rust
+side/density/action model, `garde` validation for trigger/header/content/action
+copy, renderer-local open/focus/footer activation state, token-only Leptos
+edge-panel rendering, dedicated story proof, and Bevy primitive derivation from
+the same render nodes. The sweep found that Sheet should share workflow-overlay
+vocabulary with Dialog and Drawer while keeping edge placement and close action
+semantics component-specific. Dialog, Drawer, Dropdown Menu, Popover, and
+Separator were re-audited against that learning; no earlier changes were
+required because their overlay, edge, and non-interactive layout semantics are
+already modeled in their own typed contracts.
+
+All-issue sweep pass: Sidebar through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -535,7 +546,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Sheet through Typography now have
+Concrete all-issue sweep pass: Sidebar through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

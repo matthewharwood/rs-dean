@@ -43,3 +43,4 @@ Ship a Rust-first `Sheet` component that follows the shadcn composition model wh
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete component pass complete: typed side/density/action model, close semantics, renderer-local open/focus/footer state, token-only Leptos edge panel, story variants, and Bevy primitives now share the same Rust render nodes.

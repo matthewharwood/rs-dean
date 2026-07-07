@@ -33,7 +33,8 @@ use rs_dean_ui::{
     ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ScrollArea,
     ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
     SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
-    SeparatorOrientation, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
+    SheetSide, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -960,6 +961,25 @@ fn Stories() -> impl IntoView {
                             <Separator model=invalid_separator_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Separator model=themed_separator_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-sheet" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Sheet"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 50 implemented as an edge-attached workflow panel backed by validated shared Rust side/action state, renderer-local open/focus state, and Bevy-readable overlay primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Sheet model=default_sheet_story_model() />
+                            <Sheet model=dense_sheet_story_model() />
+                            <Sheet model=left_sheet_story_model() />
+                            <Sheet model=loading_sheet_story_model() />
+                            <Sheet model=disabled_sheet_story_model() />
+                            <Sheet model=invalid_sheet_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Sheet model=themed_sheet_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3620,6 +3640,61 @@ fn themed_separator_story_model() -> SeparatorModel {
     SeparatorModel::new("Theme scoped boundary")
         .with_density(SeparatorDensity::Dense)
         .decorative()
+}
+
+fn default_sheet_story_model() -> SheetModel {
+    SheetModel::new(
+        "Open settings",
+        "Project settings",
+        "Update scoped preferences without leaving the current workflow.",
+        "The sheet keeps transient panel state local while consumers own persisted settings.",
+    )
+    .with_default_open(true)
+}
+
+fn dense_sheet_story_model() -> SheetModel {
+    default_sheet_story_model()
+        .with_density(SheetDensity::Dense)
+        .with_actions(vec![
+            SheetAction::new("Apply", "apply"),
+            SheetAction::new("Close", "close").close_sheet(),
+        ])
+}
+
+fn left_sheet_story_model() -> SheetModel {
+    SheetModel::new(
+        "Open navigation",
+        "Navigation rail",
+        "A left-attached sheet for secondary navigation workflows.",
+        "Edge placement is part of the shared Rust model so Leptos and Bevy agree.",
+    )
+    .with_side(SheetSide::Left)
+    .with_default_open(true)
+}
+
+fn loading_sheet_story_model() -> SheetModel {
+    default_sheet_story_model().loading()
+}
+
+fn disabled_sheet_story_model() -> SheetModel {
+    default_sheet_story_model()
+        .with_close_label("Locked")
+        .disabled()
+}
+
+fn invalid_sheet_story_model() -> SheetModel {
+    SheetModel::new("", "Missing trigger", "Invalid sheet metadata", "Invalid")
+}
+
+fn themed_sheet_story_model() -> SheetModel {
+    SheetModel::new(
+        "Open theme sheet",
+        "Theme scoped sheet",
+        "The same sheet tokens resolve inside the nested Dracula theme.",
+        "Theme switching stays token-driven across the overlay surface.",
+    )
+    .with_side(SheetSide::Bottom)
+    .with_default_open(true)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

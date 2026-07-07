@@ -295,12 +295,12 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        SelectPart, SeparatorPart, SheetPart, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -319,15 +319,15 @@ pub mod bevy_adapter {
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
-        default_separator_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_separator_model, default_sheet_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
-        select_render_nodes, separator_render_nodes,
+        select_render_nodes, separator_render_nodes, sheet_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -580,6 +580,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Sheet {
+            return bevy_primitives_for_sheet(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1605,6 +1608,38 @@ pub mod bevy_adapter {
                     state,
                     intent: separator_intent_for_part(node.actionable),
                     selected: node.active || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_sheet(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_sheet_model();
+        let mut sheet_state = model.state();
+        let _ = sheet_state.apply(crate::SheetIntent::Open);
+        sheet_render_nodes(&model, &sheet_state)
+            .into_iter()
+            .map(|node| {
+                let role = sheet_role_for_part(node.part);
+                let tone = sheet_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: sheet_primitive_part(&node),
+                    kind: sheet_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: sheet_size_for_part(node.part, node.side),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: sheet_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.focused,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -4616,6 +4651,78 @@ pub mod bevy_adapter {
                 Vec2::new(scale::space::XS, scale::space::XL)
             }
             (SeparatorPart::Label, _) => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    fn sheet_primitive_part(node: &crate::SheetRenderNode) -> String {
+        match node.part {
+            SheetPart::Footer => format!("{}:{}", node.part.label(), node.value),
+            SheetPart::Root
+            | SheetPart::Trigger
+            | SheetPart::Content
+            | SheetPart::Header
+            | SheetPart::Close => node.part.label().to_owned(),
+        }
+    }
+
+    const fn sheet_kind_for_part(part: SheetPart) -> UiWidgetSlotKind {
+        match part {
+            SheetPart::Root => UiWidgetSlotKind::Section,
+            SheetPart::Trigger | SheetPart::Footer => UiWidgetSlotKind::Button,
+            SheetPart::Content => UiWidgetSlotKind::Overlay,
+            SheetPart::Header => UiWidgetSlotKind::Header,
+            SheetPart::Close => UiWidgetSlotKind::IconButton,
+        }
+    }
+
+    const fn sheet_role_for_part(part: SheetPart) -> UiBlockRole {
+        match part {
+            SheetPart::Root => UiBlockRole::Root,
+            SheetPart::Trigger | SheetPart::Footer | SheetPart::Close => UiBlockRole::Action,
+            SheetPart::Content => UiBlockRole::Overlay,
+            SheetPart::Header => UiBlockRole::Header,
+        }
+    }
+
+    fn sheet_tone_for_node(node: &crate::SheetRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.selected {
+            return UiBlockTone::Brand;
+        }
+        if node.focused {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            SheetPart::Trigger | SheetPart::Footer => UiBlockTone::Brand,
+            SheetPart::Close => UiBlockTone::Muted,
+            SheetPart::Root | SheetPart::Content | SheetPart::Header => UiBlockTone::Surface,
+        }
+    }
+
+    const fn sheet_intent_for_part(part: SheetPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SheetPart::Trigger, true) => UiWidgetIntent::Toggle,
+            (SheetPart::Footer, true) => UiWidgetIntent::Activate,
+            (SheetPart::Close, true) => UiWidgetIntent::Close,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn sheet_size_for_part(part: SheetPart, side: crate::SheetSide) -> Vec2 {
+        match (part, side) {
+            (SheetPart::Root, _) => Vec2::new(scale::space::XL3, scale::space::XL2),
+            (SheetPart::Trigger, _) => Vec2::new(scale::space::XL, scale::space::M),
+            (SheetPart::Content, crate::SheetSide::Left | crate::SheetSide::Right) => {
+                Vec2::new(scale::space::XL2, scale::space::XL3)
+            }
+            (SheetPart::Content, crate::SheetSide::Top | crate::SheetSide::Bottom) => {
+                Vec2::new(scale::space::XL3, scale::space::XL2)
+            }
+            (SheetPart::Header, _) => Vec2::new(scale::space::XL2, scale::space::L),
+            (SheetPart::Footer, _) => Vec2::new(scale::space::L, scale::space::M),
+            (SheetPart::Close, _) => Vec2::new(scale::space::M, scale::space::M),
         }
     }
 

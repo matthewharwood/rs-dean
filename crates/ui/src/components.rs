@@ -42,13 +42,13 @@ use crate::{
     ResizableOrientation, ResizablePart, ScrollAreaAxis, ScrollAreaDensity, ScrollAreaIntent,
     ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, SelectDensity, SelectIntent, SelectModel,
     SelectPart, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
-    SeparatorPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
-    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    SeparatorPart, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetSide, SheetState,
+    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -64,16 +64,16 @@ use crate::{
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
-    default_select_model, default_separator_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
-    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    default_select_model, default_separator_model, default_sheet_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
     message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, validate_accordion_model,
+    selected_select_label, separator_render_nodes, sheet_render_nodes, validate_accordion_model,
     validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
     validate_attachment_model, validate_avatar_model, validate_badge_model,
     validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
@@ -89,7 +89,7 @@ use crate::{
     validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
     validate_popover_model, validate_progress_model, validate_radio_group_model,
     validate_resizable_model, validate_scroll_area_model, validate_select_model,
-    validate_separator_model,
+    validate_separator_model, validate_sheet_model,
 };
 
 const HEALTH_CARD: &str =
@@ -670,6 +670,37 @@ const DRAWER_ACTION: &str = "inline-flex min-h-field items-center justify-center
 const DRAWER_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DRAWER_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DRAWER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const SHEET_ROOT: &str = "grid w-full gap-2xs text-text-1";
+const SHEET_ROOT_DENSE: &str = "grid w-full gap-3xs text-text-1";
+const SHEET_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
+const SHEET_TRIGGER: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_TRIGGER_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_TRIGGER_OPEN: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_TRIGGER_DISABLED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const SHEET_CONTENT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const SHEET_CONTENT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const SHEET_CONTENT_RIGHT: &str = "justify-self-end border-l-brand";
+const SHEET_CONTENT_LEFT: &str = "justify-self-start border-r-brand";
+const SHEET_CONTENT_TOP: &str = "justify-self-stretch border-b-brand";
+const SHEET_CONTENT_BOTTOM: &str = "justify-self-stretch border-t-brand";
+const SHEET_HEADER: &str = "grid gap-2xs";
+const SHEET_HEADER_DENSE: &str = "grid gap-3xs";
+const SHEET_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const SHEET_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SHEET_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const SHEET_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const SHEET_BODY: &str = "m-0 text-0 leading-0 text-text-2";
+const SHEET_BODY_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const SHEET_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
+const SHEET_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const SHEET_CLOSE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SHEET_CLOSE_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const SHEET_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -13872,7 +13903,315 @@ const fn separator_state_label(
     }
 }
 
-catalog_component!(Sheet, crate::SheetModel, crate::default_sheet_model);
+#[component]
+pub fn Sheet(#[prop(optional, default = default_sheet_model())] model: SheetModel) -> AnyView {
+    if let Err(report) = validate_sheet_model(&model) {
+        let message = format!("Sheet validation failed: {report}");
+        return view! {
+            <div class=SHEET_ERROR data-ui-component="sheet" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let side = model.side;
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = sheet_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SheetPart::Root)
+        .expect("invariant: sheet render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == SheetPart::Trigger)
+        .expect("invariant: sheet render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == SheetPart::Content)
+        .expect("invariant: sheet render nodes include content")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == SheetPart::Header)
+        .expect("invariant: sheet render nodes include header")
+        .clone();
+    let close = nodes
+        .iter()
+        .find(|node| node.part == SheetPart::Close)
+        .expect("invariant: sheet render nodes include close")
+        .clone();
+    let footer_model = model.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=sheet_root_class(density, disabled)
+            data-ui-component="sheet"
+            data-ui-part=SheetPart::Root.label()
+            data-ui-side=side.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    sheet_state_label(loading, disabled, state.is_open()).to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        sheet_trigger_class(density, state.is_open(), blocked).to_owned()
+                    })
+                }
+                data-ui-part=SheetPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-haspopup="dialog"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SheetIntent::Focus(SheetPart::Trigger));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SheetIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SheetIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger.label}
+            </button>
+            {move || {
+                state.with(|state| {
+                    if !state.is_open() {
+                        return ().into_any();
+                    }
+                    let footer_nodes = sheet_render_nodes(&footer_model, state)
+                        .into_iter()
+                        .filter(|node| node.part == SheetPart::Footer)
+                        .collect::<Vec<_>>();
+                    view! {
+                        <article
+                            role="dialog"
+                            aria-modal="true"
+                            class=sheet_content_class(side, density)
+                            data-ui-part=SheetPart::Content.label()
+                            data-ui-value=content.value.clone()
+                            data-ui-side=side.label()
+                        >
+                            <header
+                                class=sheet_header_class(density)
+                                data-ui-part=SheetPart::Header.label()
+                            >
+                                <h3 class=sheet_title_class(density)>{header.label.clone()}</h3>
+                                <p class=sheet_description_class(density)>{header.detail.clone()}</p>
+                            </header>
+                            <p class=sheet_body_class(density)>{content.detail.clone()}</p>
+                            <footer class=SHEET_FOOTER data-ui-part=SheetPart::Footer.label()>
+                                {footer_nodes
+                                    .into_iter()
+                                    .map(|node| sheet_footer_action_view(node, density, blocked, set_state))
+                                    .collect_view()}
+                                <button
+                                    type="button"
+                                    class=sheet_close_class(blocked)
+                                    data-ui-part=SheetPart::Close.label()
+                                    data-ui-value=close.value.clone()
+                                    disabled=blocked
+                                    on:focus=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(SheetIntent::Focus(SheetPart::Close));
+                                            });
+                                        }
+                                    }
+                                    on:blur=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(SheetIntent::Blur);
+                                            });
+                                        }
+                                    }
+                                    on:click=move |_| {
+                                        if !blocked {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(SheetIntent::Close);
+                                            });
+                                        }
+                                    }
+                                >
+                                    {close.label.clone()}
+                                </button>
+                            </footer>
+                        </article>
+                    }
+                    .into_any()
+                })
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+fn sheet_footer_action_view(
+    node: crate::SheetRenderNode,
+    density: SheetDensity,
+    blocked: bool,
+    set_state: WriteSignal<SheetState>,
+) -> AnyView {
+    let value_for_click = node.value.clone();
+    let close_sheet = node.close_sheet;
+    let disabled = node.disabled || blocked || !node.actionable;
+    view! {
+        <button
+            type="button"
+            class=sheet_action_class(density, node.index, node.selected, disabled)
+            data-ui-part=SheetPart::Footer.label()
+            data-ui-value=node.value
+            disabled=disabled
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(SheetIntent::ActivateFooter(value));
+                        if close_sheet {
+                            let _ = state.apply(SheetIntent::Close);
+                        }
+                    });
+                }
+            }
+        >
+            {node.label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn sheet_root_class(density: SheetDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return SHEET_ROOT_DISABLED;
+    }
+    match density {
+        SheetDensity::Standard => SHEET_ROOT,
+        SheetDensity::Dense => SHEET_ROOT_DENSE,
+    }
+}
+
+const fn sheet_trigger_class(density: SheetDensity, open: bool, disabled: bool) -> &'static str {
+    if disabled {
+        return SHEET_TRIGGER_DISABLED;
+    }
+    if open {
+        return SHEET_TRIGGER_OPEN;
+    }
+    match density {
+        SheetDensity::Standard => SHEET_TRIGGER,
+        SheetDensity::Dense => SHEET_TRIGGER_DENSE,
+    }
+}
+
+fn sheet_content_class(side: SheetSide, density: SheetDensity) -> String {
+    let base = match density {
+        SheetDensity::Standard => SHEET_CONTENT,
+        SheetDensity::Dense => SHEET_CONTENT_DENSE,
+    };
+    let side_class = match side {
+        SheetSide::Top => SHEET_CONTENT_TOP,
+        SheetSide::Right => SHEET_CONTENT_RIGHT,
+        SheetSide::Bottom => SHEET_CONTENT_BOTTOM,
+        SheetSide::Left => SHEET_CONTENT_LEFT,
+    };
+    format!("{base} {side_class}")
+}
+
+const fn sheet_header_class(density: SheetDensity) -> &'static str {
+    match density {
+        SheetDensity::Standard => SHEET_HEADER,
+        SheetDensity::Dense => SHEET_HEADER_DENSE,
+    }
+}
+
+const fn sheet_title_class(density: SheetDensity) -> &'static str {
+    match density {
+        SheetDensity::Standard => SHEET_TITLE,
+        SheetDensity::Dense => SHEET_TITLE_DENSE,
+    }
+}
+
+const fn sheet_description_class(density: SheetDensity) -> &'static str {
+    match density {
+        SheetDensity::Standard => SHEET_DESCRIPTION,
+        SheetDensity::Dense => SHEET_DESCRIPTION_DENSE,
+    }
+}
+
+const fn sheet_body_class(density: SheetDensity) -> &'static str {
+    match density {
+        SheetDensity::Standard => SHEET_BODY,
+        SheetDensity::Dense => SHEET_BODY_DENSE,
+    }
+}
+
+const fn sheet_action_class(
+    density: SheetDensity,
+    index: usize,
+    selected: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SHEET_ACTION_DISABLED;
+    }
+    if selected {
+        return SHEET_ACTION_ACTIVE;
+    }
+    match (density, index) {
+        (SheetDensity::Dense, 0) => SHEET_ACTION_DENSE,
+        (_, 0) => SHEET_ACTION,
+        _ => SHEET_ACTION_SECONDARY,
+    }
+}
+
+const fn sheet_close_class(disabled: bool) -> &'static str {
+    if disabled {
+        SHEET_CLOSE_DISABLED
+    } else {
+        SHEET_CLOSE
+    }
+}
+
+const fn sheet_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(Sidebar, crate::SidebarModel, crate::default_sidebar_model);
 catalog_component!(
     Skeleton,

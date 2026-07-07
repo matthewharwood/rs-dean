@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    sheet,
-    Sheet,
-    SheetModel,
-    SheetPart,
-    SheetRenderNode,
-    SheetState,
-    SheetIntent,
-    SheetChange,
-    validate_sheet_model,
-    sheet_render_nodes,
-    default_sheet_model,
-    [
-        Root => "Sheet",
-        Trigger => "SheetTrigger",
-        Content => "SheetContent",
-        Header => "SheetHeader",
-        Footer => "SheetFooter",
-        Close => "SheetClose",
-    ]
-);
-
-define_catalog_component!(
     sidebar,
     Sidebar,
     SidebarModel,
@@ -853,8 +831,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Resizable
         | UiComponentId::ScrollArea
         | UiComponentId::Select
-        | UiComponentId::Separator => None,
-        UiComponentId::Sheet => Some(any_nodes(sheet_render_nodes(&default_sheet_model()))),
+        | UiComponentId::Separator
+        | UiComponentId::Sheet => None,
         UiComponentId::Sidebar => Some(any_nodes(sidebar_render_nodes(&default_sidebar_model()))),
         UiComponentId::Skeleton => {
             Some(any_nodes(skeleton_render_nodes(&default_skeleton_model())))
@@ -949,6 +927,7 @@ mod tests {
                     | UiComponentId::ScrollArea
                     | UiComponentId::Select
                     | UiComponentId::Separator
+                    | UiComponentId::Sheet
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -965,17 +944,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_sheet_model().state();
-        assert!(!state.is_active(SheetPart::Root));
+        let mut state = default_sidebar_model().state();
+        assert!(!state.is_active(SidebarPart::Root));
         assert_eq!(
-            state.apply(SheetIntent::Toggle(SheetPart::Root)),
-            SheetChange::Opened(SheetPart::Root)
+            state.apply(SidebarIntent::Toggle(SidebarPart::Root)),
+            SidebarChange::Opened(SidebarPart::Root)
         );
-        assert!(state.is_active(SheetPart::Root));
+        assert!(state.is_active(SidebarPart::Root));
         assert_eq!(
-            state.apply(SheetIntent::Toggle(SheetPart::Root)),
-            SheetChange::Closed(SheetPart::Root)
+            state.apply(SidebarIntent::Toggle(SidebarPart::Root)),
+            SidebarChange::Closed(SidebarPart::Root)
         );
-        assert!(!state.is_active(SheetPart::Root));
+        assert!(!state.is_active(SidebarPart::Root));
     }
 }

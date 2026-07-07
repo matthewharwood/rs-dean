@@ -51,6 +51,7 @@ pub mod resizable;
 pub mod scroll_area;
 pub mod select;
 pub mod separator;
+pub mod sheet;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -304,6 +305,10 @@ pub use separator::{
     SeparatorChange, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
     SeparatorPart, SeparatorRenderNode, SeparatorState, default_separator_model,
     separator_render_nodes, validate_separator_model,
+};
+pub use sheet::{
+    SheetAction, SheetChange, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetRenderNode,
+    SheetSide, SheetState, default_sheet_model, sheet_render_nodes, validate_sheet_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};
