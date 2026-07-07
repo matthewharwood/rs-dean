@@ -24,12 +24,13 @@ use crate::{
     DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
     DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
     EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, HoverCardDensity, HoverCardIntent,
-    HoverCardModel, HoverCardPart, InputDensity, InputIntent, InputModel, InputPart, InputState,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    HoverCardModel, HoverCardPart, InputDensity, InputGroupIntent, InputGroupModel, InputGroupPart,
+    InputGroupState, InputIntent, InputModel, InputPart, InputState, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -40,19 +41,20 @@ use crate::{
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
-    default_empty_model, default_field_model, default_hover_card_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_render_nodes, max_data_table_page_index,
-    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_model,
+    default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model,
 };
 
 const HEALTH_CARD: &str =
@@ -7498,11 +7500,172 @@ const fn input_state_label(
     }
 }
 
-catalog_component!(
-    InputGroup,
-    crate::InputGroupModel,
-    crate::default_input_group_model
-);
+#[component]
+pub fn InputGroup(
+    #[prop(optional, default = default_input_group_model())] model: InputGroupModel,
+) -> AnyView {
+    if let Err(report) = validate_input_group_model(&model) {
+        let message = format!("InputGroup validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="input-group" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let input_kind = model.input_kind;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let required = model.required;
+    let error_detail = model
+        .error
+        .clone()
+        .unwrap_or_else(|| "No input group error".to_owned());
+    let state_model = model.state();
+    let nodes = input_group_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == InputGroupPart::Root)
+        .expect("invariant: input group render nodes include root")
+        .clone();
+    let addon = nodes
+        .iter()
+        .find(|node| node.part == InputGroupPart::Addon)
+        .expect("invariant: input group render nodes include addon")
+        .clone();
+    let input = nodes
+        .iter()
+        .find(|node| node.part == InputGroupPart::Input)
+        .expect("invariant: input group render nodes include input")
+        .clone();
+    let button = nodes
+        .iter()
+        .find(|node| node.part == InputGroupPart::Button)
+        .expect("invariant: input group render nodes include button")
+        .clone();
+    let invalid = root.invalid;
+    let placeholder = input.label.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=input_root_class(disabled)
+            data-ui-component="input-group"
+            data-ui-part=InputGroupPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-kind=input_kind.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    input_state_label(loading, disabled, invalid, state.is_focused()).to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <div
+                class=move || {
+                    state.with(|state| {
+                        input_row_class(density, state.is_focused(), invalid, loading, disabled)
+                            .to_owned()
+                    })
+                }
+            >
+                <span
+                    class=input_prefix_class(density, addon.visible)
+                    data-ui-part=InputGroupPart::Addon.label()
+                    data-ui-value=addon.value
+                    aria-hidden=(!addon.visible).to_string()
+                >
+                    {addon.label}
+                </span>
+                <input
+                    type=input_kind.label()
+                    class=input_control_class(density, blocked)
+                    data-ui-part=InputGroupPart::Input.label()
+                    placeholder=placeholder
+                    aria-label="Input group"
+                    aria-invalid=invalid.to_string()
+                    required=required
+                    disabled=blocked
+                    prop:value=move || state.with(|state| state.value().to_owned())
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(InputGroupIntent::Focus);
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(InputGroupIntent::Blur);
+                            });
+                        }
+                    }
+                    on:input=move |event| {
+                        if !blocked {
+                            let value = event_target_value(&event);
+                            set_state.update(|state| {
+                                let _ = state.apply(InputGroupIntent::Input(value));
+                            });
+                        }
+                    }
+                />
+                {input_group_button_view(button, density, blocked, set_state)}
+            </div>
+            <p
+                class=input_error_class(invalid)
+                data-ui-part=InputGroupPart::Input.label()
+                aria-hidden=(!invalid).to_string()
+            >
+                {error_detail}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+fn input_group_button_view(
+    node: crate::InputGroupRenderNode,
+    density: InputDensity,
+    blocked: bool,
+    set_state: WriteSignal<InputGroupState>,
+) -> AnyView {
+    let disabled = node.disabled || blocked || !node.actionable;
+    let value_for_click = node.value.clone();
+    let value_for_data = node.value;
+    let label = node.label;
+    let visible = node.visible;
+    let active = node.active;
+    view! {
+        <button
+            type="button"
+            class=move || {
+                input_suffix_class(density, visible, active, disabled).to_owned()
+            }
+            data-ui-part=InputGroupPart::Button.label()
+            data-ui-value=value_for_data
+            aria-hidden=(!visible).to_string()
+            disabled=disabled
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(InputGroupIntent::ActivateButton(value));
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
 catalog_component!(
     InputOtp,
     crate::InputOtpModel,

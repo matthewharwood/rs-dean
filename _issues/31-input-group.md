@@ -42,4 +42,5 @@ Ship a Rust-first `Input Group` component that follows the shadcn composition mo
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Concrete addon/input/button model, Input-shared density/kind/action vocabulary, renderer-local draft state, token-only renderer, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

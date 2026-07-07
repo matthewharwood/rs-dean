@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    input_group,
-    InputGroup,
-    InputGroupModel,
-    InputGroupPart,
-    InputGroupRenderNode,
-    InputGroupState,
-    InputGroupIntent,
-    InputGroupChange,
-    validate_input_group_model,
-    input_group_render_nodes,
-    default_input_group_model,
-    [
-        Root => "InputGroup",
-        Addon => "InputGroupAddon",
-        Input => "InputGroupInput",
-        Button => "InputGroupButton",
-    ]
-);
-
-define_catalog_component!(
     input_otp,
     InputOtp,
     InputOtpModel,
@@ -1210,10 +1190,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Empty
         | UiComponentId::Field
         | UiComponentId::HoverCard
-        | UiComponentId::Input => None,
-        UiComponentId::InputGroup => Some(any_nodes(input_group_render_nodes(
-            &default_input_group_model(),
-        ))),
+        | UiComponentId::Input
+        | UiComponentId::InputGroup => None,
         UiComponentId::InputOtp => Some(any_nodes(input_otp_render_nodes(
             &default_input_otp_model(),
         ))),
@@ -1328,6 +1306,7 @@ mod tests {
                     | UiComponentId::Field
                     | UiComponentId::HoverCard
                     | UiComponentId::Input
+                    | UiComponentId::InputGroup
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1344,17 +1323,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_input_group_model().state();
-        assert!(!state.is_active(InputGroupPart::Root));
+        let mut state = default_input_otp_model().state();
+        assert!(!state.is_active(InputOtpPart::Root));
         assert_eq!(
-            state.apply(InputGroupIntent::Toggle(InputGroupPart::Root)),
-            InputGroupChange::Opened(InputGroupPart::Root)
+            state.apply(InputOtpIntent::Toggle(InputOtpPart::Root)),
+            InputOtpChange::Opened(InputOtpPart::Root)
         );
-        assert!(state.is_active(InputGroupPart::Root));
+        assert!(state.is_active(InputOtpPart::Root));
         assert_eq!(
-            state.apply(InputGroupIntent::Toggle(InputGroupPart::Root)),
-            InputGroupChange::Closed(InputGroupPart::Root)
+            state.apply(InputOtpIntent::Toggle(InputOtpPart::Root)),
+            InputOtpChange::Closed(InputOtpPart::Root)
         );
-        assert!(!state.is_active(InputGroupPart::Root));
+        assert!(!state.is_active(InputOtpPart::Root));
     }
 }

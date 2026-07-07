@@ -31,6 +31,7 @@ pub mod empty;
 pub mod field;
 pub mod hover_card;
 pub mod input;
+pub mod input_group;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -186,6 +187,11 @@ pub use hover_card::{
 pub use input::{
     InputAction, InputChange, InputDensity, InputIntent, InputKind, InputModel, InputPart,
     InputRenderNode, InputState, default_input_model, input_render_nodes, validate_input_model,
+};
+pub use input_group::{
+    InputGroupChange, InputGroupIntent, InputGroupModel, InputGroupPart, InputGroupRenderNode,
+    InputGroupState, default_input_group_model, input_group_render_nodes,
+    validate_input_group_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

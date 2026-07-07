@@ -20,7 +20,8 @@ use rs_dean_ui::{
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
-    InputKind, InputModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    InputGroup, InputGroupModel, InputKind, InputModel, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -601,6 +602,24 @@ fn Stories() -> impl IntoView {
                             <Input model=invalid_input_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Input model=themed_input_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-input-group" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Input Group"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 31 implemented as a composed input primitive backed by validated shared Rust addon/input/button state, renderer-local draft input state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <InputGroup model=default_input_group_story_model() />
+                            <InputGroup model=dense_input_group_story_model() />
+                            <InputGroup model=loading_input_group_story_model() />
+                            <InputGroup model=disabled_input_group_story_model() />
+                            <InputGroup model=invalid_input_group_story_model() />
+                            <ThemeScope theme=ThemeId::Synthwave>
+                                <InputGroup model=themed_input_group_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2265,6 +2284,49 @@ fn themed_input_story_model() -> InputModel {
         .with_value("surface-elevated")
         .with_prefix("token:")
         .with_suffix(InputAction::new("Apply", "apply-token"))
+}
+
+fn default_input_group_story_model() -> InputGroupModel {
+    InputGroupModel::new("42")
+        .with_value("42")
+        .with_addon("$")
+        .with_button(InputAction::new("Apply", "apply-amount"))
+        .required()
+}
+
+fn dense_input_group_story_model() -> InputGroupModel {
+    InputGroupModel::new("lesson slug")
+        .with_density(InputDensity::Dense)
+        .with_value("ui-input-group")
+        .with_addon("slug")
+        .with_button(InputAction::new("Save", "save-slug"))
+}
+
+fn loading_input_group_story_model() -> InputGroupModel {
+    default_input_group_story_model().loading()
+}
+
+fn disabled_input_group_story_model() -> InputGroupModel {
+    InputGroupModel::new("Locked")
+        .with_value("read-only")
+        .with_addon("id")
+        .with_button(InputAction::new("Copy", "copy-read-only").disabled())
+        .disabled()
+}
+
+fn invalid_input_group_story_model() -> InputGroupModel {
+    InputGroupModel::new("Amount")
+        .with_addon("$")
+        .with_button(InputAction::new("Apply", "apply-invalid"))
+        .with_error("Amount is required.")
+        .required()
+}
+
+fn themed_input_group_story_model() -> InputGroupModel {
+    InputGroupModel::new("theme token")
+        .with_value("brand")
+        .with_addon("token")
+        .with_button(InputAction::new("Apply", "apply-theme-token"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
