@@ -29,8 +29,9 @@ use crate::{
     InputOtpState, InputPart, InputState, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemState,
     KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, LabelDensity, LabelIntent, LabelModel,
     LabelPart, LabelRequirement, LabelState, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,
-    MarkerState, MarkerTone, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    MarkerState, MarkerTone, MenubarDensity, MenubarIntent, MenubarModel, MenubarPart,
+    MenubarState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
     calendar_render_nodes, card_render_nodes, carousel_render_nodes,
@@ -47,22 +48,23 @@ use crate::{
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
-    default_marker_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model,
+    default_marker_model, default_menubar_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model,
 };
 
 const HEALTH_CARD: &str =
@@ -868,6 +870,29 @@ const MARKER_ANCHOR_ACTIVE: &str = "inline-flex min-h-s items-center rounded-fie
 const MARKER_ANCHOR_DISABLED: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
 const MARKER_ANCHOR_HIDDEN: &str = "hidden";
 const MARKER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const MENUBAR_ROOT: &str = "grid max-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_DENSE: &str = "grid max-w-xl gap-3xs rounded-field border border-border-subtle bg-surface-1 p-3xs text-text-1 shadow-1";
+const MENUBAR_ROOT_INVALID: &str = "grid max-w-xl gap-2xs rounded-box border border-danger bg-error-soft p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_LOADING: &str =
+    "grid max-w-xl gap-2xs rounded-box border border-info bg-info-soft p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_DISABLED: &str = "grid max-w-xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-2xs text-text-disabled opacity-disabled";
+const MENUBAR_ROW: &str = "flex flex-wrap items-center gap-2xs";
+const MENUBAR_MENU: &str = "relative grid gap-2xs";
+const MENUBAR_MENU_DENSE: &str = "relative grid gap-3xs";
+const MENUBAR_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const MENUBAR_CONTENT: &str = "grid min-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-2xs shadow-2";
+const MENUBAR_CONTENT_DENSE: &str = "grid min-w-l gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs shadow-1";
+const MENUBAR_CONTENT_HIDDEN: &str = "hidden";
+const MENUBAR_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_ITEM_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-xs rounded-field px-2xs py-3xs text-left text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MENUBAR_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const MENUBAR_SHORTCUT: &str = "ml-s text-00 font-6 leading-0 text-text-muted";
+const MENUBAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -9211,7 +9236,399 @@ const fn marker_state_label(
     }
 }
 
-catalog_component!(Menubar, crate::MenubarModel, crate::default_menubar_model);
+#[component]
+pub fn Menubar(
+    #[prop(optional, default = default_menubar_model())] model: MenubarModel,
+) -> AnyView {
+    if let Err(report) = validate_menubar_model(&model) {
+        let message = format!("Menubar validation failed: {report}");
+        return view! {
+            <div class=MENUBAR_ERROR data-ui-component="menubar" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = menubar_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == MenubarPart::Root)
+        .expect("invariant: menubar render nodes include root")
+        .clone();
+    let menu_nodes = nodes
+        .iter()
+        .filter(|node| node.part == MenubarPart::Menu)
+        .cloned()
+        .collect::<Vec<_>>();
+    let trigger_nodes = nodes
+        .iter()
+        .filter(|node| node.part == MenubarPart::Trigger)
+        .cloned()
+        .collect::<Vec<_>>();
+    let content_nodes = nodes
+        .iter()
+        .filter(|node| node.part == MenubarPart::Content)
+        .cloned()
+        .collect::<Vec<_>>();
+    let item_nodes = nodes
+        .into_iter()
+        .filter(|node| node.part == MenubarPart::Item)
+        .collect::<Vec<_>>();
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let root_detail = root.detail;
+    let (state, set_state) = signal(state_model);
+    let context = MenubarViewContext {
+        density,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <nav
+            role="menubar"
+            class=menubar_root_class(density, invalid, loading, disabled)
+            data-ui-component="menubar"
+            data-ui-part=MenubarPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    menubar_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.open_menu().is_some(),
+                        state.focused_value().is_some(),
+                        state.selected_value().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+            title=root_detail
+        >
+            <div class=MENUBAR_ROW>
+                {menu_nodes
+                    .into_iter()
+                    .map(|menu| {
+                        let menu_value = menu.value.clone();
+                        let trigger = trigger_nodes
+                            .iter()
+                            .find(|node| node.menu_value == menu_value)
+                            .expect("invariant: menubar menu includes trigger")
+                            .clone();
+                        let content = content_nodes
+                            .iter()
+                            .find(|node| node.menu_value == menu_value)
+                            .expect("invariant: menubar menu includes content")
+                            .clone();
+                        let items = item_nodes
+                            .iter()
+                            .filter(|node| node.menu_value == menu_value)
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        menubar_menu_view(menu, trigger, content, items, context)
+                    })
+                    .collect_view()}
+            </div>
+        </nav>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct MenubarViewContext {
+    density: MenubarDensity,
+    blocked: bool,
+    state: ReadSignal<MenubarState>,
+    set_state: WriteSignal<MenubarState>,
+}
+
+fn menubar_menu_view(
+    menu: crate::MenubarRenderNode,
+    trigger: crate::MenubarRenderNode,
+    content: crate::MenubarRenderNode,
+    items: Vec<crate::MenubarRenderNode>,
+    context: MenubarViewContext,
+) -> AnyView {
+    let menu_value = menu.value;
+    let menu_label = menu.label;
+    let menu_detail = menu.detail;
+    view! {
+        <div
+            class=menubar_menu_class(context.density)
+            data-ui-part=MenubarPart::Menu.label()
+            data-ui-index=menu.menu_index.to_string()
+            data-ui-value=menu_value
+            aria-label=menu_label
+            title=menu_detail
+        >
+            {menubar_trigger_view(trigger, context)}
+            {menubar_content_view(content, items, context)}
+        </div>
+    }
+    .into_any()
+}
+
+fn menubar_trigger_view(node: crate::MenubarRenderNode, context: MenubarViewContext) -> AnyView {
+    let disabled = node.disabled || context.blocked;
+    let value = node.value;
+    let value_for_class = value.clone();
+    let value_for_expanded = value.clone();
+    let value_for_data = value.clone();
+    let value_for_click = value.clone();
+    let value_for_enter = value.clone();
+    let label = node.label;
+    let detail = node.detail;
+    view! {
+        <button
+            type="button"
+            role="menuitem"
+            class=move || {
+                context.state.with(|state| {
+                    menubar_trigger_class(
+                        context.density,
+                        state.is_open(value_for_class.as_str()),
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=MenubarPart::Trigger.label()
+            data-ui-index=node.menu_index.to_string()
+            data-ui-value=value_for_data
+            aria-haspopup="menu"
+            aria-expanded=move || context.state.with(|state| state.is_open(value_for_expanded.as_str()).to_string())
+            aria-disabled=disabled.to_string()
+            disabled=disabled
+            title=detail
+            on:click=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MenubarIntent::Toggle(value_for_click.clone()));
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MenubarIntent::Open(value_for_enter.clone()));
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
+fn menubar_content_view(
+    node: crate::MenubarRenderNode,
+    items: Vec<crate::MenubarRenderNode>,
+    context: MenubarViewContext,
+) -> AnyView {
+    let menu_value = node.value;
+    let menu_value_for_class = menu_value.clone();
+    let menu_value_for_data = menu_value.clone();
+    let menu_value_for_hidden = menu_value.clone();
+    let label = node.label;
+    let detail = node.detail;
+    view! {
+        <div
+            role="menu"
+            class=move || {
+                context.state.with(|state| {
+                    menubar_content_class(context.density, state.is_open(menu_value_for_class.as_str()))
+                        .to_owned()
+                })
+            }
+            data-ui-part=MenubarPart::Content.label()
+            data-ui-index=node.menu_index.to_string()
+            data-ui-value=menu_value_for_data
+            aria-label=label
+            aria-hidden=move || {
+                context.state.with(|state| (!state.is_open(menu_value_for_hidden.as_str())).to_string())
+            }
+            title=detail
+        >
+            {items
+                .into_iter()
+                .map(|item| menubar_item_view(item, context))
+                .collect_view()}
+        </div>
+    }
+    .into_any()
+}
+
+fn menubar_item_view(node: crate::MenubarRenderNode, context: MenubarViewContext) -> AnyView {
+    let disabled = node.disabled || context.blocked;
+    let value = node.value;
+    let value_for_class = value.clone();
+    let value_for_selected = value.clone();
+    let value_for_data = value.clone();
+    let value_for_focus = value.clone();
+    let value_for_enter = value.clone();
+    let value_for_click = value.clone();
+    let label = node.label;
+    let shortcut = node.shortcut;
+    let menu_value = node.menu_value;
+    view! {
+        <button
+            type="button"
+            role="menuitem"
+            class=move || {
+                context.state.with(|state| {
+                    menubar_item_class(
+                        context.density,
+                        state.is_focused(value_for_class.as_str()) || state.is_selected(value_for_class.as_str()),
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=MenubarPart::Item.label()
+            data-ui-index=node.item_index.to_string()
+            data-ui-menu=menu_value
+            data-ui-value=value_for_data
+            aria-selected=move || context.state.with(|state| state.is_selected(value_for_selected.as_str()).to_string())
+            disabled=disabled
+            on:focus=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MenubarIntent::FocusItem(value_for_focus.clone()));
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MenubarIntent::FocusItem(value_for_enter.clone()));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MenubarIntent::Activate(value_for_click.clone()));
+                    });
+                }
+            }
+        >
+            <span>{label}</span>
+            {if shortcut.is_empty() {
+                ().into_any()
+            } else {
+                view! { <span class=MENUBAR_SHORTCUT>{shortcut}</span> }.into_any()
+            }}
+        </button>
+    }
+    .into_any()
+}
+
+const fn menubar_root_class(
+    density: MenubarDensity,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MENUBAR_ROOT_DISABLED;
+    }
+    if loading {
+        return MENUBAR_ROOT_LOADING;
+    }
+    if invalid {
+        return MENUBAR_ROOT_INVALID;
+    }
+    match density {
+        MenubarDensity::Standard => MENUBAR_ROOT,
+        MenubarDensity::Dense => MENUBAR_ROOT_DENSE,
+    }
+}
+
+const fn menubar_menu_class(density: MenubarDensity) -> &'static str {
+    match density {
+        MenubarDensity::Standard => MENUBAR_MENU,
+        MenubarDensity::Dense => MENUBAR_MENU_DENSE,
+    }
+}
+
+const fn menubar_trigger_class(
+    density: MenubarDensity,
+    open: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MENUBAR_TRIGGER_DISABLED;
+    }
+    if open {
+        return MENUBAR_TRIGGER_OPEN;
+    }
+    match density {
+        MenubarDensity::Standard => MENUBAR_TRIGGER,
+        MenubarDensity::Dense => MENUBAR_TRIGGER_DENSE,
+    }
+}
+
+const fn menubar_content_class(density: MenubarDensity, open: bool) -> &'static str {
+    if !open {
+        return MENUBAR_CONTENT_HIDDEN;
+    }
+    match density {
+        MenubarDensity::Standard => MENUBAR_CONTENT,
+        MenubarDensity::Dense => MENUBAR_CONTENT_DENSE,
+    }
+}
+
+const fn menubar_item_class(density: MenubarDensity, active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        return MENUBAR_ITEM_DISABLED;
+    }
+    if active {
+        return MENUBAR_ITEM_ACTIVE;
+    }
+    match density {
+        MenubarDensity::Standard => MENUBAR_ITEM,
+        MenubarDensity::Dense => MENUBAR_ITEM_DENSE,
+    }
+}
+
+const fn menubar_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    focused: bool,
+    selected: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if selected {
+        "selected"
+    } else if focused {
+        "focused"
+    } else if open {
+        "open"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Message, crate::MessageModel, crate::default_message_model);
 catalog_component!(
     MessageScroller,

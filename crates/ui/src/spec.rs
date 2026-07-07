@@ -292,7 +292,7 @@ pub mod bevy_adapter {
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
-        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, RenderContract,
+        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, RenderContract,
         StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
         UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
@@ -313,11 +313,11 @@ pub mod bevy_adapter {
         default_empty_model, default_field_model, default_hover_card_model,
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_menubar_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, scale,
+        marker_render_nodes, menubar_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -495,6 +495,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Marker {
             return bevy_primitives_for_marker(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Menubar {
+            return bevy_primitives_for_menubar(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1116,6 +1119,37 @@ pub mod bevy_adapter {
                     state,
                     intent: marker_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_menubar(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_menubar_model();
+        let menubar_state = model.state();
+        menubar_render_nodes(&model, &menubar_state)
+            .into_iter()
+            .map(|node| {
+                let role = menubar_role_for_part(node.part);
+                let tone = menubar_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: menubar_primitive_part(&node),
+                    kind: menubar_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: menubar_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: menubar_intent_for_part(node.part, node.actionable),
+                    selected: node.open || node.focused || node.selected || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3302,6 +3336,74 @@ pub mod bevy_adapter {
             MarkerPart::Dot => Vec2::new(scale::space::XS, scale::space::XS),
             MarkerPart::Label => Vec2::new(scale::space::L, scale::space::S),
             MarkerPart::Anchor => Vec2::new(scale::space::M, scale::space::S),
+        }
+    }
+
+    fn menubar_primitive_part(node: &crate::MenubarRenderNode) -> String {
+        match node.part {
+            MenubarPart::Root => node.part.label().to_owned(),
+            MenubarPart::Menu | MenubarPart::Trigger | MenubarPart::Content => {
+                format!("{}:{}", node.part.label(), node.menu_value)
+            }
+            MenubarPart::Item => {
+                format!("{}:{}:{}", node.part.label(), node.menu_value, node.value)
+            }
+        }
+    }
+
+    const fn menubar_kind_for_part(part: MenubarPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            MenubarPart::Root => UiWidgetSlotKind::Section,
+            MenubarPart::Menu => UiWidgetSlotKind::List,
+            MenubarPart::Trigger => UiWidgetSlotKind::Button,
+            MenubarPart::Content => UiWidgetSlotKind::Overlay,
+            MenubarPart::Item if actionable => UiWidgetSlotKind::Option,
+            MenubarPart::Item => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn menubar_role_for_part(part: MenubarPart) -> UiBlockRole {
+        match part {
+            MenubarPart::Root => UiBlockRole::Root,
+            MenubarPart::Menu => UiBlockRole::Navigation,
+            MenubarPart::Trigger => UiBlockRole::Action,
+            MenubarPart::Content => UiBlockRole::Overlay,
+            MenubarPart::Item => UiBlockRole::Item,
+        }
+    }
+
+    fn menubar_tone_for_node(node: &crate::MenubarRenderNode) -> UiBlockTone {
+        if !node.visible || node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.open || node.focused || node.selected {
+            return UiBlockTone::Brand;
+        }
+        match (node.part, node.actionable) {
+            (MenubarPart::Trigger | MenubarPart::Item, true) => UiBlockTone::Surface,
+            (MenubarPart::Content, _) => UiBlockTone::Surface,
+            _ => UiBlockTone::Muted,
+        }
+    }
+
+    const fn menubar_intent_for_part(part: MenubarPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (MenubarPart::Trigger, true) => UiWidgetIntent::Open,
+            (MenubarPart::Item, true) => UiWidgetIntent::Activate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn menubar_size_for_part(part: MenubarPart) -> Vec2 {
+        match part {
+            MenubarPart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
+            MenubarPart::Menu => Vec2::new(scale::space::L, scale::space::M),
+            MenubarPart::Trigger => Vec2::new(scale::space::M, scale::space::S),
+            MenubarPart::Content => Vec2::new(scale::space::XL2, scale::space::XL),
+            MenubarPart::Item => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

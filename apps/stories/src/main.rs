@@ -22,8 +22,9 @@ use rs_dean_ui::{
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
     InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
     ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, Label, LabelDensity, LabelModel,
-    LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone, Menubar,
+    MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -712,6 +713,24 @@ fn Stories() -> impl IntoView {
                             <Marker model=invalid_marker_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Marker model=themed_marker_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-menubar" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Menubar"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 37 implemented as a horizontal application menu backed by validated shared Rust menu/trigger/content/item nodes, renderer-local open/focus/activation state, and Bevy-readable indexed menu primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Menubar model=default_menubar_story_model() />
+                            <Menubar model=dense_menubar_story_model() />
+                            <Menubar model=loading_menubar_story_model() />
+                            <Menubar model=disabled_menubar_story_model() />
+                            <Menubar model=invalid_menubar_story_model() />
+                            <ThemeScope theme=ThemeId::Synthwave>
+                                <Menubar model=themed_menubar_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2636,6 +2655,65 @@ fn themed_marker_story_model() -> MarkerModel {
         .with_value("notes")
         .with_dot_label("Annotation marker")
         .with_anchor(MarkerAnchor::new("Review", "#review-notes"))
+}
+
+fn default_menubar_story_model() -> MenubarModel {
+    MenubarModel::new(vec![
+        MenubarMenu::new(
+            "File",
+            "file",
+            vec![
+                MenubarItem::new("New project", "new-project").with_shortcut("N"),
+                MenubarItem::new("Import deck", "import-deck").with_shortcut("I"),
+            ],
+        ),
+        MenubarMenu::new(
+            "Edit",
+            "edit",
+            vec![
+                MenubarItem::new("Undo", "undo").with_shortcut("Z"),
+                MenubarItem::new("Redo", "redo").with_shortcut("R"),
+            ],
+        ),
+    ])
+}
+
+fn dense_menubar_story_model() -> MenubarModel {
+    default_menubar_story_model().with_density(MenubarDensity::Dense)
+}
+
+fn loading_menubar_story_model() -> MenubarModel {
+    default_menubar_story_model().loading()
+}
+
+fn disabled_menubar_story_model() -> MenubarModel {
+    default_menubar_story_model().disabled()
+}
+
+fn invalid_menubar_story_model() -> MenubarModel {
+    default_menubar_story_model().with_error("Menu commands are unavailable.")
+}
+
+fn themed_menubar_story_model() -> MenubarModel {
+    MenubarModel::new(vec![
+        MenubarMenu::new(
+            "View",
+            "view",
+            vec![
+                MenubarItem::new("Focus mode", "focus-mode").with_shortcut("F"),
+                MenubarItem::new("Command log", "command-log").with_shortcut("L"),
+            ],
+        ),
+        MenubarMenu::new(
+            "Tools",
+            "tools",
+            vec![
+                MenubarItem::new("Sync", "sync").with_shortcut("S"),
+                MenubarItem::new("Inspect", "inspect").with_shortcut("I"),
+            ],
+        ),
+    ])
+    .with_default_open("tools")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

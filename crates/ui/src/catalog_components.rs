@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    menubar,
-    Menubar,
-    MenubarModel,
-    MenubarPart,
-    MenubarRenderNode,
-    MenubarState,
-    MenubarIntent,
-    MenubarChange,
-    validate_menubar_model,
-    menubar_render_nodes,
-    default_menubar_model,
-    [
-        Root => "Menubar",
-        Menu => "MenubarMenu",
-        Trigger => "MenubarTrigger",
-        Content => "MenubarContent",
-        Item => "MenubarItem",
-    ]
-);
-
-define_catalog_component!(
     message,
     Message,
     MessageModel,
@@ -1104,8 +1083,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Item
         | UiComponentId::Kbd
         | UiComponentId::Label
-        | UiComponentId::Marker => None,
-        UiComponentId::Menubar => Some(any_nodes(menubar_render_nodes(&default_menubar_model()))),
+        | UiComponentId::Marker
+        | UiComponentId::Menubar => None,
         UiComponentId::Message => Some(any_nodes(message_render_nodes(&default_message_model()))),
         UiComponentId::MessageScroller => Some(any_nodes(message_scroller_render_nodes(
             &default_message_scroller_model(),
@@ -1218,6 +1197,7 @@ mod tests {
                     | UiComponentId::Kbd
                     | UiComponentId::Label
                     | UiComponentId::Marker
+                    | UiComponentId::Menubar
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1234,17 +1214,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_menubar_model().state();
-        assert!(!state.is_active(MenubarPart::Root));
+        let mut state = default_message_model().state();
+        assert!(!state.is_active(MessagePart::Root));
         assert_eq!(
-            state.apply(MenubarIntent::Toggle(MenubarPart::Root)),
-            MenubarChange::Opened(MenubarPart::Root)
+            state.apply(MessageIntent::Toggle(MessagePart::Root)),
+            MessageChange::Opened(MessagePart::Root)
         );
-        assert!(state.is_active(MenubarPart::Root));
+        assert!(state.is_active(MessagePart::Root));
         assert_eq!(
-            state.apply(MenubarIntent::Toggle(MenubarPart::Root)),
-            MenubarChange::Closed(MenubarPart::Root)
+            state.apply(MessageIntent::Toggle(MessagePart::Root)),
+            MessageChange::Closed(MessagePart::Root)
         );
-        assert!(!state.is_active(MenubarPart::Root));
+        assert!(!state.is_active(MessagePart::Root));
     }
 }

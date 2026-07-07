@@ -391,7 +391,19 @@ Issues 01 through 35 were re-audited against this learning; no earlier API
 changes were needed because hidden optional anatomy and local navigation state
 were already covered by Breadcrumb, Button, Item, Kbd, and Label.
 
-All-issue sweep pass: Menubar through Typography complete. The shared
+Concrete component pass: Menubar complete. The thirty-seventh issue now has a
+typed application-menu model, density/menu/item contracts, repeatable menu/
+trigger/content/item render nodes, renderer-local open/focus/activation state,
+`garde` validation, token-only Leptos menubar rendering, dedicated story proof,
+and Bevy primitive derivation from the same model. The sweep found that
+menu-like components need hidden/visible render state separated from hard
+disabled state so DOM renderers can open content after mount while Bevy still
+gets deterministic initial primitives. Issues 01 through 36 were re-audited
+against this learning; no earlier API changes were needed because existing
+menu components already isolate renderer-local open state from durable app
+state.
+
+All-issue sweep pass: Message through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -399,7 +411,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Menubar through Typography now have
+Concrete all-issue sweep pass: Message through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
