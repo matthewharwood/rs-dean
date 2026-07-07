@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    card,
-    Card,
-    CardModel,
-    CardPart,
-    CardRenderNode,
-    CardState,
-    CardIntent,
-    CardChange,
-    validate_card_model,
-    card_render_nodes,
-    default_card_model,
-    [
-        Root => "Card",
-        Header => "CardHeader",
-        Title => "CardTitle",
-        Description => "CardDescription",
-        Content => "CardContent",
-        Footer => "CardFooter",
-    ]
-);
-
-define_catalog_component!(
     carousel,
     Carousel,
     CarouselModel,
@@ -1573,8 +1551,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Bubble
         | UiComponentId::Button
         | UiComponentId::ButtonGroup
-        | UiComponentId::Calendar => None,
-        UiComponentId::Card => Some(any_nodes(card_render_nodes(&default_card_model()))),
+        | UiComponentId::Calendar
+        | UiComponentId::Card => None,
         UiComponentId::Carousel => {
             Some(any_nodes(carousel_render_nodes(&default_carousel_model())))
         }
@@ -1711,6 +1689,7 @@ mod tests {
                     | UiComponentId::Button
                     | UiComponentId::ButtonGroup
                     | UiComponentId::Calendar
+                    | UiComponentId::Card
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1727,17 +1706,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_card_model().state();
-        assert!(!state.is_active(CardPart::Root));
+        let mut state = default_carousel_model().state();
+        assert!(!state.is_active(CarouselPart::Root));
         assert_eq!(
-            state.apply(CardIntent::Toggle(CardPart::Root)),
-            CardChange::Opened(CardPart::Root)
+            state.apply(CarouselIntent::Toggle(CarouselPart::Root)),
+            CarouselChange::Opened(CarouselPart::Root)
         );
-        assert!(state.is_active(CardPart::Root));
+        assert!(state.is_active(CarouselPart::Root));
         assert_eq!(
-            state.apply(CardIntent::Toggle(CardPart::Root)),
-            CardChange::Closed(CardPart::Root)
+            state.apply(CarouselIntent::Toggle(CarouselPart::Root)),
+            CarouselChange::Closed(CarouselPart::Root)
         );
-        assert!(!state.is_active(CardPart::Root));
+        assert!(!state.is_active(CarouselPart::Root));
     }
 }

@@ -288,16 +288,17 @@ pub mod bevy_adapter {
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        catalog_component_any_render_nodes_for_component, component_implementation,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-        default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_group_model, default_button_model, default_calendar_model, scale,
+        CardPart, CardVariant, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, catalog_component_any_render_nodes_for_component,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model,
+        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
+        default_button_group_model, default_button_model, default_calendar_model,
+        default_card_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -383,6 +384,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Card {
+            return bevy_primitives_for_card(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -400,6 +404,39 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_card(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_card_model();
+        let card_state = model.state();
+        card_render_nodes(&model, &card_state)
+            .into_iter()
+            .map(|node| {
+                let role = card_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: card_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: card_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        card_tone_for_part(node.part, node.variant, node.active),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: card_intent_for_part(node.part, node.actionable),
+                    selected: node.active,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -1142,6 +1179,64 @@ pub mod bevy_adapter {
                 ButtonGroupOrientation::Horizontal => Vec2::new(scale::space::XS3, scale::space::L),
                 ButtonGroupOrientation::Vertical => Vec2::new(scale::space::XL, scale::space::XS3),
             },
+        }
+    }
+
+    const fn card_kind_for_part(part: CardPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            CardPart::Root => UiWidgetSlotKind::Section,
+            CardPart::Header => UiWidgetSlotKind::Header,
+            CardPart::Title => UiWidgetSlotKind::Title,
+            CardPart::Description => UiWidgetSlotKind::Description,
+            CardPart::Content => UiWidgetSlotKind::Panel,
+            CardPart::Footer if actionable => UiWidgetSlotKind::Button,
+            CardPart::Footer => UiWidgetSlotKind::Panel,
+        }
+    }
+
+    const fn card_role_for_part(part: CardPart) -> UiBlockRole {
+        match part {
+            CardPart::Root => UiBlockRole::Root,
+            CardPart::Header | CardPart::Title => UiBlockRole::Header,
+            CardPart::Description | CardPart::Content => UiBlockRole::Content,
+            CardPart::Footer => UiBlockRole::Action,
+        }
+    }
+
+    const fn card_tone_for_part(part: CardPart, variant: CardVariant, active: bool) -> UiBlockTone {
+        match part {
+            CardPart::Footer if active => UiBlockTone::Brand,
+            CardPart::Footer => UiBlockTone::Accent,
+            CardPart::Root => match variant {
+                CardVariant::Elevated | CardVariant::Outline => UiBlockTone::Surface,
+                CardVariant::Ghost => UiBlockTone::Muted,
+            },
+            CardPart::Header | CardPart::Title | CardPart::Description | CardPart::Content => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn card_intent_for_part(part: CardPart, actionable: bool) -> UiWidgetIntent {
+        match part {
+            CardPart::Footer if actionable => UiWidgetIntent::Activate,
+            CardPart::Root
+            | CardPart::Header
+            | CardPart::Title
+            | CardPart::Description
+            | CardPart::Content
+            | CardPart::Footer => UiWidgetIntent::None,
+        }
+    }
+
+    fn card_size_for_part(part: CardPart) -> Vec2 {
+        match part {
+            CardPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            CardPart::Header => Vec2::new(scale::space::XL2, scale::space::L),
+            CardPart::Title => Vec2::new(scale::space::XL2, scale::space::S),
+            CardPart::Description => Vec2::new(scale::space::XL2, scale::space::S),
+            CardPart::Content => Vec2::new(scale::space::XL2, scale::space::XL),
+            CardPart::Footer => Vec2::new(scale::space::XL2, scale::space::L),
         }
     }
 

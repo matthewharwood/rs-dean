@@ -7,8 +7,9 @@ use rs_dean_ui::{
     BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, Bubble,
     BubbleAction, BubbleModel, BubbleSide, Button, ButtonGroup, ButtonGroupItem, ButtonGroupModel,
     ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, Calendar,
-    CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, HealthCard,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
+    CardDensity, CardModel, CardVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -264,6 +265,24 @@ fn Stories() -> impl IntoView {
                             <Calendar model=invalid_calendar_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Calendar model=themed_calendar_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-card" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Card"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 13 implemented as a framed content surface backed by a validated shared Rust model, renderer-local footer action state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Card model=default_card_story_model() />
+                            <Card model=dense_card_story_model() />
+                            <Card model=loading_card_story_model() />
+                            <Card model=disabled_card_story_model() />
+                            <Card model=invalid_card_story_model() />
+                            <ThemeScope theme=ThemeId::Synthwave>
+                                <Card model=themed_card_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -788,6 +807,71 @@ fn themed_calendar_story_model() -> CalendarModel {
             CalendarDate::new(2026, 10, 12),
             CalendarDate::new(2026, 10, 16),
         ))
+}
+
+fn default_card_story_model() -> CardModel {
+    CardModel::new(
+        "Design system",
+        "64 components share one token contract.",
+        "Implementation notes stay portable across Leptos DOM and Bevy scene primitives.",
+        "Sweep process ready",
+    )
+    .with_action(CardAction::new("Open checklist", "open-checklist"))
+}
+
+fn dense_card_story_model() -> CardModel {
+    CardModel::new(
+        "Compact review",
+        "Dense card preserves the same anatomy with tighter token spacing.",
+        "Header, content, and footer spacing all resolve through shared scale tokens.",
+        "No drift found",
+    )
+    .with_density(CardDensity::Dense)
+    .with_variant(CardVariant::Outline)
+    .without_action()
+}
+
+fn loading_card_story_model() -> CardModel {
+    CardModel::new(
+        "Publishing artifact",
+        "The card keeps layout stable while the action is blocked.",
+        "The one-pass gate is still building Pages and story artifacts.",
+        "Waiting on CI",
+    )
+    .with_action(CardAction::new("View run", "view-run"))
+    .loading()
+}
+
+fn disabled_card_story_model() -> CardModel {
+    CardModel::new(
+        "Locked surface",
+        "Disabled cards keep their content visible without interactive affordance.",
+        "Consumer state must hydrate before this checklist can be opened.",
+        "Hydration required",
+    )
+    .with_variant(CardVariant::Ghost)
+    .with_action(CardAction::new("Open", "open-locked").disabled())
+    .disabled()
+}
+
+fn invalid_card_story_model() -> CardModel {
+    CardModel::new(
+        "",
+        "The validation boundary renders an invalid state instead of accepting an empty title.",
+        "Invalid card content remains outside the typed render-node path.",
+        "Invalid",
+    )
+}
+
+fn themed_card_story_model() -> CardModel {
+    CardModel::new(
+        "Theme scoped card",
+        "The same semantic card tokens resolve through a nested Synthwave theme scope.",
+        "Variant, density, text, border, and action state stay token-driven.",
+        "Theme preview",
+    )
+    .with_variant(CardVariant::Elevated)
+    .with_action(CardAction::new("Inspect", "inspect-themed-card"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

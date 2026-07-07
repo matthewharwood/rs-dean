@@ -10,6 +10,7 @@ pub mod bubble;
 pub mod button;
 pub mod button_group;
 pub mod calendar;
+pub mod card;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -74,6 +75,10 @@ pub use calendar::{
     CalendarChange, CalendarDate, CalendarIntent, CalendarModel, CalendarPart, CalendarRange,
     CalendarRenderNode, CalendarSelectionMode, CalendarState, calendar_render_nodes,
     default_calendar_model, month_name, month_short_name, validate_calendar_model,
+};
+pub use card::{
+    CardAction, CardChange, CardDensity, CardIntent, CardModel, CardPart, CardRenderNode,
+    CardState, CardVariant, card_render_nodes, default_card_model, validate_card_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

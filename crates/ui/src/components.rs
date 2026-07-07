@@ -9,21 +9,23 @@ use crate::{
     BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
     BubblePart, BubbleSide, ButtonGroupIntent, ButtonGroupModel, ButtonGroupOrientation,
     ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
-    CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CatalogComponentModel,
-    CatalogComponentPart, CatalogComponentRenderNode, ComponentImplementation, ThemeChoice,
-    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CardDensity, CardIntent,
+    CardModel, CardPart, CardVariant, CatalogComponentModel, CatalogComponentPart,
+    CatalogComponentRenderNode, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
     default_badge_model, default_breadcrumb_model, default_bubble_model,
-    default_button_group_model, default_button_model, default_calendar_model, month_name,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    default_button_group_model, default_button_model, default_calendar_model, default_card_model,
+    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
     validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
     validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model,
 };
 
 const HEALTH_CARD: &str =
@@ -328,6 +330,32 @@ const CALENDAR_RANGE: &str =
 const CALENDAR_RANGE_ACTIVE: &str =
     "rounded-field border border-brand bg-primary-soft p-xs text-0 font-7 leading-0 text-text-1";
 const CALENDAR_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const CARD_STANDARD_ELEVATED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
+const CARD_STANDARD_OUTLINE: &str = "grid w-full max-w-md gap-s rounded-box border border-border-strong bg-surface-1 p-s text-text-1 shadow-1";
+const CARD_STANDARD_GHOST: &str = "grid w-full max-w-md gap-s rounded-box border border-border-faint bg-surface-1 p-s text-text-1";
+const CARD_DENSE_ELEVATED: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-1";
+const CARD_DENSE_OUTLINE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-strong bg-surface-1 p-xs text-text-1 shadow-1";
+const CARD_DENSE_GHOST: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-faint bg-surface-1 p-xs text-text-1";
+const CARD_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CARD_HEADER: &str = "grid gap-2xs";
+const CARD_HEADER_DENSE: &str = "grid gap-3xs";
+const CARD_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const CARD_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const CARD_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const CARD_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const CARD_CONTENT: &str =
+    "rounded-field border border-border-subtle bg-surface-2 p-s text-0 leading-0 text-text-1";
+const CARD_CONTENT_DENSE: &str =
+    "rounded-field border border-border-subtle bg-surface-2 p-xs text-00 leading-0 text-text-1";
+const CARD_FOOTER: &str =
+    "flex flex-wrap items-center justify-between gap-xs border-t border-border-subtle pt-s";
+const CARD_FOOTER_DENSE: &str =
+    "flex flex-wrap items-center justify-between gap-2xs border-t border-border-subtle pt-xs";
+const CARD_FOOTER_TEXT: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
+const CARD_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CARD_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CARD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -2877,7 +2905,208 @@ const fn calendar_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Card, crate::CardModel, crate::default_card_model);
+#[component]
+pub fn Card(#[prop(optional, default = default_card_model())] model: CardModel) -> AnyView {
+    if let Err(report) = validate_card_model(&model) {
+        let message = format!("Card validation failed: {report}");
+        return view! {
+            <div class=CARD_ERROR data-ui-component="card" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = card_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Root)
+        .expect("invariant: card render nodes include root")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Header)
+        .expect("invariant: card render nodes include header")
+        .clone();
+    let title = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Title)
+        .expect("invariant: card render nodes include title")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Description)
+        .expect("invariant: card render nodes include description")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Content)
+        .expect("invariant: card render nodes include content")
+        .clone();
+    let footer = nodes
+        .iter()
+        .find(|node| node.part == CardPart::Footer)
+        .expect("invariant: card render nodes include footer")
+        .clone();
+    let (state, set_state) = signal(state_model);
+    let footer_disabled = footer.disabled || blocked;
+    let action_value = footer.value.clone();
+    let action_label = footer.detail.clone();
+    let action_view = if footer.actionable {
+        view! {
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        card_action_class(state.is_active(CardPart::Footer), footer_disabled)
+                    })
+                }
+                data-ui-part=CardPart::Footer.label()
+                data-ui-value=action_value.clone()
+                aria-pressed=move || {
+                    state.with(|state| state.is_active(CardPart::Footer).to_string())
+                }
+                disabled=footer_disabled
+                on:focus=move |_| {
+                    if !footer_disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(CardIntent::Focus(CardPart::Footer));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !footer_disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(CardIntent::Blur(CardPart::Footer));
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !footer_disabled {
+                        let value = action_value.clone();
+                        set_state.update(|state| {
+                            let _ = state.apply(CardIntent::ActivateFooter(value));
+                        });
+                    }
+                }
+            >
+                {action_label}
+            </button>
+        }
+        .into_any()
+    } else {
+        ().into_any()
+    };
+
+    view! {
+        <article
+            class=card_root_class(root.variant, root.density, disabled)
+            data-ui-component="card"
+            data-ui-part=CardPart::Root.label()
+            data-ui-variant=root.variant.label()
+            data-ui-density=root.density.label()
+            data-ui-state=card_state_label(loading, disabled)
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <header
+                class=card_header_class(root.density)
+                data-ui-part=header.part.label()
+            >
+                <h3 class=card_title_class(root.density) data-ui-part=title.part.label()>
+                    {title.label}
+                </h3>
+                <p class=card_description_class(root.density) data-ui-part=description.part.label()>
+                    {description.detail}
+                </p>
+            </header>
+            <div class=card_content_class(root.density) data-ui-part=content.part.label()>
+                {content.detail}
+            </div>
+            <footer class=card_footer_class(root.density) data-ui-part=footer.part.label()>
+                <p class=CARD_FOOTER_TEXT>{footer.label}</p>
+                {action_view}
+            </footer>
+        </article>
+    }
+    .into_any()
+}
+
+const fn card_root_class(
+    variant: CardVariant,
+    density: CardDensity,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return CARD_DISABLED;
+    }
+    match (density, variant) {
+        (CardDensity::Standard, CardVariant::Elevated) => CARD_STANDARD_ELEVATED,
+        (CardDensity::Standard, CardVariant::Outline) => CARD_STANDARD_OUTLINE,
+        (CardDensity::Standard, CardVariant::Ghost) => CARD_STANDARD_GHOST,
+        (CardDensity::Dense, CardVariant::Elevated) => CARD_DENSE_ELEVATED,
+        (CardDensity::Dense, CardVariant::Outline) => CARD_DENSE_OUTLINE,
+        (CardDensity::Dense, CardVariant::Ghost) => CARD_DENSE_GHOST,
+    }
+}
+
+const fn card_header_class(density: CardDensity) -> &'static str {
+    match density {
+        CardDensity::Standard => CARD_HEADER,
+        CardDensity::Dense => CARD_HEADER_DENSE,
+    }
+}
+
+const fn card_title_class(density: CardDensity) -> &'static str {
+    match density {
+        CardDensity::Standard => CARD_TITLE,
+        CardDensity::Dense => CARD_TITLE_DENSE,
+    }
+}
+
+const fn card_description_class(density: CardDensity) -> &'static str {
+    match density {
+        CardDensity::Standard => CARD_DESCRIPTION,
+        CardDensity::Dense => CARD_DESCRIPTION_DENSE,
+    }
+}
+
+const fn card_content_class(density: CardDensity) -> &'static str {
+    match density {
+        CardDensity::Standard => CARD_CONTENT,
+        CardDensity::Dense => CARD_CONTENT_DENSE,
+    }
+}
+
+const fn card_footer_class(density: CardDensity) -> &'static str {
+    match density {
+        CardDensity::Standard => CARD_FOOTER,
+        CardDensity::Dense => CARD_FOOTER_DENSE,
+    }
+}
+
+const fn card_action_class(active: bool, disabled: bool) -> &'static str {
+    if active && !disabled {
+        CARD_ACTION_ACTIVE
+    } else {
+        CARD_ACTION
+    }
+}
+
+const fn card_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     Carousel,
     crate::CarouselModel,
