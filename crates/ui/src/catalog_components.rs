@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    hover_card,
-    HoverCard,
-    HoverCardModel,
-    HoverCardPart,
-    HoverCardRenderNode,
-    HoverCardState,
-    HoverCardIntent,
-    HoverCardChange,
-    validate_hover_card_model,
-    hover_card_render_nodes,
-    default_hover_card_model,
-    [
-        Root => "HoverCard",
-        Trigger => "HoverCardTrigger",
-        Content => "HoverCardContent",
-        Arrow => "HoverCardArrow",
-    ]
-);
-
-define_catalog_component!(
     input,
     Input,
     InputModel,
@@ -1248,10 +1228,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Drawer
         | UiComponentId::DropdownMenu
         | UiComponentId::Empty
-        | UiComponentId::Field => None,
-        UiComponentId::HoverCard => Some(any_nodes(hover_card_render_nodes(
-            &default_hover_card_model(),
-        ))),
+        | UiComponentId::Field
+        | UiComponentId::HoverCard => None,
         UiComponentId::Input => Some(any_nodes(input_render_nodes(&default_input_model()))),
         UiComponentId::InputGroup => Some(any_nodes(input_group_render_nodes(
             &default_input_group_model(),
@@ -1368,6 +1346,7 @@ mod tests {
                     | UiComponentId::DropdownMenu
                     | UiComponentId::Empty
                     | UiComponentId::Field
+                    | UiComponentId::HoverCard
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1384,17 +1363,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_hover_card_model().state();
-        assert!(!state.is_active(HoverCardPart::Root));
+        let mut state = default_input_model().state();
+        assert!(!state.is_active(InputPart::Root));
         assert_eq!(
-            state.apply(HoverCardIntent::Toggle(HoverCardPart::Root)),
-            HoverCardChange::Opened(HoverCardPart::Root)
+            state.apply(InputIntent::Toggle(InputPart::Root)),
+            InputChange::Opened(InputPart::Root)
         );
-        assert!(state.is_active(HoverCardPart::Root));
+        assert!(state.is_active(InputPart::Root));
         assert_eq!(
-            state.apply(HoverCardIntent::Toggle(HoverCardPart::Root)),
-            HoverCardChange::Closed(HoverCardPart::Root)
+            state.apply(InputIntent::Toggle(InputPart::Root)),
+            InputChange::Closed(InputPart::Root)
         );
-        assert!(!state.is_active(HoverCardPart::Root));
+        assert!(!state.is_active(InputPart::Root));
     }
 }

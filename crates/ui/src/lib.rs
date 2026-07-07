@@ -29,6 +29,7 @@ pub mod drawer;
 pub mod dropdown_menu;
 pub mod empty;
 pub mod field;
+pub mod hover_card;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -175,6 +176,11 @@ pub use empty::{
 pub use field::{
     FieldChange, FieldDensity, FieldInputKind, FieldIntent, FieldModel, FieldPart, FieldRenderNode,
     FieldState, default_field_model, field_render_nodes, validate_field_model,
+};
+pub use hover_card::{
+    HoverCardChange, HoverCardDensity, HoverCardIntent, HoverCardModel, HoverCardPart,
+    HoverCardRenderNode, HoverCardState, default_hover_card_model, hover_card_render_nodes,
+    validate_hover_card_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

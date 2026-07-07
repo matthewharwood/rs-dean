@@ -19,7 +19,8 @@ use rs_dean_ui::{
     Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
-    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    HealthCard, HoverCard, HoverCardDensity, HoverCardModel, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -564,6 +565,24 @@ fn Stories() -> impl IntoView {
                             <Field model=invalid_field_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Field model=themed_field_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-hover-card" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Hover Card"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 29 implemented as a trigger-attached preview overlay backed by validated shared Rust copy, renderer-local hover/focus state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <HoverCard model=default_hover_card_story_model() />
+                            <HoverCard model=dense_hover_card_story_model() />
+                            <HoverCard model=loading_hover_card_story_model() />
+                            <HoverCard model=disabled_hover_card_story_model() />
+                            <HoverCard model=invalid_hover_card_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <HoverCard model=themed_hover_card_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2129,6 +2148,60 @@ fn themed_field_story_model() -> FieldModel {
     )
     .with_placeholder("surface-elevated")
     .with_value("brand")
+}
+
+fn default_hover_card_story_model() -> HoverCardModel {
+    HoverCardModel::new(
+        "Theme token",
+        "Shared semantic preview",
+        "The preview opens from local hover or focus state while durable app data stays outside the component.",
+    )
+    .with_metadata("Issue 29")
+    .default_open()
+}
+
+fn dense_hover_card_story_model() -> HoverCardModel {
+    HoverCardModel::new(
+        "Dense preview",
+        "Compact overlay",
+        "Dense spacing keeps the trigger, content, and arrow anatomy stable across themes.",
+    )
+    .with_density(HoverCardDensity::Dense)
+    .with_metadata("Dense")
+    .default_open()
+}
+
+fn loading_hover_card_story_model() -> HoverCardModel {
+    default_hover_card_story_model().loading()
+}
+
+fn disabled_hover_card_story_model() -> HoverCardModel {
+    HoverCardModel::new(
+        "Locked preview",
+        "Unavailable content",
+        "Disabled hover cards keep trigger copy visible while suppressing renderer-local open changes.",
+    )
+    .with_metadata("Disabled")
+    .disabled()
+}
+
+fn invalid_hover_card_story_model() -> HoverCardModel {
+    HoverCardModel::new(
+        "",
+        "Preview",
+        "The validation boundary rejects empty trigger labels.",
+    )
+}
+
+fn themed_hover_card_story_model() -> HoverCardModel {
+    HoverCardModel::new(
+        "Palette preview",
+        "Theme scoped overlay",
+        "The same Hover Card model resolves semantic tokens through the nested Luxury theme.",
+    )
+    .with_metadata("Luxury")
+    .with_arrow_label("Theme arrow")
+    .default_open()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -23,13 +23,14 @@ use crate::{
     DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, DrawerIntent,
     DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
     DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
-    EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, HoverCardDensity, HoverCardIntent,
+    HoverCardModel, HoverCardPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -39,17 +40,19 @@ use crate::{
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
-    default_empty_model, default_field_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_empty_model, default_field_model, default_hover_card_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, max_data_table_page_index, month_name,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
     validate_dialog_model, validate_direction_model, validate_drawer_model,
     validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model,
 };
 
 const HEALTH_CARD: &str =
@@ -703,6 +706,27 @@ const FIELD_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabl
 const FIELD_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const FIELD_ERROR_HIDDEN: &str = "hidden";
 const FIELD_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const HOVER_CARD_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
+const HOVER_CARD_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
+const HOVER_CARD_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const HOVER_CARD_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const HOVER_CARD_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const HOVER_CARD_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const HOVER_CARD_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const HOVER_CARD_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const HOVER_CARD_CONTENT_DENSE: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const HOVER_CARD_CONTENT_LOADING: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
+const HOVER_CARD_CONTENT_DISABLED: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled shadow-1";
+const HOVER_CARD_CONTENT_HIDDEN: &str = "hidden";
+const HOVER_CARD_META: &str = "m-0 text-00 font-7 uppercase tracking-label text-brand";
+const HOVER_CARD_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const HOVER_CARD_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const HOVER_CARD_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
+const HOVER_CARD_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const HOVER_CARD_ARROW: &str = "grid size-s place-items-center rounded-field border border-border-subtle bg-surface-elevated text-00 font-7 text-text-muted shadow-1";
+const HOVER_CARD_ARROW_HIDDEN: &str = "hidden";
+const HOVER_CARD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -6950,11 +6974,239 @@ const fn field_state_label(
     }
 }
 
-catalog_component!(
-    HoverCard,
-    crate::HoverCardModel,
-    crate::default_hover_card_model
-);
+#[component]
+pub fn HoverCard(
+    #[prop(optional, default = default_hover_card_model())] model: HoverCardModel,
+) -> AnyView {
+    if let Err(report) = validate_hover_card_model(&model) {
+        let message = format!("HoverCard validation failed: {report}");
+        return view! {
+            <div class=HOVER_CARD_ERROR data-ui-component="hover-card" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = hover_card_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == HoverCardPart::Root)
+        .expect("invariant: hover card render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == HoverCardPart::Trigger)
+        .expect("invariant: hover card render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == HoverCardPart::Content)
+        .expect("invariant: hover card render nodes include content")
+        .clone();
+    let arrow = nodes
+        .iter()
+        .find(|node| node.part == HoverCardPart::Arrow)
+        .expect("invariant: hover card render nodes include arrow")
+        .clone();
+    let (state, set_state) = signal(state_model);
+    let trigger_label = if loading {
+        "Loading preview".to_owned()
+    } else {
+        trigger.label.clone()
+    };
+    let content_value = content.value.clone();
+    let content_label = if loading {
+        "Loading".to_owned()
+    } else {
+        content.label.clone()
+    };
+    let content_detail = if loading {
+        "Preparing hover card content.".to_owned()
+    } else {
+        content.detail.clone()
+    };
+    let arrow_value = arrow.value.clone();
+    let arrow_label = arrow.label.clone();
+    let arrow_detail = arrow.detail.clone();
+
+    view! {
+        <section
+            class=hover_card_root_class(disabled)
+            data-ui-component="hover-card"
+            data-ui-part=HoverCardPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| hover_card_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(HoverCardIntent::Open(HoverCardPart::Trigger));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(HoverCardIntent::Close);
+                    });
+                }
+            }
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        hover_card_trigger_class(density, state.is_open(), blocked).to_owned()
+                    })
+                }
+                data-ui-part=HoverCardPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-haspopup="dialog"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(HoverCardIntent::Focus(HoverCardPart::Trigger));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(HoverCardIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(HoverCardIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {trigger_label}
+            </button>
+            <article
+                role="tooltip"
+                class=move || {
+                    state.with(|state| {
+                        hover_card_content_class(density, state.is_open(), loading, disabled)
+                            .to_owned()
+                    })
+                }
+                data-ui-part=HoverCardPart::Content.label()
+                data-ui-value=content_value
+                aria-hidden=move || state.with(|state| (!state.is_open()).to_string())
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                <span
+                    class=move || state.with(|state| hover_card_arrow_class(state.is_open()).to_owned())
+                    data-ui-part=HoverCardPart::Arrow.label()
+                    data-ui-value=arrow_value
+                    aria-label=arrow_detail
+                >
+                    {arrow_label}
+                </span>
+                <p class=HOVER_CARD_META>{content.value}</p>
+                <h3 class=hover_card_title_class(density)>{content_label}</h3>
+                <p class=hover_card_detail_class(density)>{content_detail}</p>
+            </article>
+        </section>
+    }
+    .into_any()
+}
+
+const fn hover_card_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        HOVER_CARD_ROOT_DISABLED
+    } else {
+        HOVER_CARD_ROOT
+    }
+}
+
+const fn hover_card_trigger_class(
+    density: HoverCardDensity,
+    open: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return HOVER_CARD_TRIGGER_DISABLED;
+    }
+    match (density, open) {
+        (HoverCardDensity::Standard, true) => HOVER_CARD_TRIGGER_OPEN,
+        (HoverCardDensity::Dense, true) => HOVER_CARD_TRIGGER_DENSE_OPEN,
+        (HoverCardDensity::Standard, false) => HOVER_CARD_TRIGGER,
+        (HoverCardDensity::Dense, false) => HOVER_CARD_TRIGGER_DENSE,
+    }
+}
+
+const fn hover_card_content_class(
+    density: HoverCardDensity,
+    open: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if !open {
+        return HOVER_CARD_CONTENT_HIDDEN;
+    }
+    if disabled {
+        return HOVER_CARD_CONTENT_DISABLED;
+    }
+    if loading {
+        return HOVER_CARD_CONTENT_LOADING;
+    }
+    match density {
+        HoverCardDensity::Standard => HOVER_CARD_CONTENT,
+        HoverCardDensity::Dense => HOVER_CARD_CONTENT_DENSE,
+    }
+}
+
+const fn hover_card_title_class(density: HoverCardDensity) -> &'static str {
+    match density {
+        HoverCardDensity::Standard => HOVER_CARD_TITLE,
+        HoverCardDensity::Dense => HOVER_CARD_TITLE_DENSE,
+    }
+}
+
+const fn hover_card_detail_class(density: HoverCardDensity) -> &'static str {
+    match density {
+        HoverCardDensity::Standard => HOVER_CARD_DETAIL,
+        HoverCardDensity::Dense => HOVER_CARD_DETAIL_DENSE,
+    }
+}
+
+const fn hover_card_arrow_class(open: bool) -> &'static str {
+    if open {
+        HOVER_CARD_ARROW
+    } else {
+        HOVER_CARD_ARROW_HIDDEN
+    }
+}
+
+const fn hover_card_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(Input, crate::InputModel, crate::default_input_model);
 catalog_component!(
     InputGroup,

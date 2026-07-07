@@ -301,7 +301,18 @@ remain consumer-owned through `crates/state` / `rs-dean-idb`. Issues 01 through
 because picker query state, command filtering, and checkbox toggles already
 model renderer-local drafts separately from durable app state.
 
-All-issue sweep pass: Hover Card through Typography complete. The shared
+Concrete component pass: Hover Card complete. The twenty-ninth issue now has a
+typed preview-overlay model, trigger/content/arrow anatomy, renderer-local
+hover/focus open state, `garde` validation, token-only Leptos hover-card
+rendering, dedicated story proof, and Bevy primitive derivation from the same
+model. The sweep found that trigger-attached preview overlays need an explicit
+local-open state and can expose opened content in Bevy proofs without promoting
+hover state into durable app storage. Issues 01 through 28 were re-audited
+against this learning; no earlier API changes were needed because disclosure,
+dialog, drawer, dropdown, and field draft states already keep ephemeral
+renderer state separate from persisted app data.
+
+All-issue sweep pass: Input through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -309,7 +320,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Hover Card through Typography now have
+Concrete all-issue sweep pass: Input through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -335,6 +346,7 @@ uses a renderer-neutral owned view node.
 - Dropdown Menu components share item/shortcut/destructive action vocabulary with Context Menu while keeping trigger-attached open and selection state separate.
 - Empty components preserve a disabled action node when no recovery action exists so Leptos and Bevy still expose the full empty-state anatomy.
 - Field components may keep focus and draft input local for renderer behavior, while durable submitted form data remains consumer-owned state.
+- Trigger-attached preview overlays keep hover/focus open state renderer-local while Bevy primitive proofs can start opened to expose content and arrow anatomy.
 - Message and media display components can own renderer-local ephemeral state for activation feedback while keeping durable file selections and uploads in `crates/state` / `rs-dean-idb`.
 - Messaging components can own renderer-local action feedback and side-aware layout while durable transcript/message updates stay app-owned.
 - Identity media components can own renderer-local load/error fallback state while keeping durable profile identity in app/state models.
@@ -358,4 +370,4 @@ uses a renderer-neutral owned view node.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found twenty-five cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, put input-backed filtering in the shared picker contract instead of renderer-local list logic, model searchable command palettes with grouped action and shortcut contracts instead of generated catalog slots, model pointer-triggered nested menus with shared entry, separator, submenu, and destructive-action contracts, model tabular data with typed columns, rows, selected-row validation, and shared page math instead of generic table slots, compose date pickers from shared calendar date math plus picker-owned trigger, popover, and selected-value semantics, keep general workflow Dialog footer actions distinct from destructive Alert Dialog confirmation, model inherited/effective direction flow explicitly instead of treating `dir` as a generic selected slot, keep drawer side placement and handle drag state out of general dialog workflow contracts, keep dropdown trigger/selection state separate from context-menu pointer and submenu semantics, keep empty-state action anatomy present even when recovery actions are omitted, and keep form field drafts renderer-local while durable submitted values stay app-owned.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found twenty-six cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, put input-backed filtering in the shared picker contract instead of renderer-local list logic, model searchable command palettes with grouped action and shortcut contracts instead of generated catalog slots, model pointer-triggered nested menus with shared entry, separator, submenu, and destructive-action contracts, model tabular data with typed columns, rows, selected-row validation, and shared page math instead of generic table slots, compose date pickers from shared calendar date math plus picker-owned trigger, popover, and selected-value semantics, keep general workflow Dialog footer actions distinct from destructive Alert Dialog confirmation, model inherited/effective direction flow explicitly instead of treating `dir` as a generic selected slot, keep drawer side placement and handle drag state out of general dialog workflow contracts, keep dropdown trigger/selection state separate from context-menu pointer and submenu semantics, keep empty-state action anatomy present even when recovery actions are omitted, keep form field drafts renderer-local while durable submitted values stay app-owned, and keep trigger-attached preview overlay state renderer-local while Bevy proofs can open content explicitly.

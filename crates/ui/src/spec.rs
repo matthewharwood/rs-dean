@@ -291,8 +291,8 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, FieldPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        EmptyPart, FieldPart, HoverCardPart, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
         attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
         bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
@@ -308,9 +308,9 @@ pub mod bevy_adapter {
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
-        default_empty_model, default_field_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        scale,
+        default_empty_model, default_field_model, default_hover_card_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -452,6 +452,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Field {
             return bevy_primitives_for_field(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::HoverCard {
+            return bevy_primitives_for_hover_card(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -777,6 +784,39 @@ pub mod bevy_adapter {
                     state,
                     intent: field_intent_for_part(node.part),
                     selected: node.focused || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_hover_card(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_hover_card_model().default_open();
+        let hover_card_state = model.state();
+        hover_card_render_nodes(&model, &hover_card_state)
+            .into_iter()
+            .map(|node| {
+                let role = hover_card_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: hover_card_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: hover_card_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        hover_card_tone_for_part(node.part, node.open, node.visible),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: hover_card_intent_for_part(node.part),
+                    selected: node.open || node.active,
                     disabled: node.disabled,
                 }
             })
@@ -2471,6 +2511,57 @@ pub mod bevy_adapter {
             FieldPart::Control => Vec2::new(scale::space::XL3, scale::space::L),
             FieldPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
             FieldPart::Error => Vec2::new(scale::space::XL3, scale::space::S),
+        }
+    }
+
+    const fn hover_card_kind_for_part(part: HoverCardPart) -> UiWidgetSlotKind {
+        match part {
+            HoverCardPart::Root => UiWidgetSlotKind::Section,
+            HoverCardPart::Trigger => UiWidgetSlotKind::Button,
+            HoverCardPart::Content => UiWidgetSlotKind::Overlay,
+            HoverCardPart::Arrow => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn hover_card_role_for_part(part: HoverCardPart) -> UiBlockRole {
+        match part {
+            HoverCardPart::Root => UiBlockRole::Root,
+            HoverCardPart::Trigger => UiBlockRole::Action,
+            HoverCardPart::Content => UiBlockRole::Overlay,
+            HoverCardPart::Arrow => UiBlockRole::Indicator,
+        }
+    }
+
+    const fn hover_card_tone_for_part(
+        part: HoverCardPart,
+        open: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            HoverCardPart::Trigger if open => UiBlockTone::Brand,
+            HoverCardPart::Trigger => UiBlockTone::Surface,
+            HoverCardPart::Content if visible => UiBlockTone::Surface,
+            HoverCardPart::Arrow if visible => UiBlockTone::Accent,
+            HoverCardPart::Content | HoverCardPart::Arrow => UiBlockTone::Muted,
+            HoverCardPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn hover_card_intent_for_part(part: HoverCardPart) -> UiWidgetIntent {
+        match part {
+            HoverCardPart::Trigger => UiWidgetIntent::Open,
+            HoverCardPart::Root | HoverCardPart::Content | HoverCardPart::Arrow => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn hover_card_size_for_part(part: HoverCardPart) -> Vec2 {
+        match part {
+            HoverCardPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            HoverCardPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            HoverCardPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
+            HoverCardPart::Arrow => Vec2::new(scale::space::S, scale::space::S),
         }
     }
 
