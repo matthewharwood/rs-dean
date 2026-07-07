@@ -41,7 +41,8 @@ use crate::{
     RadioGroupOrientation, RadioGroupPart, ResizableDensity, ResizableIntent, ResizableModel,
     ResizableOrientation, ResizablePart, ScrollAreaAxis, ScrollAreaDensity, ScrollAreaIntent,
     ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, SelectDensity, SelectIntent, SelectModel,
-    SelectPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    SelectPart, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
+    SeparatorPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
     UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
@@ -63,15 +64,16 @@ use crate::{
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
-    default_select_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
-    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
-    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
-    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
-    scroll_area_render_nodes, select_render_nodes, selected_select_label, validate_accordion_model,
+    default_select_model, default_separator_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
+    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
+    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
+    selected_select_label, separator_render_nodes, validate_accordion_model,
     validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
     validate_attachment_model, validate_avatar_model, validate_badge_model,
     validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
@@ -87,6 +89,7 @@ use crate::{
     validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
     validate_popover_model, validate_progress_model, validate_radio_group_model,
     validate_resizable_model, validate_scroll_area_model, validate_select_model,
+    validate_separator_model,
 };
 
 const HEALTH_CARD: &str =
@@ -1043,6 +1046,27 @@ const SELECT_ITEM_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-
 const SELECT_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const SELECT_ITEM_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const SELECT_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const SEPARATOR_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_DENSE: &str = "grid w-full max-w-md gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_VERTICAL: &str = "flex min-h-xl w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_ACTIVE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_VERTICAL_ACTIVE: &str = "flex min-h-xl w-fit items-center gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled";
+const SEPARATOR_LINE: &str = "h-3xs w-full rounded-pill bg-border-subtle";
+const SEPARATOR_LINE_DENSE: &str = "h-2xs w-full rounded-pill bg-border-subtle";
+const SEPARATOR_LINE_VERTICAL: &str = "h-xl w-2xs rounded-pill bg-border-subtle";
+const SEPARATOR_LINE_ACTIVE: &str = "h-3xs w-full rounded-pill bg-brand shadow-1";
+const SEPARATOR_LINE_VERTICAL_ACTIVE: &str = "h-xl w-2xs rounded-pill bg-brand shadow-1";
+const SEPARATOR_LINE_INVALID: &str = "h-3xs w-full rounded-pill bg-danger";
+const SEPARATOR_LINE_DISABLED: &str = "h-3xs w-full rounded-pill bg-border-muted opacity-disabled";
+const SEPARATOR_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SEPARATOR_LABEL_DENSE: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
+const SEPARATOR_LABEL_INVALID: &str = "m-0 text-00 font-7 uppercase tracking-label text-danger";
+const SEPARATOR_LABEL_DISABLED: &str =
+    "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
+const SEPARATOR_LABEL_HIDDEN: &str = "hidden";
+const SEPARATOR_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -13624,11 +13648,230 @@ fn select_state_label(
     }
 }
 
-catalog_component!(
-    Separator,
-    crate::SeparatorModel,
-    crate::default_separator_model
-);
+#[component]
+pub fn Separator(
+    #[prop(optional, default = default_separator_model())] model: SeparatorModel,
+) -> AnyView {
+    if let Err(report) = validate_separator_model(&model) {
+        let message = format!("Separator validation failed: {report}");
+        return view! {
+            <div class=SEPARATOR_ROOT_INVALID data-ui-component="separator" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let orientation = model.orientation;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let decorative = model.decorative;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = separator_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SeparatorPart::Root)
+        .expect("invariant: separator render nodes include root")
+        .clone();
+    let line = nodes
+        .iter()
+        .find(|node| node.part == SeparatorPart::Line)
+        .expect("invariant: separator render nodes include line")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == SeparatorPart::Label)
+        .expect("invariant: separator render nodes include label")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_description = root.detail.clone();
+    let root_error = root.detail.clone();
+    let line_value = line.value.clone();
+    let label_value = label.value.clone();
+    let label_text = label.label.clone();
+    let label_visible = label.visible;
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <div
+            class=move || {
+                state.with(|state| {
+                    separator_root_class(
+                        density,
+                        orientation,
+                        state.is_active(),
+                        invalid,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="separator"
+            data-ui-part=SeparatorPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-orientation=orientation.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    separator_state_label(loading, disabled, invalid, state.is_active()).to_owned()
+                })
+            }
+            data-ui-value=root_value
+            role=if decorative { "presentation" } else { "separator" }
+            aria-label=root_label
+            aria-description=root_description
+            aria-orientation=orientation.label()
+            aria-hidden=decorative.to_string()
+            aria-busy=loading.to_string()
+            aria-disabled=blocked.to_string()
+            tabindex=if blocked || decorative { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !blocked && !decorative {
+                    set_state.update(|state| {
+                        let _ = state.apply(SeparatorIntent::Focus);
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !blocked && !decorative {
+                    set_state.update(|state| {
+                        let _ = state.apply(SeparatorIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(SeparatorIntent::Hover);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(SeparatorIntent::Leave);
+                    });
+                }
+            }
+        >
+            <span
+                class=move || {
+                    state.with(|state| {
+                        separator_line_class(
+                            density,
+                            orientation,
+                            state.is_active(),
+                            invalid,
+                            blocked,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=SeparatorPart::Line.label()
+                data-ui-value=line_value
+                aria-hidden="true"
+            ></span>
+            <span
+                class=separator_label_class(density, label_visible, invalid, blocked)
+                data-ui-part=SeparatorPart::Label.label()
+                data-ui-value=label_value
+                hidden=!label_visible
+            >
+                {label_text}
+            </span>
+            {invalid.then_some(view! { <p class=SEPARATOR_ERROR>{root_error}</p> })}
+        </div>
+    }
+    .into_any()
+}
+
+const fn separator_root_class(
+    density: SeparatorDensity,
+    orientation: SeparatorOrientation,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SEPARATOR_ROOT_DISABLED;
+    }
+    if invalid {
+        return SEPARATOR_ROOT_INVALID;
+    }
+    match (orientation, active, density) {
+        (SeparatorOrientation::Vertical, true, _) => SEPARATOR_ROOT_VERTICAL_ACTIVE,
+        (SeparatorOrientation::Vertical, false, _) => SEPARATOR_ROOT_VERTICAL,
+        (SeparatorOrientation::Horizontal, true, _) => SEPARATOR_ROOT_ACTIVE,
+        (SeparatorOrientation::Horizontal, false, SeparatorDensity::Dense) => SEPARATOR_ROOT_DENSE,
+        (SeparatorOrientation::Horizontal, false, SeparatorDensity::Standard) => SEPARATOR_ROOT,
+    }
+}
+
+const fn separator_line_class(
+    density: SeparatorDensity,
+    orientation: SeparatorOrientation,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SEPARATOR_LINE_DISABLED;
+    }
+    if invalid {
+        return SEPARATOR_LINE_INVALID;
+    }
+    match (orientation, active, density) {
+        (SeparatorOrientation::Vertical, true, _) => SEPARATOR_LINE_VERTICAL_ACTIVE,
+        (SeparatorOrientation::Vertical, false, _) => SEPARATOR_LINE_VERTICAL,
+        (SeparatorOrientation::Horizontal, true, _) => SEPARATOR_LINE_ACTIVE,
+        (SeparatorOrientation::Horizontal, false, SeparatorDensity::Dense) => SEPARATOR_LINE_DENSE,
+        (SeparatorOrientation::Horizontal, false, SeparatorDensity::Standard) => SEPARATOR_LINE,
+    }
+}
+
+const fn separator_label_class(
+    density: SeparatorDensity,
+    visible: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if !visible {
+        return SEPARATOR_LABEL_HIDDEN;
+    }
+    if disabled {
+        return SEPARATOR_LABEL_DISABLED;
+    }
+    if invalid {
+        return SEPARATOR_LABEL_INVALID;
+    }
+    match density {
+        SeparatorDensity::Standard => SEPARATOR_LABEL,
+        SeparatorDensity::Dense => SEPARATOR_LABEL_DENSE,
+    }
+}
+
+const fn separator_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if active {
+        "active"
+    } else {
+        "idle"
+    }
+}
+
 catalog_component!(Sheet, crate::SheetModel, crate::default_sheet_model);
 catalog_component!(Sidebar, crate::SidebarModel, crate::default_sidebar_model);
 catalog_component!(

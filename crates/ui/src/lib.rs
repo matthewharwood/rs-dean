@@ -50,6 +50,7 @@ pub mod radio_group;
 pub mod resizable;
 pub mod scroll_area;
 pub mod select;
+pub mod separator;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -298,6 +299,11 @@ pub use select::{
     SelectChange, SelectDensity, SelectGroup, SelectIntent, SelectModel, SelectOption, SelectPart,
     SelectRenderNode, SelectState, default_select_groups, default_select_model,
     select_render_nodes, selected_select_label, validate_select_model,
+};
+pub use separator::{
+    SeparatorChange, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
+    SeparatorPart, SeparatorRenderNode, SeparatorState, default_separator_model,
+    separator_render_nodes, validate_separator_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

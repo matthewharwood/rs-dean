@@ -32,8 +32,8 @@ use rs_dean_ui::{
     RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation, Resizable,
     ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ScrollArea,
     ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
-    SelectGroup, SelectModel, SelectOption, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
+    SeparatorOrientation, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -941,6 +941,25 @@ fn Stories() -> impl IntoView {
                             <Select model=invalid_select_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Select model=themed_select_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-separator" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Separator"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 49 implemented as a divider primitive backed by validated shared Rust orientation/label state, renderer-local focus/hover state, and Bevy-readable separator primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Separator model=default_separator_story_model() />
+                            <Separator model=dense_separator_story_model() />
+                            <Separator model=vertical_separator_story_model() />
+                            <Separator model=loading_separator_story_model() />
+                            <Separator model=disabled_separator_story_model() />
+                            <Separator model=invalid_separator_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Separator model=themed_separator_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3562,6 +3581,45 @@ fn themed_select_story_model() -> SelectModel {
     SelectModel::new(select_story_groups())
         .with_label("Theme scoped target")
         .with_selected_value("bevy")
+}
+
+fn default_separator_story_model() -> SeparatorModel {
+    SeparatorModel::new("Content boundary")
+        .with_detail("Separates related component regions with shared theme tokens.")
+}
+
+fn dense_separator_story_model() -> SeparatorModel {
+    default_separator_story_model()
+        .with_density(SeparatorDensity::Dense)
+        .with_label("Compact boundary")
+}
+
+fn vertical_separator_story_model() -> SeparatorModel {
+    SeparatorModel::new("Rail divider")
+        .with_orientation(SeparatorOrientation::Vertical)
+        .with_detail("A vertical divider for split navigation and content rails.")
+}
+
+fn loading_separator_story_model() -> SeparatorModel {
+    default_separator_story_model()
+        .with_label("Publishing boundary")
+        .loading()
+}
+
+fn disabled_separator_story_model() -> SeparatorModel {
+    default_separator_story_model()
+        .with_label("Locked boundary")
+        .disabled()
+}
+
+fn invalid_separator_story_model() -> SeparatorModel {
+    default_separator_story_model().with_error("Separator metadata failed validation upstream.")
+}
+
+fn themed_separator_story_model() -> SeparatorModel {
+    SeparatorModel::new("Theme scoped boundary")
+        .with_density(SeparatorDensity::Dense)
+        .decorative()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

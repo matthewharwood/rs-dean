@@ -295,10 +295,10 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        SelectPart, SeparatorPart, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -319,7 +319,7 @@ pub mod bevy_adapter {
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_separator_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
@@ -327,7 +327,7 @@ pub mod bevy_adapter {
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
-        select_render_nodes,
+        select_render_nodes, separator_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -573,6 +573,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Select {
             return bevy_primitives_for_select(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Separator {
+            return bevy_primitives_for_separator(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1568,6 +1575,37 @@ pub mod bevy_adapter {
                     intent: select_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.focused || node.invalid,
                     disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_separator(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_separator_model();
+        let separator_state = model.state();
+        separator_render_nodes(&model, &separator_state)
+            .into_iter()
+            .map(|node| {
+                let role = separator_role_for_part(node.part);
+                let tone = separator_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: separator_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: separator_size_for_part(node.part, node.orientation),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: separator_intent_for_part(node.actionable),
+                    selected: node.active || node.invalid,
+                    disabled: node.disabled || !node.visible,
                 }
             })
             .collect()
@@ -4522,6 +4560,62 @@ pub mod bevy_adapter {
             SelectPart::Content => Vec2::new(scale::space::XL2, scale::space::XL),
             SelectPart::Group => Vec2::new(scale::space::XL, scale::space::M),
             SelectPart::Item => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    const fn separator_kind_for_part(part: SeparatorPart) -> UiWidgetSlotKind {
+        match part {
+            SeparatorPart::Root => UiWidgetSlotKind::Section,
+            SeparatorPart::Line => UiWidgetSlotKind::Separator,
+            SeparatorPart::Label => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn separator_role_for_part(part: SeparatorPart) -> UiBlockRole {
+        match part {
+            SeparatorPart::Root | SeparatorPart::Line => UiBlockRole::Layout,
+            SeparatorPart::Label => UiBlockRole::Text,
+        }
+    }
+
+    fn separator_tone_for_node(node: &crate::SeparatorRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            SeparatorPart::Line => UiBlockTone::Muted,
+            SeparatorPart::Root | SeparatorPart::Label => UiBlockTone::Surface,
+        }
+    }
+
+    const fn separator_intent_for_part(_actionable: bool) -> UiWidgetIntent {
+        UiWidgetIntent::None
+    }
+
+    fn separator_size_for_part(
+        part: SeparatorPart,
+        orientation: crate::SeparatorOrientation,
+    ) -> Vec2 {
+        match (part, orientation) {
+            (SeparatorPart::Root, crate::SeparatorOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL2, scale::space::M)
+            }
+            (SeparatorPart::Root, crate::SeparatorOrientation::Vertical) => {
+                Vec2::new(scale::space::M, scale::space::XL)
+            }
+            (SeparatorPart::Line, crate::SeparatorOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL2, scale::space::XS)
+            }
+            (SeparatorPart::Line, crate::SeparatorOrientation::Vertical) => {
+                Vec2::new(scale::space::XS, scale::space::XL)
+            }
+            (SeparatorPart::Label, _) => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

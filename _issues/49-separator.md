@@ -43,3 +43,4 @@ Ship a Rust-first `Separator` component that follows the shadcn composition mode
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete component pass complete: typed orientation, density, decorative-label semantics, renderer-local focus/hover state, token-only Leptos divider, story variants, and Bevy primitives now share the same Rust render nodes.

@@ -516,7 +516,18 @@ control state. Native Select, Combobox, Radio Group, and Scroll Area were
 re-audited against that learning; no earlier changes were required because each
 keeps its renderer-local affordances separate from durable selected values.
 
-All-issue sweep pass: Separator through Typography complete. The shared
+Concrete component pass: Separator complete. The component now has typed Rust
+orientation, density, decorative-label semantics, `garde` validation for
+optional labels and error copy, renderer-local focus/hover state, token-only
+Leptos divider rendering, dedicated story proof, and Bevy primitive derivation
+from the same render nodes. The sweep found that non-interactive layout
+primitives still need explicit renderer-local state for focus/hover proofing,
+but should not persist layout affordance state. Progress, Resizable, Scroll
+Area, and Select were re-audited against that learning; no earlier changes were
+required because their durable values remain consumer-owned and renderer
+affordances stay local.
+
+All-issue sweep pass: Sheet through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -524,7 +535,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Separator through Typography now have
+Concrete all-issue sweep pass: Sheet through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

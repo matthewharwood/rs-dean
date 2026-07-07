@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    separator,
-    Separator,
-    SeparatorModel,
-    SeparatorPart,
-    SeparatorRenderNode,
-    SeparatorState,
-    SeparatorIntent,
-    SeparatorChange,
-    validate_separator_model,
-    separator_render_nodes,
-    default_separator_model,
-    [Root => "Separator", Line => "SeparatorLine", Label => "SeparatorLabel"]
-);
-
-define_catalog_component!(
     sheet,
     Sheet,
     SheetModel,
@@ -867,10 +852,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::RadioGroup
         | UiComponentId::Resizable
         | UiComponentId::ScrollArea
-        | UiComponentId::Select => None,
-        UiComponentId::Separator => Some(any_nodes(separator_render_nodes(
-            &default_separator_model(),
-        ))),
+        | UiComponentId::Select
+        | UiComponentId::Separator => None,
         UiComponentId::Sheet => Some(any_nodes(sheet_render_nodes(&default_sheet_model()))),
         UiComponentId::Sidebar => Some(any_nodes(sidebar_render_nodes(&default_sidebar_model()))),
         UiComponentId::Skeleton => {
@@ -965,6 +948,7 @@ mod tests {
                     | UiComponentId::Resizable
                     | UiComponentId::ScrollArea
                     | UiComponentId::Select
+                    | UiComponentId::Separator
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -981,17 +965,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_separator_model().state();
-        assert!(!state.is_active(SeparatorPart::Root));
+        let mut state = default_sheet_model().state();
+        assert!(!state.is_active(SheetPart::Root));
         assert_eq!(
-            state.apply(SeparatorIntent::Toggle(SeparatorPart::Root)),
-            SeparatorChange::Opened(SeparatorPart::Root)
+            state.apply(SheetIntent::Toggle(SheetPart::Root)),
+            SheetChange::Opened(SheetPart::Root)
         );
-        assert!(state.is_active(SeparatorPart::Root));
+        assert!(state.is_active(SheetPart::Root));
         assert_eq!(
-            state.apply(SeparatorIntent::Toggle(SeparatorPart::Root)),
-            SeparatorChange::Closed(SeparatorPart::Root)
+            state.apply(SheetIntent::Toggle(SheetPart::Root)),
+            SheetChange::Closed(SheetPart::Root)
         );
-        assert!(!state.is_active(SeparatorPart::Root));
+        assert!(!state.is_active(SheetPart::Root));
     }
 }
