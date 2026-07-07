@@ -28,7 +28,8 @@ use rs_dean_ui::{
     MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
     NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
-    Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel,
+    Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel, RadioGroup,
+    RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation,
     ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
@@ -863,6 +864,24 @@ fn Stories() -> impl IntoView {
                             <Progress model=indeterminate_progress_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Progress model=themed_progress_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-radio-group" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Radio Group"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 45 implemented as a mutually exclusive option group backed by validated shared Rust options, renderer-local focus/selection state, and Bevy-readable radio primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <RadioGroup model=default_radio_group_story_model() />
+                            <RadioGroup model=dense_radio_group_story_model() />
+                            <RadioGroup model=loading_radio_group_story_model() />
+                            <RadioGroup model=disabled_radio_group_story_model() />
+                            <RadioGroup model=invalid_radio_group_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <RadioGroup model=themed_radio_group_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3263,6 +3282,50 @@ fn themed_progress_story_model() -> ProgressModel {
     ProgressModel::new(86)
         .with_label("Theme build")
         .with_detail("86 percent complete inside the Catppuccin theme scope.")
+}
+
+fn radio_group_story_options() -> Vec<RadioGroupOption> {
+    vec![
+        RadioGroupOption::new("Light", "light").with_detail("Use light semantic tokens."),
+        RadioGroupOption::new("Dark", "dark").with_detail("Use dark semantic tokens."),
+        RadioGroupOption::new("System", "system").with_detail("Follow the device setting."),
+    ]
+}
+
+fn default_radio_group_story_model() -> RadioGroupModel {
+    RadioGroupModel::new(radio_group_story_options())
+        .with_label("Theme preference")
+        .with_selected_value("light")
+        .required()
+}
+
+fn dense_radio_group_story_model() -> RadioGroupModel {
+    RadioGroupModel::new(radio_group_story_options())
+        .with_density(RadioGroupDensity::Dense)
+        .with_label("Compact theme")
+        .with_selected_value("dark")
+}
+
+fn loading_radio_group_story_model() -> RadioGroupModel {
+    default_radio_group_story_model().loading()
+}
+
+fn disabled_radio_group_story_model() -> RadioGroupModel {
+    RadioGroupModel::new(radio_group_story_options())
+        .with_label("Locked rollout")
+        .with_selected_value("system")
+        .disabled()
+}
+
+fn invalid_radio_group_story_model() -> RadioGroupModel {
+    default_radio_group_story_model().with_error("A selected value must be persisted upstream.")
+}
+
+fn themed_radio_group_story_model() -> RadioGroupModel {
+    RadioGroupModel::new(radio_group_story_options())
+        .with_label("Theme scope")
+        .with_orientation(RadioGroupOrientation::Horizontal)
+        .with_selected_value("dark")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

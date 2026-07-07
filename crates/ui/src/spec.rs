@@ -294,12 +294,13 @@ pub mod bevy_adapter {
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        PopoverPart, ProgressPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -316,13 +317,15 @@ pub mod bevy_adapter {
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
-        default_popover_model, default_progress_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_popover_model, default_progress_model, default_radio_group_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
-        pagination_render_nodes, popover_render_nodes, progress_render_nodes, scale,
+        pagination_render_nodes, popover_render_nodes, progress_render_nodes,
+        radio_group_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -540,6 +543,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Progress {
             return bevy_primitives_for_progress(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::RadioGroup {
+            return bevy_primitives_for_radio_group(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1413,6 +1423,37 @@ pub mod bevy_adapter {
                     state,
                     intent: UiWidgetIntent::None,
                     selected: node.highlighted || node.invalid || node.loading,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_radio_group(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_radio_group_model();
+        let radio_group_state = model.state();
+        radio_group_render_nodes(&model, &radio_group_state)
+            .into_iter()
+            .map(|node| {
+                let role = radio_group_role_for_part(node.part);
+                let tone = radio_group_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: radio_group_primitive_part(&node),
+                    kind: radio_group_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: radio_group_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: radio_group_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -4096,6 +4137,64 @@ pub mod bevy_adapter {
             ProgressPart::Track => Vec2::new(scale::space::XL3, scale::space::XS),
             ProgressPart::Indicator => Vec2::new(scale::space::XL, scale::space::XS),
             ProgressPart::Label => Vec2::new(scale::space::XL3, scale::space::S),
+        }
+    }
+
+    fn radio_group_primitive_part(node: &crate::RadioGroupRenderNode) -> String {
+        match node.part {
+            RadioGroupPart::Item | RadioGroupPart::Indicator | RadioGroupPart::Label => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            RadioGroupPart::Root => node.part.label().to_owned(),
+        }
+    }
+
+    const fn radio_group_kind_for_part(part: RadioGroupPart) -> UiWidgetSlotKind {
+        match part {
+            RadioGroupPart::Root => UiWidgetSlotKind::Section,
+            RadioGroupPart::Item => UiWidgetSlotKind::Radio,
+            RadioGroupPart::Indicator => UiWidgetSlotKind::Marker,
+            RadioGroupPart::Label => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn radio_group_role_for_part(part: RadioGroupPart) -> UiBlockRole {
+        match part {
+            RadioGroupPart::Root | RadioGroupPart::Item => UiBlockRole::Control,
+            RadioGroupPart::Indicator => UiBlockRole::Indicator,
+            RadioGroupPart::Label => UiBlockRole::Text,
+        }
+    }
+
+    fn radio_group_tone_for_node(node: &crate::RadioGroupRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.selected {
+            return UiBlockTone::Brand;
+        }
+        if node.focused {
+            return UiBlockTone::Accent;
+        }
+        UiBlockTone::Surface
+    }
+
+    const fn radio_group_intent_for_part(part: RadioGroupPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (RadioGroupPart::Item | RadioGroupPart::Indicator, true) => UiWidgetIntent::Select,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn radio_group_size_for_part(part: RadioGroupPart) -> Vec2 {
+        match part {
+            RadioGroupPart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
+            RadioGroupPart::Item => Vec2::new(scale::space::XL2, scale::space::M),
+            RadioGroupPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
+            RadioGroupPart::Label => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

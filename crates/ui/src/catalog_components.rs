@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    radio_group,
-    RadioGroup,
-    RadioGroupModel,
-    RadioGroupPart,
-    RadioGroupRenderNode,
-    RadioGroupState,
-    RadioGroupIntent,
-    RadioGroupChange,
-    validate_radio_group_model,
-    radio_group_render_nodes,
-    default_radio_group_model,
-    [
-        Root => "RadioGroup",
-        Item => "RadioGroupItem",
-        Indicator => "RadioGroupIndicator",
-        Label => "RadioGroupLabel",
-    ]
-);
-
-define_catalog_component!(
     resizable,
     Resizable,
     ResizableModel,
@@ -945,10 +925,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::NavigationMenu
         | UiComponentId::Pagination
         | UiComponentId::Popover
-        | UiComponentId::Progress => None,
-        UiComponentId::RadioGroup => Some(any_nodes(radio_group_render_nodes(
-            &default_radio_group_model(),
-        ))),
+        | UiComponentId::Progress
+        | UiComponentId::RadioGroup => None,
         UiComponentId::Resizable => Some(any_nodes(resizable_render_nodes(
             &default_resizable_model(),
         ))),
@@ -1049,6 +1027,7 @@ mod tests {
                     | UiComponentId::Pagination
                     | UiComponentId::Popover
                     | UiComponentId::Progress
+                    | UiComponentId::RadioGroup
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1065,17 +1044,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_radio_group_model().state();
-        assert!(!state.is_active(RadioGroupPart::Root));
+        let mut state = default_resizable_model().state();
+        assert!(!state.is_active(ResizablePart::PanelGroup));
         assert_eq!(
-            state.apply(RadioGroupIntent::Toggle(RadioGroupPart::Root)),
-            RadioGroupChange::Opened(RadioGroupPart::Root)
+            state.apply(ResizableIntent::Toggle(ResizablePart::PanelGroup)),
+            ResizableChange::Opened(ResizablePart::PanelGroup)
         );
-        assert!(state.is_active(RadioGroupPart::Root));
+        assert!(state.is_active(ResizablePart::PanelGroup));
         assert_eq!(
-            state.apply(RadioGroupIntent::Toggle(RadioGroupPart::Root)),
-            RadioGroupChange::Closed(RadioGroupPart::Root)
+            state.apply(ResizableIntent::Toggle(ResizablePart::PanelGroup)),
+            ResizableChange::Closed(ResizablePart::PanelGroup)
         );
-        assert!(!state.is_active(RadioGroupPart::Root));
+        assert!(!state.is_active(ResizablePart::PanelGroup));
     }
 }

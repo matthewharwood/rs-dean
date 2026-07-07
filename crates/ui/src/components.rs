@@ -37,11 +37,12 @@ use crate::{
     NavigationMenuIntent, NavigationMenuModel, NavigationMenuPart, NavigationMenuState,
     PaginationDensity, PaginationIntent, PaginationModel, PaginationPart, PaginationState,
     PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ProgressDensity, ProgressIntent,
-    ProgressModel, ProgressPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    ProgressModel, ProgressPart, RadioGroupDensity, RadioGroupIntent, RadioGroupModel,
+    RadioGroupOrientation, RadioGroupPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -57,16 +58,17 @@ use crate::{
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
-    default_pagination_model, default_popover_model, default_progress_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_pagination_model, default_popover_model, default_progress_model,
+    default_radio_group_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -78,6 +80,7 @@ use crate::{
     validate_marker_model, validate_menubar_model, validate_message_model,
     validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
     validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model,
 };
 
 const HEALTH_CARD: &str =
@@ -891,6 +894,35 @@ const PROGRESS_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 const PROGRESS_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const PROGRESS_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const PROGRESS_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const RADIO_GROUP_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const RADIO_GROUP_TITLE_ROW: &str = "flex flex-wrap items-center justify-between gap-2xs";
+const RADIO_GROUP_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const RADIO_GROUP_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const RADIO_GROUP_STATUS: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
+const RADIO_GROUP_LIST: &str = "grid gap-2xs";
+const RADIO_GROUP_LIST_DENSE: &str = "grid gap-3xs";
+const RADIO_GROUP_LIST_HORIZONTAL: &str = "flex flex-wrap gap-2xs";
+const RADIO_GROUP_ITEM: &str = "flex min-w-0 items-start gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-left transition-colors hover:bg-hover-tint";
+const RADIO_GROUP_ITEM_DENSE: &str = "flex min-w-0 items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left transition-colors hover:bg-hover-tint";
+const RADIO_GROUP_ITEM_SELECTED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 transition-colors hover:bg-selected-tint";
+const RADIO_GROUP_ITEM_FOCUSED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-brand bg-surface-1 p-xs text-left shadow-1";
+const RADIO_GROUP_ITEM_DISABLED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
+const RADIO_GROUP_CONTROL: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-strong bg-surface-1 text-00 font-7 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const RADIO_GROUP_CONTROL_SELECTED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-brand bg-brand text-00 font-7 text-text-on-brand shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const RADIO_GROUP_CONTROL_INVALID: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-danger bg-error-soft text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const RADIO_GROUP_CONTROL_DISABLED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-muted bg-surface-3 text-00 font-6 text-text-disabled opacity-disabled";
+const RADIO_GROUP_DOT: &str = "size-2xs rounded-pill bg-text-on-brand";
+const RADIO_GROUP_DOT_EMPTY: &str = "hidden";
+const RADIO_GROUP_TEXT: &str = "grid min-w-0 gap-3xs";
+const RADIO_GROUP_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const RADIO_GROUP_LABEL_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const RADIO_GROUP_LABEL_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const RADIO_GROUP_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const RADIO_GROUP_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const RADIO_GROUP_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -12059,11 +12091,292 @@ const fn progress_state_label(
         "indeterminate"
     }
 }
-catalog_component!(
-    RadioGroup,
-    crate::RadioGroupModel,
-    crate::default_radio_group_model
-);
+#[component]
+pub fn RadioGroup(
+    #[prop(optional, default = default_radio_group_model())] model: RadioGroupModel,
+) -> AnyView {
+    if let Err(report) = validate_radio_group_model(&model) {
+        let message = format!("RadioGroup validation failed: {report}");
+        return view! {
+            <div class=RADIO_GROUP_ROOT_INVALID data-ui-component="radio-group" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let orientation = model.orientation;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let required = model.required;
+    let state_model = model.state();
+    let nodes = radio_group_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == RadioGroupPart::Root)
+        .expect("invariant: radio group render nodes include root")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_aria_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let options = model.options.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=radio_group_root_class(density, invalid, disabled)
+            data-ui-component="radio-group"
+            data-ui-part=RadioGroupPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-orientation=orientation.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    radio_group_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.selected_value(),
+                        state.focused_value(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            role="radiogroup"
+            aria-label=root_aria_label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+            aria-required=required.to_string()
+        >
+            <div class=RADIO_GROUP_TITLE_ROW>
+                <p class=radio_group_title_class(density)>
+                    {root_label}
+                    {required.then_some(view! { <span class=CHECKBOX_REQUIRED>" *"</span> })}
+                </p>
+                <p class=RADIO_GROUP_STATUS>{root_detail}</p>
+            </div>
+            <div class=radio_group_list_class(density, orientation)>
+                {options
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, option)| {
+                        let value = option.value.clone();
+                        let value_for_item = value.clone();
+                        let value_for_item_data = value.clone();
+                        let value_for_control = value.clone();
+                        let value_for_control_data = value.clone();
+                        let value_for_checked = value.clone();
+                        let value_for_focus = value.clone();
+                        let value_for_select = value.clone();
+                        let value_for_dot = value.clone();
+                        let option_disabled = blocked || option.disabled;
+                        view! {
+                            <div
+                                class=move || {
+                                    state.with(|state| {
+                                        radio_group_item_class(
+                                            density,
+                                            state.is_selected(&value_for_item),
+                                            state.is_focused(&value_for_item),
+                                            option_disabled,
+                                        )
+                                        .to_owned()
+                                    })
+                                }
+                                data-ui-part=RadioGroupPart::Item.label()
+                                data-ui-value=value_for_item_data
+                                data-ui-index=index.to_string()
+                            >
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    class=move || {
+                                        state.with(|state| {
+                                            radio_group_control_class(
+                                                state.is_selected(&value_for_control),
+                                                option_disabled,
+                                                invalid,
+                                            )
+                                            .to_owned()
+                                        })
+                                    }
+                                    data-ui-part=RadioGroupPart::Indicator.label()
+                                    data-ui-value=value_for_control_data
+                                    aria-label=option.label.clone()
+                                    aria-checked=move || {
+                                        state.with(|state| state.is_selected(&value_for_checked).to_string())
+                                    }
+                                    disabled=option_disabled
+                                    on:focus=move |_| {
+                                        if !option_disabled {
+                                            let value = value_for_focus.clone();
+                                            set_state.update(|state| {
+                                                let _ = state.apply(RadioGroupIntent::Focus(value));
+                                            });
+                                        }
+                                    }
+                                    on:blur=move |_| {
+                                        if !option_disabled {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(RadioGroupIntent::Blur);
+                                            });
+                                        }
+                                    }
+                                    on:click=move |_| {
+                                        if !option_disabled {
+                                            let value = value_for_select.clone();
+                                            set_state.update(|state| {
+                                                let _ = state.apply(RadioGroupIntent::Select(value));
+                                            });
+                                        }
+                                    }
+                                >
+                                    <span
+                                        class=move || {
+                                            state.with(|state| {
+                                                radio_group_dot_class(state.is_selected(&value_for_dot)).to_owned()
+                                            })
+                                        }
+                                        data-ui-part=RadioGroupPart::Indicator.label()
+                                    ></span>
+                                </button>
+                                <div class=RADIO_GROUP_TEXT data-ui-part=RadioGroupPart::Label.label()>
+                                    <p class=radio_group_label_class(density, option_disabled)>{option.label}</p>
+                                    <p class=radio_group_detail_class(invalid, option_disabled)>{option.detail}</p>
+                                </div>
+                            </div>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn radio_group_root_class(
+    density: RadioGroupDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return RADIO_GROUP_ROOT_DISABLED;
+    }
+    if invalid {
+        return RADIO_GROUP_ROOT_INVALID;
+    }
+    match density {
+        RadioGroupDensity::Standard => RADIO_GROUP_ROOT,
+        RadioGroupDensity::Dense => RADIO_GROUP_ROOT_DENSE,
+    }
+}
+
+const fn radio_group_title_class(density: RadioGroupDensity) -> &'static str {
+    match density {
+        RadioGroupDensity::Standard => RADIO_GROUP_TITLE,
+        RadioGroupDensity::Dense => RADIO_GROUP_TITLE_DENSE,
+    }
+}
+
+const fn radio_group_list_class(
+    density: RadioGroupDensity,
+    orientation: RadioGroupOrientation,
+) -> &'static str {
+    match (density, orientation) {
+        (_, RadioGroupOrientation::Horizontal) => RADIO_GROUP_LIST_HORIZONTAL,
+        (RadioGroupDensity::Standard, RadioGroupOrientation::Vertical) => RADIO_GROUP_LIST,
+        (RadioGroupDensity::Dense, RadioGroupOrientation::Vertical) => RADIO_GROUP_LIST_DENSE,
+    }
+}
+
+const fn radio_group_item_class(
+    density: RadioGroupDensity,
+    selected: bool,
+    focused: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return RADIO_GROUP_ITEM_DISABLED;
+    }
+    if selected {
+        return RADIO_GROUP_ITEM_SELECTED;
+    }
+    if focused {
+        return RADIO_GROUP_ITEM_FOCUSED;
+    }
+    match density {
+        RadioGroupDensity::Standard => RADIO_GROUP_ITEM,
+        RadioGroupDensity::Dense => RADIO_GROUP_ITEM_DENSE,
+    }
+}
+
+const fn radio_group_control_class(selected: bool, disabled: bool, invalid: bool) -> &'static str {
+    if disabled {
+        return RADIO_GROUP_CONTROL_DISABLED;
+    }
+    if invalid {
+        return RADIO_GROUP_CONTROL_INVALID;
+    }
+    if selected {
+        RADIO_GROUP_CONTROL_SELECTED
+    } else {
+        RADIO_GROUP_CONTROL
+    }
+}
+
+const fn radio_group_dot_class(selected: bool) -> &'static str {
+    if selected {
+        RADIO_GROUP_DOT
+    } else {
+        RADIO_GROUP_DOT_EMPTY
+    }
+}
+
+const fn radio_group_label_class(density: RadioGroupDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return RADIO_GROUP_LABEL_DISABLED;
+    }
+    match density {
+        RadioGroupDensity::Standard => RADIO_GROUP_LABEL,
+        RadioGroupDensity::Dense => RADIO_GROUP_LABEL_DENSE,
+    }
+}
+
+const fn radio_group_detail_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        RADIO_GROUP_DETAIL_DISABLED
+    } else if invalid {
+        RADIO_GROUP_DETAIL_INVALID
+    } else {
+        RADIO_GROUP_DETAIL
+    }
+}
+
+fn radio_group_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    selected_value: Option<&str>,
+    focused_value: Option<&str>,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if let Some(value) = focused_value {
+        format!("focused-{value}")
+    } else if let Some(value) = selected_value {
+        format!("selected-{value}")
+    } else {
+        "unselected".to_owned()
+    }
+}
 catalog_component!(
     Resizable,
     crate::ResizableModel,
