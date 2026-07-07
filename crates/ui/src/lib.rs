@@ -3,6 +3,7 @@ pub mod alert;
 pub mod alert_dialog;
 pub mod aspect_ratio;
 pub mod attachment;
+pub mod avatar;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -36,6 +37,10 @@ pub use attachment::{
     AttachmentAction, AttachmentChange, AttachmentIntent, AttachmentKind, AttachmentModel,
     AttachmentPart, AttachmentRenderNode, AttachmentState, attachment_render_nodes,
     default_attachment_model, validate_attachment_model,
+};
+pub use avatar::{
+    AvatarChange, AvatarImage, AvatarIntent, AvatarModel, AvatarPart, AvatarRenderNode, AvatarSize,
+    AvatarState, AvatarVisual, avatar_render_nodes, default_avatar_model, validate_avatar_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

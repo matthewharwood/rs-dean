@@ -285,12 +285,13 @@ pub mod bevy_adapter {
 
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
-        AspectRatioPart, AttachmentPart, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, catalog_component_any_render_nodes_for_component,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model, scale,
+        AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, RenderContract, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        catalog_component_any_render_nodes_for_component, component_implementation,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, default_attachment_model, default_avatar_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -343,6 +344,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Avatar {
+            return bevy_primitives_for_avatar(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -360,6 +364,35 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_avatar(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_avatar_model();
+        avatar_render_nodes(&model, model.state())
+            .into_iter()
+            .map(|node| {
+                let role = avatar_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: avatar_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: avatar_size_for_part(node.part),
+                    fill: fill_for_tone(avatar_tone_for_part(node.part), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: avatar_intent_for_part(node.part),
+                    selected: node.visual == AvatarVisual::Image,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -581,6 +614,44 @@ pub mod bevy_adapter {
             | AttachmentPart::Preview
             | AttachmentPart::Title
             | AttachmentPart::Meta => UiWidgetIntent::None,
+        }
+    }
+
+    const fn avatar_kind_for_part(part: AvatarPart) -> UiWidgetSlotKind {
+        match part {
+            AvatarPart::Root => UiWidgetSlotKind::Section,
+            AvatarPart::Image => UiWidgetSlotKind::Avatar,
+            AvatarPart::Fallback => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn avatar_role_for_part(part: AvatarPart) -> UiBlockRole {
+        match part {
+            AvatarPart::Root => UiBlockRole::Root,
+            AvatarPart::Image => UiBlockRole::Media,
+            AvatarPart::Fallback => UiBlockRole::Text,
+        }
+    }
+
+    const fn avatar_tone_for_part(part: AvatarPart) -> UiBlockTone {
+        match part {
+            AvatarPart::Root | AvatarPart::Fallback => UiBlockTone::Surface,
+            AvatarPart::Image => UiBlockTone::Success,
+        }
+    }
+
+    const fn avatar_intent_for_part(part: AvatarPart) -> UiWidgetIntent {
+        match part {
+            AvatarPart::Image => UiWidgetIntent::None,
+            AvatarPart::Root | AvatarPart::Fallback => UiWidgetIntent::None,
+        }
+    }
+
+    fn avatar_size_for_part(part: AvatarPart) -> Vec2 {
+        match part {
+            AvatarPart::Root | AvatarPart::Image | AvatarPart::Fallback => {
+                Vec2::new(scale::space::XL, scale::space::XL)
+            }
         }
     }
 

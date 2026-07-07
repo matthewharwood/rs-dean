@@ -4,14 +4,16 @@ use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone, AspectRatioFit,
     AspectRatioModel, AspectRatioPart, AttachmentIntent, AttachmentKind, AttachmentModel,
-    AttachmentPart, CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
+    AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual,
+    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
     ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
     UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, catalog_component_render_nodes,
-    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
-    default_alert_model, default_aspect_ratio_model, default_attachment_model,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    catalog_component_render_nodes, component_implementation, component_spec,
+    default_accordion_items, default_alert_dialog_model, default_alert_model,
+    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
     validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
 };
 
 const HEALTH_CARD: &str =
@@ -165,6 +167,21 @@ const ATTACHMENT_META_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled
 const ATTACHMENT_ACTION: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ATTACHMENT_ACTION_ACTIVE: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ATTACHMENT_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const AVATAR_ROOT_SMALL: &str = "m-0 grid size-l place-items-center overflow-hidden rounded-pill border border-border-subtle bg-surface-2 text-text-1 shadow-1";
+const AVATAR_ROOT_MEDIUM: &str = "m-0 grid size-xl place-items-center overflow-hidden rounded-pill border border-border-subtle bg-surface-2 text-text-1 shadow-1";
+const AVATAR_ROOT_LARGE: &str = "m-0 grid size-2xl place-items-center overflow-hidden rounded-pill border border-border-subtle bg-surface-2 text-text-1 shadow-2";
+const AVATAR_ROOT_DISABLED: &str = "m-0 grid size-xl place-items-center overflow-hidden rounded-pill border border-border-muted bg-surface-3 text-text-disabled";
+const AVATAR_IMAGE: &str = "h-full w-full object-cover";
+const AVATAR_FALLBACK: &str =
+    "grid h-full w-full place-items-center bg-primary-soft text-0 font-7 text-text-1";
+const AVATAR_FALLBACK_SMALL: &str =
+    "grid h-full w-full place-items-center bg-primary-soft text-00 font-7 text-text-1";
+const AVATAR_FALLBACK_LARGE: &str =
+    "grid h-full w-full place-items-center bg-primary-soft text-1 font-7 text-text-1";
+const AVATAR_FALLBACK_MUTED: &str =
+    "grid h-full w-full place-items-center bg-surface-3 text-0 font-7 text-text-muted";
+const AVATAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1419,7 +1436,127 @@ const fn attachment_state(model: &AttachmentModel) -> &'static str {
     }
 }
 
-catalog_component!(Avatar, crate::AvatarModel, crate::default_avatar_model);
+#[component]
+pub fn Avatar(#[prop(optional, default = default_avatar_model())] model: AvatarModel) -> AnyView {
+    if let Err(report) = validate_avatar_model(&model) {
+        let message = format!("Avatar validation failed: {report}");
+        return view! {
+            <section class=AVATAR_ROOT_MEDIUM data-ui-component="avatar" data-ui-state="invalid">
+                <p class=AVATAR_ERROR role="alert">{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = avatar_render_nodes(&model, initial_state);
+    let image = nodes
+        .iter()
+        .find(|node| node.part == AvatarPart::Image)
+        .expect("invariant: avatar render nodes include image");
+    let fallback = nodes
+        .iter()
+        .find(|node| node.part == AvatarPart::Fallback)
+        .expect("invariant: avatar render nodes include fallback");
+    let image_src = image.value.clone();
+    let image_alt = image.label.clone();
+    let fallback_value = fallback.value.clone();
+    let root_label = model.name;
+    let root_class = avatar_root_class(model.size, model.disabled);
+    let fallback_class = avatar_fallback_class(model.size, model.loading, model.disabled);
+    let size = model.size.label();
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let has_image = model.image.is_some();
+    let state_label = avatar_state_label(loading, disabled);
+    let (state, set_state) = signal(initial_state);
+    let visual = Memo::new(move |_| state.with(|state| state.visual()));
+    let visual_for_root = visual;
+    let visual_for_content = visual;
+
+    view! {
+        <figure
+            class=root_class
+            data-ui-component="avatar"
+            data-ui-part="Avatar"
+            data-ui-size=size
+            data-ui-state=state_label
+            data-ui-visual=move || visual_for_root.get().label()
+            aria-label=root_label.clone()
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            {move || {
+                if loading || disabled || !has_image || visual_for_content.get() == AvatarVisual::Fallback {
+                    view! {
+                        <span class=fallback_class data-ui-part="AvatarFallback" aria-hidden="true">
+                            {if loading { "...".to_owned() } else { fallback_value.clone() }}
+                        </span>
+                    }
+                        .into_any()
+                } else {
+                    let set_image_loaded = set_state;
+                    let set_image_failed = set_state;
+                    view! {
+                        <img
+                            class=AVATAR_IMAGE
+                            data-ui-part="AvatarImage"
+                            src=image_src.clone()
+                            alt=image_alt.clone()
+                            on:load=move |_| {
+                                set_image_loaded.update(|state| {
+                                    let _ = state.apply(AvatarIntent::ImageLoaded);
+                                });
+                            }
+                            on:error=move |_| {
+                                set_image_failed.update(|state| {
+                                    let _ = state.apply(AvatarIntent::ImageFailed);
+                                });
+                            }
+                        />
+                    }
+                        .into_any()
+                }
+            }}
+        </figure>
+    }
+    .into_any()
+}
+
+const fn avatar_root_class(size: AvatarSize, disabled: bool) -> &'static str {
+    if disabled {
+        AVATAR_ROOT_DISABLED
+    } else {
+        match size {
+            AvatarSize::Small => AVATAR_ROOT_SMALL,
+            AvatarSize::Medium => AVATAR_ROOT_MEDIUM,
+            AvatarSize::Large => AVATAR_ROOT_LARGE,
+        }
+    }
+}
+
+const fn avatar_fallback_class(size: AvatarSize, loading: bool, disabled: bool) -> &'static str {
+    if loading || disabled {
+        AVATAR_FALLBACK_MUTED
+    } else {
+        match size {
+            AvatarSize::Small => AVATAR_FALLBACK_SMALL,
+            AvatarSize::Medium => AVATAR_FALLBACK,
+            AvatarSize::Large => AVATAR_FALLBACK_LARGE,
+        }
+    }
+}
+
+const fn avatar_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Badge, crate::BadgeModel, crate::default_badge_model);
 catalog_component!(
     Breadcrumb,

@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    avatar,
-    Avatar,
-    AvatarModel,
-    AvatarPart,
-    AvatarRenderNode,
-    AvatarState,
-    AvatarIntent,
-    AvatarChange,
-    validate_avatar_model,
-    avatar_render_nodes,
-    default_avatar_model,
-    [Root => "Avatar", Image => "AvatarImage", Fallback => "AvatarFallback"]
-);
-
-define_catalog_component!(
     badge,
     Badge,
     BadgeModel,
@@ -1694,8 +1679,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Alert
         | UiComponentId::AlertDialog
         | UiComponentId::AspectRatio
-        | UiComponentId::Attachment => None,
-        UiComponentId::Avatar => Some(any_nodes(avatar_render_nodes(&default_avatar_model()))),
+        | UiComponentId::Attachment
+        | UiComponentId::Avatar => None,
         UiComponentId::Badge => Some(any_nodes(badge_render_nodes(&default_badge_model()))),
         UiComponentId::Breadcrumb => Some(any_nodes(breadcrumb_render_nodes(
             &default_breadcrumb_model(),
@@ -1838,6 +1823,7 @@ mod tests {
                     | UiComponentId::AlertDialog
                     | UiComponentId::AspectRatio
                     | UiComponentId::Attachment
+                    | UiComponentId::Avatar
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

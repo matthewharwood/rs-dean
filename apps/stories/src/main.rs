@@ -3,7 +3,8 @@ use rs_dean_ui::{
     Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertDialog,
     AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
-    AttachmentModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    AttachmentModel, Avatar, AvatarModel, AvatarSize, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -132,6 +133,24 @@ fn Stories() -> impl IntoView {
                             <Attachment model=invalid_attachment_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Attachment model=themed_attachment_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-avatar" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Avatar"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 06 implemented as an identity image/fallback contract backed by a validated shared Rust model, local image fallback state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Avatar model=default_avatar_story_model() />
+                            <Avatar model=fallback_avatar_story_model() />
+                            <Avatar model=loading_avatar_story_model() />
+                            <Avatar model=disabled_avatar_story_model() />
+                            <Avatar model=invalid_avatar_story_model() />
+                            <ThemeScope theme=ThemeId::Synthwave>
+                                <Avatar model=themed_avatar_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -380,6 +399,32 @@ fn themed_attachment_story_model() -> AttachmentModel {
         .with_kind(AttachmentKind::Data)
         .with_preview_label("CSV")
         .with_action(AttachmentAction::new("Inspect", "inspect-theme-audit"))
+}
+
+fn default_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("Matthew Harwood", "MH")
+}
+
+fn fallback_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("Design System", "DS")
+        .with_size(AvatarSize::Small)
+        .without_image()
+}
+
+fn loading_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("Hydrating User", "HU").loading()
+}
+
+fn disabled_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("Locked User", "LU").disabled()
+}
+
+fn invalid_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("", "??")
+}
+
+fn themed_avatar_story_model() -> AvatarModel {
+    AvatarModel::new("Theme Scope", "TS").with_size(AvatarSize::Large)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
