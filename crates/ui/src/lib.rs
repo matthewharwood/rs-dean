@@ -2,6 +2,7 @@ pub mod accordion;
 pub mod alert;
 pub mod alert_dialog;
 pub mod catalog;
+pub mod catalog_components;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -29,6 +30,7 @@ pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,
     UiComponentCategory, UiComponentId, UiStateModel,
 };
+pub use catalog_components::*;
 #[cfg(feature = "leptos")]
 pub use components::*;
 pub use kit::{

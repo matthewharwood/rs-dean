@@ -1,11 +1,13 @@
 use garde::Validate;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     StateContract, UiBlockRole, UiBlockTone, UiComponentCategory, UiComponentId,
     component_implementation, detail_for_part, role_for_part, tone_for_category, tone_for_role,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetPattern {
     Action,
     Callout,
@@ -22,7 +24,8 @@ pub enum UiWidgetPattern {
     Utility,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetIntent {
     None,
     Activate,
@@ -37,7 +40,8 @@ pub enum UiWidgetIntent {
     Toggle,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetSlotKind {
     Avatar,
     Badge,

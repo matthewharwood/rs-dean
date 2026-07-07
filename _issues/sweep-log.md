@@ -41,6 +41,16 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
+Concrete all-issue sweep pass: Aspect Ratio through Typography now have
+component-specific public Rust APIs generated from one shared contract. Each
+non-bespoke component exposes its own model, part enum, local state type,
+intent/change aliases, render node alias, default model, validator, and render
+node function. The story gallery routes every catalog ID through the named
+Leptos component, and Bevy primitive derivation consumes the same concrete
+render-node layer. This sweep found that consumer-provided models need owned
+render node copy instead of static literals, so the Leptos slot renderer now
+uses a renderer-neutral owned view node.
+
 ## Consolidated Learnings
 
 - Bespoke one-off APIs would drift across Leptos and Bevy, so the implementation source of truth is the combination of `ComponentImplementation` in `crates/ui/src/kit.rs` and literal `UiWidget` constructors in `crates/ui/src/widgets.rs`.
@@ -50,10 +60,12 @@ parts.
 - The token-class guard scans every `crates/ui/src` Rust file so later component work cannot reintroduce stock Tailwind design-scale utilities.
 - Concrete components use `garde` at the shared Rust model boundary before a renderer accepts props, so Leptos and Bevy consume the same validated component contract.
 - Generic catalog components use `garde` at the literal `UiWidget` boundary before Leptos or Bevy renders them.
+- Non-bespoke catalog components now expose concrete generated Rust APIs over the shared implementation so consumer code gets named model, part, state, intent, validation, and render-node types without duplicating behavior.
+- The shared Leptos slot renderer accepts owned view nodes, which keeps consumer-provided model copy valid while preserving token-only classes.
 - Repeatable shadcn anatomy parts are valid component structure; validation enforces catalog membership and full coverage instead of uniqueness.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found three cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, and validate generic widgets before framework-specific rendering.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found four cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, and use owned render nodes where consumer-provided copy enters the renderer.

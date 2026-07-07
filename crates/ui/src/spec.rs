@@ -1,6 +1,8 @@
 use crate::{ComponentDefinition, UiComponentCategory, UiComponentId, UiStateModel};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiBlockRole {
     Action,
     Content,
@@ -18,7 +20,8 @@ pub enum UiBlockRole {
     Text,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiBlockTone {
     Accent,
     Brand,
@@ -284,9 +287,9 @@ pub mod bevy_adapter {
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, component_implementation, default_accordion_items,
-        default_alert_dialog_model, default_alert_model, scale, widget_for_component,
-        widget_render_nodes,
+        alert_render_nodes, catalog_component_any_render_nodes_for_component,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -325,16 +328,15 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
-        let widget = widget_for_component(id);
-        widget_render_nodes(&widget)
-            .expect("invariant: literal widget contract validates before Bevy primitive derivation")
+        catalog_component_any_render_nodes_for_component(id)
+            .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
             .map(|node| BevyUiPrimitive {
-                part: node.part.to_owned(),
+                part: node.part,
                 kind: node.kind,
                 role: node.role,
-                label: node.label.to_owned(),
-                value: node.value.to_owned(),
+                label: node.label,
+                value: node.value,
                 size: size_for_role(node.role),
                 fill: fill_for_tone(node.tone, theme),
                 text: theme.text_1().to_bevy(),

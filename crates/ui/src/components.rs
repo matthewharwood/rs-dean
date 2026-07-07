@@ -3,11 +3,12 @@ use leptos::prelude::*;
 use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget,
-    UiWidgetPattern, UiWidgetRenderNode, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
-    default_alert_model, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, widget_for_component, widget_render_nodes,
+    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    catalog_component_render_nodes, component_implementation, component_spec,
+    default_accordion_items, default_alert_dialog_model, default_alert_model,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
 };
 
 const HEALTH_CARD: &str =
@@ -122,6 +123,31 @@ const ALERT_DIALOG_ACTION_DESTRUCTIVE: &str = "inline-flex min-h-field items-cen
 const ALERT_DIALOG_CANCEL: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ALERT_DIALOG_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+
+#[derive(Clone)]
+struct WidgetViewNode {
+    part: String,
+    kind: UiWidgetSlotKind,
+    label: String,
+    value: String,
+    intent: UiWidgetIntent,
+    selected: bool,
+    disabled: bool,
+}
+
+impl<P: CatalogComponentPart> From<CatalogComponentRenderNode<P>> for WidgetViewNode {
+    fn from(node: CatalogComponentRenderNode<P>) -> Self {
+        Self {
+            part: node.part.label().to_owned(),
+            kind: node.kind,
+            label: node.label,
+            value: node.value,
+            intent: node.intent,
+            selected: node.selected,
+            disabled: node.disabled,
+        }
+    }
+}
 
 #[component]
 pub fn HealthCard(title: &'static str, body: &'static str) -> impl IntoView {
@@ -259,20 +285,78 @@ pub fn ComponentDemo(id: UiComponentId) -> AnyView {
         UiComponentId::Accordion => view! { <Accordion /> }.into_any(),
         UiComponentId::Alert => view! { <Alert /> }.into_any(),
         UiComponentId::AlertDialog => view! { <AlertDialog /> }.into_any(),
-        _ => render_widget(widget_for_component(id)).into_any(),
+        UiComponentId::AspectRatio => view! { <AspectRatio /> }.into_any(),
+        UiComponentId::Attachment => view! { <Attachment /> }.into_any(),
+        UiComponentId::Avatar => view! { <Avatar /> }.into_any(),
+        UiComponentId::Badge => view! { <Badge /> }.into_any(),
+        UiComponentId::Breadcrumb => view! { <Breadcrumb /> }.into_any(),
+        UiComponentId::Bubble => view! { <Bubble /> }.into_any(),
+        UiComponentId::Button => view! { <Button /> }.into_any(),
+        UiComponentId::ButtonGroup => view! { <ButtonGroup /> }.into_any(),
+        UiComponentId::Calendar => view! { <Calendar /> }.into_any(),
+        UiComponentId::Card => view! { <Card /> }.into_any(),
+        UiComponentId::Carousel => view! { <Carousel /> }.into_any(),
+        UiComponentId::Chart => view! { <Chart /> }.into_any(),
+        UiComponentId::Checkbox => view! { <Checkbox /> }.into_any(),
+        UiComponentId::Collapsible => view! { <Collapsible /> }.into_any(),
+        UiComponentId::Combobox => view! { <Combobox /> }.into_any(),
+        UiComponentId::Command => view! { <Command /> }.into_any(),
+        UiComponentId::ContextMenu => view! { <ContextMenu /> }.into_any(),
+        UiComponentId::DataTable => view! { <DataTable /> }.into_any(),
+        UiComponentId::DatePicker => view! { <DatePicker /> }.into_any(),
+        UiComponentId::Dialog => view! { <Dialog /> }.into_any(),
+        UiComponentId::Direction => view! { <Direction /> }.into_any(),
+        UiComponentId::Drawer => view! { <Drawer /> }.into_any(),
+        UiComponentId::DropdownMenu => view! { <DropdownMenu /> }.into_any(),
+        UiComponentId::Empty => view! { <Empty /> }.into_any(),
+        UiComponentId::Field => view! { <Field /> }.into_any(),
+        UiComponentId::HoverCard => view! { <HoverCard /> }.into_any(),
+        UiComponentId::Input => view! { <Input /> }.into_any(),
+        UiComponentId::InputGroup => view! { <InputGroup /> }.into_any(),
+        UiComponentId::InputOtp => view! { <InputOtp /> }.into_any(),
+        UiComponentId::Item => view! { <Item /> }.into_any(),
+        UiComponentId::Kbd => view! { <Kbd /> }.into_any(),
+        UiComponentId::Label => view! { <Label /> }.into_any(),
+        UiComponentId::Marker => view! { <Marker /> }.into_any(),
+        UiComponentId::Menubar => view! { <Menubar /> }.into_any(),
+        UiComponentId::Message => view! { <Message /> }.into_any(),
+        UiComponentId::MessageScroller => view! { <MessageScroller /> }.into_any(),
+        UiComponentId::NativeSelect => view! { <NativeSelect /> }.into_any(),
+        UiComponentId::NavigationMenu => view! { <NavigationMenu /> }.into_any(),
+        UiComponentId::Pagination => view! { <Pagination /> }.into_any(),
+        UiComponentId::Popover => view! { <Popover /> }.into_any(),
+        UiComponentId::Progress => view! { <Progress /> }.into_any(),
+        UiComponentId::RadioGroup => view! { <RadioGroup /> }.into_any(),
+        UiComponentId::Resizable => view! { <Resizable /> }.into_any(),
+        UiComponentId::ScrollArea => view! { <ScrollArea /> }.into_any(),
+        UiComponentId::Select => view! { <Select /> }.into_any(),
+        UiComponentId::Separator => view! { <Separator /> }.into_any(),
+        UiComponentId::Sheet => view! { <Sheet /> }.into_any(),
+        UiComponentId::Sidebar => view! { <Sidebar /> }.into_any(),
+        UiComponentId::Skeleton => view! { <Skeleton /> }.into_any(),
+        UiComponentId::Slider => view! { <Slider /> }.into_any(),
+        UiComponentId::Sonner => view! { <Sonner /> }.into_any(),
+        UiComponentId::Spinner => view! { <Spinner /> }.into_any(),
+        UiComponentId::Switch => view! { <Switch /> }.into_any(),
+        UiComponentId::Table => view! { <Table /> }.into_any(),
+        UiComponentId::Tabs => view! { <Tabs /> }.into_any(),
+        UiComponentId::Textarea => view! { <Textarea /> }.into_any(),
+        UiComponentId::Toast => view! { <Toast /> }.into_any(),
+        UiComponentId::Toggle => view! { <Toggle /> }.into_any(),
+        UiComponentId::ToggleGroup => view! { <ToggleGroup /> }.into_any(),
+        UiComponentId::Tooltip => view! { <Tooltip /> }.into_any(),
+        UiComponentId::Typography => view! { <Typography /> }.into_any(),
     }
 }
 
-fn render_widget(widget: UiWidget) -> AnyView {
-    let slug = widget.id.definition().slug;
-    let pattern = widget.pattern.label();
-    let nodes = match widget_render_nodes(&widget) {
+fn render_catalog_component<P: CatalogComponentPart>(model: CatalogComponentModel<P>) -> AnyView {
+    let id = P::ID;
+    let slug = id.definition().slug;
+    let pattern = model.pattern.label();
+    let nodes = match catalog_component_render_nodes(&model) {
         Ok(nodes) => nodes,
         Err(report) => {
-            let message = format!(
-                "{} widget validation failed: {report}",
-                widget.id.definition().name
-            );
+            let message = format!("{} validation failed: {report}", id.definition().name);
             return view! {
                 <section class=WIDGET_SHELL data-ui-widget=slug data-ui-state="invalid">
                     <p class=WIDGET_ERROR role="alert">{message}</p>
@@ -281,14 +365,20 @@ fn render_widget(widget: UiWidget) -> AnyView {
             .into_any();
         }
     };
-    let root = *nodes
+    let root = nodes
         .first()
-        .expect("invariant: validated widgets always include a root node");
-    let content_class = content_class(widget.pattern);
-    let slots = nodes.into_iter().skip(1).collect::<Vec<_>>();
+        .cloned()
+        .map(WidgetViewNode::from)
+        .expect("invariant: validated catalog components always include a root node");
+    let content_class = content_class(model.pattern);
+    let slots = nodes
+        .into_iter()
+        .skip(1)
+        .map(WidgetViewNode::from)
+        .collect::<Vec<_>>();
 
     view! {
-        <section class=widget_class(widget.pattern) data-ui-widget=slug data-ui-pattern=pattern>
+        <section class=widget_class(model.pattern) data-ui-widget=slug data-ui-pattern=pattern>
             <header class=WIDGET_HEADER>
                 <p class=WIDGET_EYEBROW>{pattern}</p>
                 <h3 class=WIDGET_TITLE>{root.label}</h3>
@@ -302,134 +392,134 @@ fn render_widget(widget: UiWidget) -> AnyView {
     .into_any()
 }
 
-fn slot_view(slot: UiWidgetRenderNode) -> AnyView {
-    let part = slot.part;
+fn slot_view(slot: WidgetViewNode) -> AnyView {
+    let part = slot.part.clone();
     let kind = slot.kind.label();
     let intent = slot.intent.label();
     let selected = slot.selected.to_string();
     let disabled = slot.disabled;
-    let slot_class = slot_class(slot);
+    let slot_class = slot_class(&slot);
 
     match slot.kind {
         UiWidgetSlotKind::Avatar => view! {
             <div class=WIDGET_SLOT data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_AVATAR aria-hidden="true">{slot.label}</span>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <span class=WIDGET_AVATAR aria-hidden="true">{slot.label.clone()}</span>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Badge => view! {
             <span class=WIDGET_BADGE data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                {slot.label}
+                {slot.label.clone()}
             </span>
         }.into_any(),
         UiWidgetSlotKind::Button | UiWidgetSlotKind::IconButton => view! {
-            <button type="button" class=button_class(slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-pressed=selected disabled=disabled>
-                {slot.label}
+            <button type="button" class=button_class(&slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-pressed=selected disabled=disabled>
+                {slot.label.clone()}
             </button>
         }.into_any(),
         UiWidgetSlotKind::Cell => view! {
             <div role="cell" class=WIDGET_TABLE_CELL data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                {slot.label}
+                {slot.label.clone()}
             </div>
         }.into_any(),
         UiWidgetSlotKind::Chart => view! {
             <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label}</p>
+                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
                 <div class="flex items-end gap-2xs" aria-hidden="true">
                     <span class="h-xs w-s rounded-field bg-brand"></span>
                     <span class="h-m w-s rounded-field bg-success"></span>
                     <span class="h-l w-s rounded-field bg-accent"></span>
                 </div>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Checkbox => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
                 <input type="checkbox" class="size-s rounded-selector border border-border-strong accent-brand" checked=slot.selected disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value}</span>
+                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
             </label>
         }.into_any(),
         UiWidgetSlotKind::Description | UiWidgetSlotKind::Text => view! {
             <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label}</p>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Header | UiWidgetSlotKind::Title => view! {
             <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <h4 class=WIDGET_TITLE>{slot.label}</h4>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <h4 class=WIDGET_TITLE>{slot.label.clone()}</h4>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Input => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <input class=WIDGET_INPUT value=slot.value aria-label=slot.label disabled=disabled />
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <input class=WIDGET_INPUT value=slot.value.clone() aria-label=slot.label.clone() disabled=disabled />
             </label>
         }.into_any(),
         UiWidgetSlotKind::Key => view! {
-            <kbd class=WIDGET_KEY data-ui-part=part data-ui-kind=kind data-ui-intent=intent>{slot.label}</kbd>
+            <kbd class=WIDGET_KEY data-ui-part=part data-ui-kind=kind data-ui-intent=intent>{slot.label.clone()}</kbd>
         }.into_any(),
         UiWidgetSlotKind::Link => view! {
-            <a class=button_class(slot) href="#" data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-current=selected>
-                {slot.label}
+            <a class=button_class(&slot) href="#" data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-current=selected>
+                {slot.label.clone()}
             </a>
         }.into_any(),
         UiWidgetSlotKind::List => view! {
             <div role="list" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label}</p>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::ListItem | UiWidgetSlotKind::Option => view! {
             <div role="option" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <p class=WIDGET_LABEL>{slot.label}</p>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Marker => view! {
             <span class=WIDGET_MARKER data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                {slot.label}
+                {slot.label.clone()}
             </span>
         }.into_any(),
         UiWidgetSlotKind::Media => view! {
             <figure class=WIDGET_MEDIA data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span>{slot.label}</span>
-                <figcaption class=WIDGET_VALUE>{slot.value}</figcaption>
+                <span>{slot.label.clone()}</span>
+                <figcaption class=WIDGET_VALUE>{slot.value.clone()}</figcaption>
             </figure>
         }.into_any(),
         UiWidgetSlotKind::Overlay | UiWidgetSlotKind::Panel | UiWidgetSlotKind::Section => view! {
             <section class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <p class=WIDGET_LABEL>{slot.label}</p>
-                <p class=WIDGET_VALUE>{slot.value}</p>
+                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
+                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
             </section>
         }.into_any(),
         UiWidgetSlotKind::Progress => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <progress class=WIDGET_PROGRESS value="64" max="100">{slot.value}</progress>
-                <span class=WIDGET_VALUE>{slot.value}</span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <progress class=WIDGET_PROGRESS value="64" max="100">{slot.value.clone()}</progress>
+                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
             </label>
         }.into_any(),
         UiWidgetSlotKind::Radio => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
                 <input type="radio" class="size-s border border-border-strong accent-brand" checked=slot.selected disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value}</span>
+                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
             </label>
         }.into_any(),
         UiWidgetSlotKind::Row => view! {
             <div role="row" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <span class=WIDGET_VALUE>{slot.value}</span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Select => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <select class=WIDGET_INPUT aria-label=slot.label disabled=disabled>
-                    <option selected=slot.selected>{slot.value}</option>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <select class=WIDGET_INPUT aria-label=slot.label.clone() disabled=disabled>
+                    <option selected=slot.selected>{slot.value.clone()}</option>
                     <option>"Light"</option>
                     <option>"Dark"</option>
                 </select>
@@ -437,8 +527,8 @@ fn slot_view(slot: UiWidgetRenderNode) -> AnyView {
         }.into_any(),
         UiWidgetSlotKind::Separator => view! {
             <div class="grid gap-2xs" data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_SEPARATOR role="separator" aria-label=slot.value></span>
-                <span class=WIDGET_LABEL>{slot.label}</span>
+                <span class=WIDGET_SEPARATOR role="separator" aria-label=slot.value.clone()></span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Skeleton => view! {
@@ -449,34 +539,34 @@ fn slot_view(slot: UiWidgetRenderNode) -> AnyView {
         }.into_any(),
         UiWidgetSlotKind::Slider => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <input type="range" class=WIDGET_RANGE min="0" max="100" value="72" aria-label=slot.label disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value}</span>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <input type="range" class=WIDGET_RANGE min="0" max="100" value="72" aria-label=slot.label.clone() disabled=disabled />
+                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
             </label>
         }.into_any(),
         UiWidgetSlotKind::Spinner => view! {
             <div role="status" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
                 <span class=WIDGET_SPINNER aria-hidden="true"></span>
-                <span class=WIDGET_VALUE>{slot.label}</span>
+                <span class=WIDGET_VALUE>{slot.label.clone()}</span>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Switch => view! {
-            <button type="button" role="switch" class=button_class(slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-checked=selected disabled=disabled>
-                {slot.label}
+            <button type="button" role="switch" class=button_class(&slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-checked=selected disabled=disabled>
+                {slot.label.clone()}
             </button>
         }.into_any(),
         UiWidgetSlotKind::Table => view! {
             <div role="table" class=WIDGET_TABLE data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
                 <div role="row" class="grid grid-cols-2">
-                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.label}</span>
-                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.value}</span>
+                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.label.clone()}</span>
+                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.value.clone()}</span>
                 </div>
             </div>
         }.into_any(),
         UiWidgetSlotKind::Textarea => view! {
             <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label}</span>
-                <textarea class=WIDGET_TEXTAREA aria-label=slot.label disabled=disabled>{slot.value}</textarea>
+                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
+                <textarea class=WIDGET_TEXTAREA aria-label=slot.label.clone() disabled=disabled>{slot.value.clone()}</textarea>
             </label>
         }.into_any(),
     }
@@ -512,7 +602,7 @@ fn content_class(pattern: UiWidgetPattern) -> &'static str {
     }
 }
 
-fn slot_class(slot: UiWidgetRenderNode) -> &'static str {
+fn slot_class(slot: &WidgetViewNode) -> &'static str {
     if slot.selected {
         WIDGET_SLOT_ACTIVE
     } else {
@@ -520,7 +610,7 @@ fn slot_class(slot: UiWidgetRenderNode) -> &'static str {
     }
 }
 
-fn button_class(slot: UiWidgetRenderNode) -> &'static str {
+fn button_class(slot: &WidgetViewNode) -> &'static str {
     if slot.selected {
         WIDGET_BUTTON_ACTIVE
     } else {
@@ -528,11 +618,11 @@ fn button_class(slot: UiWidgetRenderNode) -> &'static str {
     }
 }
 
-macro_rules! literal_component {
-    ($name:ident, $id:ident) => {
+macro_rules! catalog_component {
+    ($name:ident, $model:ty, $default:path) => {
         #[component]
-        pub fn $name() -> impl IntoView {
-            view! { <ComponentDemo id=UiComponentId::$id /> }
+        pub fn $name(#[prop(optional, default = $default())] model: $model) -> AnyView {
+            render_catalog_component(model)
         }
     };
 }
@@ -998,67 +1088,187 @@ pub fn Accordion(
     .into_any()
 }
 
-literal_component!(AspectRatio, AspectRatio);
-literal_component!(Attachment, Attachment);
-literal_component!(Avatar, Avatar);
-literal_component!(Badge, Badge);
-literal_component!(Breadcrumb, Breadcrumb);
-literal_component!(Bubble, Bubble);
-literal_component!(Button, Button);
-literal_component!(ButtonGroup, ButtonGroup);
-literal_component!(Calendar, Calendar);
-literal_component!(Card, Card);
-literal_component!(Carousel, Carousel);
-literal_component!(Chart, Chart);
-literal_component!(Checkbox, Checkbox);
-literal_component!(Collapsible, Collapsible);
-literal_component!(Combobox, Combobox);
-literal_component!(Command, Command);
-literal_component!(ContextMenu, ContextMenu);
-literal_component!(DataTable, DataTable);
-literal_component!(DatePicker, DatePicker);
-literal_component!(Dialog, Dialog);
-literal_component!(Direction, Direction);
-literal_component!(Drawer, Drawer);
-literal_component!(DropdownMenu, DropdownMenu);
-literal_component!(Empty, Empty);
-literal_component!(Field, Field);
-literal_component!(HoverCard, HoverCard);
-literal_component!(Input, Input);
-literal_component!(InputGroup, InputGroup);
-literal_component!(InputOtp, InputOtp);
-literal_component!(Item, Item);
-literal_component!(Kbd, Kbd);
-literal_component!(Label, Label);
-literal_component!(Marker, Marker);
-literal_component!(Menubar, Menubar);
-literal_component!(Message, Message);
-literal_component!(MessageScroller, MessageScroller);
-literal_component!(NativeSelect, NativeSelect);
-literal_component!(NavigationMenu, NavigationMenu);
-literal_component!(Pagination, Pagination);
-literal_component!(Popover, Popover);
-literal_component!(Progress, Progress);
-literal_component!(RadioGroup, RadioGroup);
-literal_component!(Resizable, Resizable);
-literal_component!(ScrollArea, ScrollArea);
-literal_component!(Select, Select);
-literal_component!(Separator, Separator);
-literal_component!(Sheet, Sheet);
-literal_component!(Sidebar, Sidebar);
-literal_component!(Skeleton, Skeleton);
-literal_component!(Slider, Slider);
-literal_component!(Sonner, Sonner);
-literal_component!(Spinner, Spinner);
-literal_component!(Switch, Switch);
-literal_component!(Table, Table);
-literal_component!(Tabs, Tabs);
-literal_component!(Textarea, Textarea);
-literal_component!(Toast, Toast);
-literal_component!(Toggle, Toggle);
-literal_component!(ToggleGroup, ToggleGroup);
-literal_component!(Tooltip, Tooltip);
-literal_component!(Typography, Typography);
+catalog_component!(
+    AspectRatio,
+    crate::AspectRatioModel,
+    crate::default_aspect_ratio_model
+);
+catalog_component!(
+    Attachment,
+    crate::AttachmentModel,
+    crate::default_attachment_model
+);
+catalog_component!(Avatar, crate::AvatarModel, crate::default_avatar_model);
+catalog_component!(Badge, crate::BadgeModel, crate::default_badge_model);
+catalog_component!(
+    Breadcrumb,
+    crate::BreadcrumbModel,
+    crate::default_breadcrumb_model
+);
+catalog_component!(Bubble, crate::BubbleModel, crate::default_bubble_model);
+catalog_component!(Button, crate::ButtonModel, crate::default_button_model);
+catalog_component!(
+    ButtonGroup,
+    crate::ButtonGroupModel,
+    crate::default_button_group_model
+);
+catalog_component!(
+    Calendar,
+    crate::CalendarModel,
+    crate::default_calendar_model
+);
+catalog_component!(Card, crate::CardModel, crate::default_card_model);
+catalog_component!(
+    Carousel,
+    crate::CarouselModel,
+    crate::default_carousel_model
+);
+catalog_component!(Chart, crate::ChartModel, crate::default_chart_model);
+catalog_component!(
+    Checkbox,
+    crate::CheckboxModel,
+    crate::default_checkbox_model
+);
+catalog_component!(
+    Collapsible,
+    crate::CollapsibleModel,
+    crate::default_collapsible_model
+);
+catalog_component!(
+    Combobox,
+    crate::ComboboxModel,
+    crate::default_combobox_model
+);
+catalog_component!(Command, crate::CommandModel, crate::default_command_model);
+catalog_component!(
+    ContextMenu,
+    crate::ContextMenuModel,
+    crate::default_context_menu_model
+);
+catalog_component!(
+    DataTable,
+    crate::DataTableModel,
+    crate::default_data_table_model
+);
+catalog_component!(
+    DatePicker,
+    crate::DatePickerModel,
+    crate::default_date_picker_model
+);
+catalog_component!(Dialog, crate::DialogModel, crate::default_dialog_model);
+catalog_component!(
+    Direction,
+    crate::DirectionModel,
+    crate::default_direction_model
+);
+catalog_component!(Drawer, crate::DrawerModel, crate::default_drawer_model);
+catalog_component!(
+    DropdownMenu,
+    crate::DropdownMenuModel,
+    crate::default_dropdown_menu_model
+);
+catalog_component!(Empty, crate::EmptyModel, crate::default_empty_model);
+catalog_component!(Field, crate::FieldModel, crate::default_field_model);
+catalog_component!(
+    HoverCard,
+    crate::HoverCardModel,
+    crate::default_hover_card_model
+);
+catalog_component!(Input, crate::InputModel, crate::default_input_model);
+catalog_component!(
+    InputGroup,
+    crate::InputGroupModel,
+    crate::default_input_group_model
+);
+catalog_component!(
+    InputOtp,
+    crate::InputOtpModel,
+    crate::default_input_otp_model
+);
+catalog_component!(Item, crate::ItemModel, crate::default_item_model);
+catalog_component!(Kbd, crate::KbdModel, crate::default_kbd_model);
+catalog_component!(Label, crate::LabelModel, crate::default_label_model);
+catalog_component!(Marker, crate::MarkerModel, crate::default_marker_model);
+catalog_component!(Menubar, crate::MenubarModel, crate::default_menubar_model);
+catalog_component!(Message, crate::MessageModel, crate::default_message_model);
+catalog_component!(
+    MessageScroller,
+    crate::MessageScrollerModel,
+    crate::default_message_scroller_model
+);
+catalog_component!(
+    NativeSelect,
+    crate::NativeSelectModel,
+    crate::default_native_select_model
+);
+catalog_component!(
+    NavigationMenu,
+    crate::NavigationMenuModel,
+    crate::default_navigation_menu_model
+);
+catalog_component!(
+    Pagination,
+    crate::PaginationModel,
+    crate::default_pagination_model
+);
+catalog_component!(Popover, crate::PopoverModel, crate::default_popover_model);
+catalog_component!(
+    Progress,
+    crate::ProgressModel,
+    crate::default_progress_model
+);
+catalog_component!(
+    RadioGroup,
+    crate::RadioGroupModel,
+    crate::default_radio_group_model
+);
+catalog_component!(
+    Resizable,
+    crate::ResizableModel,
+    crate::default_resizable_model
+);
+catalog_component!(
+    ScrollArea,
+    crate::ScrollAreaModel,
+    crate::default_scroll_area_model
+);
+catalog_component!(Select, crate::SelectModel, crate::default_select_model);
+catalog_component!(
+    Separator,
+    crate::SeparatorModel,
+    crate::default_separator_model
+);
+catalog_component!(Sheet, crate::SheetModel, crate::default_sheet_model);
+catalog_component!(Sidebar, crate::SidebarModel, crate::default_sidebar_model);
+catalog_component!(
+    Skeleton,
+    crate::SkeletonModel,
+    crate::default_skeleton_model
+);
+catalog_component!(Slider, crate::SliderModel, crate::default_slider_model);
+catalog_component!(Sonner, crate::SonnerModel, crate::default_sonner_model);
+catalog_component!(Spinner, crate::SpinnerModel, crate::default_spinner_model);
+catalog_component!(Switch, crate::SwitchModel, crate::default_switch_model);
+catalog_component!(Table, crate::TableModel, crate::default_table_model);
+catalog_component!(Tabs, crate::TabsModel, crate::default_tabs_model);
+catalog_component!(
+    Textarea,
+    crate::TextareaModel,
+    crate::default_textarea_model
+);
+catalog_component!(Toast, crate::ToastModel, crate::default_toast_model);
+catalog_component!(Toggle, crate::ToggleModel, crate::default_toggle_model);
+catalog_component!(
+    ToggleGroup,
+    crate::ToggleGroupModel,
+    crate::default_toggle_group_model
+);
+catalog_component!(Tooltip, crate::TooltipModel, crate::default_tooltip_model);
+catalog_component!(
+    Typography,
+    crate::TypographyModel,
+    crate::default_typography_model
+);
 
 #[component]
 pub fn ThemeCycleButton(
