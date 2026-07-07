@@ -293,12 +293,12 @@ pub mod bevy_adapter {
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
-        MessageSide, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        MessageScrollerPart, MessageSide, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -313,11 +313,13 @@ pub mod bevy_adapter {
         default_empty_model, default_field_model, default_hover_card_model,
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
-        default_menubar_model, default_message_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_menubar_model, default_message_model, default_message_scroller_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes, scale,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        message_scroller_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -501,6 +503,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Message {
             return bevy_primitives_for_message(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::MessageScroller {
+            return bevy_primitives_for_message_scroller(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1184,6 +1193,37 @@ pub mod bevy_adapter {
                     state,
                     intent: message_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_message_scroller(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_message_scroller_model();
+        let message_scroller_state = model.state();
+        message_scroller_render_nodes(&model, &message_scroller_state)
+            .into_iter()
+            .map(|node| {
+                let role = message_scroller_role_for_part(node.part);
+                let tone = message_scroller_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: message_scroller_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: message_scroller_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: message_scroller_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.invalid || !node.at_latest,
                     disabled: node.disabled,
                 }
             })
@@ -3505,6 +3545,69 @@ pub mod bevy_adapter {
             }
             MessagePart::Content => Vec2::new(scale::space::XL2, scale::space::L),
             MessagePart::Actions => Vec2::new(scale::space::M, scale::space::S),
+        }
+    }
+
+    const fn message_scroller_kind_for_part(
+        part: MessageScrollerPart,
+        actionable: bool,
+    ) -> UiWidgetSlotKind {
+        match part {
+            MessageScrollerPart::Root => UiWidgetSlotKind::Section,
+            MessageScrollerPart::Viewport => UiWidgetSlotKind::Panel,
+            MessageScrollerPart::List => UiWidgetSlotKind::List,
+            MessageScrollerPart::Anchor => UiWidgetSlotKind::Marker,
+            MessageScrollerPart::JumpButton if actionable => UiWidgetSlotKind::Button,
+            MessageScrollerPart::JumpButton => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn message_scroller_role_for_part(part: MessageScrollerPart) -> UiBlockRole {
+        match part {
+            MessageScrollerPart::Root => UiBlockRole::Root,
+            MessageScrollerPart::Viewport => UiBlockRole::Layout,
+            MessageScrollerPart::List => UiBlockRole::Content,
+            MessageScrollerPart::Anchor => UiBlockRole::Indicator,
+            MessageScrollerPart::JumpButton => UiBlockRole::Action,
+        }
+    }
+
+    fn message_scroller_tone_for_node(node: &crate::MessageScrollerRenderNode) -> UiBlockTone {
+        if !node.visible || node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active || (node.part == MessageScrollerPart::JumpButton && !node.at_latest) {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            MessageScrollerPart::Root | MessageScrollerPart::Viewport => UiBlockTone::Surface,
+            MessageScrollerPart::List => UiBlockTone::Surface,
+            MessageScrollerPart::Anchor if node.at_latest => UiBlockTone::Success,
+            MessageScrollerPart::Anchor => UiBlockTone::Muted,
+            MessageScrollerPart::JumpButton => UiBlockTone::Brand,
+        }
+    }
+
+    const fn message_scroller_intent_for_part(
+        part: MessageScrollerPart,
+        actionable: bool,
+    ) -> UiWidgetIntent {
+        match (part, actionable) {
+            (MessageScrollerPart::JumpButton, true) => UiWidgetIntent::Activate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn message_scroller_size_for_part(part: MessageScrollerPart) -> Vec2 {
+        match part {
+            MessageScrollerPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            MessageScrollerPart::Viewport => Vec2::new(scale::space::XL3, scale::space::XL2),
+            MessageScrollerPart::List => Vec2::new(scale::space::XL2, scale::space::XL2),
+            MessageScrollerPart::Anchor => Vec2::new(scale::space::XL2, scale::space::XS3),
+            MessageScrollerPart::JumpButton => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

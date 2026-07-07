@@ -24,7 +24,9 @@ use rs_dean_ui::{
     ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, Label, LabelDensity, LabelModel,
     LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone, Menubar,
     MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, Message, MessageAction, MessageDensity,
-    MessageModel, MessageSide, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    MessageModel, MessageScroller, MessageScrollerDensity, MessageScrollerEntry,
+    MessageScrollerModel, MessageSide, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -749,6 +751,24 @@ fn Stories() -> impl IntoView {
                             <Message model=invalid_message_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Message model=themed_message_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-message-scroller" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Message Scroller"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 39 implemented as a live transcript viewport backed by validated shared Rust message entries, renderer-local scroll/jump state, and Bevy-readable scroller primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <MessageScroller model=default_message_scroller_story_model() />
+                            <MessageScroller model=dense_latest_message_scroller_story_model() />
+                            <MessageScroller model=loading_message_scroller_story_model() />
+                            <MessageScroller model=disabled_message_scroller_story_model() />
+                            <MessageScroller model=invalid_message_scroller_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <MessageScroller model=themed_message_scroller_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2795,6 +2815,81 @@ fn themed_message_story_model() -> MessageModel {
     )
     .with_side(MessageSide::Incoming)
     .with_actions(vec![MessageAction::new("Inspect", "inspect-theme")])
+}
+
+fn default_message_scroller_story_model() -> MessageScrollerModel {
+    MessageScrollerModel::new(vec![
+        MessageScrollerEntry::new(
+            "codex-ready",
+            MessageModel::new(
+                "Codex",
+                "Today at 9:41",
+                "Message Scroller is ready for sweep review.",
+                "Delivered",
+            )
+            .with_actions(vec![MessageAction::new("Reply", "reply")]),
+        ),
+        MessageScrollerEntry::new(
+            "matthew-plan",
+            MessageModel::new(
+                "Matthew",
+                "Today at 9:42",
+                "Keep transcript ownership durable and scroll position renderer-local.",
+                "Read",
+            )
+            .with_side(MessageSide::Outgoing)
+            .with_actions(vec![MessageAction::new("Edit", "edit")]),
+        ),
+    ])
+}
+
+fn dense_latest_message_scroller_story_model() -> MessageScrollerModel {
+    default_message_scroller_story_model()
+        .with_density(MessageScrollerDensity::Dense)
+        .with_at_latest(true)
+        .manual_scroll()
+}
+
+fn loading_message_scroller_story_model() -> MessageScrollerModel {
+    default_message_scroller_story_model().loading()
+}
+
+fn disabled_message_scroller_story_model() -> MessageScrollerModel {
+    default_message_scroller_story_model()
+        .with_anchor_label("Transcript locked")
+        .with_jump_label("Locked")
+        .disabled()
+}
+
+fn invalid_message_scroller_story_model() -> MessageScrollerModel {
+    default_message_scroller_story_model().with_error("Transcript hydration failed.")
+}
+
+fn themed_message_scroller_story_model() -> MessageScrollerModel {
+    MessageScrollerModel::new(vec![
+        MessageScrollerEntry::new(
+            "theme-runner",
+            MessageModel::new(
+                "Theme runner",
+                "Token preview",
+                "Scroller chrome, nested messages, and jump controls all resolve through the shared theme.",
+                "Ready",
+            )
+            .with_actions(vec![MessageAction::new("Inspect", "inspect")]),
+        ),
+        MessageScrollerEntry::new(
+            "designer",
+            MessageModel::new(
+                "Designer",
+                "Follow-up",
+                "The latest anchor should stay visible across theme switches.",
+                "Queued",
+            )
+            .with_side(MessageSide::Outgoing)
+            .with_actions(vec![MessageAction::new("Pin", "pin")]),
+        ),
+    ])
+    .with_jump_label("Latest")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

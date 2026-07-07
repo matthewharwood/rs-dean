@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    message_scroller,
-    MessageScroller,
-    MessageScrollerModel,
-    MessageScrollerPart,
-    MessageScrollerRenderNode,
-    MessageScrollerState,
-    MessageScrollerIntent,
-    MessageScrollerChange,
-    validate_message_scroller_model,
-    message_scroller_render_nodes,
-    default_message_scroller_model,
-    [
-        Root => "MessageScroller",
-        Viewport => "MessageViewport",
-        List => "MessageList",
-        Anchor => "MessageAnchor",
-        JumpButton => "MessageJumpButton",
-    ]
-);
-
-define_catalog_component!(
     native_select,
     NativeSelect,
     NativeSelectModel,
@@ -1064,10 +1043,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Label
         | UiComponentId::Marker
         | UiComponentId::Menubar
-        | UiComponentId::Message => None,
-        UiComponentId::MessageScroller => Some(any_nodes(message_scroller_render_nodes(
-            &default_message_scroller_model(),
-        ))),
+        | UiComponentId::Message
+        | UiComponentId::MessageScroller => None,
         UiComponentId::NativeSelect => Some(any_nodes(native_select_render_nodes(
             &default_native_select_model(),
         ))),
@@ -1178,6 +1155,7 @@ mod tests {
                     | UiComponentId::Marker
                     | UiComponentId::Menubar
                     | UiComponentId::Message
+                    | UiComponentId::MessageScroller
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1194,17 +1172,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_message_scroller_model().state();
-        assert!(!state.is_active(MessageScrollerPart::Root));
+        let mut state = default_native_select_model().state();
+        assert!(!state.is_active(NativeSelectPart::Root));
         assert_eq!(
-            state.apply(MessageScrollerIntent::Toggle(MessageScrollerPart::Root)),
-            MessageScrollerChange::Opened(MessageScrollerPart::Root)
+            state.apply(NativeSelectIntent::Toggle(NativeSelectPart::Root)),
+            NativeSelectChange::Opened(NativeSelectPart::Root)
         );
-        assert!(state.is_active(MessageScrollerPart::Root));
+        assert!(state.is_active(NativeSelectPart::Root));
         assert_eq!(
-            state.apply(MessageScrollerIntent::Toggle(MessageScrollerPart::Root)),
-            MessageScrollerChange::Closed(MessageScrollerPart::Root)
+            state.apply(NativeSelectIntent::Toggle(NativeSelectPart::Root)),
+            NativeSelectChange::Closed(NativeSelectPart::Root)
         );
-        assert!(!state.is_active(MessageScrollerPart::Root));
+        assert!(!state.is_active(NativeSelectPart::Root));
     }
 }

@@ -414,7 +414,18 @@ re-audited against this learning; no earlier API changes were needed because
 Bubble, Attachment, Marker, and Menubar already keep durable workflow state
 outside renderer-local interaction caches.
 
-All-issue sweep pass: Message Scroller through Typography complete. The shared
+Concrete component pass: Message Scroller complete. The thirty-ninth issue now
+has a typed transcript-viewport model, message-entry composition over
+`MessageModel`, viewport/list/anchor/jump-button render nodes, renderer-local
+scroll position and jump state, `garde` validation, token-only Leptos scroller
+rendering, dedicated story proof, and Bevy primitive derivation from the same
+model. The sweep found that scroll affordances need local position state while
+the transcript entries remain consumer-owned durable data. Issues 01 through
+38 were re-audited against this learning; no earlier API changes were needed
+because Message and the existing navigation components already separate local
+UI position from durable app state.
+
+All-issue sweep pass: Native Select through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -422,7 +433,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Message Scroller through Typography now have
+Concrete all-issue sweep pass: Native Select through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

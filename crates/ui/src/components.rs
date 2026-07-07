@@ -30,12 +30,13 @@ use crate::{
     KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, LabelDensity, LabelIntent, LabelModel,
     LabelPart, LabelRequirement, LabelState, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,
     MarkerState, MarkerTone, MenubarDensity, MenubarIntent, MenubarModel, MenubarPart,
-    MenubarState, MessageDensity, MessageIntent, MessageModel, MessagePart, MessageSide,
-    MessageState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
-    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    MenubarState, MessageDensity, MessageIntent, MessageModel, MessagePart, MessageScrollerDensity,
+    MessageScrollerEntry, MessageScrollerIntent, MessageScrollerModel, MessageScrollerPart,
+    MessageScrollerState, MessageSide, MessageState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -49,23 +50,25 @@ use crate::{
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
-    default_marker_model, default_menubar_model, default_message_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model, validate_menubar_model, validate_message_model,
+    default_marker_model, default_menubar_model, default_message_model,
+    default_message_scroller_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model, validate_message_model, validate_message_scroller_model,
 };
 
 const HEALTH_CARD: &str =
@@ -929,6 +932,29 @@ const MESSAGE_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-cen
 const MESSAGE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const MESSAGE_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
 const MESSAGE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const MESSAGE_SCROLLER_ROOT: &str = "grid max-w-3xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT_DENSE: &str = "grid max-w-3xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT_INVALID: &str =
+    "grid max-w-3xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT_LOADING: &str =
+    "grid max-w-3xl gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
+const MESSAGE_SCROLLER_ROOT_DISABLED: &str = "grid max-w-3xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const MESSAGE_SCROLLER_VIEWPORT: &str = "max-h-4xl overflow-y-auto rounded-field border border-border-subtle bg-surface-2 p-xs scroll-smooth";
+const MESSAGE_SCROLLER_VIEWPORT_DENSE: &str =
+    "max-h-3xl overflow-y-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
+const MESSAGE_SCROLLER_LIST: &str = "grid gap-xs";
+const MESSAGE_SCROLLER_LIST_DENSE: &str = "grid gap-2xs";
+const MESSAGE_SCROLLER_EMPTY: &str =
+    "rounded-field border border-border-subtle bg-surface-1 p-s text-0 leading-0 text-text-muted";
+const MESSAGE_SCROLLER_ANCHOR: &str = "h-selector rounded-pill bg-border-subtle";
+const MESSAGE_SCROLLER_ANCHOR_ACTIVE: &str = "h-selector rounded-pill bg-brand";
+const MESSAGE_SCROLLER_JUMP: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-xs py-2xs text-0 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_SCROLLER_JUMP_DENSE: &str = "justify-self-end inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-00 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_SCROLLER_JUMP_ACTIVE: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_SCROLLER_JUMP_DISABLED: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const MESSAGE_SCROLLER_JUMP_HIDDEN: &str = "hidden";
+const MESSAGE_SCROLLER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -10023,11 +10049,328 @@ const fn message_state_label(
     }
 }
 
-catalog_component!(
-    MessageScroller,
-    crate::MessageScrollerModel,
-    crate::default_message_scroller_model
-);
+#[component]
+pub fn MessageScroller(
+    #[prop(optional, default = default_message_scroller_model())] model: MessageScrollerModel,
+) -> AnyView {
+    if let Err(report) = validate_message_scroller_model(&model) {
+        let message = format!("MessageScroller validation failed: {report}");
+        return view! {
+            <div class=MESSAGE_SCROLLER_ERROR data-ui-component="message-scroller" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = message_scroller_render_nodes(&model, &initial_state);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == MessageScrollerPart::Root)
+        .expect("invariant: message scroller render nodes include root")
+        .clone();
+    let viewport = nodes
+        .iter()
+        .find(|node| node.part == MessageScrollerPart::Viewport)
+        .expect("invariant: message scroller render nodes include viewport")
+        .clone();
+    let list = nodes
+        .iter()
+        .find(|node| node.part == MessageScrollerPart::List)
+        .expect("invariant: message scroller render nodes include list")
+        .clone();
+    let anchor = nodes
+        .iter()
+        .find(|node| node.part == MessageScrollerPart::Anchor)
+        .expect("invariant: message scroller render nodes include anchor")
+        .clone();
+    let jump = nodes
+        .into_iter()
+        .find(|node| node.part == MessageScrollerPart::JumpButton)
+        .expect("invariant: message scroller render nodes include jump button");
+    let density = root.density;
+    let invalid = root.invalid;
+    let loading = root.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let entries = model.messages;
+    let root_value = root.value;
+    let root_label = root.label;
+    let root_detail = root.detail;
+    let viewport_detail = viewport.detail;
+    let list_label = if loading {
+        "Loading messages".to_owned()
+    } else {
+        list.label
+    };
+    let list_count = list.message_count;
+    let anchor_label = anchor.label;
+    let jump_label = jump.label;
+    let (state, set_state) = signal(initial_state);
+    let context = MessageScrollerViewContext {
+        density,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <section
+            class=move || {
+                state.with(|state| {
+                    message_scroller_root_class(
+                        density,
+                        state.is_active_part(MessageScrollerPart::Root) || state.jump_active(),
+                        invalid,
+                        loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="message-scroller"
+            data-ui-part=MessageScrollerPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    message_scroller_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.at_latest(),
+                        state.jump_active(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_label
+            aria-busy=loading.to_string()
+            aria-disabled=blocked.to_string()
+            aria-invalid=invalid.to_string()
+            title=root_detail
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::Hover(MessageScrollerPart::Root));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::Leave);
+                    });
+                }
+            }
+        >
+            <div
+                class=message_scroller_viewport_class(density)
+                data-ui-part=MessageScrollerPart::Viewport.label()
+                title=viewport_detail
+                on:scroll=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(MessageScrollerIntent::SetAtLatest(false));
+                        });
+                    }
+                }
+            >
+                <div
+                    class=message_scroller_list_class(density)
+                    data-ui-part=MessageScrollerPart::List.label()
+                    data-ui-count=list_count.to_string()
+                    aria-label=list_label.clone()
+                >
+                    {if entries.is_empty() {
+                        view! {
+                            <p class=MESSAGE_SCROLLER_EMPTY>{list_label.clone()}</p>
+                        }
+                        .into_any()
+                    } else {
+                        entries
+                            .into_iter()
+                            .map(message_scroller_entry_view)
+                            .collect_view()
+                            .into_any()
+                    }}
+                    <span
+                        class=move || {
+                            state.with(|state| message_scroller_anchor_class(state.at_latest()).to_owned())
+                        }
+                        data-ui-part=MessageScrollerPart::Anchor.label()
+                        aria-label=anchor_label
+                    ></span>
+                </div>
+            </div>
+            {message_scroller_jump_view(jump_label, context)}
+        </section>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct MessageScrollerViewContext {
+    density: MessageScrollerDensity,
+    blocked: bool,
+    state: ReadSignal<MessageScrollerState>,
+    set_state: WriteSignal<MessageScrollerState>,
+}
+
+fn message_scroller_entry_view(entry: MessageScrollerEntry) -> AnyView {
+    view! {
+        <div data-ui-entry=entry.value>
+            <Message model=entry.message />
+        </div>
+    }
+    .into_any()
+}
+
+fn message_scroller_jump_view(label: String, context: MessageScrollerViewContext) -> AnyView {
+    view! {
+        <button
+            type="button"
+            class=move || {
+                context.state.with(|state| {
+                    message_scroller_jump_class(
+                        context.density,
+                        state.jump_active(),
+                        !state.at_latest(),
+                        context.blocked || state.at_latest(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=MessageScrollerPart::JumpButton.label()
+            data-ui-intent="jump-to-latest"
+            aria-hidden=move || context.state.with(|state| state.at_latest().to_string())
+            disabled=move || context.state.with(|state| context.blocked || state.at_latest())
+            on:focus=move |_| {
+                if !context.blocked {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::Focus(MessageScrollerPart::JumpButton));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !context.blocked {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !context.blocked {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::Hover(MessageScrollerPart::JumpButton));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !context.blocked {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageScrollerIntent::JumpToLatest);
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn message_scroller_root_class(
+    density: MessageScrollerDensity,
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MESSAGE_SCROLLER_ROOT_DISABLED;
+    }
+    if loading {
+        return MESSAGE_SCROLLER_ROOT_LOADING;
+    }
+    if invalid {
+        return MESSAGE_SCROLLER_ROOT_INVALID;
+    }
+    if active {
+        return MESSAGE_SCROLLER_ROOT;
+    }
+    match density {
+        MessageScrollerDensity::Standard => MESSAGE_SCROLLER_ROOT,
+        MessageScrollerDensity::Dense => MESSAGE_SCROLLER_ROOT_DENSE,
+    }
+}
+
+const fn message_scroller_viewport_class(density: MessageScrollerDensity) -> &'static str {
+    match density {
+        MessageScrollerDensity::Standard => MESSAGE_SCROLLER_VIEWPORT,
+        MessageScrollerDensity::Dense => MESSAGE_SCROLLER_VIEWPORT_DENSE,
+    }
+}
+
+const fn message_scroller_list_class(density: MessageScrollerDensity) -> &'static str {
+    match density {
+        MessageScrollerDensity::Standard => MESSAGE_SCROLLER_LIST,
+        MessageScrollerDensity::Dense => MESSAGE_SCROLLER_LIST_DENSE,
+    }
+}
+
+const fn message_scroller_anchor_class(at_latest: bool) -> &'static str {
+    if at_latest {
+        MESSAGE_SCROLLER_ANCHOR_ACTIVE
+    } else {
+        MESSAGE_SCROLLER_ANCHOR
+    }
+}
+
+const fn message_scroller_jump_class(
+    density: MessageScrollerDensity,
+    active: bool,
+    visible: bool,
+    disabled: bool,
+) -> &'static str {
+    if !visible {
+        return MESSAGE_SCROLLER_JUMP_HIDDEN;
+    }
+    if disabled {
+        return MESSAGE_SCROLLER_JUMP_DISABLED;
+    }
+    if active {
+        return MESSAGE_SCROLLER_JUMP_ACTIVE;
+    }
+    match density {
+        MessageScrollerDensity::Standard => MESSAGE_SCROLLER_JUMP,
+        MessageScrollerDensity::Dense => MESSAGE_SCROLLER_JUMP_DENSE,
+    }
+}
+
+const fn message_scroller_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    at_latest: bool,
+    jump_active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if jump_active {
+        "jumped"
+    } else if at_latest {
+        "latest"
+    } else {
+        "history"
+    }
+}
+
 catalog_component!(
     NativeSelect,
     crate::NativeSelectModel,
