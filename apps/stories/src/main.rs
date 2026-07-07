@@ -10,8 +10,9 @@ use rs_dean_ui::{
     CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
     CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
     Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, Checkbox, CheckboxChecked,
-    CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, HealthCard,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, Combobox,
+    ComboboxDensity, ComboboxModel, ComboboxOption, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -357,6 +358,24 @@ fn Stories() -> impl IntoView {
                             <Collapsible model=invalid_collapsible_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Collapsible model=themed_collapsible_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-combobox" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Combobox"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 18 implemented as an input-backed picker backed by a validated shared Rust option model, renderer-local query/open/selected state, filtered option anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Combobox model=default_combobox_story_model() />
+                            <Combobox model=dense_combobox_story_model() />
+                            <Combobox model=loading_combobox_story_model() />
+                            <Combobox model=disabled_combobox_story_model() />
+                            <Combobox model=invalid_combobox_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Combobox model=themed_combobox_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1190,6 +1209,57 @@ fn themed_collapsible_story_model() -> CollapsibleModel {
         "The same semantic classes resolve through the nested Luxury theme scope.",
     )
     .open()
+}
+
+fn default_combobox_story_model() -> ComboboxModel {
+    ComboboxModel::new(vec![
+        ComboboxOption::new("Leptos DOM", "leptos"),
+        ComboboxOption::new("Bevy scene", "bevy"),
+        ComboboxOption::new("Shared state", "state"),
+    ])
+    .with_placeholder("Search UI surface")
+    .with_selected_value("leptos")
+}
+
+fn dense_combobox_story_model() -> ComboboxModel {
+    ComboboxModel::new(vec![
+        ComboboxOption::new("Accordion", "accordion"),
+        ComboboxOption::new("Checkbox", "checkbox"),
+        ComboboxOption::new("Collapsible", "collapsible"),
+    ])
+    .with_density(ComboboxDensity::Dense)
+    .with_placeholder("Filter component")
+    .with_default_query("co")
+}
+
+fn loading_combobox_story_model() -> ComboboxModel {
+    default_combobox_story_model().loading()
+}
+
+fn disabled_combobox_story_model() -> ComboboxModel {
+    ComboboxModel::new(vec![
+        ComboboxOption::new("Stable", "stable"),
+        ComboboxOption::new("Blocked", "blocked").disabled(),
+    ])
+    .with_selected_value("stable")
+    .disabled()
+}
+
+fn invalid_combobox_story_model() -> ComboboxModel {
+    ComboboxModel::new(vec![
+        ComboboxOption::new("Duplicate", "same"),
+        ComboboxOption::new("Duplicate again", "same"),
+    ])
+}
+
+fn themed_combobox_story_model() -> ComboboxModel {
+    ComboboxModel::new(vec![
+        ComboboxOption::new("Brand", "brand"),
+        ComboboxOption::new("Success", "success"),
+        ComboboxOption::new("Danger", "danger"),
+    ])
+    .with_placeholder("Search tone")
+    .with_selected_value("success")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

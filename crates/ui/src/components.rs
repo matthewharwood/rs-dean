@@ -14,24 +14,25 @@ use crate::{
     CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode, ChartDensity,
     ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
     CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
-    CollapsibleModel, CollapsiblePart, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, component_implementation, component_spec,
+    CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
+    ComboboxPart, ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
     default_badge_model, default_breadcrumb_model, default_bubble_model,
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
-    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_combobox_model, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model,
+    validate_collapsible_model, validate_combobox_model,
 };
 
 const HEALTH_CARD: &str =
@@ -438,6 +439,21 @@ const COLLAPSIBLE_CONTENT_DENSE: &str =
     "border-t border-border-subtle bg-surface-1 p-xs text-00 leading-0 text-text-2";
 const COLLAPSIBLE_CONTENT_HIDDEN: &str = "hidden";
 const COLLAPSIBLE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const COMBOBOX_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const COMBOBOX_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const COMBOBOX_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const COMBOBOX_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMBOBOX_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMBOBOX_LIST: &str = "grid max-h-4xl gap-2xs overflow-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
+const COMBOBOX_LIST_HIDDEN: &str = "hidden";
+const COMBOBOX_OPTION: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMBOBOX_OPTION_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMBOBOX_OPTION_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const COMBOBOX_EMPTY: &str =
+    "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
+const COMBOBOX_META: &str = "text-00 font-6 uppercase tracking-label text-text-muted";
+const COMBOBOX_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -3910,11 +3926,190 @@ const fn collapsible_state_label(loading: bool, disabled: bool, open: bool) -> &
     }
 }
 
-catalog_component!(
-    Combobox,
-    crate::ComboboxModel,
-    crate::default_combobox_model
-);
+#[component]
+pub fn Combobox(
+    #[prop(optional, default = default_combobox_model())] model: ComboboxModel,
+) -> AnyView {
+    if let Err(report) = validate_combobox_model(&model) {
+        let message = format!("Combobox validation failed: {report}");
+        return view! {
+            <div class=COMBOBOX_ERROR data-ui-component="combobox" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = combobox_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == ComboboxPart::Root)
+        .expect("invariant: combobox render nodes include root")
+        .clone();
+    let input = input_nodes
+        .iter()
+        .find(|node| node.part == ComboboxPart::Input)
+        .expect("invariant: combobox render nodes include input")
+        .clone();
+    let list_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=combobox_root_class(density, disabled)
+            data-ui-component="combobox"
+            data-ui-part=ComboboxPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| combobox_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <input
+                type="text"
+                role="combobox"
+                class=combobox_input_class(density)
+                data-ui-part=ComboboxPart::Input.label()
+                data-ui-value=root.value
+                placeholder=input.label
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                prop:value=move || state.with(|state| state.query().to_owned())
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ComboboxIntent::Open);
+                        });
+                    }
+                }
+                on:input=move |event| {
+                    if !blocked {
+                        let value = event_target_value(&event);
+                        set_state.update(|state| {
+                            let _ = state.apply(ComboboxIntent::Input(value));
+                        });
+                    }
+                }
+            />
+            <div
+                class=move || state.with(|state| combobox_list_class(state.is_open()).to_owned())
+                data-ui-part=ComboboxPart::List.label()
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                {move || {
+                    state.with(|state| {
+                        let nodes = combobox_render_nodes(&list_model, state);
+                        let option_nodes = nodes
+                            .iter()
+                            .filter(|node| node.part == ComboboxPart::Option)
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        if option_nodes.is_empty() {
+                            let empty = nodes
+                                .into_iter()
+                                .find(|node| node.part == ComboboxPart::Empty)
+                                .expect("invariant: combobox render nodes include empty");
+                            view! {
+                                <p
+                                    class=COMBOBOX_EMPTY
+                                    data-ui-part=ComboboxPart::Empty.label()
+                                >
+                                    {empty.label}
+                                </p>
+                            }
+                            .into_any()
+                        } else {
+                            option_nodes
+                                .into_iter()
+                                .map(|node| {
+                                    let value = node.value.clone();
+                                    view! {
+                                        <button
+                                            type="button"
+                                            class=combobox_option_class(node.selected, node.disabled)
+                                            data-ui-part=ComboboxPart::Option.label()
+                                            data-ui-value=node.value
+                                            aria-selected=node.selected.to_string()
+                                            disabled=node.disabled
+                                            on:click=move |_| {
+                                                if !blocked {
+                                                    let value = value.clone();
+                                                    set_state.update(|state| {
+                                                        let _ = state.apply(ComboboxIntent::Select(value));
+                                                    });
+                                                }
+                                            }
+                                        >
+                                            <span>{node.label}</span>
+                                            <span class=COMBOBOX_META>
+                                                {if node.selected { "selected" } else { "" }}
+                                            </span>
+                                        </button>
+                                    }
+                                })
+                                .collect_view()
+                                .into_any()
+                        }
+                    })
+                }}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn combobox_root_class(density: ComboboxDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return COMBOBOX_ROOT_DISABLED;
+    }
+    match density {
+        ComboboxDensity::Standard => COMBOBOX_ROOT,
+        ComboboxDensity::Dense => COMBOBOX_ROOT_DENSE,
+    }
+}
+
+const fn combobox_input_class(density: ComboboxDensity) -> &'static str {
+    match density {
+        ComboboxDensity::Standard => COMBOBOX_INPUT,
+        ComboboxDensity::Dense => COMBOBOX_INPUT_DENSE,
+    }
+}
+
+const fn combobox_list_class(open: bool) -> &'static str {
+    if open {
+        COMBOBOX_LIST
+    } else {
+        COMBOBOX_LIST_HIDDEN
+    }
+}
+
+const fn combobox_option_class(selected: bool, disabled: bool) -> &'static str {
+    if disabled {
+        COMBOBOX_OPTION_DISABLED
+    } else if selected {
+        COMBOBOX_OPTION_SELECTED
+    } else {
+        COMBOBOX_OPTION
+    }
+}
+
+const fn combobox_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(Command, crate::CommandModel, crate::default_command_model);
 catalog_component!(
     ContextMenu,

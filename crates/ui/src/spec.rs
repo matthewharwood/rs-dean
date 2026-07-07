@@ -289,19 +289,19 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        CollapsiblePart, ComboboxPart, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
         attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
         bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
         card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
-        chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes,
+        chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         component_implementation, default_accordion_items, default_alert_dialog_model,
         default_alert_model, default_aspect_ratio_model, default_attachment_model,
         default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
         default_button_group_model, default_button_model, default_calendar_model,
         default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
-        default_collapsible_model, scale,
+        default_collapsible_model, default_combobox_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -414,6 +414,13 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Combobox {
+            return bevy_primitives_for_combobox(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -495,6 +502,40 @@ pub mod bevy_adapter {
                     state,
                     intent: collapsible_intent_for_part(node.part),
                     selected: node.open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_combobox(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_combobox_model();
+        let mut combobox_state = model.state();
+        let _ = combobox_state.apply(crate::ComboboxIntent::Open);
+        combobox_render_nodes(&model, &combobox_state)
+            .into_iter()
+            .map(|node| {
+                let role = combobox_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: combobox_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: combobox_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        combobox_tone_for_part(node.part, node.selected, node.visible),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: combobox_intent_for_part(node.part),
+                    selected: node.selected,
                     disabled: node.disabled,
                 }
             })
@@ -1605,6 +1646,69 @@ pub mod bevy_adapter {
             CollapsiblePart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
             CollapsiblePart::Trigger => Vec2::new(scale::space::XL3, scale::space::L),
             CollapsiblePart::Content => Vec2::new(scale::space::XL3, scale::space::XL),
+        }
+    }
+
+    const fn combobox_kind_for_part(part: ComboboxPart) -> UiWidgetSlotKind {
+        match part {
+            ComboboxPart::Root => UiWidgetSlotKind::Section,
+            ComboboxPart::Input => UiWidgetSlotKind::Input,
+            ComboboxPart::List => UiWidgetSlotKind::List,
+            ComboboxPart::Option => UiWidgetSlotKind::Button,
+            ComboboxPart::Empty => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn combobox_role_for_part(part: ComboboxPart) -> UiBlockRole {
+        match part {
+            ComboboxPart::Root => UiBlockRole::Root,
+            ComboboxPart::Input => UiBlockRole::Control,
+            ComboboxPart::List => UiBlockRole::Navigation,
+            ComboboxPart::Option => UiBlockRole::Item,
+            ComboboxPart::Empty => UiBlockRole::Feedback,
+        }
+    }
+
+    const fn combobox_tone_for_part(
+        part: ComboboxPart,
+        selected: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            ComboboxPart::Option => {
+                if selected {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            ComboboxPart::Empty => {
+                if visible {
+                    UiBlockTone::Warning
+                } else {
+                    UiBlockTone::Muted
+                }
+            }
+            ComboboxPart::Input => UiBlockTone::Brand,
+            ComboboxPart::List | ComboboxPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn combobox_intent_for_part(part: ComboboxPart) -> UiWidgetIntent {
+        match part {
+            ComboboxPart::Input => UiWidgetIntent::Input,
+            ComboboxPart::Option => UiWidgetIntent::Select,
+            ComboboxPart::Root | ComboboxPart::List | ComboboxPart::Empty => UiWidgetIntent::None,
+        }
+    }
+
+    fn combobox_size_for_part(part: ComboboxPart) -> Vec2 {
+        match part {
+            ComboboxPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            ComboboxPart::Input => Vec2::new(scale::space::XL3, scale::space::L),
+            ComboboxPart::List => Vec2::new(scale::space::XL3, scale::space::XL),
+            ComboboxPart::Option => Vec2::new(scale::space::XL3, scale::space::L),
+            ComboboxPart::Empty => Vec2::new(scale::space::XL3, scale::space::S),
         }
     }
 

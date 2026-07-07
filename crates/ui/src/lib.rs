@@ -17,6 +17,7 @@ pub mod catalog_components;
 pub mod chart;
 pub mod checkbox;
 pub mod collapsible;
+pub mod combobox;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -108,6 +109,11 @@ pub use collapsible::{
     CollapsibleChange, CollapsibleDensity, CollapsibleIntent, CollapsibleModel, CollapsiblePart,
     CollapsibleRenderNode, CollapsibleState, collapsible_render_nodes, default_collapsible_model,
     validate_collapsible_model,
+};
+pub use combobox::{
+    ComboboxChange, ComboboxDensity, ComboboxIntent, ComboboxModel, ComboboxOption, ComboboxPart,
+    ComboboxRenderNode, ComboboxState, combobox_render_nodes, default_combobox_model,
+    filtered_combobox_options, selected_combobox_label, validate_combobox_model,
 };
 #[cfg(feature = "leptos")]
 pub use components::*;

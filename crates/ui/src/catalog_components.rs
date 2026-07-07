@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    combobox,
-    Combobox,
-    ComboboxModel,
-    ComboboxPart,
-    ComboboxRenderNode,
-    ComboboxState,
-    ComboboxIntent,
-    ComboboxChange,
-    validate_combobox_model,
-    combobox_render_nodes,
-    default_combobox_model,
-    [
-        Root => "Combobox",
-        Input => "ComboboxInput",
-        List => "ComboboxList",
-        Option => "ComboboxOption",
-        Empty => "ComboboxEmpty",
-    ]
-);
-
-define_catalog_component!(
     command,
     Command,
     CommandModel,
@@ -1474,10 +1453,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Carousel
         | UiComponentId::Chart
         | UiComponentId::Checkbox
-        | UiComponentId::Collapsible => None,
-        UiComponentId::Combobox => {
-            Some(any_nodes(combobox_render_nodes(&default_combobox_model())))
-        }
+        | UiComponentId::Collapsible
+        | UiComponentId::Combobox => None,
         UiComponentId::Command => Some(any_nodes(command_render_nodes(&default_command_model()))),
         UiComponentId::ContextMenu => Some(any_nodes(context_menu_render_nodes(
             &default_context_menu_model(),
@@ -1606,6 +1583,7 @@ mod tests {
                     | UiComponentId::Chart
                     | UiComponentId::Checkbox
                     | UiComponentId::Collapsible
+                    | UiComponentId::Combobox
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1622,17 +1600,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_combobox_model().state();
-        assert!(!state.is_active(ComboboxPart::Root));
+        let mut state = default_command_model().state();
+        assert!(!state.is_active(CommandPart::Root));
         assert_eq!(
-            state.apply(ComboboxIntent::Toggle(ComboboxPart::Root)),
-            ComboboxChange::Opened(ComboboxPart::Root)
+            state.apply(CommandIntent::Toggle(CommandPart::Root)),
+            CommandChange::Opened(CommandPart::Root)
         );
-        assert!(state.is_active(ComboboxPart::Root));
+        assert!(state.is_active(CommandPart::Root));
         assert_eq!(
-            state.apply(ComboboxIntent::Toggle(ComboboxPart::Root)),
-            ComboboxChange::Closed(ComboboxPart::Root)
+            state.apply(CommandIntent::Toggle(CommandPart::Root)),
+            CommandChange::Closed(CommandPart::Root)
         );
-        assert!(!state.is_active(ComboboxPart::Root));
+        assert!(!state.is_active(CommandPart::Root));
     }
 }
