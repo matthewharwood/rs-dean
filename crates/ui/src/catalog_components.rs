@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    carousel,
-    Carousel,
-    CarouselModel,
-    CarouselPart,
-    CarouselRenderNode,
-    CarouselState,
-    CarouselIntent,
-    CarouselChange,
-    validate_carousel_model,
-    carousel_render_nodes,
-    default_carousel_model,
-    [
-        Root => "Carousel",
-        Content => "CarouselContent",
-        Item => "CarouselItem",
-        Previous => "CarouselPrevious",
-        Next => "CarouselNext",
-        Indicator => "CarouselIndicator",
-    ]
-);
-
-define_catalog_component!(
     chart,
     Chart,
     ChartModel,
@@ -1552,10 +1530,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Button
         | UiComponentId::ButtonGroup
         | UiComponentId::Calendar
-        | UiComponentId::Card => None,
-        UiComponentId::Carousel => {
-            Some(any_nodes(carousel_render_nodes(&default_carousel_model())))
-        }
+        | UiComponentId::Card
+        | UiComponentId::Carousel => None,
         UiComponentId::Chart => Some(any_nodes(chart_render_nodes(&default_chart_model()))),
         UiComponentId::Checkbox => {
             Some(any_nodes(checkbox_render_nodes(&default_checkbox_model())))
@@ -1690,6 +1666,7 @@ mod tests {
                     | UiComponentId::ButtonGroup
                     | UiComponentId::Calendar
                     | UiComponentId::Card
+                    | UiComponentId::Carousel
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1706,17 +1683,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_carousel_model().state();
-        assert!(!state.is_active(CarouselPart::Root));
+        let mut state = default_chart_model().state();
+        assert!(!state.is_active(ChartPart::Container));
         assert_eq!(
-            state.apply(CarouselIntent::Toggle(CarouselPart::Root)),
-            CarouselChange::Opened(CarouselPart::Root)
+            state.apply(ChartIntent::Toggle(ChartPart::Container)),
+            ChartChange::Opened(ChartPart::Container)
         );
-        assert!(state.is_active(CarouselPart::Root));
+        assert!(state.is_active(ChartPart::Container));
         assert_eq!(
-            state.apply(CarouselIntent::Toggle(CarouselPart::Root)),
-            CarouselChange::Closed(CarouselPart::Root)
+            state.apply(ChartIntent::Toggle(ChartPart::Container)),
+            ChartChange::Closed(ChartPart::Container)
         );
-        assert!(!state.is_active(CarouselPart::Root));
+        assert!(!state.is_active(ChartPart::Container));
     }
 }

@@ -288,17 +288,17 @@ pub mod bevy_adapter {
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
-        CardPart, CardVariant, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        CardPart, CardVariant, CarouselPart, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
         attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
         bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, catalog_component_any_render_nodes_for_component,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         component_implementation, default_accordion_items, default_alert_dialog_model,
         default_alert_model, default_aspect_ratio_model, default_attachment_model,
         default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
         default_button_group_model, default_button_model, default_calendar_model,
-        default_card_model, scale,
+        default_card_model, default_carousel_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -387,6 +387,13 @@ pub mod bevy_adapter {
         if id == UiComponentId::Card {
             return bevy_primitives_for_card(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::Carousel {
+            return bevy_primitives_for_carousel(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -404,6 +411,36 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_carousel(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_carousel_model();
+        let carousel_state = model.state();
+        carousel_render_nodes(&model, &carousel_state)
+            .into_iter()
+            .map(|node| {
+                let role = carousel_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: carousel_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: carousel_size_for_part(node.part),
+                    fill: fill_for_tone(carousel_tone_for_part(node.part, node.selected), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: carousel_intent_for_part(node.part),
+                    selected: node.selected,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -1237,6 +1274,59 @@ pub mod bevy_adapter {
             CardPart::Description => Vec2::new(scale::space::XL2, scale::space::S),
             CardPart::Content => Vec2::new(scale::space::XL2, scale::space::XL),
             CardPart::Footer => Vec2::new(scale::space::XL2, scale::space::L),
+        }
+    }
+
+    const fn carousel_kind_for_part(part: CarouselPart) -> UiWidgetSlotKind {
+        match part {
+            CarouselPart::Root => UiWidgetSlotKind::Section,
+            CarouselPart::Content => UiWidgetSlotKind::List,
+            CarouselPart::Item => UiWidgetSlotKind::Media,
+            CarouselPart::Previous | CarouselPart::Next => UiWidgetSlotKind::IconButton,
+            CarouselPart::Indicator => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn carousel_role_for_part(part: CarouselPart) -> UiBlockRole {
+        match part {
+            CarouselPart::Root => UiBlockRole::Root,
+            CarouselPart::Content => UiBlockRole::Layout,
+            CarouselPart::Item => UiBlockRole::Media,
+            CarouselPart::Previous | CarouselPart::Next => UiBlockRole::Action,
+            CarouselPart::Indicator => UiBlockRole::Indicator,
+        }
+    }
+
+    const fn carousel_tone_for_part(part: CarouselPart, selected: bool) -> UiBlockTone {
+        match part {
+            CarouselPart::Item if selected => UiBlockTone::Brand,
+            CarouselPart::Previous | CarouselPart::Next => UiBlockTone::Brand,
+            CarouselPart::Indicator if selected => UiBlockTone::Accent,
+            CarouselPart::Root | CarouselPart::Content | CarouselPart::Item => UiBlockTone::Surface,
+            CarouselPart::Indicator => UiBlockTone::Muted,
+        }
+    }
+
+    const fn carousel_intent_for_part(part: CarouselPart) -> UiWidgetIntent {
+        match part {
+            CarouselPart::Previous | CarouselPart::Next => UiWidgetIntent::Navigate,
+            CarouselPart::Item => UiWidgetIntent::Select,
+            CarouselPart::Root | CarouselPart::Content | CarouselPart::Indicator => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn carousel_size_for_part(part: CarouselPart) -> Vec2 {
+        match part {
+            CarouselPart::Root | CarouselPart::Content => {
+                Vec2::new(scale::space::XL3, scale::space::XL2)
+            }
+            CarouselPart::Item => Vec2::new(scale::space::XL2, scale::space::XL),
+            CarouselPart::Previous | CarouselPart::Next => {
+                Vec2::new(scale::space::L, scale::space::L)
+            }
+            CarouselPart::Indicator => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

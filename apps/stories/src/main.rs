@@ -8,8 +8,8 @@ use rs_dean_ui::{
     BubbleAction, BubbleModel, BubbleSide, Button, ButtonGroup, ButtonGroupItem, ButtonGroupModel,
     ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, Calendar,
     CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
-    CardDensity, CardModel, CardVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
+    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -283,6 +283,24 @@ fn Stories() -> impl IntoView {
                             <Card model=invalid_card_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Card model=themed_card_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-carousel" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Carousel"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 14 implemented as a paged content strip backed by a validated shared Rust slide model, renderer-local index state, repeated item anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Carousel model=default_carousel_story_model() />
+                            <Carousel model=dense_carousel_story_model() />
+                            <Carousel model=loading_carousel_story_model() />
+                            <Carousel model=disabled_carousel_story_model() />
+                            <Carousel model=invalid_carousel_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Carousel model=themed_carousel_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -872,6 +890,91 @@ fn themed_card_story_model() -> CardModel {
     )
     .with_variant(CardVariant::Elevated)
     .with_action(CardAction::new("Inspect", "inspect-themed-card"))
+}
+
+fn default_carousel_story_model() -> CarouselModel {
+    CarouselModel::new(vec![
+        CarouselSlide::new(
+            "Theme preview",
+            "theme-preview",
+            "Semantic tokens resolve through Leptos and Bevy from the same palette.",
+        ),
+        CarouselSlide::new(
+            "Component contract",
+            "component-contract",
+            "Typed render nodes keep content, controls, and indicators portable.",
+        ),
+        CarouselSlide::new(
+            "Story proof",
+            "story-proof",
+            "The story harness validates the component before app integration.",
+        ),
+    ])
+    .looping()
+}
+
+fn dense_carousel_story_model() -> CarouselModel {
+    CarouselModel::new(vec![
+        CarouselSlide::new(
+            "Compact slide",
+            "compact-slide",
+            "Dense mode preserves the carousel anatomy with tighter token spacing.",
+        ),
+        CarouselSlide::new(
+            "Focused item",
+            "focused-item",
+            "The selected item reads from renderer-local state only.",
+        ),
+    ])
+    .with_density(CarouselDensity::Dense)
+    .with_default_index(1)
+}
+
+fn loading_carousel_story_model() -> CarouselModel {
+    default_carousel_story_model().loading()
+}
+
+fn disabled_carousel_story_model() -> CarouselModel {
+    CarouselModel::new(vec![
+        CarouselSlide::new(
+            "Locked deck",
+            "locked-deck",
+            "Navigation is blocked until the app hydrates durable state.",
+        ),
+        CarouselSlide::new(
+            "Disabled slide",
+            "disabled-slide",
+            "Individual slides can also remove interaction affordance.",
+        )
+        .disabled(),
+    ])
+    .disabled()
+}
+
+fn invalid_carousel_story_model() -> CarouselModel {
+    CarouselModel::new(Vec::new())
+}
+
+fn themed_carousel_story_model() -> CarouselModel {
+    CarouselModel::new(vec![
+        CarouselSlide::new(
+            "Theme scope",
+            "theme-scope",
+            "The same semantic carousel tokens resolve through Catppuccin.",
+        ),
+        CarouselSlide::new(
+            "Looped controls",
+            "looped-controls",
+            "Previous and next controls derive disabled state from shared CarouselState.",
+        ),
+        CarouselSlide::new(
+            "Bevy primitive",
+            "bevy-primitive",
+            "Scene adapters consume the same selected item and indicator nodes.",
+        ),
+    ])
+    .with_density(CarouselDensity::Dense)
+    .looping()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -139,7 +139,17 @@ catalog slots for action behavior. Issues 01 through 12 were re-audited
 against this learning; no earlier API changes were needed because their action
 state is already represented in component-specific contracts.
 
-All-issue sweep pass: Carousel through Typography complete. The shared
+Concrete component pass: Carousel complete. The fourteenth issue now has a
+typed Rust slide model, density and loop contracts, repeated item render nodes,
+renderer-local current-index navigation state, `garde` validation, token-only
+Leptos carousel rendering, dedicated story proof, and Bevy primitive derivation
+from the same model. The sweep found that paged content components need typed
+collections and shared navigation state instead of generic navigate slots.
+Issues 01 through 13 were re-audited against this learning; no earlier API
+changes were needed because their repeatable collections and action states are
+already represented in component-specific contracts.
+
+All-issue sweep pass: Chart through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -147,7 +157,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Carousel through Typography now have
+Concrete all-issue sweep pass: Chart through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -176,6 +186,7 @@ uses a renderer-neutral owned view node.
 - Grouped action components reuse the Button variant and size vocabulary so consumers do not learn or mix parallel action class systems.
 - Date-grid components keep date arithmetic, range ordering, and month navigation in the shared Rust contract so Leptos and Bevy do not invent separate date string conventions.
 - Framed display surfaces keep footer actions in a component-specific model so generic catalog slots do not become the source of consumer action semantics.
+- Paged content components need typed item collections and shared navigation state so Leptos and Bevy derive previous/next disabled state from the same model.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 

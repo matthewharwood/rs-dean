@@ -11,6 +11,7 @@ pub mod button;
 pub mod button_group;
 pub mod calendar;
 pub mod card;
+pub mod carousel;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -79,6 +80,11 @@ pub use calendar::{
 pub use card::{
     CardAction, CardChange, CardDensity, CardIntent, CardModel, CardPart, CardRenderNode,
     CardState, CardVariant, card_render_nodes, default_card_model, validate_card_model,
+};
+pub use carousel::{
+    CarouselChange, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
+    CarouselRenderNode, CarouselSlide, CarouselState, carousel_render_nodes,
+    default_carousel_model, default_carousel_slides, validate_carousel_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,
