@@ -28,11 +28,12 @@ use crate::{
     InputGroupState, InputIntent, InputModel, InputOtpIntent, InputOtpModel, InputOtpPart,
     InputOtpState, InputPart, InputState, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemState,
     KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, LabelDensity, LabelIntent, LabelModel,
-    LabelPart, LabelRequirement, LabelState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    LabelPart, LabelRequirement, LabelState, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,
+    MarkerState, MarkerTone, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -46,21 +47,22 @@ use crate::{
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model,
+    default_marker_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model,
 };
 
 const HEALTH_CARD: &str =
@@ -841,6 +843,31 @@ const LABEL_REQUIREMENT_DENSE_OPTIONAL: &str = "rounded-pill border border-borde
 const LABEL_REQUIREMENT_HIDDEN: &str = "hidden";
 const LABEL_REQUIREMENT_DISABLED: &str = "text-00 font-6 leading-0 text-text-disabled";
 const LABEL_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const MARKER_ROOT: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-border-subtle bg-surface-1 px-2xs py-3xs text-text-1 shadow-1 transition-colors";
+const MARKER_ROOT_DENSE: &str = "inline-flex max-w-full items-center gap-3xs rounded-pill border border-border-subtle bg-surface-1 px-3xs py-3xs text-text-1 shadow-1 transition-colors";
+const MARKER_ROOT_ACTIVE: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-brand bg-selected-tint px-2xs py-3xs text-text-1 shadow-1 transition-colors";
+const MARKER_ROOT_INVALID: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-danger bg-error-soft px-2xs py-3xs text-danger shadow-1 transition-colors";
+const MARKER_ROOT_LOADING: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-info bg-info-soft px-2xs py-3xs text-info shadow-1 transition-colors";
+const MARKER_ROOT_DISABLED: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-border-muted bg-surface-2 px-2xs py-3xs text-text-disabled opacity-disabled";
+const MARKER_DOT: &str = "size-2xs shrink-0 rounded-pill bg-brand";
+const MARKER_DOT_DENSE: &str = "size-3xs shrink-0 rounded-pill bg-brand";
+const MARKER_DOT_NEUTRAL: &str = "size-2xs shrink-0 rounded-pill bg-text-muted";
+const MARKER_DOT_INFO: &str = "size-2xs shrink-0 rounded-pill bg-info";
+const MARKER_DOT_SUCCESS: &str = "size-2xs shrink-0 rounded-pill bg-success";
+const MARKER_DOT_WARNING: &str = "size-2xs shrink-0 rounded-pill bg-warning";
+const MARKER_DOT_DANGER: &str = "size-2xs shrink-0 rounded-pill bg-danger";
+const MARKER_DOT_INVALID: &str = "size-2xs shrink-0 rounded-pill bg-danger";
+const MARKER_DOT_LOADING: &str = "size-2xs shrink-0 rounded-pill bg-info";
+const MARKER_DOT_DISABLED: &str = "size-2xs shrink-0 rounded-pill bg-border-muted";
+const MARKER_LABEL: &str = "m-0 truncate text-00 font-7 leading-0 text-inherit";
+const MARKER_LABEL_DENSE: &str = "m-0 truncate text-00 font-6 leading-0 text-inherit";
+const MARKER_LABEL_DISABLED: &str = "m-0 truncate text-00 font-6 leading-0 text-text-disabled";
+const MARKER_ANCHOR: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-7 leading-0 text-brand transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const MARKER_ANCHOR_ACTIVE: &str = "inline-flex min-h-s items-center rounded-field bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-brand transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const MARKER_ANCHOR_DISABLED: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const MARKER_ANCHOR_HIDDEN: &str = "hidden";
+const MARKER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -8857,7 +8884,333 @@ const fn label_state_label(
     }
 }
 
-catalog_component!(Marker, crate::MarkerModel, crate::default_marker_model);
+#[component]
+pub fn Marker(#[prop(optional, default = default_marker_model())] model: MarkerModel) -> AnyView {
+    if let Err(report) = validate_marker_model(&model) {
+        let message = format!("Marker validation failed: {report}");
+        return view! {
+            <div class=MARKER_ERROR data-ui-component="marker" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let tone = model.tone;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = marker_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == MarkerPart::Root)
+        .expect("invariant: marker render nodes include root")
+        .clone();
+    let dot = nodes
+        .iter()
+        .find(|node| node.part == MarkerPart::Dot)
+        .expect("invariant: marker render nodes include dot")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == MarkerPart::Label)
+        .expect("invariant: marker render nodes include label")
+        .clone();
+    let anchor = nodes
+        .iter()
+        .find(|node| node.part == MarkerPart::Anchor)
+        .expect("invariant: marker render nodes include anchor")
+        .clone();
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let root_detail = root.detail;
+    let dot_value = dot.value;
+    let dot_label = dot.label;
+    let label_value = label.value;
+    let label_text = label.label;
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <span
+            role="group"
+            class=move || {
+                state.with(|state| {
+                    marker_root_class(
+                        density,
+                        marker_any_active(state),
+                        invalid,
+                        loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="marker"
+            data-ui-part=MarkerPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-tone=tone.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    marker_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        marker_any_active(state),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+            title=root_detail
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MarkerIntent::Hover(MarkerPart::Root));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MarkerIntent::Leave);
+                    });
+                }
+            }
+        >
+            <span
+                role="img"
+                class=marker_dot_class(density, tone, invalid, loading, disabled)
+                data-ui-part=MarkerPart::Dot.label()
+                data-ui-value=dot_value
+                aria-label=dot_label
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(MarkerIntent::Hover(MarkerPart::Dot));
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(MarkerIntent::Leave);
+                        });
+                    }
+                }
+            ></span>
+            <span
+                class=marker_label_class(density, disabled)
+                data-ui-part=MarkerPart::Label.label()
+                data-ui-value=label_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(MarkerIntent::Hover(MarkerPart::Label));
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(MarkerIntent::Leave);
+                        });
+                    }
+                }
+            >
+                {label_text}
+            </span>
+            {marker_anchor_view(anchor, blocked, state, set_state)}
+        </span>
+    }
+    .into_any()
+}
+
+fn marker_anchor_view(
+    node: crate::MarkerRenderNode,
+    blocked: bool,
+    state: ReadSignal<MarkerState>,
+    set_state: WriteSignal<MarkerState>,
+) -> AnyView {
+    let visible = node.visible;
+    let actionable = node.actionable;
+    let disabled = node.disabled || blocked;
+    let loading = node.loading;
+    let invalid = node.invalid;
+    let href = node.value;
+    let label = node.label;
+    let detail = node.detail;
+    let href_for_click = href.clone();
+    if !visible {
+        return view! {
+            <span
+                class=MARKER_ANCHOR_HIDDEN
+                data-ui-part=MarkerPart::Anchor.label()
+                data-ui-value=href
+                aria-hidden="true"
+            >
+                {label}
+            </span>
+        }
+        .into_any();
+    }
+
+    view! {
+        <a
+            class=move || {
+                state.with(|state| {
+                    marker_anchor_class(state.is_active(MarkerPart::Anchor), disabled).to_owned()
+                })
+            }
+            data-ui-part=MarkerPart::Anchor.label()
+            data-ui-value=href.clone()
+            data-ui-state=move || {
+                state.with(|state| {
+                    marker_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_active(MarkerPart::Anchor),
+                    )
+                    .to_owned()
+                })
+            }
+            href=href
+            aria-disabled=disabled.to_string()
+            tabindex=if disabled { "-1" } else { "0" }
+            title=detail
+            on:focus=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(MarkerIntent::Focus(MarkerPart::Anchor));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(MarkerIntent::Blur);
+                    });
+                }
+            }
+            on:click=move |event| {
+                if disabled || !actionable {
+                    event.prevent_default();
+                } else {
+                    set_state.update(|state| {
+                        let _ = state.apply(MarkerIntent::Navigate(href_for_click.clone()));
+                    });
+                }
+            }
+        >
+            {label}
+        </a>
+    }
+    .into_any()
+}
+
+const fn marker_root_class(
+    density: MarkerDensity,
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MARKER_ROOT_DISABLED;
+    }
+    if loading {
+        return MARKER_ROOT_LOADING;
+    }
+    if invalid {
+        return MARKER_ROOT_INVALID;
+    }
+    if active {
+        return MARKER_ROOT_ACTIVE;
+    }
+    match density {
+        MarkerDensity::Standard => MARKER_ROOT,
+        MarkerDensity::Dense => MARKER_ROOT_DENSE,
+    }
+}
+
+const fn marker_dot_class(
+    density: MarkerDensity,
+    tone: MarkerTone,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MARKER_DOT_DISABLED;
+    }
+    if loading {
+        return MARKER_DOT_LOADING;
+    }
+    if invalid {
+        return MARKER_DOT_INVALID;
+    }
+    match (density, tone) {
+        (MarkerDensity::Dense, MarkerTone::Brand) => MARKER_DOT_DENSE,
+        (_, MarkerTone::Neutral) => MARKER_DOT_NEUTRAL,
+        (_, MarkerTone::Brand) => MARKER_DOT,
+        (_, MarkerTone::Info) => MARKER_DOT_INFO,
+        (_, MarkerTone::Success) => MARKER_DOT_SUCCESS,
+        (_, MarkerTone::Warning) => MARKER_DOT_WARNING,
+        (_, MarkerTone::Danger) => MARKER_DOT_DANGER,
+    }
+}
+
+const fn marker_label_class(density: MarkerDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return MARKER_LABEL_DISABLED;
+    }
+    match density {
+        MarkerDensity::Standard => MARKER_LABEL,
+        MarkerDensity::Dense => MARKER_LABEL_DENSE,
+    }
+}
+
+const fn marker_anchor_class(active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        MARKER_ANCHOR_DISABLED
+    } else if active {
+        MARKER_ANCHOR_ACTIVE
+    } else {
+        MARKER_ANCHOR
+    }
+}
+
+const fn marker_any_active(state: &MarkerState) -> bool {
+    state.is_active(MarkerPart::Root)
+        || state.is_active(MarkerPart::Dot)
+        || state.is_active(MarkerPart::Label)
+        || state.is_active(MarkerPart::Anchor)
+}
+
+const fn marker_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if active {
+        "active"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Menubar, crate::MenubarModel, crate::default_menubar_model);
 catalog_component!(Message, crate::MessageModel, crate::default_message_model);
 catalog_component!(

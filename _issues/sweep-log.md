@@ -380,7 +380,18 @@ Issues 01 through 34 were re-audited against this learning; no earlier API
 changes were needed because optional visible/hidden anatomy and non-durable
 renderer-local focus state were already covered by Field, Input, Item, and Kbd.
 
-All-issue sweep pass: Marker through Typography complete. The shared
+Concrete component pass: Marker complete. The thirty-sixth issue now has a
+typed status-marker model, density/tone/anchor contracts, root/dot/label/
+anchor render nodes, renderer-local hover/focus/navigation state, `garde`
+validation, token-only Leptos marker rendering, dedicated story proof, and
+Bevy primitive derivation from the same model. The sweep found that tiny
+messaging primitives still need explicit visible/hidden anchor anatomy so
+Leptos can stay stable while Bevy receives deterministic primitive slots.
+Issues 01 through 35 were re-audited against this learning; no earlier API
+changes were needed because hidden optional anatomy and local navigation state
+were already covered by Breadcrumb, Button, Item, Kbd, and Label.
+
+All-issue sweep pass: Menubar through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -388,7 +399,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Marker through Typography now have
+Concrete all-issue sweep pass: Menubar through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

@@ -22,7 +22,8 @@ use rs_dean_ui::{
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
     InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
     ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, Label, LabelDensity, LabelModel,
-    LabelRequirement, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -693,6 +694,24 @@ fn Stories() -> impl IntoView {
                             <Label model=invalid_label_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Label model=themed_label_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-marker" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Marker"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 36 implemented as a status marker backed by validated shared Rust dot/label/anchor nodes, renderer-local hover/focus/navigation state, and Bevy-readable marker primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Marker model=default_marker_story_model() />
+                            <Marker model=dense_marker_story_model() />
+                            <Marker model=loading_marker_story_model() />
+                            <Marker model=disabled_marker_story_model() />
+                            <Marker model=invalid_marker_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Marker model=themed_marker_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2572,6 +2591,51 @@ fn invalid_label_story_model() -> LabelModel {
 
 fn themed_label_story_model() -> LabelModel {
     LabelModel::new("Theme token").with_requirement(LabelRequirement::Optional)
+}
+
+fn default_marker_story_model() -> MarkerModel {
+    MarkerModel::new("3 new")
+        .with_value("unread")
+        .with_dot_label("Unread messages")
+        .with_anchor(MarkerAnchor::new("Jump", "#latest-message"))
+}
+
+fn dense_marker_story_model() -> MarkerModel {
+    MarkerModel::new("Pinned")
+        .with_density(MarkerDensity::Dense)
+        .with_tone(MarkerTone::Success)
+        .with_value("pinned")
+        .with_dot_label("Pinned marker")
+        .without_anchor()
+}
+
+fn loading_marker_story_model() -> MarkerModel {
+    default_marker_story_model().loading()
+}
+
+fn disabled_marker_story_model() -> MarkerModel {
+    MarkerModel::new("Archived")
+        .with_tone(MarkerTone::Neutral)
+        .with_value("archived")
+        .with_dot_label("Archived marker")
+        .with_anchor(MarkerAnchor::new("Open", "#archived").disabled())
+        .disabled()
+}
+
+fn invalid_marker_story_model() -> MarkerModel {
+    MarkerModel::new("Stale")
+        .with_tone(MarkerTone::Danger)
+        .with_value("stale")
+        .with_dot_label("Stale marker")
+        .with_error("Marker target is stale.")
+}
+
+fn themed_marker_story_model() -> MarkerModel {
+    MarkerModel::new("2 notes")
+        .with_tone(MarkerTone::Warning)
+        .with_value("notes")
+        .with_dot_label("Annotation marker")
+        .with_anchor(MarkerAnchor::new("Review", "#review-notes"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

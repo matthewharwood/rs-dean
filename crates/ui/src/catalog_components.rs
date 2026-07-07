@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    marker,
-    Marker,
-    MarkerModel,
-    MarkerPart,
-    MarkerRenderNode,
-    MarkerState,
-    MarkerIntent,
-    MarkerChange,
-    validate_marker_model,
-    marker_render_nodes,
-    default_marker_model,
-    [
-        Root => "Marker",
-        Dot => "MarkerDot",
-        Label => "MarkerLabel",
-        Anchor => "MarkerAnchor",
-    ]
-);
-
-define_catalog_component!(
     menubar,
     Menubar,
     MenubarModel,
@@ -1123,8 +1103,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::InputOtp
         | UiComponentId::Item
         | UiComponentId::Kbd
-        | UiComponentId::Label => None,
-        UiComponentId::Marker => Some(any_nodes(marker_render_nodes(&default_marker_model()))),
+        | UiComponentId::Label
+        | UiComponentId::Marker => None,
         UiComponentId::Menubar => Some(any_nodes(menubar_render_nodes(&default_menubar_model()))),
         UiComponentId::Message => Some(any_nodes(message_render_nodes(&default_message_model()))),
         UiComponentId::MessageScroller => Some(any_nodes(message_scroller_render_nodes(
@@ -1237,6 +1217,7 @@ mod tests {
                     | UiComponentId::Item
                     | UiComponentId::Kbd
                     | UiComponentId::Label
+                    | UiComponentId::Marker
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1253,17 +1234,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_marker_model().state();
-        assert!(!state.is_active(MarkerPart::Root));
+        let mut state = default_menubar_model().state();
+        assert!(!state.is_active(MenubarPart::Root));
         assert_eq!(
-            state.apply(MarkerIntent::Toggle(MarkerPart::Root)),
-            MarkerChange::Opened(MarkerPart::Root)
+            state.apply(MenubarIntent::Toggle(MenubarPart::Root)),
+            MenubarChange::Opened(MenubarPart::Root)
         );
-        assert!(state.is_active(MarkerPart::Root));
+        assert!(state.is_active(MenubarPart::Root));
         assert_eq!(
-            state.apply(MarkerIntent::Toggle(MarkerPart::Root)),
-            MarkerChange::Closed(MarkerPart::Root)
+            state.apply(MenubarIntent::Toggle(MenubarPart::Root)),
+            MenubarChange::Closed(MenubarPart::Root)
         );
-        assert!(!state.is_active(MarkerPart::Root));
+        assert!(!state.is_active(MenubarPart::Root));
     }
 }

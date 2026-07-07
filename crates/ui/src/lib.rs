@@ -37,6 +37,7 @@ pub mod item;
 pub mod kbd;
 pub mod kit;
 pub mod label;
+pub mod marker;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -216,6 +217,11 @@ pub use kit::{
 pub use label::{
     LabelChange, LabelDensity, LabelIntent, LabelModel, LabelPart, LabelRenderNode,
     LabelRequirement, LabelState, default_label_model, label_render_nodes, validate_label_model,
+};
+pub use marker::{
+    MarkerAnchor, MarkerChange, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,
+    MarkerRenderNode, MarkerState, MarkerTone, default_marker_model, marker_render_nodes,
+    validate_marker_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

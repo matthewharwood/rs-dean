@@ -292,12 +292,13 @@ pub mod bevy_adapter {
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
-        KbdPart, LabelPart, LabelRequirement, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, RenderContract,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -311,11 +312,12 @@ pub mod bevy_adapter {
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
         default_empty_model, default_field_model, default_hover_card_model,
         default_input_group_model, default_input_model, default_input_otp_model,
-        default_item_model, default_kbd_model, default_label_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, scale,
+        default_item_model, default_kbd_model, default_label_model, default_marker_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -490,6 +492,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Label {
             return bevy_primitives_for_label(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Marker {
+            return bevy_primitives_for_marker(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1069,6 +1074,47 @@ pub mod bevy_adapter {
                     render,
                     state,
                     intent: label_intent_for_part(node.part),
+                    selected: node.active || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_marker(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_marker_model();
+        let marker_state = model.state();
+        marker_render_nodes(&model, &marker_state)
+            .into_iter()
+            .map(|node| {
+                let role = marker_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: marker_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: marker_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        marker_tone_for_part(
+                            node.part,
+                            node.tone,
+                            node.active,
+                            node.invalid,
+                            node.visible,
+                            node.actionable,
+                            node.disabled,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: marker_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.invalid,
                     disabled: node.disabled,
                 }
@@ -3192,6 +3238,70 @@ pub mod bevy_adapter {
             LabelPart::Root => Vec2::new(scale::space::XL, scale::space::S),
             LabelPart::Text => Vec2::new(scale::space::L, scale::space::S),
             LabelPart::Requirement => Vec2::new(scale::space::M, scale::space::S),
+        }
+    }
+
+    const fn marker_kind_for_part(part: MarkerPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            MarkerPart::Root => UiWidgetSlotKind::Section,
+            MarkerPart::Dot => UiWidgetSlotKind::Marker,
+            MarkerPart::Label => UiWidgetSlotKind::Text,
+            MarkerPart::Anchor if actionable => UiWidgetSlotKind::Link,
+            MarkerPart::Anchor => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn marker_role_for_part(part: MarkerPart) -> UiBlockRole {
+        match part {
+            MarkerPart::Root => UiBlockRole::Root,
+            MarkerPart::Dot => UiBlockRole::Indicator,
+            MarkerPart::Label => UiBlockRole::Text,
+            MarkerPart::Anchor => UiBlockRole::Navigation,
+        }
+    }
+
+    const fn marker_tone_for_part(
+        part: MarkerPart,
+        tone: MarkerTone,
+        active: bool,
+        invalid: bool,
+        visible: bool,
+        actionable: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if !visible || disabled {
+            return UiBlockTone::Muted;
+        }
+        if invalid {
+            return UiBlockTone::Danger;
+        }
+        if active || actionable {
+            return UiBlockTone::Brand;
+        }
+        match (part, tone) {
+            (MarkerPart::Dot, MarkerTone::Neutral) => UiBlockTone::Muted,
+            (MarkerPart::Dot, MarkerTone::Brand) => UiBlockTone::Brand,
+            (MarkerPart::Dot, MarkerTone::Info) => UiBlockTone::Info,
+            (MarkerPart::Dot, MarkerTone::Success) => UiBlockTone::Success,
+            (MarkerPart::Dot, MarkerTone::Warning) => UiBlockTone::Warning,
+            (MarkerPart::Dot, MarkerTone::Danger) => UiBlockTone::Danger,
+            _ => UiBlockTone::Surface,
+        }
+    }
+
+    const fn marker_intent_for_part(part: MarkerPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (MarkerPart::Anchor, true) => UiWidgetIntent::Navigate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn marker_size_for_part(part: MarkerPart) -> Vec2 {
+        match part {
+            MarkerPart::Root => Vec2::new(scale::space::XL, scale::space::S),
+            MarkerPart::Dot => Vec2::new(scale::space::XS, scale::space::XS),
+            MarkerPart::Label => Vec2::new(scale::space::L, scale::space::S),
+            MarkerPart::Anchor => Vec2::new(scale::space::M, scale::space::S),
         }
     }
 
