@@ -25,8 +25,8 @@ use rs_dean_ui::{
     LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone, Menubar,
     MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, Message, MessageAction, MessageDensity,
     MessageModel, MessageScroller, MessageScrollerDensity, MessageScrollerEntry,
-    MessageScrollerModel, MessageSide, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
+    NativeSelectOption, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -769,6 +769,24 @@ fn Stories() -> impl IntoView {
                             <MessageScroller model=invalid_message_scroller_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <MessageScroller model=themed_message_scroller_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-native-select" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Native Select"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 40 implemented as a browser-native select backed by validated shared Rust options, renderer-local focus/selection state, and Bevy-readable select primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <NativeSelect model=default_native_select_story_model() />
+                            <NativeSelect model=dense_native_select_story_model() />
+                            <NativeSelect model=loading_native_select_story_model() />
+                            <NativeSelect model=disabled_native_select_story_model() />
+                            <NativeSelect model=invalid_native_select_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <NativeSelect model=themed_native_select_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2890,6 +2908,59 @@ fn themed_message_scroller_story_model() -> MessageScrollerModel {
         ),
     ])
     .with_jump_label("Latest")
+}
+
+fn default_native_select_story_model() -> NativeSelectModel {
+    NativeSelectModel::new(vec![
+        NativeSelectOption::new("Leptos DOM", "leptos")
+            .with_detail("Render the component through the Leptos browser surface."),
+        NativeSelectOption::new("Bevy WebGPU", "bevy")
+            .with_detail("Render the same shared slots as Bevy UI primitives."),
+        NativeSelectOption::new("Shared contract", "shared")
+            .with_detail("Keep durable selection ownership above the component."),
+    ])
+    .with_label("Renderer")
+    .with_placeholder("Choose renderer")
+    .with_selected_value("leptos")
+}
+
+fn dense_native_select_story_model() -> NativeSelectModel {
+    default_native_select_story_model()
+        .with_density(NativeSelectDensity::Dense)
+        .with_label("Dense renderer")
+        .with_selected_value("bevy")
+}
+
+fn loading_native_select_story_model() -> NativeSelectModel {
+    default_native_select_story_model().loading()
+}
+
+fn disabled_native_select_story_model() -> NativeSelectModel {
+    default_native_select_story_model()
+        .with_label("Locked renderer")
+        .disabled()
+}
+
+fn invalid_native_select_story_model() -> NativeSelectModel {
+    default_native_select_story_model()
+        .without_selected_value()
+        .required()
+        .with_error("Select a renderer before this state can persist.")
+}
+
+fn themed_native_select_story_model() -> NativeSelectModel {
+    NativeSelectModel::new(vec![
+        NativeSelectOption::new("Catppuccin", "catppuccin")
+            .with_detail("Preview the select in the Catppuccin theme scope."),
+        NativeSelectOption::new("Dracula", "dracula")
+            .with_detail("Preview the select in the Dracula theme scope."),
+        NativeSelectOption::new("Luxury", "luxury")
+            .with_detail("Preview the select in the Luxury theme scope.")
+            .disabled(),
+    ])
+    .with_label("Theme")
+    .with_placeholder("Choose theme")
+    .with_selected_value("catppuccin")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

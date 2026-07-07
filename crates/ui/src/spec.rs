@@ -293,12 +293,13 @@ pub mod bevy_adapter {
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
-        MessageScrollerPart, MessageSide, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        MessageScrollerPart, MessageSide, NativeSelectPart, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -314,12 +315,12 @@ pub mod bevy_adapter {
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_native_select_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
-        message_scroller_render_nodes, scale,
+        message_scroller_render_nodes, native_select_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -506,6 +507,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::MessageScroller {
             return bevy_primitives_for_message_scroller(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::NativeSelect {
+            return bevy_primitives_for_native_select(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1224,6 +1232,37 @@ pub mod bevy_adapter {
                     state,
                     intent: message_scroller_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.invalid || !node.at_latest,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_native_select(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_native_select_model();
+        let native_select_state = model.state();
+        native_select_render_nodes(&model, &native_select_state)
+            .into_iter()
+            .map(|node| {
+                let role = native_select_role_for_part(node.part);
+                let tone = native_select_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: native_select_primitive_part(&node),
+                    kind: native_select_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: native_select_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: native_select_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3608,6 +3647,68 @@ pub mod bevy_adapter {
             MessageScrollerPart::List => Vec2::new(scale::space::XL2, scale::space::XL2),
             MessageScrollerPart::Anchor => Vec2::new(scale::space::XL2, scale::space::XS3),
             MessageScrollerPart::JumpButton => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    fn native_select_primitive_part(node: &crate::NativeSelectRenderNode) -> String {
+        match node.part {
+            NativeSelectPart::Option => format!("{}:{}", node.part.label(), node.value),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn native_select_kind_for_part(part: NativeSelectPart) -> UiWidgetSlotKind {
+        match part {
+            NativeSelectPart::Root => UiWidgetSlotKind::Section,
+            NativeSelectPart::Trigger => UiWidgetSlotKind::Select,
+            NativeSelectPart::Option => UiWidgetSlotKind::Option,
+            NativeSelectPart::Value => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn native_select_role_for_part(part: NativeSelectPart) -> UiBlockRole {
+        match part {
+            NativeSelectPart::Root => UiBlockRole::Root,
+            NativeSelectPart::Trigger => UiBlockRole::Control,
+            NativeSelectPart::Option => UiBlockRole::Item,
+            NativeSelectPart::Value => UiBlockRole::Text,
+        }
+    }
+
+    fn native_select_tone_for_node(node: &crate::NativeSelectRenderNode) -> UiBlockTone {
+        if node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.focused || node.selected {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            NativeSelectPart::Root => UiBlockTone::Surface,
+            NativeSelectPart::Trigger => UiBlockTone::Surface,
+            NativeSelectPart::Option => UiBlockTone::Surface,
+            NativeSelectPart::Value => UiBlockTone::Muted,
+        }
+    }
+
+    const fn native_select_intent_for_part(
+        part: NativeSelectPart,
+        actionable: bool,
+    ) -> UiWidgetIntent {
+        match (part, actionable) {
+            (NativeSelectPart::Trigger | NativeSelectPart::Option, true) => UiWidgetIntent::Select,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn native_select_size_for_part(part: NativeSelectPart) -> Vec2 {
+        match part {
+            NativeSelectPart::Root => Vec2::new(scale::space::XL2, scale::space::L),
+            NativeSelectPart::Trigger => Vec2::new(scale::space::XL2, scale::space::S),
+            NativeSelectPart::Option => Vec2::new(scale::space::XL, scale::space::S),
+            NativeSelectPart::Value => Vec2::new(scale::space::L, scale::space::XS),
         }
     }
 

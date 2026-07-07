@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    native_select,
-    NativeSelect,
-    NativeSelectModel,
-    NativeSelectPart,
-    NativeSelectRenderNode,
-    NativeSelectState,
-    NativeSelectIntent,
-    NativeSelectChange,
-    validate_native_select_model,
-    native_select_render_nodes,
-    default_native_select_model,
-    [
-        Root => "NativeSelect",
-        Trigger => "NativeSelectTrigger",
-        Option => "NativeSelectOption",
-        Value => "NativeSelectValue",
-    ]
-);
-
-define_catalog_component!(
     navigation_menu,
     NavigationMenu,
     NavigationMenuModel,
@@ -1044,10 +1024,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Marker
         | UiComponentId::Menubar
         | UiComponentId::Message
-        | UiComponentId::MessageScroller => None,
-        UiComponentId::NativeSelect => Some(any_nodes(native_select_render_nodes(
-            &default_native_select_model(),
-        ))),
+        | UiComponentId::MessageScroller
+        | UiComponentId::NativeSelect => None,
         UiComponentId::NavigationMenu => Some(any_nodes(navigation_menu_render_nodes(
             &default_navigation_menu_model(),
         ))),
@@ -1156,6 +1134,7 @@ mod tests {
                     | UiComponentId::Menubar
                     | UiComponentId::Message
                     | UiComponentId::MessageScroller
+                    | UiComponentId::NativeSelect
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1172,17 +1151,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_native_select_model().state();
-        assert!(!state.is_active(NativeSelectPart::Root));
+        let mut state = default_navigation_menu_model().state();
+        assert!(!state.is_active(NavigationMenuPart::Root));
         assert_eq!(
-            state.apply(NativeSelectIntent::Toggle(NativeSelectPart::Root)),
-            NativeSelectChange::Opened(NativeSelectPart::Root)
+            state.apply(NavigationMenuIntent::Toggle(NavigationMenuPart::Root)),
+            NavigationMenuChange::Opened(NavigationMenuPart::Root)
         );
-        assert!(state.is_active(NativeSelectPart::Root));
+        assert!(state.is_active(NavigationMenuPart::Root));
         assert_eq!(
-            state.apply(NativeSelectIntent::Toggle(NativeSelectPart::Root)),
-            NativeSelectChange::Closed(NativeSelectPart::Root)
+            state.apply(NavigationMenuIntent::Toggle(NavigationMenuPart::Root)),
+            NavigationMenuChange::Closed(NavigationMenuPart::Root)
         );
-        assert!(!state.is_active(NativeSelectPart::Root));
+        assert!(!state.is_active(NavigationMenuPart::Root));
     }
 }

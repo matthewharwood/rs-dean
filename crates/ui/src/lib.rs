@@ -41,6 +41,7 @@ pub mod marker;
 pub mod menubar;
 pub mod message;
 pub mod message_scroller;
+pub mod native_select;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -240,6 +241,12 @@ pub use message_scroller::{
     MessageScrollerChange, MessageScrollerDensity, MessageScrollerEntry, MessageScrollerIntent,
     MessageScrollerModel, MessageScrollerPart, MessageScrollerRenderNode, MessageScrollerState,
     default_message_scroller_model, message_scroller_render_nodes, validate_message_scroller_model,
+};
+pub use native_select::{
+    NativeSelectChange, NativeSelectDensity, NativeSelectIntent, NativeSelectModel,
+    NativeSelectOption, NativeSelectPart, NativeSelectRenderNode, NativeSelectState,
+    default_native_select_model, native_select_render_nodes, selected_native_select_label,
+    validate_native_select_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

@@ -425,7 +425,17 @@ the transcript entries remain consumer-owned durable data. Issues 01 through
 because Message and the existing navigation components already separate local
 UI position from durable app state.
 
-All-issue sweep pass: Native Select through Typography complete. The shared
+Concrete component pass: Native Select complete. The component now has a
+typed Rust option/value model, `garde` validation for duplicate and disabled
+selections, token-only native `<select>` rendering, dedicated story proof, and
+Bevy primitive derivation from the same render nodes. The sweep found that the
+native DOM control should stay browser-native while the shared contract names
+the shadcn trigger/option/value anatomy for Bevy and Leptos. Issues 01 through
+39 were re-audited against this learning; no earlier API changes were needed
+because existing form and messaging components already keep durable ownership
+above renderer-local interaction state.
+
+All-issue sweep pass: Navigation Menu through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -433,7 +443,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Native Select through Typography now have
+Concrete all-issue sweep pass: Navigation Menu through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

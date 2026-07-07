@@ -32,13 +32,14 @@ use crate::{
     MarkerState, MarkerTone, MenubarDensity, MenubarIntent, MenubarModel, MenubarPart,
     MenubarState, MessageDensity, MessageIntent, MessageModel, MessagePart, MessageScrollerDensity,
     MessageScrollerEntry, MessageScrollerIntent, MessageScrollerModel, MessageScrollerPart,
-    MessageScrollerState, MessageSide, MessageState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    MessageScrollerState, MessageSide, MessageState, NativeSelectDensity, NativeSelectIntent,
+    NativeSelectModel, NativeSelectPart, NativeSelectState, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -51,24 +52,25 @@ use crate::{
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
-    default_message_scroller_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
-    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
+    default_message_scroller_model, default_native_select_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model,
 };
 
 const HEALTH_CARD: &str =
@@ -770,6 +772,22 @@ const INPUT_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_ERROR_HIDDEN: &str = "hidden";
 const INPUT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const NATIVE_SELECT_ROOT: &str = "grid w-full max-w-md gap-2xs text-text-1";
+const NATIVE_SELECT_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const NATIVE_SELECT_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const NATIVE_SELECT_LABEL_DISABLED: &str =
+    "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
+const NATIVE_SELECT_TRIGGER: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NATIVE_SELECT_TRIGGER_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NATIVE_SELECT_TRIGGER_FOCUSED: &str = "min-h-field w-full rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 shadow-2 outline-none transition-colors";
+const NATIVE_SELECT_TRIGGER_DENSE_FOCUSED: &str = "min-h-s w-full rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 shadow-2 outline-none transition-colors";
+const NATIVE_SELECT_TRIGGER_INVALID: &str = "min-h-field w-full rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NATIVE_SELECT_TRIGGER_DENSE_INVALID: &str = "min-h-s w-full rounded-field border border-danger bg-error-soft px-2xs py-3xs text-00 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NATIVE_SELECT_TRIGGER_LOADING: &str = "min-h-field w-full rounded-field border border-info bg-info-soft px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none";
+const NATIVE_SELECT_TRIGGER_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-disabled outline-none";
+const NATIVE_SELECT_VALUE: &str = "m-0 text-00 leading-0 text-text-2";
+const NATIVE_SELECT_VALUE_PLACEHOLDER: &str = "m-0 text-00 leading-0 text-text-muted";
+const NATIVE_SELECT_VALUE_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -7701,6 +7719,281 @@ const fn input_state_label(
 }
 
 #[component]
+pub fn NativeSelect(
+    #[prop(optional, default = default_native_select_model())] model: NativeSelectModel,
+) -> AnyView {
+    if let Err(report) = validate_native_select_model(&model) {
+        let message = format!("NativeSelect validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="native-select" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let required = model.required;
+    let state_model = model.state();
+    let nodes = native_select_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == NativeSelectPart::Root)
+        .expect("invariant: native select render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == NativeSelectPart::Trigger)
+        .expect("invariant: native select render nodes include trigger")
+        .clone();
+    let value = nodes
+        .iter()
+        .find(|node| node.part == NativeSelectPart::Value)
+        .expect("invariant: native select render nodes include value")
+        .clone();
+    let options = nodes
+        .iter()
+        .filter(|node| node.part == NativeSelectPart::Option)
+        .cloned()
+        .collect::<Vec<_>>();
+    let invalid = root.invalid;
+    let label = root.label.clone();
+    let placeholder = model.placeholder.clone();
+    let value_detail = value.detail.clone();
+    let option_lookup = model.options.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=native_select_root_class(disabled)
+            data-ui-component="native-select"
+            data-ui-part=NativeSelectPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    native_select_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_focused(),
+                        state.selected_value().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=move || {
+                state.with(|state| state.selected_value().unwrap_or("").to_owned())
+            }
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <label class=native_select_label_class(disabled)>
+                {label}
+            </label>
+            <select
+                class=move || {
+                    state.with(|state| {
+                        native_select_trigger_class(
+                            density,
+                            state.is_focused(),
+                            invalid,
+                            loading,
+                            disabled,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=NativeSelectPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-label=trigger.label
+                aria-invalid=invalid.to_string()
+                required=required
+                disabled=blocked
+                prop:value=move || {
+                    state.with(|state| state.selected_value().unwrap_or("").to_owned())
+                }
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(NativeSelectIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(NativeSelectIntent::Blur);
+                        });
+                    }
+                }
+                on:change=move |event| {
+                    if !blocked {
+                        let value = event_target_value(&event);
+                        set_state.update(|state| {
+                            let _ = state.apply(NativeSelectIntent::Select(value));
+                        });
+                    }
+                }
+            >
+                <option
+                    value=""
+                    selected=move || state.with(|state| state.selected_value().is_none())
+                    disabled=required
+                >
+                    {placeholder.clone()}
+                </option>
+                {options
+                    .into_iter()
+                    .map(|option| native_select_option_view(option, state))
+                    .collect_view()}
+            </select>
+            <p
+                class=move || {
+                    state.with(|state| {
+                        native_select_value_class(invalid, state.selected_value().is_some())
+                            .to_owned()
+                    })
+                }
+                data-ui-part=NativeSelectPart::Value.label()
+                aria-live="polite"
+            >
+                {move || {
+                    state.with(|state| {
+                        native_select_value_label(
+                            &option_lookup,
+                            state.selected_value(),
+                            &placeholder,
+                            invalid,
+                            &value_detail,
+                        )
+                    })
+                }}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+fn native_select_option_view(
+    node: crate::NativeSelectRenderNode,
+    state: ReadSignal<NativeSelectState>,
+) -> AnyView {
+    let value_for_selected = node.value.clone();
+    let value_for_attr = node.value;
+    let label = node.label;
+    let detail = node.detail;
+    let index = node.index.to_string();
+    let disabled = node.disabled;
+    view! {
+        <option
+            value=value_for_attr
+            selected=move || state.with(|state| state.is_selected(&value_for_selected))
+            disabled=disabled
+            data-ui-part=NativeSelectPart::Option.label()
+            data-ui-index=index
+            data-ui-detail=detail
+        >
+            {label}
+        </option>
+    }
+    .into_any()
+}
+
+fn native_select_value_label(
+    options: &[crate::NativeSelectOption],
+    selected: Option<&str>,
+    placeholder: &str,
+    invalid: bool,
+    error_detail: &str,
+) -> String {
+    if invalid {
+        return error_detail.to_owned();
+    }
+    selected
+        .and_then(|selected| {
+            options
+                .iter()
+                .find(|option| option.value == selected)
+                .map(|option| option.label.clone())
+        })
+        .unwrap_or_else(|| placeholder.to_owned())
+}
+
+const fn native_select_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        NATIVE_SELECT_ROOT_DISABLED
+    } else {
+        NATIVE_SELECT_ROOT
+    }
+}
+
+const fn native_select_label_class(disabled: bool) -> &'static str {
+    if disabled {
+        NATIVE_SELECT_LABEL_DISABLED
+    } else {
+        NATIVE_SELECT_LABEL
+    }
+}
+
+const fn native_select_trigger_class(
+    density: NativeSelectDensity,
+    focused: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return NATIVE_SELECT_TRIGGER_DISABLED;
+    }
+    if loading {
+        return NATIVE_SELECT_TRIGGER_LOADING;
+    }
+    match (density, invalid, focused) {
+        (NativeSelectDensity::Standard, true, _) => NATIVE_SELECT_TRIGGER_INVALID,
+        (NativeSelectDensity::Dense, true, _) => NATIVE_SELECT_TRIGGER_DENSE_INVALID,
+        (NativeSelectDensity::Standard, false, true) => NATIVE_SELECT_TRIGGER_FOCUSED,
+        (NativeSelectDensity::Dense, false, true) => NATIVE_SELECT_TRIGGER_DENSE_FOCUSED,
+        (NativeSelectDensity::Standard, false, false) => NATIVE_SELECT_TRIGGER,
+        (NativeSelectDensity::Dense, false, false) => NATIVE_SELECT_TRIGGER_DENSE,
+    }
+}
+
+const fn native_select_value_class(invalid: bool, selected: bool) -> &'static str {
+    if invalid {
+        NATIVE_SELECT_VALUE_INVALID
+    } else if selected {
+        NATIVE_SELECT_VALUE
+    } else {
+        NATIVE_SELECT_VALUE_PLACEHOLDER
+    }
+}
+
+const fn native_select_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+    selected: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else if selected {
+        "selected"
+    } else {
+        "empty"
+    }
+}
+
+#[component]
 pub fn InputGroup(
     #[prop(optional, default = default_input_group_model())] model: InputGroupModel,
 ) -> AnyView {
@@ -10371,11 +10664,6 @@ const fn message_scroller_state_label(
     }
 }
 
-catalog_component!(
-    NativeSelect,
-    crate::NativeSelectModel,
-    crate::default_native_select_model
-);
 catalog_component!(
     NavigationMenu,
     crate::NavigationMenuModel,
