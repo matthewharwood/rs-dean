@@ -26,7 +26,9 @@ use rs_dean_ui::{
     MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, Message, MessageAction, MessageDensity,
     MessageModel, MessageScroller, MessageScrollerDensity, MessageScrollerEntry,
     MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
-    NativeSelectOption, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
+    NavigationMenuLink, NavigationMenuModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -787,6 +789,24 @@ fn Stories() -> impl IntoView {
                             <NativeSelect model=invalid_native_select_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <NativeSelect model=themed_native_select_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-navigation-menu" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Navigation Menu"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 41 implemented as a responsive top-level navigation contract backed by validated shared Rust items, renderer-local open/focus state, and Bevy-readable menu primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <NavigationMenu model=default_navigation_menu_story_model() />
+                            <NavigationMenu model=dense_navigation_menu_story_model() />
+                            <NavigationMenu model=loading_navigation_menu_story_model() />
+                            <NavigationMenu model=disabled_navigation_menu_story_model() />
+                            <NavigationMenu model=invalid_navigation_menu_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <NavigationMenu model=themed_navigation_menu_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2961,6 +2981,110 @@ fn themed_native_select_story_model() -> NativeSelectModel {
     .with_label("Theme")
     .with_placeholder("Choose theme")
     .with_selected_value("catppuccin")
+}
+
+fn default_navigation_menu_story_model() -> NavigationMenuModel {
+    NavigationMenuModel::new(vec![
+        NavigationMenuItem::link(
+            "Docs",
+            "docs",
+            "/docs",
+            "Implementation guides and architecture notes.",
+        ),
+        NavigationMenuItem::panel(
+            "Components",
+            "components",
+            "Browse shared token-only UI primitives.",
+            vec![
+                NavigationMenuLink::new(
+                    "Accordion",
+                    "accordion",
+                    "/components/accordion",
+                    "Disclosure state rendered through shared Rust nodes.",
+                ),
+                NavigationMenuLink::new(
+                    "Native Select",
+                    "native-select",
+                    "/components/native-select",
+                    "Browser-native select with shared option validation.",
+                ),
+                NavigationMenuLink::new(
+                    "Navigation Menu",
+                    "navigation-menu",
+                    "/components/navigation-menu",
+                    "Top-level menus with local panel state.",
+                ),
+            ],
+        ),
+        NavigationMenuItem::link(
+            "Stories",
+            "stories",
+            "/stories",
+            "Open the reusable UI story harness.",
+        ),
+    ])
+    .with_default_open("components")
+    .with_selected_value("native-select")
+}
+
+fn dense_navigation_menu_story_model() -> NavigationMenuModel {
+    default_navigation_menu_story_model()
+        .with_density(NavigationMenuDensity::Dense)
+        .with_selected_value("docs")
+}
+
+fn loading_navigation_menu_story_model() -> NavigationMenuModel {
+    default_navigation_menu_story_model().loading()
+}
+
+fn disabled_navigation_menu_story_model() -> NavigationMenuModel {
+    default_navigation_menu_story_model()
+        .with_label("Locked navigation")
+        .disabled()
+}
+
+fn invalid_navigation_menu_story_model() -> NavigationMenuModel {
+    default_navigation_menu_story_model().with_error("Navigation hydration failed.")
+}
+
+fn themed_navigation_menu_story_model() -> NavigationMenuModel {
+    NavigationMenuModel::new(vec![
+        NavigationMenuItem::link(
+            "Overview",
+            "overview",
+            "/overview",
+            "Theme scoped navigation overview.",
+        ),
+        NavigationMenuItem::panel(
+            "Themes",
+            "themes",
+            "Preview palettes through the shared token surface.",
+            vec![
+                NavigationMenuLink::new(
+                    "Luxury",
+                    "luxury",
+                    "/themes/luxury",
+                    "Warm high-contrast palette.",
+                ),
+                NavigationMenuLink::new(
+                    "Dracula",
+                    "dracula",
+                    "/themes/dracula",
+                    "Dark saturated palette.",
+                ),
+                NavigationMenuLink::new(
+                    "Catppuccin",
+                    "catppuccin",
+                    "/themes/catppuccin",
+                    "Soft balanced palette.",
+                )
+                .disabled(),
+            ],
+        ),
+    ])
+    .with_label("Theme navigation")
+    .with_default_open("themes")
+    .with_selected_value("luxury")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

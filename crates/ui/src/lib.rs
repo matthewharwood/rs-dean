@@ -42,6 +42,7 @@ pub mod menubar;
 pub mod message;
 pub mod message_scroller;
 pub mod native_select;
+pub mod navigation_menu;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -247,6 +248,12 @@ pub use native_select::{
     NativeSelectOption, NativeSelectPart, NativeSelectRenderNode, NativeSelectState,
     default_native_select_model, native_select_render_nodes, selected_native_select_label,
     validate_native_select_model,
+};
+pub use navigation_menu::{
+    NavigationMenuChange, NavigationMenuDensity, NavigationMenuIntent, NavigationMenuItem,
+    NavigationMenuLink, NavigationMenuModel, NavigationMenuPart, NavigationMenuRenderNode,
+    NavigationMenuState, default_navigation_menu_model, navigation_menu_render_nodes,
+    validate_navigation_menu_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

@@ -293,9 +293,9 @@ pub mod bevy_adapter {
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
-        MessageScrollerPart, MessageSide, NativeSelectPart, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, RenderContract,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -315,12 +315,13 @@ pub mod bevy_adapter {
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
-        default_native_select_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
-        message_scroller_render_nodes, native_select_render_nodes, scale,
+        default_native_select_model, default_navigation_menu_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
+        scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -514,6 +515,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::NativeSelect {
             return bevy_primitives_for_native_select(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::NavigationMenu {
+            return bevy_primitives_for_navigation_menu(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1263,6 +1271,37 @@ pub mod bevy_adapter {
                     state,
                     intent: native_select_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.focused || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_navigation_menu(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_navigation_menu_model();
+        let navigation_menu_state = model.state();
+        navigation_menu_render_nodes(&model, &navigation_menu_state)
+            .into_iter()
+            .map(|node| {
+                let role = navigation_menu_role_for_part(node.part);
+                let tone = navigation_menu_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: navigation_menu_primitive_part(&node),
+                    kind: navigation_menu_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: navigation_menu_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: navigation_menu_intent_for_part(node.part, node.actionable),
+                    selected: node.open || node.focused || node.selected || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3709,6 +3748,78 @@ pub mod bevy_adapter {
             NativeSelectPart::Trigger => Vec2::new(scale::space::XL2, scale::space::S),
             NativeSelectPart::Option => Vec2::new(scale::space::XL, scale::space::S),
             NativeSelectPart::Value => Vec2::new(scale::space::L, scale::space::XS),
+        }
+    }
+
+    fn navigation_menu_primitive_part(node: &crate::NavigationMenuRenderNode) -> String {
+        match node.part {
+            NavigationMenuPart::Item => format!("{}:{}", node.part.label(), node.value),
+            NavigationMenuPart::Trigger => format!("{}:{}", node.part.label(), node.value),
+            NavigationMenuPart::Content => format!("{}:{}", node.part.label(), node.value),
+            NavigationMenuPart::Link => format!("{}:{}", node.part.label(), node.value),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn navigation_menu_kind_for_part(part: NavigationMenuPart) -> UiWidgetSlotKind {
+        match part {
+            NavigationMenuPart::Root => UiWidgetSlotKind::Section,
+            NavigationMenuPart::List => UiWidgetSlotKind::List,
+            NavigationMenuPart::Item => UiWidgetSlotKind::ListItem,
+            NavigationMenuPart::Trigger => UiWidgetSlotKind::Button,
+            NavigationMenuPart::Content => UiWidgetSlotKind::Panel,
+            NavigationMenuPart::Link => UiWidgetSlotKind::Link,
+        }
+    }
+
+    const fn navigation_menu_role_for_part(part: NavigationMenuPart) -> UiBlockRole {
+        match part {
+            NavigationMenuPart::Root | NavigationMenuPart::List => UiBlockRole::Navigation,
+            NavigationMenuPart::Item => UiBlockRole::Item,
+            NavigationMenuPart::Trigger => UiBlockRole::Action,
+            NavigationMenuPart::Content => UiBlockRole::Overlay,
+            NavigationMenuPart::Link => UiBlockRole::Navigation,
+        }
+    }
+
+    fn navigation_menu_tone_for_node(node: &crate::NavigationMenuRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.open || node.focused || node.selected {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            NavigationMenuPart::Root | NavigationMenuPart::List => UiBlockTone::Surface,
+            NavigationMenuPart::Item => UiBlockTone::Surface,
+            NavigationMenuPart::Trigger => UiBlockTone::Brand,
+            NavigationMenuPart::Content => UiBlockTone::Surface,
+            NavigationMenuPart::Link => UiBlockTone::Surface,
+        }
+    }
+
+    const fn navigation_menu_intent_for_part(
+        part: NavigationMenuPart,
+        actionable: bool,
+    ) -> UiWidgetIntent {
+        match (part, actionable) {
+            (NavigationMenuPart::Trigger, true) => UiWidgetIntent::Open,
+            (NavigationMenuPart::Item | NavigationMenuPart::Link, true) => UiWidgetIntent::Navigate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn navigation_menu_size_for_part(part: NavigationMenuPart) -> Vec2 {
+        match part {
+            NavigationMenuPart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
+            NavigationMenuPart::List => Vec2::new(scale::space::XL3, scale::space::M),
+            NavigationMenuPart::Item => Vec2::new(scale::space::L, scale::space::S),
+            NavigationMenuPart::Trigger => Vec2::new(scale::space::L, scale::space::S),
+            NavigationMenuPart::Content => Vec2::new(scale::space::XL2, scale::space::L),
+            NavigationMenuPart::Link => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

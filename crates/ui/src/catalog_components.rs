@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    navigation_menu,
-    NavigationMenu,
-    NavigationMenuModel,
-    NavigationMenuPart,
-    NavigationMenuRenderNode,
-    NavigationMenuState,
-    NavigationMenuIntent,
-    NavigationMenuChange,
-    validate_navigation_menu_model,
-    navigation_menu_render_nodes,
-    default_navigation_menu_model,
-    [
-        Root => "NavigationMenu",
-        List => "NavigationMenuList",
-        Item => "NavigationMenuItem",
-        Trigger => "NavigationMenuTrigger",
-        Content => "NavigationMenuContent",
-        Link => "NavigationMenuLink",
-    ]
-);
-
-define_catalog_component!(
     pagination,
     Pagination,
     PaginationModel,
@@ -1025,10 +1003,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Menubar
         | UiComponentId::Message
         | UiComponentId::MessageScroller
-        | UiComponentId::NativeSelect => None,
-        UiComponentId::NavigationMenu => Some(any_nodes(navigation_menu_render_nodes(
-            &default_navigation_menu_model(),
-        ))),
+        | UiComponentId::NativeSelect
+        | UiComponentId::NavigationMenu => None,
         UiComponentId::Pagination => Some(any_nodes(pagination_render_nodes(
             &default_pagination_model(),
         ))),
@@ -1135,6 +1111,7 @@ mod tests {
                     | UiComponentId::Message
                     | UiComponentId::MessageScroller
                     | UiComponentId::NativeSelect
+                    | UiComponentId::NavigationMenu
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1151,17 +1128,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_navigation_menu_model().state();
-        assert!(!state.is_active(NavigationMenuPart::Root));
+        let mut state = default_pagination_model().state();
+        assert!(!state.is_active(PaginationPart::Root));
         assert_eq!(
-            state.apply(NavigationMenuIntent::Toggle(NavigationMenuPart::Root)),
-            NavigationMenuChange::Opened(NavigationMenuPart::Root)
+            state.apply(PaginationIntent::Toggle(PaginationPart::Root)),
+            PaginationChange::Opened(PaginationPart::Root)
         );
-        assert!(state.is_active(NavigationMenuPart::Root));
+        assert!(state.is_active(PaginationPart::Root));
         assert_eq!(
-            state.apply(NavigationMenuIntent::Toggle(NavigationMenuPart::Root)),
-            NavigationMenuChange::Closed(NavigationMenuPart::Root)
+            state.apply(PaginationIntent::Toggle(PaginationPart::Root)),
+            PaginationChange::Closed(PaginationPart::Root)
         );
-        assert!(!state.is_active(NavigationMenuPart::Root));
+        assert!(!state.is_active(PaginationPart::Root));
     }
 }

@@ -435,7 +435,17 @@ the shadcn trigger/option/value anatomy for Bevy and Leptos. Issues 01 through
 because existing form and messaging components already keep durable ownership
 above renderer-local interaction state.
 
-All-issue sweep pass: Navigation Menu through Typography complete. The shared
+Concrete component pass: Navigation Menu complete. The component now has a
+typed Rust item/link model, `garde` validation for direct-link versus panel
+items, token-only Leptos navigation rendering, dedicated story proof, and Bevy
+primitive derivation from the same render nodes. The sweep found that
+top-level navigation needs local open/focus state while selected routes remain
+consumer-owned durable state. Issues 01 through 40 were re-audited against
+this learning; no earlier API changes were needed because Menubar, Breadcrumb,
+and Native Select already separate local navigation affordances from durable
+selection ownership.
+
+All-issue sweep pass: Pagination through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -443,7 +453,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Navigation Menu through Typography now have
+Concrete all-issue sweep pass: Pagination through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

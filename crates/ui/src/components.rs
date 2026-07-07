@@ -33,12 +33,13 @@ use crate::{
     MenubarState, MessageDensity, MessageIntent, MessageModel, MessagePart, MessageScrollerDensity,
     MessageScrollerEntry, MessageScrollerIntent, MessageScrollerModel, MessageScrollerPart,
     MessageScrollerState, MessageSide, MessageState, NativeSelectDensity, NativeSelectIntent,
-    NativeSelectModel, NativeSelectPart, NativeSelectState, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    NativeSelectModel, NativeSelectPart, NativeSelectState, NavigationMenuDensity,
+    NavigationMenuIntent, NavigationMenuModel, NavigationMenuPart, NavigationMenuState,
+    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -52,15 +53,15 @@ use crate::{
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
-    default_message_scroller_model, default_native_select_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -70,7 +71,7 @@ use crate::{
     validate_hover_card_model, validate_input_group_model, validate_input_model,
     validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
     validate_marker_model, validate_menubar_model, validate_message_model,
-    validate_message_scroller_model, validate_native_select_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
 };
 
 const HEALTH_CARD: &str =
@@ -788,6 +789,41 @@ const NATIVE_SELECT_TRIGGER_DISABLED: &str = "min-h-field w-full rounded-field b
 const NATIVE_SELECT_VALUE: &str = "m-0 text-00 leading-0 text-text-2";
 const NATIVE_SELECT_VALUE_PLACEHOLDER: &str = "m-0 text-00 leading-0 text-text-muted";
 const NATIVE_SELECT_VALUE_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const NAVIGATION_MENU_ROOT: &str = "grid w-full max-w-3xl gap-2xs text-text-1";
+const NAVIGATION_MENU_ROOT_DISABLED: &str = "grid w-full max-w-3xl gap-2xs text-text-disabled";
+const NAVIGATION_MENU_LIST: &str = "flex flex-wrap items-start gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs shadow-1";
+const NAVIGATION_MENU_LIST_DENSE: &str = "flex flex-wrap items-start gap-3xs rounded-box border border-border-subtle bg-surface-1 p-3xs shadow-1";
+const NAVIGATION_MENU_LIST_LOADING: &str =
+    "flex flex-wrap items-start gap-2xs rounded-box border border-info bg-info-soft p-2xs shadow-1";
+const NAVIGATION_MENU_ITEM: &str = "relative grid gap-2xs";
+const NAVIGATION_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NAVIGATION_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NAVIGATION_MENU_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_LINK: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_LINK_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_LINK_SELECTED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_LINK_DENSE_SELECTED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_LINK_INVALID: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_LINK_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_CONTENT: &str = "grid min-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-s shadow-2";
+const NAVIGATION_MENU_CONTENT_DENSE: &str = "grid min-w-l gap-3xs rounded-box border border-border-subtle bg-surface-elevated p-xs shadow-1";
+const NAVIGATION_MENU_CONTENT_INVALID: &str =
+    "grid min-w-xl gap-2xs rounded-box border border-danger bg-error-soft p-s shadow-1";
+const NAVIGATION_MENU_CONTENT_LOADING: &str =
+    "grid min-w-xl gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
+const NAVIGATION_MENU_CONTENT_DISABLED: &str = "grid min-w-xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_CONTENT_HIDDEN: &str = "hidden";
+const NAVIGATION_MENU_PANEL_LINK: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-left text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_PANEL_LINK_DENSE: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_PANEL_LINK_SELECTED: &str = "grid gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-left text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const NAVIGATION_MENU_PANEL_LINK_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_PANEL_TITLE: &str = "text-0 font-7 leading-0 text-text-1";
+const NAVIGATION_MENU_PANEL_DETAIL: &str = "text-00 leading-0 text-text-2";
+const NAVIGATION_MENU_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const NAVIGATION_MENU_ERROR_HIDDEN: &str = "hidden";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -7994,6 +8030,515 @@ const fn native_select_state_label(
 }
 
 #[component]
+pub fn NavigationMenu(
+    #[prop(optional, default = default_navigation_menu_model())] model: NavigationMenuModel,
+) -> AnyView {
+    if let Err(report) = validate_navigation_menu_model(&model) {
+        let message = format!("NavigationMenu validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="navigation-menu" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = navigation_menu_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == NavigationMenuPart::Root)
+        .expect("invariant: navigation menu render nodes include root")
+        .clone();
+    let list = nodes
+        .iter()
+        .find(|node| node.part == NavigationMenuPart::List)
+        .expect("invariant: navigation menu render nodes include list")
+        .clone();
+    let item_nodes = nodes
+        .iter()
+        .filter(|node| node.part == NavigationMenuPart::Item)
+        .cloned()
+        .collect::<Vec<_>>();
+    let invalid = root.invalid;
+    let error_detail = root.detail.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <nav
+            class=navigation_menu_root_class(disabled)
+            data-ui-component="navigation-menu"
+            data-ui-part=NavigationMenuPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    navigation_menu_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.open_item().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-label=root.label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Close);
+                    });
+                }
+            }
+        >
+            <ul
+                class=navigation_menu_list_class(density, loading)
+                data-ui-part=NavigationMenuPart::List.label()
+                data-ui-value=list.value
+                role="menubar"
+            >
+                {item_nodes
+                    .into_iter()
+                    .map(|item| {
+                        navigation_menu_item_view(
+                            item,
+                            nodes.clone(),
+                            density,
+                            blocked,
+                            state,
+                            set_state,
+                        )
+                    })
+                    .collect_view()}
+            </ul>
+            <p
+                class=navigation_menu_error_class(invalid)
+                role="alert"
+                aria-hidden=(!invalid).to_string()
+            >
+                {error_detail}
+            </p>
+        </nav>
+    }
+    .into_any()
+}
+
+fn navigation_menu_item_view(
+    item: crate::NavigationMenuRenderNode,
+    nodes: Vec<crate::NavigationMenuRenderNode>,
+    density: NavigationMenuDensity,
+    blocked: bool,
+    state: ReadSignal<NavigationMenuState>,
+    set_state: WriteSignal<NavigationMenuState>,
+) -> AnyView {
+    let item_value = item.value.clone();
+    let item_data_value = item.value.clone();
+    let item_disabled = item.disabled;
+    let fallback_item = item.clone();
+    let child_nodes = nodes
+        .into_iter()
+        .filter(|node| node.item_index == item.item_index && node.part != NavigationMenuPart::Item)
+        .collect::<Vec<_>>();
+    let trigger = child_nodes
+        .iter()
+        .find(|node| node.part == NavigationMenuPart::Trigger)
+        .cloned();
+    let content = child_nodes
+        .iter()
+        .find(|node| node.part == NavigationMenuPart::Content)
+        .cloned();
+    let links = child_nodes
+        .into_iter()
+        .filter(|node| node.part == NavigationMenuPart::Link)
+        .collect::<Vec<_>>();
+
+    view! {
+        <li
+            class=NAVIGATION_MENU_ITEM
+            data-ui-part=NavigationMenuPart::Item.label()
+            data-ui-value=item_data_value
+            aria-disabled=(item_disabled || blocked).to_string()
+        >
+            {if let Some(trigger) = trigger {
+                navigation_menu_panel_view(
+                    trigger,
+                    content,
+                    links,
+                    density,
+                    blocked,
+                    state,
+                    set_state,
+                )
+            } else {
+                let link = links
+                    .into_iter()
+                    .find(|link| link.value == item_value)
+                    .unwrap_or(fallback_item);
+                navigation_menu_direct_link_view(link, density, blocked, state, set_state)
+            }}
+        </li>
+    }
+    .into_any()
+}
+
+fn navigation_menu_panel_view(
+    trigger: crate::NavigationMenuRenderNode,
+    content: Option<crate::NavigationMenuRenderNode>,
+    links: Vec<crate::NavigationMenuRenderNode>,
+    density: NavigationMenuDensity,
+    blocked: bool,
+    state: ReadSignal<NavigationMenuState>,
+    set_state: WriteSignal<NavigationMenuState>,
+) -> AnyView {
+    let disabled = trigger.disabled || blocked;
+    let value_for_click = trigger.value.clone();
+    let value_for_focus = trigger.value.clone();
+    let value_for_expanded = trigger.value.clone();
+    let value_for_mouse = trigger.value.clone();
+    let trigger_value = trigger.value.clone();
+    let trigger_label = trigger.label.clone();
+    let content_node = content.unwrap_or_else(|| trigger.clone());
+    let content_value_for_class = content_node.value.clone();
+    let content_value_for_hidden = content_node.value.clone();
+    let content_detail = content_node.detail.clone();
+
+    view! {
+        <button
+            type="button"
+            class=move || {
+                state.with(|state| {
+                    navigation_menu_trigger_class(
+                        density,
+                        state.is_open(&trigger_value),
+                        trigger.invalid,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=NavigationMenuPart::Trigger.label()
+            data-ui-value=trigger.value
+            aria-haspopup="menu"
+            aria-expanded=move || state.with(|state| state.is_open(&value_for_expanded).to_string())
+            disabled=disabled
+            on:focus=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Focus(value_for_focus.clone()));
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Open(value_for_mouse.clone()));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Toggle(value_for_click.clone()));
+                    });
+                }
+            }
+        >
+            {trigger_label}
+        </button>
+        <div
+            role="menu"
+            class=move || {
+                state.with(|state| {
+                    navigation_menu_content_class(
+                        density,
+                        state.is_open(&content_value_for_class),
+                        content_node.invalid,
+                        content_node.loading,
+                        content_node.disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=NavigationMenuPart::Content.label()
+            data-ui-value=content_node.value
+            aria-label=content_detail
+            hidden=move || state.with(|state| !state.is_open(&content_value_for_hidden))
+        >
+            {links
+                .into_iter()
+                .map(|link| {
+                    navigation_menu_panel_link_view(link, density, blocked, state, set_state)
+                })
+                .collect_view()}
+        </div>
+    }
+    .into_any()
+}
+
+fn navigation_menu_direct_link_view(
+    node: crate::NavigationMenuRenderNode,
+    density: NavigationMenuDensity,
+    blocked: bool,
+    state: ReadSignal<NavigationMenuState>,
+    set_state: WriteSignal<NavigationMenuState>,
+) -> AnyView {
+    let disabled = node.disabled || blocked;
+    let actionable = node.actionable;
+    let value_for_click = node.value.clone();
+    let value_for_current = node.value.clone();
+    let value_for_focus = node.value.clone();
+    let value_for_class = node.value.clone();
+    let href = node.href.clone();
+    let label = node.label.clone();
+    view! {
+        <a
+            class=move || {
+                state.with(|state| {
+                    navigation_menu_link_class(
+                        density,
+                        state.is_selected(&value_for_class),
+                        node.invalid,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=NavigationMenuPart::Link.label()
+            data-ui-value=node.value
+            href=href
+            aria-disabled=disabled.to_string()
+            aria-current=move || {
+                state.with(|state| {
+                    if state.is_selected(&value_for_current) { "page" } else { "false" }.to_owned()
+                })
+            }
+            tabindex=if disabled { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Focus(value_for_focus.clone()));
+                    });
+                }
+            }
+            on:click=move |event| {
+                if disabled || !actionable {
+                    event.prevent_default();
+                } else {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Navigate(value_for_click.clone()));
+                    });
+                }
+            }
+        >
+            {label}
+        </a>
+    }
+    .into_any()
+}
+
+fn navigation_menu_panel_link_view(
+    node: crate::NavigationMenuRenderNode,
+    density: NavigationMenuDensity,
+    blocked: bool,
+    state: ReadSignal<NavigationMenuState>,
+    set_state: WriteSignal<NavigationMenuState>,
+) -> AnyView {
+    let disabled = node.disabled || blocked;
+    let actionable = node.actionable;
+    let visible = node.visible;
+    let value_for_click = node.value.clone();
+    let value_for_current = node.value.clone();
+    let value_for_focus = node.value.clone();
+    let value_for_class = node.value.clone();
+    let href = node.href.clone();
+    let label = node.label.clone();
+    let detail = node.detail.clone();
+    view! {
+        <a
+            class=move || {
+                state.with(|state| {
+                    navigation_menu_panel_link_class(
+                        density,
+                        visible,
+                        state.is_selected(&value_for_class),
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=NavigationMenuPart::Link.label()
+            data-ui-value=node.value
+            data-ui-parent=node.item_value
+            href=href
+            aria-disabled=disabled.to_string()
+            aria-hidden=(!visible).to_string()
+            aria-current=move || {
+                state.with(|state| {
+                    if state.is_selected(&value_for_current) { "page" } else { "false" }.to_owned()
+                })
+            }
+            tabindex=if disabled { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Focus(value_for_focus.clone()));
+                    });
+                }
+            }
+            on:click=move |event| {
+                if disabled || !actionable {
+                    event.prevent_default();
+                } else {
+                    set_state.update(|state| {
+                        let _ = state.apply(NavigationMenuIntent::Navigate(value_for_click.clone()));
+                    });
+                }
+            }
+        >
+            <span class=NAVIGATION_MENU_PANEL_TITLE>{label}</span>
+            <span class=NAVIGATION_MENU_PANEL_DETAIL>{detail}</span>
+        </a>
+    }
+    .into_any()
+}
+
+const fn navigation_menu_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        NAVIGATION_MENU_ROOT_DISABLED
+    } else {
+        NAVIGATION_MENU_ROOT
+    }
+}
+
+const fn navigation_menu_list_class(density: NavigationMenuDensity, loading: bool) -> &'static str {
+    if loading {
+        return NAVIGATION_MENU_LIST_LOADING;
+    }
+    match density {
+        NavigationMenuDensity::Standard => NAVIGATION_MENU_LIST,
+        NavigationMenuDensity::Dense => NAVIGATION_MENU_LIST_DENSE,
+    }
+}
+
+const fn navigation_menu_trigger_class(
+    density: NavigationMenuDensity,
+    open: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return NAVIGATION_MENU_TRIGGER_DISABLED;
+    }
+    if invalid {
+        return NAVIGATION_MENU_TRIGGER_INVALID;
+    }
+    match (density, open) {
+        (NavigationMenuDensity::Standard, true) => NAVIGATION_MENU_TRIGGER_OPEN,
+        (NavigationMenuDensity::Dense, true) => NAVIGATION_MENU_TRIGGER_DENSE_OPEN,
+        (NavigationMenuDensity::Standard, false) => NAVIGATION_MENU_TRIGGER,
+        (NavigationMenuDensity::Dense, false) => NAVIGATION_MENU_TRIGGER_DENSE,
+    }
+}
+
+const fn navigation_menu_link_class(
+    density: NavigationMenuDensity,
+    selected: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return NAVIGATION_MENU_LINK_DISABLED;
+    }
+    if invalid {
+        return NAVIGATION_MENU_LINK_INVALID;
+    }
+    match (density, selected) {
+        (NavigationMenuDensity::Standard, true) => NAVIGATION_MENU_LINK_SELECTED,
+        (NavigationMenuDensity::Dense, true) => NAVIGATION_MENU_LINK_DENSE_SELECTED,
+        (NavigationMenuDensity::Standard, false) => NAVIGATION_MENU_LINK,
+        (NavigationMenuDensity::Dense, false) => NAVIGATION_MENU_LINK_DENSE,
+    }
+}
+
+const fn navigation_menu_content_class(
+    density: NavigationMenuDensity,
+    open: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if !open {
+        return NAVIGATION_MENU_CONTENT_HIDDEN;
+    }
+    if disabled {
+        return NAVIGATION_MENU_CONTENT_DISABLED;
+    }
+    if loading {
+        return NAVIGATION_MENU_CONTENT_LOADING;
+    }
+    if invalid {
+        return NAVIGATION_MENU_CONTENT_INVALID;
+    }
+    match density {
+        NavigationMenuDensity::Standard => NAVIGATION_MENU_CONTENT,
+        NavigationMenuDensity::Dense => NAVIGATION_MENU_CONTENT_DENSE,
+    }
+}
+
+const fn navigation_menu_panel_link_class(
+    density: NavigationMenuDensity,
+    visible: bool,
+    selected: bool,
+    disabled: bool,
+) -> &'static str {
+    if !visible {
+        return NAVIGATION_MENU_CONTENT_HIDDEN;
+    }
+    if disabled {
+        return NAVIGATION_MENU_PANEL_LINK_DISABLED;
+    }
+    match (density, selected) {
+        (NavigationMenuDensity::Standard, true) => NAVIGATION_MENU_PANEL_LINK_SELECTED,
+        (NavigationMenuDensity::Dense, true) => NAVIGATION_MENU_PANEL_LINK_SELECTED,
+        (NavigationMenuDensity::Standard, false) => NAVIGATION_MENU_PANEL_LINK,
+        (NavigationMenuDensity::Dense, false) => NAVIGATION_MENU_PANEL_LINK_DENSE,
+    }
+}
+
+const fn navigation_menu_error_class(visible: bool) -> &'static str {
+    if visible {
+        NAVIGATION_MENU_ERROR
+    } else {
+        NAVIGATION_MENU_ERROR_HIDDEN
+    }
+}
+
+const fn navigation_menu_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
+#[component]
 pub fn InputGroup(
     #[prop(optional, default = default_input_group_model())] model: InputGroupModel,
 ) -> AnyView {
@@ -10664,11 +11209,6 @@ const fn message_scroller_state_label(
     }
 }
 
-catalog_component!(
-    NavigationMenu,
-    crate::NavigationMenuModel,
-    crate::default_navigation_menu_model
-);
 catalog_component!(
     Pagination,
     crate::PaginationModel,
