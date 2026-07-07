@@ -30,7 +30,8 @@ use rs_dean_ui::{
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
     Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel, RadioGroup,
     RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation, Resizable,
-    ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ShadcnComponentGallery,
+    ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ScrollArea,
+    ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, ShadcnComponentGallery,
     ThemeCycleButton, ThemeId, ThemeScope,
 };
 
@@ -902,6 +903,25 @@ fn Stories() -> impl IntoView {
                             <Resizable model=invalid_resizable_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Resizable model=themed_resizable_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-scroll-area" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Scroll Area"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 47 implemented as a scrollable content region backed by validated shared Rust items, renderer-local viewport/bar state, and Bevy-readable scroll primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <ScrollArea model=default_scroll_area_story_model() />
+                            <ScrollArea model=dense_scroll_area_story_model() />
+                            <ScrollArea model=horizontal_scroll_area_story_model() />
+                            <ScrollArea model=loading_scroll_area_story_model() />
+                            <ScrollArea model=disabled_scroll_area_story_model() />
+                            <ScrollArea model=invalid_scroll_area_story_model() />
+                            <ThemeScope theme=ThemeId::Lofi>
+                                <ScrollArea model=themed_scroll_area_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3408,6 +3428,60 @@ fn invalid_resizable_story_model() -> ResizableModel {
 
 fn themed_resizable_story_model() -> ResizableModel {
     ResizableModel::new(three_panel_resizable_story_panels()).with_label("Theme scoped split")
+}
+
+fn scroll_area_story_items() -> Vec<ScrollAreaItem> {
+    vec![
+        ScrollAreaItem::new("Queue lesson", "queue")
+            .with_detail("Prepare the next lesson from local state."),
+        ScrollAreaItem::new("Hydrate app", "hydrate")
+            .with_detail("Read durable state before rendering progress."),
+        ScrollAreaItem::new("Render story", "render")
+            .with_detail("Prove the component in the isolated story harness."),
+        ScrollAreaItem::new("Verify gate", "verify")
+            .with_detail("Run the one-pass Rust quality gate."),
+        ScrollAreaItem::new("Publish artifact", "publish")
+            .with_detail("Emit static Pages output after the gate passes."),
+    ]
+}
+
+fn default_scroll_area_story_model() -> ScrollAreaModel {
+    ScrollAreaModel::new(scroll_area_story_items())
+        .with_label("Activity feed")
+        .with_active_item("hydrate")
+}
+
+fn dense_scroll_area_story_model() -> ScrollAreaModel {
+    ScrollAreaModel::new(scroll_area_story_items())
+        .with_density(ScrollAreaDensity::Dense)
+        .with_label("Compact feed")
+}
+
+fn horizontal_scroll_area_story_model() -> ScrollAreaModel {
+    ScrollAreaModel::new(scroll_area_story_items())
+        .with_label("Overflow lanes")
+        .with_overflow(ScrollAreaOverflow::Both)
+        .with_active_item("render")
+}
+
+fn loading_scroll_area_story_model() -> ScrollAreaModel {
+    default_scroll_area_story_model().loading()
+}
+
+fn disabled_scroll_area_story_model() -> ScrollAreaModel {
+    ScrollAreaModel::new(scroll_area_story_items())
+        .with_label("Locked feed")
+        .disabled()
+}
+
+fn invalid_scroll_area_story_model() -> ScrollAreaModel {
+    default_scroll_area_story_model().with_error("Scroll content failed validation upstream.")
+}
+
+fn themed_scroll_area_story_model() -> ScrollAreaModel {
+    ScrollAreaModel::new(scroll_area_story_items())
+        .with_label("Theme scoped feed")
+        .with_overflow(ScrollAreaOverflow::Horizontal)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

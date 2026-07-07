@@ -48,6 +48,7 @@ pub mod popover;
 pub mod progress;
 pub mod radio_group;
 pub mod resizable;
+pub mod scroll_area;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -285,6 +286,12 @@ pub use resizable::{
     ResizablePanel, ResizablePart, ResizableRenderNode, ResizableState, default_resizable_model,
     default_resizable_panels, resizable_panel_flex_style, resizable_render_nodes,
     resizable_sizes_label, validate_resizable_model,
+};
+pub use scroll_area::{
+    ScrollAreaAxis, ScrollAreaChange, ScrollAreaDensity, ScrollAreaIntent, ScrollAreaItem,
+    ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, ScrollAreaRenderNode, ScrollAreaState,
+    default_scroll_area_items, default_scroll_area_model, scroll_area_render_nodes,
+    validate_scroll_area_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

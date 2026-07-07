@@ -497,7 +497,16 @@ clamping rules rather than renderer-specific drag math; earlier components were
 re-audited against that learning, and no changes were required because their
 local state machines already keep interaction math inside shared Rust.
 
-All-issue sweep pass: Scroll Area through Typography complete. The shared
+Concrete component pass: Scroll Area complete. The component now has a typed
+Rust item model, overflow-axis contract, `garde` validation for unique item
+values and active-item membership, renderer-local viewport/bar state,
+token-only Leptos scroll content, dedicated story proof, and Bevy primitive
+derivation from the same render nodes. The sweep found that scroll affordances
+should expose axis state without owning durable scroll position; Resizable was
+re-audited against that learning and required no change because its durable
+layout sizes remain consumer-owned while local handle state stays ephemeral.
+
+All-issue sweep pass: Select through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -505,7 +514,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Scroll Area through Typography now have
+Concrete all-issue sweep pass: Select through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

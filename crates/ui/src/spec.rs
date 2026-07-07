@@ -294,9 +294,9 @@ pub mod bevy_adapter {
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -318,14 +318,14 @@ pub mod bevy_adapter {
         default_menubar_model, default_message_model, default_message_scroller_model,
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
-        default_resizable_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_resizable_model, default_scroll_area_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
-        radio_group_render_nodes, resizable_render_nodes, scale,
+        radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -557,6 +557,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Resizable {
             return bevy_primitives_for_resizable(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::ScrollArea {
+            return bevy_primitives_for_scroll_area(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1492,6 +1499,37 @@ pub mod bevy_adapter {
                     state,
                     intent: resizable_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.resizing || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_scroll_area(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_scroll_area_model().with_overflow(crate::ScrollAreaOverflow::Both);
+        let scroll_area_state = model.state();
+        scroll_area_render_nodes(&model, &scroll_area_state)
+            .into_iter()
+            .map(|node| {
+                let role = scroll_area_role_for_part(node.part);
+                let tone = scroll_area_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: scroll_area_primitive_part(&node),
+                    kind: scroll_area_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: scroll_area_size_for_part(node.part, node.axis),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: scroll_area_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -4308,6 +4346,78 @@ pub mod bevy_adapter {
             }
             (ResizablePart::Handle, crate::ResizableOrientation::Vertical) => {
                 Vec2::new(scale::space::XL2, scale::space::XS)
+            }
+        }
+    }
+
+    fn scroll_area_primitive_part(node: &crate::ScrollAreaRenderNode) -> String {
+        match node.part {
+            ScrollAreaPart::Content | ScrollAreaPart::Bar => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            ScrollAreaPart::Root | ScrollAreaPart::Viewport | ScrollAreaPart::Corner => {
+                node.part.label().to_owned()
+            }
+        }
+    }
+
+    const fn scroll_area_kind_for_part(part: ScrollAreaPart) -> UiWidgetSlotKind {
+        match part {
+            ScrollAreaPart::Root => UiWidgetSlotKind::Section,
+            ScrollAreaPart::Viewport => UiWidgetSlotKind::Panel,
+            ScrollAreaPart::Content => UiWidgetSlotKind::Text,
+            ScrollAreaPart::Bar | ScrollAreaPart::Corner => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn scroll_area_role_for_part(part: ScrollAreaPart) -> UiBlockRole {
+        match part {
+            ScrollAreaPart::Root | ScrollAreaPart::Viewport => UiBlockRole::Layout,
+            ScrollAreaPart::Content => UiBlockRole::Content,
+            ScrollAreaPart::Bar | ScrollAreaPart::Corner => UiBlockRole::Indicator,
+        }
+    }
+
+    fn scroll_area_tone_for_node(node: &crate::ScrollAreaRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active {
+            return UiBlockTone::Brand;
+        }
+        if node.focused {
+            return UiBlockTone::Accent;
+        }
+        UiBlockTone::Surface
+    }
+
+    const fn scroll_area_intent_for_part(part: ScrollAreaPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (ScrollAreaPart::Viewport | ScrollAreaPart::Bar, true) => UiWidgetIntent::Scroll,
+            (ScrollAreaPart::Content, true) => UiWidgetIntent::Select,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn scroll_area_size_for_part(
+        part: ScrollAreaPart,
+        axis: Option<crate::ScrollAreaAxis>,
+    ) -> Vec2 {
+        match (part, axis) {
+            (ScrollAreaPart::Root, _) => Vec2::new(scale::space::XL3, scale::space::XL2),
+            (ScrollAreaPart::Viewport, _) => Vec2::new(scale::space::XL3, scale::space::XL),
+            (ScrollAreaPart::Content, _) => Vec2::new(scale::space::XL2, scale::space::M),
+            (ScrollAreaPart::Bar, Some(crate::ScrollAreaAxis::Vertical)) => {
+                Vec2::new(scale::space::XS, scale::space::XL)
+            }
+            (ScrollAreaPart::Bar, Some(crate::ScrollAreaAxis::Horizontal)) => {
+                Vec2::new(scale::space::XL2, scale::space::XS)
+            }
+            (ScrollAreaPart::Bar, None) | (ScrollAreaPart::Corner, _) => {
+                Vec2::new(scale::space::XS, scale::space::XS)
             }
         }
     }

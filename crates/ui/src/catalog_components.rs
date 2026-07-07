@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    scroll_area,
-    ScrollArea,
-    ScrollAreaModel,
-    ScrollAreaPart,
-    ScrollAreaRenderNode,
-    ScrollAreaState,
-    ScrollAreaIntent,
-    ScrollAreaChange,
-    validate_scroll_area_model,
-    scroll_area_render_nodes,
-    default_scroll_area_model,
-    [
-        Root => "ScrollArea",
-        Viewport => "ScrollViewport",
-        Content => "ScrollContent",
-        Bar => "ScrollBar",
-        Corner => "ScrollCorner",
-    ]
-);
-
-define_catalog_component!(
     select,
     Select,
     SelectModel,
@@ -908,10 +887,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Popover
         | UiComponentId::Progress
         | UiComponentId::RadioGroup
-        | UiComponentId::Resizable => None,
-        UiComponentId::ScrollArea => Some(any_nodes(scroll_area_render_nodes(
-            &default_scroll_area_model(),
-        ))),
+        | UiComponentId::Resizable
+        | UiComponentId::ScrollArea => None,
         UiComponentId::Select => Some(any_nodes(select_render_nodes(&default_select_model()))),
         UiComponentId::Separator => Some(any_nodes(separator_render_nodes(
             &default_separator_model(),
@@ -1008,6 +985,7 @@ mod tests {
                     | UiComponentId::Progress
                     | UiComponentId::RadioGroup
                     | UiComponentId::Resizable
+                    | UiComponentId::ScrollArea
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1024,17 +1002,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_scroll_area_model().state();
-        assert!(!state.is_active(ScrollAreaPart::Root));
+        let mut state = default_select_model().state();
+        assert!(!state.is_active(SelectPart::Root));
         assert_eq!(
-            state.apply(ScrollAreaIntent::Toggle(ScrollAreaPart::Root)),
-            ScrollAreaChange::Opened(ScrollAreaPart::Root)
+            state.apply(SelectIntent::Toggle(SelectPart::Root)),
+            SelectChange::Opened(SelectPart::Root)
         );
-        assert!(state.is_active(ScrollAreaPart::Root));
+        assert!(state.is_active(SelectPart::Root));
         assert_eq!(
-            state.apply(ScrollAreaIntent::Toggle(ScrollAreaPart::Root)),
-            ScrollAreaChange::Closed(ScrollAreaPart::Root)
+            state.apply(SelectIntent::Toggle(SelectPart::Root)),
+            SelectChange::Closed(SelectPart::Root)
         );
-        assert!(!state.is_active(ScrollAreaPart::Root));
+        assert!(!state.is_active(SelectPart::Root));
     }
 }

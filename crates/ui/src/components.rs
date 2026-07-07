@@ -39,13 +39,14 @@ use crate::{
     PopoverDensity, PopoverIntent, PopoverModel, PopoverPart, ProgressDensity, ProgressIntent,
     ProgressModel, ProgressPart, RadioGroupDensity, RadioGroupIntent, RadioGroupModel,
     RadioGroupOrientation, RadioGroupPart, ResizableDensity, ResizableIntent, ResizableModel,
-    ResizableOrientation, ResizablePart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    ResizableOrientation, ResizablePart, ScrollAreaAxis, ScrollAreaDensity, ScrollAreaIntent,
+    ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -60,30 +61,30 @@ use crate::{
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
-    default_radio_group_model, default_resizable_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    default_radio_group_model, default_resizable_model, default_scroll_area_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
-    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
-    validate_popover_model, validate_progress_model, validate_radio_group_model,
-    validate_resizable_model,
+    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
 };
 
 const HEALTH_CARD: &str =
@@ -965,6 +966,50 @@ const RESIZABLE_HANDLE_LABEL: &str = "m-0 text-00 font-6 leading-0 text-text-mut
 const RESIZABLE_HANDLE_LABEL_ACTIVE: &str = "m-0 text-00 font-7 leading-0 text-brand";
 const RESIZABLE_HANDLE_LABEL_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
 const RESIZABLE_RANGE: &str = "w-full accent-brand";
+const SCROLL_AREA_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SCROLL_AREA_HEADER: &str = "flex flex-wrap items-center justify-between gap-2xs";
+const SCROLL_AREA_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SCROLL_AREA_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const SCROLL_AREA_STATUS: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
+const SCROLL_AREA_STATUS_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const SCROLL_AREA_STATUS_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
+const SCROLL_AREA_FRAME: &str =
+    "grid gap-2xs rounded-field border border-border-subtle bg-surface-2 p-2xs";
+const SCROLL_AREA_FRAME_DENSE: &str =
+    "grid gap-3xs rounded-field border border-border-subtle bg-surface-2 p-3xs";
+const SCROLL_AREA_VIEWPORT: &str = "max-h-2xl overflow-auto rounded-field bg-surface-1 p-xs outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SCROLL_AREA_VIEWPORT_DENSE: &str = "max-h-xl overflow-auto rounded-field bg-surface-1 p-2xs outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SCROLL_AREA_VIEWPORT_FOCUSED: &str = "max-h-2xl overflow-auto rounded-field border border-brand bg-surface-1 p-xs shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SCROLL_AREA_VIEWPORT_INVALID: &str =
+    "max-h-2xl overflow-auto rounded-field border border-danger bg-error-soft p-xs outline-none";
+const SCROLL_AREA_VIEWPORT_DISABLED: &str = "max-h-2xl overflow-auto rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled outline-none";
+const SCROLL_AREA_CONTENT: &str = "grid min-w-max gap-2xs";
+const SCROLL_AREA_CONTENT_DENSE: &str = "grid min-w-max gap-3xs";
+const SCROLL_AREA_ITEM: &str = "grid min-w-0 gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 transition-colors hover:bg-hover-tint";
+const SCROLL_AREA_ITEM_DENSE: &str = "grid min-w-0 gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 transition-colors hover:bg-hover-tint";
+const SCROLL_AREA_ITEM_ACTIVE: &str = "grid min-w-0 gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1";
+const SCROLL_AREA_ITEM_INVALID: &str =
+    "grid min-w-0 gap-3xs rounded-field border border-danger bg-error-soft p-xs text-text-1";
+const SCROLL_AREA_ITEM_DISABLED: &str = "grid min-w-0 gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled";
+const SCROLL_AREA_ITEM_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SCROLL_AREA_ITEM_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const SCROLL_AREA_ITEM_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const SCROLL_AREA_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const SCROLL_AREA_ITEM_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const SCROLL_AREA_ITEM_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const SCROLL_AREA_BAR_ROW: &str = "flex flex-wrap items-center gap-2xs";
+const SCROLL_AREA_BAR: &str = "rounded-pill bg-border-subtle";
+const SCROLL_AREA_BAR_ACTIVE: &str = "rounded-pill bg-brand shadow-1";
+const SCROLL_AREA_BAR_INVALID: &str = "rounded-pill bg-danger";
+const SCROLL_AREA_BAR_DISABLED: &str = "rounded-pill bg-border-muted opacity-disabled";
+const SCROLL_AREA_BAR_VERTICAL: &str = "h-m w-2xs";
+const SCROLL_AREA_BAR_HORIZONTAL: &str = "h-2xs w-m";
+const SCROLL_AREA_CORNER: &str = "size-2xs rounded-field bg-border-subtle";
+const SCROLL_AREA_CORNER_ACTIVE: &str = "size-2xs rounded-field bg-brand";
+const SCROLL_AREA_CORNER_HIDDEN: &str = "hidden";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -12853,11 +12898,398 @@ fn resizable_state_label(
     }
 }
 
-catalog_component!(
-    ScrollArea,
-    crate::ScrollAreaModel,
-    crate::default_scroll_area_model
-);
+#[component]
+pub fn ScrollArea(
+    #[prop(optional, default = default_scroll_area_model())] model: ScrollAreaModel,
+) -> AnyView {
+    if let Err(report) = validate_scroll_area_model(&model) {
+        let message = format!("ScrollArea validation failed: {report}");
+        return view! {
+            <div class=SCROLL_AREA_ROOT_INVALID data-ui-component="scroll-area" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let overflow = model.overflow;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = scroll_area_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ScrollAreaPart::Root)
+        .expect("invariant: scroll area render nodes include root")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_aria_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let items = model.items.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=scroll_area_root_class(density, invalid, disabled)
+            data-ui-component="scroll-area"
+            data-ui-part=ScrollAreaPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-overflow=overflow.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    scroll_area_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.active_item(),
+                        state.hovered_axis(),
+                        state.is_viewport_focused(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_aria_label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <div class=SCROLL_AREA_HEADER>
+                <p class=scroll_area_title_class(density)>{root_label}</p>
+                <p class=scroll_area_status_class(invalid, disabled)>{root_detail}</p>
+            </div>
+            <div class=scroll_area_frame_class(density) data-ui-part=ScrollAreaPart::Viewport.label()>
+                <div
+                    class=move || {
+                        state.with(|state| {
+                            scroll_area_viewport_class(
+                                density,
+                                state.is_viewport_focused(),
+                                invalid,
+                                blocked,
+                            )
+                            .to_owned()
+                        })
+                    }
+                    data-ui-part=ScrollAreaPart::Viewport.label()
+                    data-ui-value=move || {
+                        state.with(|state| state.active_item().unwrap_or("viewport").to_owned())
+                    }
+                    tabindex=if blocked { "-1" } else { "0" }
+                    role="region"
+                    aria-label="Scrollable content"
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(ScrollAreaIntent::FocusViewport);
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(ScrollAreaIntent::BlurViewport);
+                            });
+                        }
+                    }
+                >
+                    <div class=scroll_area_content_class(density) data-ui-part=ScrollAreaPart::Content.label()>
+                        {items
+                            .into_iter()
+                            .enumerate()
+                            .map(|(index, item)| {
+                                let item_value_for_class = item.value.clone();
+                                let item_value_for_data = item.value.clone();
+                                let item_value_for_click = item.value.clone();
+                                let item_disabled = blocked || item.disabled;
+                                view! {
+                                    <article
+                                        class=move || {
+                                            state.with(|state| {
+                                                scroll_area_item_class(
+                                                    density,
+                                                    state.is_active_item(&item_value_for_class),
+                                                    item_disabled,
+                                                    invalid,
+                                                )
+                                                .to_owned()
+                                            })
+                                        }
+                                        data-ui-part=ScrollAreaPart::Content.label()
+                                        data-ui-value=item_value_for_data
+                                        data-ui-index=index.to_string()
+                                        aria-disabled=item_disabled.to_string()
+                                        on:click=move |_| {
+                                            if !item_disabled {
+                                                let value = item_value_for_click.clone();
+                                                set_state.update(|state| {
+                                                    let _ = state.apply(ScrollAreaIntent::ScrollTo(value));
+                                                });
+                                            }
+                                        }
+                                    >
+                                        <p class=scroll_area_item_title_class(density, item_disabled)>
+                                            {item.title}
+                                        </p>
+                                        <p class=scroll_area_item_detail_class(invalid, item_disabled)>
+                                            {item.detail}
+                                        </p>
+                                    </article>
+                                }
+                            })
+                            .collect_view()}
+                    </div>
+                </div>
+                <div class=SCROLL_AREA_BAR_ROW aria-hidden="true">
+                    {overflow.has_vertical().then_some(view! {
+                        <span
+                            class=move || {
+                                state.with(|state| {
+                                    scroll_area_bar_class(
+                                        ScrollAreaAxis::Vertical,
+                                        state.is_hovering_axis(ScrollAreaAxis::Vertical),
+                                        invalid,
+                                        blocked,
+                                    )
+                                    .to_owned()
+                                })
+                            }
+                            data-ui-part=ScrollAreaPart::Bar.label()
+                            data-ui-axis=ScrollAreaAxis::Vertical.label()
+                            on:mouseenter=move |_| {
+                                if !blocked {
+                                    set_state.update(|state| {
+                                        let _ = state.apply(ScrollAreaIntent::HoverBar(ScrollAreaAxis::Vertical));
+                                    });
+                                }
+                            }
+                            on:mouseleave=move |_| {
+                                if !blocked {
+                                    set_state.update(|state| {
+                                        let _ = state.apply(ScrollAreaIntent::LeaveBar);
+                                    });
+                                }
+                            }
+                        ></span>
+                    })}
+                    {overflow.has_horizontal().then_some(view! {
+                        <span
+                            class=move || {
+                                state.with(|state| {
+                                    scroll_area_bar_class(
+                                        ScrollAreaAxis::Horizontal,
+                                        state.is_hovering_axis(ScrollAreaAxis::Horizontal),
+                                        invalid,
+                                        blocked,
+                                    )
+                                    .to_owned()
+                                })
+                            }
+                            data-ui-part=ScrollAreaPart::Bar.label()
+                            data-ui-axis=ScrollAreaAxis::Horizontal.label()
+                            on:mouseenter=move |_| {
+                                if !blocked {
+                                    set_state.update(|state| {
+                                        let _ = state.apply(ScrollAreaIntent::HoverBar(ScrollAreaAxis::Horizontal));
+                                    });
+                                }
+                            }
+                            on:mouseleave=move |_| {
+                                if !blocked {
+                                    set_state.update(|state| {
+                                        let _ = state.apply(ScrollAreaIntent::LeaveBar);
+                                    });
+                                }
+                            }
+                        ></span>
+                    })}
+                    <span
+                        class=move || {
+                            state.with(|state| {
+                                scroll_area_corner_class(
+                                    overflow,
+                                    state.hovered_axis().is_some(),
+                                )
+                                .to_owned()
+                            })
+                        }
+                        data-ui-part=ScrollAreaPart::Corner.label()
+                    ></span>
+                </div>
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn scroll_area_root_class(
+    density: ScrollAreaDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SCROLL_AREA_ROOT_DISABLED;
+    }
+    if invalid {
+        return SCROLL_AREA_ROOT_INVALID;
+    }
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_ROOT,
+        ScrollAreaDensity::Dense => SCROLL_AREA_ROOT_DENSE,
+    }
+}
+
+const fn scroll_area_title_class(density: ScrollAreaDensity) -> &'static str {
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_TITLE,
+        ScrollAreaDensity::Dense => SCROLL_AREA_TITLE_DENSE,
+    }
+}
+
+const fn scroll_area_status_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SCROLL_AREA_STATUS_DISABLED
+    } else if invalid {
+        SCROLL_AREA_STATUS_INVALID
+    } else {
+        SCROLL_AREA_STATUS
+    }
+}
+
+const fn scroll_area_frame_class(density: ScrollAreaDensity) -> &'static str {
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_FRAME,
+        ScrollAreaDensity::Dense => SCROLL_AREA_FRAME_DENSE,
+    }
+}
+
+const fn scroll_area_viewport_class(
+    density: ScrollAreaDensity,
+    focused: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SCROLL_AREA_VIEWPORT_DISABLED;
+    }
+    if invalid {
+        return SCROLL_AREA_VIEWPORT_INVALID;
+    }
+    if focused {
+        return SCROLL_AREA_VIEWPORT_FOCUSED;
+    }
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_VIEWPORT,
+        ScrollAreaDensity::Dense => SCROLL_AREA_VIEWPORT_DENSE,
+    }
+}
+
+const fn scroll_area_content_class(density: ScrollAreaDensity) -> &'static str {
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_CONTENT,
+        ScrollAreaDensity::Dense => SCROLL_AREA_CONTENT_DENSE,
+    }
+}
+
+const fn scroll_area_item_class(
+    density: ScrollAreaDensity,
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return SCROLL_AREA_ITEM_DISABLED;
+    }
+    if invalid {
+        return SCROLL_AREA_ITEM_INVALID;
+    }
+    if active {
+        return SCROLL_AREA_ITEM_ACTIVE;
+    }
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_ITEM,
+        ScrollAreaDensity::Dense => SCROLL_AREA_ITEM_DENSE,
+    }
+}
+
+const fn scroll_area_item_title_class(density: ScrollAreaDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return SCROLL_AREA_ITEM_TITLE_DISABLED;
+    }
+    match density {
+        ScrollAreaDensity::Standard => SCROLL_AREA_ITEM_TITLE,
+        ScrollAreaDensity::Dense => SCROLL_AREA_ITEM_TITLE_DENSE,
+    }
+}
+
+const fn scroll_area_item_detail_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SCROLL_AREA_ITEM_DETAIL_DISABLED
+    } else if invalid {
+        SCROLL_AREA_ITEM_DETAIL_INVALID
+    } else {
+        SCROLL_AREA_ITEM_DETAIL
+    }
+}
+
+fn scroll_area_bar_class(
+    axis: ScrollAreaAxis,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> String {
+    let tone = if disabled {
+        SCROLL_AREA_BAR_DISABLED
+    } else if invalid {
+        SCROLL_AREA_BAR_INVALID
+    } else if active {
+        SCROLL_AREA_BAR_ACTIVE
+    } else {
+        SCROLL_AREA_BAR
+    };
+    let axis_class = match axis {
+        ScrollAreaAxis::Vertical => SCROLL_AREA_BAR_VERTICAL,
+        ScrollAreaAxis::Horizontal => SCROLL_AREA_BAR_HORIZONTAL,
+    };
+    format!("{tone} {axis_class}")
+}
+
+const fn scroll_area_corner_class(overflow: ScrollAreaOverflow, active: bool) -> &'static str {
+    match (overflow, active) {
+        (ScrollAreaOverflow::Both, true) => SCROLL_AREA_CORNER_ACTIVE,
+        (ScrollAreaOverflow::Both, false) => SCROLL_AREA_CORNER,
+        _ => SCROLL_AREA_CORNER_HIDDEN,
+    }
+}
+
+fn scroll_area_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active_item: Option<&str>,
+    hovered_axis: Option<ScrollAreaAxis>,
+    viewport_focused: bool,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if let Some(axis) = hovered_axis {
+        format!("bar-{}", axis.label())
+    } else if let Some(item) = active_item {
+        format!("active-{item}")
+    } else if viewport_focused {
+        "focused".to_owned()
+    } else {
+        "idle".to_owned()
+    }
+}
+
 catalog_component!(Select, crate::SelectModel, crate::default_select_model);
 catalog_component!(
     Separator,
