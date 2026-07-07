@@ -293,11 +293,11 @@ pub mod bevy_adapter {
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
-        MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, RenderContract,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -315,13 +315,14 @@ pub mod bevy_adapter {
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
         default_menubar_model, default_message_model, default_message_scroller_model,
-        default_native_select_model, default_navigation_menu_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_native_select_model, default_navigation_menu_model, default_pagination_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
-        scale,
+        pagination_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -522,6 +523,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::NavigationMenu {
             return bevy_primitives_for_navigation_menu(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::Pagination {
+            return bevy_primitives_for_pagination(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -1302,6 +1310,37 @@ pub mod bevy_adapter {
                     state,
                     intent: navigation_menu_intent_for_part(node.part, node.actionable),
                     selected: node.open || node.focused || node.selected || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_pagination(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_pagination_model();
+        let pagination_state = model.state();
+        pagination_render_nodes(&model, &pagination_state)
+            .into_iter()
+            .map(|node| {
+                let role = pagination_role_for_part(node.part);
+                let tone = pagination_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: pagination_primitive_part(&node),
+                    kind: pagination_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: pagination_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: pagination_intent_for_part(node.part, node.actionable),
+                    selected: node.current || node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3820,6 +3859,76 @@ pub mod bevy_adapter {
             NavigationMenuPart::Trigger => Vec2::new(scale::space::L, scale::space::S),
             NavigationMenuPart::Content => Vec2::new(scale::space::XL2, scale::space::L),
             NavigationMenuPart::Link => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    fn pagination_primitive_part(node: &crate::PaginationRenderNode) -> String {
+        match node.part {
+            PaginationPart::Item | PaginationPart::Link => {
+                format!("{}:{}", node.part.label(), node.page)
+            }
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn pagination_kind_for_part(part: PaginationPart) -> UiWidgetSlotKind {
+        match part {
+            PaginationPart::Root => UiWidgetSlotKind::Section,
+            PaginationPart::Content => UiWidgetSlotKind::List,
+            PaginationPart::Item => UiWidgetSlotKind::ListItem,
+            PaginationPart::Previous | PaginationPart::Next => UiWidgetSlotKind::Button,
+            PaginationPart::Link => UiWidgetSlotKind::Link,
+        }
+    }
+
+    const fn pagination_role_for_part(part: PaginationPart) -> UiBlockRole {
+        match part {
+            PaginationPart::Root | PaginationPart::Content => UiBlockRole::Navigation,
+            PaginationPart::Item => UiBlockRole::Item,
+            PaginationPart::Previous | PaginationPart::Next | PaginationPart::Link => {
+                UiBlockRole::Action
+            }
+        }
+    }
+
+    fn pagination_tone_for_node(node: &crate::PaginationRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.current || node.focused {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            PaginationPart::Root | PaginationPart::Content | PaginationPart::Item => {
+                UiBlockTone::Surface
+            }
+            PaginationPart::Previous | PaginationPart::Link | PaginationPart::Next => {
+                UiBlockTone::Brand
+            }
+        }
+    }
+
+    const fn pagination_intent_for_part(part: PaginationPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (PaginationPart::Previous | PaginationPart::Next | PaginationPart::Link, true) => {
+                UiWidgetIntent::Navigate
+            }
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn pagination_size_for_part(part: PaginationPart) -> Vec2 {
+        match part {
+            PaginationPart::Root => Vec2::new(scale::space::XL2, scale::space::L),
+            PaginationPart::Content => Vec2::new(scale::space::XL2, scale::space::M),
+            PaginationPart::Item => Vec2::new(scale::space::M, scale::space::S),
+            PaginationPart::Previous | PaginationPart::Next => {
+                Vec2::new(scale::space::M, scale::space::S)
+            }
+            PaginationPart::Link => Vec2::new(scale::space::S, scale::space::S),
         }
     }
 

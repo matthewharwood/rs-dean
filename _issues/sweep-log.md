@@ -445,7 +445,18 @@ this learning; no earlier API changes were needed because Menubar, Breadcrumb,
 and Native Select already separate local navigation affordances from durable
 selection ownership.
 
-All-issue sweep pass: Pagination through Typography complete. The shared
+Concrete component pass: Pagination complete. The component now has a typed
+Rust page-count/current-page model, `garde` validation for page ranges,
+token-only Leptos page controls, dedicated story proof, and Bevy primitive
+derivation from the same render nodes. The sweep found that pagination needs
+renderer-local page/focus transitions while durable page ownership remains
+with the consuming table or collection state. Issues 01 through 41 were
+re-audited against this learning; no earlier API changes were needed because
+Data Table already keeps pagination state in the collection owner and
+Navigation Menu already exposes local navigation affordances without durable
+storage.
+
+All-issue sweep pass: Popover through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -453,7 +464,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Pagination through Typography now have
+Concrete all-issue sweep pass: Popover through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

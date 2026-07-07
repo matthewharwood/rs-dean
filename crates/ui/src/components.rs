@@ -35,6 +35,7 @@ use crate::{
     MessageScrollerState, MessageSide, MessageState, NativeSelectDensity, NativeSelectIntent,
     NativeSelectModel, NativeSelectPart, NativeSelectState, NavigationMenuDensity,
     NavigationMenuIntent, NavigationMenuModel, NavigationMenuPart, NavigationMenuState,
+    PaginationDensity, PaginationIntent, PaginationModel, PaginationPart, PaginationState,
     ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
     UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
     attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
@@ -54,14 +55,15 @@ use crate::{
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
     default_marker_model, default_menubar_model, default_message_model,
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_pagination_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -72,6 +74,7 @@ use crate::{
     validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
     validate_marker_model, validate_menubar_model, validate_message_model,
     validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model,
 };
 
 const HEALTH_CARD: &str =
@@ -824,6 +827,20 @@ const NAVIGATION_MENU_PANEL_TITLE: &str = "text-0 font-7 leading-0 text-text-1";
 const NAVIGATION_MENU_PANEL_DETAIL: &str = "text-00 leading-0 text-text-2";
 const NAVIGATION_MENU_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const NAVIGATION_MENU_ERROR_HIDDEN: &str = "hidden";
+const PAGINATION_ROOT: &str = "grid w-full max-w-2xl gap-2xs text-text-1";
+const PAGINATION_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs text-text-disabled";
+const PAGINATION_CONTENT: &str = "flex flex-wrap items-center gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs shadow-1";
+const PAGINATION_CONTENT_DENSE: &str = "flex flex-wrap items-center gap-3xs rounded-box border border-border-subtle bg-surface-1 p-3xs shadow-1";
+const PAGINATION_CONTENT_LOADING: &str = "flex flex-wrap items-center gap-2xs rounded-box border border-info bg-info-soft p-2xs shadow-1";
+const PAGINATION_ITEM: &str = "contents";
+const PAGINATION_CONTROL: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const PAGINATION_CONTROL_DENSE: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const PAGINATION_CONTROL_CURRENT: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const PAGINATION_CONTROL_DENSE_CURRENT: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const PAGINATION_CONTROL_INVALID: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const PAGINATION_CONTROL_DISABLED: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const PAGINATION_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const PAGINATION_ERROR_HIDDEN: &str = "hidden";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -8539,6 +8556,251 @@ const fn navigation_menu_state_label(
 }
 
 #[component]
+pub fn Pagination(
+    #[prop(optional, default = default_pagination_model())] model: PaginationModel,
+) -> AnyView {
+    if let Err(report) = validate_pagination_model(&model) {
+        let message = format!("Pagination validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="pagination" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let page_count = model.page_count;
+    let state_model = model.state();
+    let nodes = pagination_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == PaginationPart::Root)
+        .expect("invariant: pagination render nodes include root")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == PaginationPart::Content)
+        .expect("invariant: pagination render nodes include content")
+        .clone();
+    let invalid = root.invalid;
+    let error_detail = root.detail.clone();
+    let render_model = model.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <nav
+            class=pagination_root_class(disabled)
+            data-ui-component="pagination"
+            data-ui-part=PaginationPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    pagination_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.current_page(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-label=root.label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <ul
+                class=pagination_content_class(density, loading)
+                data-ui-part=PaginationPart::Content.label()
+                data-ui-value=content.value
+            >
+                {move || {
+                    state.with(|state| {
+                        pagination_render_nodes(&render_model, state)
+                            .into_iter()
+                            .filter(|node| {
+                                matches!(
+                                    node.part,
+                                    PaginationPart::Previous
+                                        | PaginationPart::Link
+                                        | PaginationPart::Next
+                                )
+                            })
+                            .map(|node| {
+                                pagination_control_view(
+                                    node,
+                                    page_count,
+                                    density,
+                                    blocked,
+                                    state,
+                                    set_state,
+                                )
+                            })
+                            .collect_view()
+                    })
+                }}
+            </ul>
+            <p
+                class=pagination_error_class(invalid)
+                role="alert"
+                aria-hidden=(!invalid).to_string()
+            >
+                {error_detail}
+            </p>
+        </nav>
+    }
+    .into_any()
+}
+
+fn pagination_control_view(
+    node: crate::PaginationRenderNode,
+    page_count: u16,
+    density: PaginationDensity,
+    blocked: bool,
+    state: &PaginationState,
+    set_state: WriteSignal<PaginationState>,
+) -> AnyView {
+    let page = node.page;
+    let disabled = pagination_control_is_disabled(node.part, page, page_count, blocked, state);
+    let value_for_focus = page;
+    let value_for_click = page;
+    let current = node.current;
+    let invalid = node.invalid;
+    let part = node.part;
+    let part_label = node.part.label();
+    let item_value = node.value.clone();
+    let button_value = node.value.clone();
+    let label = node.label.clone();
+    let detail = node.detail.clone();
+    view! {
+        <li
+            class=PAGINATION_ITEM
+            data-ui-part=PaginationPart::Item.label()
+            data-ui-value=item_value
+        >
+            <button
+                type="button"
+                class=pagination_control_class(density, current, invalid, disabled)
+                data-ui-part=part_label
+                data-ui-value=button_value
+                data-ui-page=page.to_string()
+                aria-label=detail
+                aria-current=if current { "page" } else { "false" }
+                disabled=disabled
+                on:focus=move |_| {
+                    if !disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(PaginationIntent::Focus(value_for_focus), page_count);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !disabled {
+                        let intent = match part {
+                            PaginationPart::Previous => PaginationIntent::Previous,
+                            PaginationPart::Next => PaginationIntent::Next,
+                            PaginationPart::Link => PaginationIntent::GoTo(value_for_click),
+                            _ => PaginationIntent::Focus(value_for_click),
+                        };
+                        set_state.update(|state| {
+                            let _ = state.apply(intent, page_count);
+                        });
+                    }
+                }
+            >
+                {label}
+            </button>
+        </li>
+    }
+    .into_any()
+}
+
+const fn pagination_control_is_disabled(
+    part: PaginationPart,
+    page: u16,
+    page_count: u16,
+    blocked: bool,
+    state: &PaginationState,
+) -> bool {
+    if blocked {
+        return true;
+    }
+    match part {
+        PaginationPart::Previous => state.current_page() <= 1,
+        PaginationPart::Next => state.current_page() >= page_count,
+        PaginationPart::Link => state.current_page() == page,
+        PaginationPart::Root | PaginationPart::Content | PaginationPart::Item => true,
+    }
+}
+
+const fn pagination_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        PAGINATION_ROOT_DISABLED
+    } else {
+        PAGINATION_ROOT
+    }
+}
+
+const fn pagination_content_class(density: PaginationDensity, loading: bool) -> &'static str {
+    if loading {
+        return PAGINATION_CONTENT_LOADING;
+    }
+    match density {
+        PaginationDensity::Standard => PAGINATION_CONTENT,
+        PaginationDensity::Dense => PAGINATION_CONTENT_DENSE,
+    }
+}
+
+const fn pagination_control_class(
+    density: PaginationDensity,
+    current: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled && !current {
+        return PAGINATION_CONTROL_DISABLED;
+    }
+    if invalid {
+        return PAGINATION_CONTROL_INVALID;
+    }
+    match (density, current) {
+        (PaginationDensity::Standard, true) => PAGINATION_CONTROL_CURRENT,
+        (PaginationDensity::Dense, true) => PAGINATION_CONTROL_DENSE_CURRENT,
+        (PaginationDensity::Standard, false) => PAGINATION_CONTROL,
+        (PaginationDensity::Dense, false) => PAGINATION_CONTROL_DENSE,
+    }
+}
+
+const fn pagination_error_class(visible: bool) -> &'static str {
+    if visible {
+        PAGINATION_ERROR
+    } else {
+        PAGINATION_ERROR_HIDDEN
+    }
+}
+
+fn pagination_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    current_page: u16,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else {
+        format!("page-{current_page}")
+    }
+}
+
+#[component]
 pub fn InputGroup(
     #[prop(optional, default = default_input_group_model())] model: InputGroupModel,
 ) -> AnyView {
@@ -11209,11 +11471,6 @@ const fn message_scroller_state_label(
     }
 }
 
-catalog_component!(
-    Pagination,
-    crate::PaginationModel,
-    crate::default_pagination_model
-);
 catalog_component!(Popover, crate::PopoverModel, crate::default_popover_model);
 catalog_component!(
     Progress,

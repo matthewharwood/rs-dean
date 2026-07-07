@@ -43,6 +43,7 @@ pub mod message;
 pub mod message_scroller;
 pub mod native_select;
 pub mod navigation_menu;
+pub mod pagination;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -254,6 +255,11 @@ pub use navigation_menu::{
     NavigationMenuLink, NavigationMenuModel, NavigationMenuPart, NavigationMenuRenderNode,
     NavigationMenuState, default_navigation_menu_model, navigation_menu_render_nodes,
     validate_navigation_menu_model,
+};
+pub use pagination::{
+    PaginationChange, PaginationDensity, PaginationIntent, PaginationModel, PaginationPart,
+    PaginationRenderNode, PaginationState, default_pagination_model, pagination_render_nodes,
+    validate_pagination_model, visible_pagination_pages,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

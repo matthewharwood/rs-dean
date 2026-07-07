@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    pagination,
-    Pagination,
-    PaginationModel,
-    PaginationPart,
-    PaginationRenderNode,
-    PaginationState,
-    PaginationIntent,
-    PaginationChange,
-    validate_pagination_model,
-    pagination_render_nodes,
-    default_pagination_model,
-    [
-        Root => "Pagination",
-        Content => "PaginationContent",
-        Item => "PaginationItem",
-        Previous => "PaginationPrevious",
-        Link => "PaginationLink",
-        Next => "PaginationNext",
-    ]
-);
-
-define_catalog_component!(
     popover,
     Popover,
     PopoverModel,
@@ -1004,10 +982,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Message
         | UiComponentId::MessageScroller
         | UiComponentId::NativeSelect
-        | UiComponentId::NavigationMenu => None,
-        UiComponentId::Pagination => Some(any_nodes(pagination_render_nodes(
-            &default_pagination_model(),
-        ))),
+        | UiComponentId::NavigationMenu
+        | UiComponentId::Pagination => None,
         UiComponentId::Popover => Some(any_nodes(popover_render_nodes(&default_popover_model()))),
         UiComponentId::Progress => {
             Some(any_nodes(progress_render_nodes(&default_progress_model())))
@@ -1112,6 +1088,7 @@ mod tests {
                     | UiComponentId::MessageScroller
                     | UiComponentId::NativeSelect
                     | UiComponentId::NavigationMenu
+                    | UiComponentId::Pagination
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1128,17 +1105,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_pagination_model().state();
-        assert!(!state.is_active(PaginationPart::Root));
+        let mut state = default_popover_model().state();
+        assert!(!state.is_active(PopoverPart::Root));
         assert_eq!(
-            state.apply(PaginationIntent::Toggle(PaginationPart::Root)),
-            PaginationChange::Opened(PaginationPart::Root)
+            state.apply(PopoverIntent::Toggle(PopoverPart::Root)),
+            PopoverChange::Opened(PopoverPart::Root)
         );
-        assert!(state.is_active(PaginationPart::Root));
+        assert!(state.is_active(PopoverPart::Root));
         assert_eq!(
-            state.apply(PaginationIntent::Toggle(PaginationPart::Root)),
-            PaginationChange::Closed(PaginationPart::Root)
+            state.apply(PopoverIntent::Toggle(PopoverPart::Root)),
+            PopoverChange::Closed(PopoverPart::Root)
         );
-        assert!(!state.is_active(PaginationPart::Root));
+        assert!(!state.is_active(PopoverPart::Root));
     }
 }

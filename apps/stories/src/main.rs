@@ -27,8 +27,8 @@ use rs_dean_ui::{
     MessageModel, MessageScroller, MessageScrollerDensity, MessageScrollerEntry,
     MessageScrollerModel, MessageSide, NativeSelect, NativeSelectDensity, NativeSelectModel,
     NativeSelectOption, NavigationMenu, NavigationMenuDensity, NavigationMenuItem,
-    NavigationMenuLink, NavigationMenuModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -807,6 +807,24 @@ fn Stories() -> impl IntoView {
                             <NavigationMenu model=invalid_navigation_menu_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <NavigationMenu model=themed_navigation_menu_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-pagination" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Pagination"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 42 implemented as a page navigation contract backed by validated shared Rust page math, renderer-local current/focus state, and Bevy-readable page primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Pagination model=default_pagination_story_model() />
+                            <Pagination model=dense_pagination_story_model() />
+                            <Pagination model=loading_pagination_story_model() />
+                            <Pagination model=disabled_pagination_story_model() />
+                            <Pagination model=invalid_pagination_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Pagination model=themed_pagination_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3085,6 +3103,38 @@ fn themed_navigation_menu_story_model() -> NavigationMenuModel {
     .with_label("Theme navigation")
     .with_default_open("themes")
     .with_selected_value("luxury")
+}
+
+fn default_pagination_story_model() -> PaginationModel {
+    PaginationModel::new(12, 5)
+}
+
+fn dense_pagination_story_model() -> PaginationModel {
+    PaginationModel::new(6, 2)
+        .with_density(PaginationDensity::Dense)
+        .with_sibling_count(2)
+}
+
+fn loading_pagination_story_model() -> PaginationModel {
+    default_pagination_story_model().loading()
+}
+
+fn disabled_pagination_story_model() -> PaginationModel {
+    PaginationModel::new(3, 1)
+        .with_previous_label("Back")
+        .with_next_label("Forward")
+        .disabled()
+}
+
+fn invalid_pagination_story_model() -> PaginationModel {
+    default_pagination_story_model().with_error("Page range failed to hydrate.")
+}
+
+fn themed_pagination_story_model() -> PaginationModel {
+    PaginationModel::new(9, 7)
+        .with_sibling_count(1)
+        .with_previous_label("Earlier")
+        .with_next_label("Later")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
