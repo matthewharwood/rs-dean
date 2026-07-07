@@ -14,6 +14,7 @@ pub mod card;
 pub mod carousel;
 pub mod catalog;
 pub mod catalog_components;
+pub mod chart;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -91,6 +92,11 @@ pub use catalog::{
     UiComponentCategory, UiComponentId, UiStateModel,
 };
 pub use catalog_components::*;
+pub use chart::{
+    ChartChange, ChartDensity, ChartIntent, ChartModel, ChartPart, ChartRenderNode, ChartSeries,
+    ChartState, ChartTone, chart_render_nodes, default_chart_model, default_chart_series,
+    validate_chart_model,
+};
 #[cfg(feature = "leptos")]
 pub use components::*;
 pub use kit::{

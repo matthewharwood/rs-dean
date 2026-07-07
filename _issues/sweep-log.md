@@ -149,7 +149,17 @@ Issues 01 through 13 were re-audited against this learning; no earlier API
 changes were needed because their repeatable collections and action states are
 already represented in component-specific contracts.
 
-All-issue sweep pass: Chart through Typography complete. The shared
+Concrete component pass: Chart complete. The fifteenth issue now has a typed
+Rust series model, density/tone/value contracts, repeated series and legend
+render nodes, renderer-local selected-series state, `garde` validation,
+token-only Leptos chart rendering, dedicated story proof, and Bevy primitive
+derivation from the same model. The sweep found that data visualization
+components need value-range validation and a typed selected-series boundary
+instead of generic chart slots. Issues 01 through 14 were re-audited against
+this learning; no earlier API changes were needed because their numeric data
+contracts are either absent or already component-specific.
+
+All-issue sweep pass: Checkbox through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -157,7 +167,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Chart through Typography now have
+Concrete all-issue sweep pass: Checkbox through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -187,6 +197,7 @@ uses a renderer-neutral owned view node.
 - Date-grid components keep date arithmetic, range ordering, and month navigation in the shared Rust contract so Leptos and Bevy do not invent separate date string conventions.
 - Framed display surfaces keep footer actions in a component-specific model so generic catalog slots do not become the source of consumer action semantics.
 - Paged content components need typed item collections and shared navigation state so Leptos and Bevy derive previous/next disabled state from the same model.
+- Data visualization components need value-range validation and typed selected-series state so renderer tooltips, legends, and scene primitives agree.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 

@@ -9,7 +9,8 @@ use rs_dean_ui::{
     ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, Calendar,
     CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
     CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
-    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -301,6 +302,24 @@ fn Stories() -> impl IntoView {
                             <Carousel model=invalid_carousel_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Carousel model=themed_carousel_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-chart" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Chart"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 15 implemented as a themed data visualization frame backed by a validated shared Rust series model, renderer-local selected-series state, repeated series/legend anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Chart model=default_chart_story_model() />
+                            <Chart model=dense_chart_story_model() />
+                            <Chart model=loading_chart_story_model() />
+                            <Chart model=disabled_chart_story_model() />
+                            <Chart model=invalid_chart_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Chart model=themed_chart_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -975,6 +994,73 @@ fn themed_carousel_story_model() -> CarouselModel {
     ])
     .with_density(CarouselDensity::Dense)
     .looping()
+}
+
+fn default_chart_story_model() -> ChartModel {
+    ChartModel::new(
+        "Component progress",
+        "Implementation status",
+        "%",
+        vec![
+            ChartSeries::new("Implemented", "implemented", 23).with_tone(ChartTone::Success),
+            ChartSeries::new("In sweep", "in-sweep", 8).with_tone(ChartTone::Info),
+            ChartSeries::new("Remaining", "remaining", 69).with_tone(ChartTone::Muted),
+        ],
+    )
+    .with_selected_value("implemented")
+}
+
+fn dense_chart_story_model() -> ChartModel {
+    ChartModel::new(
+        "Gate timing",
+        "Minutes",
+        "m",
+        vec![
+            ChartSeries::new("Local", "local", 7).with_tone(ChartTone::Brand),
+            ChartSeries::new("Remote", "remote", 13).with_tone(ChartTone::Info),
+        ],
+    )
+    .with_density(ChartDensity::Dense)
+    .with_selected_value("remote")
+}
+
+fn loading_chart_story_model() -> ChartModel {
+    default_chart_story_model().loading()
+}
+
+fn disabled_chart_story_model() -> ChartModel {
+    ChartModel::new(
+        "Hydration status",
+        "Availability",
+        "%",
+        vec![
+            ChartSeries::new("Ready", "ready", 75).with_tone(ChartTone::Success),
+            ChartSeries::new("Blocked", "blocked", 25)
+                .with_tone(ChartTone::Warning)
+                .disabled(),
+        ],
+    )
+    .with_selected_value("ready")
+    .disabled()
+}
+
+fn invalid_chart_story_model() -> ChartModel {
+    ChartModel::new("Invalid chart", "Axis", "%", Vec::new())
+}
+
+fn themed_chart_story_model() -> ChartModel {
+    ChartModel::new(
+        "Theme scoped chart",
+        "Palette coverage",
+        "%",
+        vec![
+            ChartSeries::new("Brand", "brand", 40).with_tone(ChartTone::Brand),
+            ChartSeries::new("Danger", "danger", 18).with_tone(ChartTone::Danger),
+            ChartSeries::new("Muted", "muted", 42).with_tone(ChartTone::Muted),
+        ],
+    )
+    .with_density(ChartDensity::Dense)
+    .with_selected_value("brand")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

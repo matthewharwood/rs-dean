@@ -11,22 +11,23 @@ use crate::{
     ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
     CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CardDensity, CardIntent,
     CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
-    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, component_implementation, component_spec,
-    default_accordion_items, default_alert_dialog_model, default_alert_model,
-    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode, ChartDensity,
+    ChartIntent, ChartModel, ChartPart, ChartTone, ComponentImplementation, ThemeChoice, ThemeId,
+    UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
+    default_alert_model, default_aspect_ratio_model, default_attachment_model,
+    default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
-    default_carousel_model, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model,
+    default_carousel_model, default_chart_model, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model,
 };
 
 const HEALTH_CARD: &str =
@@ -374,6 +375,32 @@ const CAROUSEL_CONTROLS: &str = "flex items-center justify-between gap-xs";
 const CAROUSEL_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const CAROUSEL_INDICATOR: &str = "rounded-pill border border-border-subtle bg-surface-2 px-xs py-3xs text-00 font-7 text-text-muted";
 const CAROUSEL_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const CHART_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CHART_ROOT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CHART_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CHART_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const CHART_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const CHART_SERIES_LIST: &str = "grid gap-xs";
+const CHART_SERIES_LIST_DENSE: &str = "grid gap-2xs";
+const CHART_SERIES: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHART_SERIES_SELECTED: &str = "grid gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHART_SERIES_LABEL: &str = "flex items-center justify-between gap-xs text-00 font-7 uppercase tracking-label text-text-muted";
+const CHART_TRACK: &str = "h-s overflow-hidden rounded-pill bg-surface-3";
+const CHART_BAR_BRAND: &str = "block h-full rounded-pill bg-brand";
+const CHART_BAR_INFO: &str = "block h-full rounded-pill bg-info";
+const CHART_BAR_SUCCESS: &str = "block h-full rounded-pill bg-success";
+const CHART_BAR_WARNING: &str = "block h-full rounded-pill bg-warning";
+const CHART_BAR_DANGER: &str = "block h-full rounded-pill bg-danger";
+const CHART_BAR_MUTED: &str = "block h-full rounded-pill bg-border-strong";
+const CHART_LEGEND: &str = "flex flex-wrap gap-2xs";
+const CHART_LEGEND_ITEM: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-2";
+const CHART_LEGEND_SELECTED: &str =
+    "rounded-pill border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1";
+const CHART_TOOLTIP: &str = "rounded-field border border-border-subtle bg-surface-elevated p-xs text-0 leading-0 text-text-1 shadow-1";
+const CHART_AXIS: &str =
+    "border-t border-border-subtle pt-2xs text-00 font-6 uppercase tracking-label text-text-muted";
+const CHART_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -3323,7 +3350,194 @@ const fn carousel_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Chart, crate::ChartModel, crate::default_chart_model);
+#[component]
+pub fn Chart(#[prop(optional, default = default_chart_model())] model: ChartModel) -> AnyView {
+    if let Err(report) = validate_chart_model(&model) {
+        let message = format!("Chart validation failed: {report}");
+        return view! {
+            <div class=CHART_ERROR data-ui-component="chart" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let series_model = model.clone();
+    let legend_model = model.clone();
+    let tooltip_model = model.clone();
+    let axis_model = model.clone();
+    let container = chart_render_nodes(&model, &model.state())
+        .into_iter()
+        .find(|node| node.part == ChartPart::Container)
+        .expect("invariant: chart render nodes include container");
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=chart_root_class(density, disabled)
+            data-ui-component="chart"
+            data-ui-part=ChartPart::Container.label()
+            data-ui-density=density.label()
+            data-ui-state=chart_state_label(loading, disabled)
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <h3 class=chart_title_class(density)>{container.label}</h3>
+            <div class=chart_series_list_class(density) data-ui-part=ChartPart::Series.label()>
+                {move || {
+                    state.with(|state| {
+                        chart_render_nodes(&series_model, state)
+                            .into_iter()
+                            .filter(|node| node.part == ChartPart::Series)
+                            .map(|node| {
+                                let value = node.value.clone();
+                                view! {
+                                    <button
+                                        type="button"
+                                        class=chart_series_class(node.selected)
+                                        data-ui-part=ChartPart::Series.label()
+                                        data-ui-value=node.value
+                                        data-ui-index=node.index.to_string()
+                                        aria-pressed=node.selected.to_string()
+                                        disabled=node.disabled
+                                        on:click=move |_| {
+                                            if !blocked {
+                                                let value = value.clone();
+                                                set_state.update(|state| {
+                                                    let _ = state.apply(ChartIntent::Select(value));
+                                                });
+                                            }
+                                        }
+                                    >
+                                        <span class=CHART_SERIES_LABEL>
+                                            <span>{node.label.clone()}</span>
+                                            <span>{format!("{}{}", node.amount, model.unit)}</span>
+                                        </span>
+                                        <span class=CHART_TRACK aria-hidden="true">
+                                            <span
+                                                class=chart_bar_class(node.tone)
+                                                style=format!("width: {}%;", node.amount)
+                                            ></span>
+                                        </span>
+                                    </button>
+                                }
+                            })
+                            .collect_view()
+                    })
+                }}
+            </div>
+            <div class=CHART_LEGEND data-ui-part=ChartPart::Legend.label()>
+                {move || {
+                    state.with(|state| {
+                        chart_render_nodes(&legend_model, state)
+                            .into_iter()
+                            .filter(|node| node.part == ChartPart::Legend)
+                            .map(|node| {
+                                view! {
+                                    <span
+                                        class=chart_legend_class(node.selected)
+                                        data-ui-value=node.value
+                                    >
+                                        {node.label}
+                                    </span>
+                                }
+                            })
+                            .collect_view()
+                    })
+                }}
+            </div>
+            <p class=CHART_TOOLTIP data-ui-part=ChartPart::Tooltip.label()>
+                {move || {
+                    state.with(|state| {
+                        chart_render_nodes(&tooltip_model, state)
+                            .into_iter()
+                            .find(|node| node.part == ChartPart::Tooltip)
+                            .map(|node| format!("{}: {}", node.label, node.detail))
+                            .unwrap_or_else(|| "No series".to_owned())
+                    })
+                }}
+            </p>
+            <p class=CHART_AXIS data-ui-part=ChartPart::Axis.label()>
+                {move || {
+                    state.with(|state| {
+                        chart_render_nodes(&axis_model, state)
+                            .into_iter()
+                            .find(|node| node.part == ChartPart::Axis)
+                            .map(|node| format!("{} ({})", node.label, node.detail))
+                            .unwrap_or_else(|| "Axis".to_owned())
+                    })
+                }}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+const fn chart_root_class(density: ChartDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return CHART_ROOT_DISABLED;
+    }
+    match density {
+        ChartDensity::Standard => CHART_ROOT,
+        ChartDensity::Dense => CHART_ROOT_DENSE,
+    }
+}
+
+const fn chart_title_class(density: ChartDensity) -> &'static str {
+    match density {
+        ChartDensity::Standard => CHART_TITLE,
+        ChartDensity::Dense => CHART_TITLE_DENSE,
+    }
+}
+
+const fn chart_series_list_class(density: ChartDensity) -> &'static str {
+    match density {
+        ChartDensity::Standard => CHART_SERIES_LIST,
+        ChartDensity::Dense => CHART_SERIES_LIST_DENSE,
+    }
+}
+
+const fn chart_series_class(selected: bool) -> &'static str {
+    if selected {
+        CHART_SERIES_SELECTED
+    } else {
+        CHART_SERIES
+    }
+}
+
+const fn chart_bar_class(tone: ChartTone) -> &'static str {
+    match tone {
+        ChartTone::Brand => CHART_BAR_BRAND,
+        ChartTone::Info => CHART_BAR_INFO,
+        ChartTone::Success => CHART_BAR_SUCCESS,
+        ChartTone::Warning => CHART_BAR_WARNING,
+        ChartTone::Danger => CHART_BAR_DANGER,
+        ChartTone::Muted => CHART_BAR_MUTED,
+    }
+}
+
+const fn chart_legend_class(selected: bool) -> &'static str {
+    if selected {
+        CHART_LEGEND_SELECTED
+    } else {
+        CHART_LEGEND_ITEM
+    }
+}
+
+const fn chart_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     Checkbox,
     crate::CheckboxModel,

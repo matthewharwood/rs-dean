@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    chart,
-    Chart,
-    ChartModel,
-    ChartPart,
-    ChartRenderNode,
-    ChartState,
-    ChartIntent,
-    ChartChange,
-    validate_chart_model,
-    chart_render_nodes,
-    default_chart_model,
-    [
-        Container => "ChartContainer",
-        Series => "ChartSeries",
-        Legend => "ChartLegend",
-        Tooltip => "ChartTooltip",
-        Axis => "ChartAxis",
-    ]
-);
-
-define_catalog_component!(
     checkbox,
     Checkbox,
     CheckboxModel,
@@ -1531,8 +1510,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::ButtonGroup
         | UiComponentId::Calendar
         | UiComponentId::Card
-        | UiComponentId::Carousel => None,
-        UiComponentId::Chart => Some(any_nodes(chart_render_nodes(&default_chart_model()))),
+        | UiComponentId::Carousel
+        | UiComponentId::Chart => None,
         UiComponentId::Checkbox => {
             Some(any_nodes(checkbox_render_nodes(&default_checkbox_model())))
         }
@@ -1667,6 +1646,7 @@ mod tests {
                     | UiComponentId::Calendar
                     | UiComponentId::Card
                     | UiComponentId::Carousel
+                    | UiComponentId::Chart
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1683,17 +1663,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_chart_model().state();
-        assert!(!state.is_active(ChartPart::Container));
+        let mut state = default_checkbox_model().state();
+        assert!(!state.is_active(CheckboxPart::Root));
         assert_eq!(
-            state.apply(ChartIntent::Toggle(ChartPart::Container)),
-            ChartChange::Opened(ChartPart::Container)
+            state.apply(CheckboxIntent::Toggle(CheckboxPart::Root)),
+            CheckboxChange::Opened(CheckboxPart::Root)
         );
-        assert!(state.is_active(ChartPart::Container));
+        assert!(state.is_active(CheckboxPart::Root));
         assert_eq!(
-            state.apply(ChartIntent::Toggle(ChartPart::Container)),
-            ChartChange::Closed(ChartPart::Container)
+            state.apply(CheckboxIntent::Toggle(CheckboxPart::Root)),
+            CheckboxChange::Closed(CheckboxPart::Root)
         );
-        assert!(!state.is_active(ChartPart::Container));
+        assert!(!state.is_active(CheckboxPart::Root));
     }
 }

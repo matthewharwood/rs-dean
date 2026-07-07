@@ -288,17 +288,19 @@ pub mod bevy_adapter {
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
-        CardPart, CardVariant, CarouselPart, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model,
-        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_group_model, default_button_model, default_calendar_model,
-        default_card_model, default_carousel_model, scale,
+        CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, RenderContract, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        chart_render_nodes, component_implementation, default_accordion_items,
+        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
+        default_attachment_model, default_avatar_model, default_badge_model,
+        default_breadcrumb_model, default_bubble_model, default_button_group_model,
+        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
+        default_chart_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -394,6 +396,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Chart {
+            return bevy_primitives_for_chart(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -411,6 +416,36 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_chart(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_chart_model();
+        let chart_state = model.state();
+        chart_render_nodes(&model, &chart_state)
+            .into_iter()
+            .map(|node| {
+                let role = chart_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: chart_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: chart_size_for_part(node.part),
+                    fill: fill_for_tone(chart_tone_for_part(node.part, node.tone), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: chart_intent_for_part(node.part),
+                    selected: node.selected,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -1327,6 +1362,59 @@ pub mod bevy_adapter {
                 Vec2::new(scale::space::L, scale::space::L)
             }
             CarouselPart::Indicator => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    const fn chart_kind_for_part(part: ChartPart) -> UiWidgetSlotKind {
+        match part {
+            ChartPart::Container => UiWidgetSlotKind::Section,
+            ChartPart::Series => UiWidgetSlotKind::Chart,
+            ChartPart::Legend => UiWidgetSlotKind::Badge,
+            ChartPart::Tooltip => UiWidgetSlotKind::Text,
+            ChartPart::Axis => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn chart_role_for_part(part: ChartPart) -> UiBlockRole {
+        match part {
+            ChartPart::Container => UiBlockRole::Root,
+            ChartPart::Series => UiBlockRole::Data,
+            ChartPart::Legend => UiBlockRole::Indicator,
+            ChartPart::Tooltip => UiBlockRole::Text,
+            ChartPart::Axis => UiBlockRole::Layout,
+        }
+    }
+
+    const fn chart_tone_for_part(part: ChartPart, tone: ChartTone) -> UiBlockTone {
+        match part {
+            ChartPart::Container | ChartPart::Axis | ChartPart::Tooltip => UiBlockTone::Surface,
+            ChartPart::Legend | ChartPart::Series => match tone {
+                ChartTone::Brand => UiBlockTone::Brand,
+                ChartTone::Info => UiBlockTone::Info,
+                ChartTone::Success => UiBlockTone::Success,
+                ChartTone::Warning => UiBlockTone::Warning,
+                ChartTone::Danger => UiBlockTone::Danger,
+                ChartTone::Muted => UiBlockTone::Muted,
+            },
+        }
+    }
+
+    const fn chart_intent_for_part(part: ChartPart) -> UiWidgetIntent {
+        match part {
+            ChartPart::Series => UiWidgetIntent::Select,
+            ChartPart::Container | ChartPart::Legend | ChartPart::Tooltip | ChartPart::Axis => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn chart_size_for_part(part: ChartPart) -> Vec2 {
+        match part {
+            ChartPart::Container => Vec2::new(scale::space::XL3, scale::space::XL2),
+            ChartPart::Series => Vec2::new(scale::space::XL2, scale::space::L),
+            ChartPart::Legend => Vec2::new(scale::space::XL, scale::space::S),
+            ChartPart::Tooltip => Vec2::new(scale::space::XL2, scale::space::S),
+            ChartPart::Axis => Vec2::new(scale::space::XL2, scale::space::XS3),
         }
     }
 
