@@ -14,8 +14,9 @@ use rs_dean_ui::{
     ComboboxDensity, ComboboxModel, ComboboxOption, Command, CommandDensity, CommandGroup,
     CommandItem, CommandModel, ContextMenu, ContextMenuAction, ContextMenuDensity,
     ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, DataTable, DataTableColumn,
-    DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, HealthCard,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, DatePicker,
+    DatePickerDensity, DatePickerModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -433,6 +434,24 @@ fn Stories() -> impl IntoView {
                             <DataTable model=invalid_data_table_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <DataTable model=themed_data_table_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-date-picker" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Date Picker"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 22 implemented as a composed date trigger, popover, calendar grid, and value contract backed by shared Rust date state and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <DatePicker model=default_date_picker_story_model() />
+                            <DatePicker model=dense_open_date_picker_story_model() />
+                            <DatePicker model=loading_date_picker_story_model() />
+                            <DatePicker model=disabled_date_picker_story_model() />
+                            <DatePicker model=invalid_date_picker_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <DatePicker model=themed_date_picker_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1620,6 +1639,47 @@ fn themed_data_table_story_model() -> DataTableModel {
         .with_sort("surface", DataTableSortDirection::Ascending)
         .with_selected_row("data-table")
         .with_page_size(4)
+}
+
+fn default_date_picker_story_model() -> DatePickerModel {
+    DatePickerModel::new(2026, 7)
+        .with_label("Release date")
+        .with_placeholder("Choose release date")
+        .with_selected(CalendarDate::new(2026, 7, 7))
+}
+
+fn dense_open_date_picker_story_model() -> DatePickerModel {
+    DatePickerModel::new(2026, 8)
+        .with_density(DatePickerDensity::Dense)
+        .with_label("Dense picker")
+        .with_placeholder("Pick day")
+        .with_default_open(true)
+}
+
+fn loading_date_picker_story_model() -> DatePickerModel {
+    default_date_picker_story_model()
+        .with_default_open(true)
+        .loading()
+}
+
+fn disabled_date_picker_story_model() -> DatePickerModel {
+    DatePickerModel::new(2026, 9)
+        .with_label("Locked date")
+        .with_placeholder("Unavailable")
+        .with_selected(CalendarDate::new(2026, 9, 15))
+        .disabled()
+}
+
+fn invalid_date_picker_story_model() -> DatePickerModel {
+    DatePickerModel::new(2026, 7).with_label("")
+}
+
+fn themed_date_picker_story_model() -> DatePickerModel {
+    DatePickerModel::new(2026, 10)
+        .with_label("Theme scoped date")
+        .with_placeholder("Choose themed date")
+        .with_selected(CalendarDate::new(2026, 10, 21))
+        .with_default_open(true)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

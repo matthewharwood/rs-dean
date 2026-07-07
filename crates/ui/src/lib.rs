@@ -21,6 +21,7 @@ pub mod combobox;
 pub mod command;
 pub mod context_menu;
 pub mod data_table;
+pub mod date_picker;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -135,6 +136,11 @@ pub use data_table::{
     DataTablePart, DataTableRenderNode, DataTableRow, DataTableSortDirection, DataTableState,
     data_table_render_nodes, default_data_table_model, max_data_table_page_index,
     validate_data_table_model, visible_data_table_rows,
+};
+pub use date_picker::{
+    DatePickerChange, DatePickerDensity, DatePickerIntent, DatePickerModel, DatePickerPart,
+    DatePickerRenderNode, DatePickerState, date_picker_date_label, date_picker_render_nodes,
+    date_picker_value_label, default_date_picker_model, validate_date_picker_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

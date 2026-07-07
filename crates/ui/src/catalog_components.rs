@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    date_picker,
-    DatePicker,
-    DatePickerModel,
-    DatePickerPart,
-    DatePickerRenderNode,
-    DatePickerState,
-    DatePickerIntent,
-    DatePickerChange,
-    validate_date_picker_model,
-    date_picker_render_nodes,
-    default_date_picker_model,
-    [
-        Root => "DatePicker",
-        Trigger => "DatePickerTrigger",
-        Popover => "DatePickerPopover",
-        Calendar => "DatePickerCalendar",
-        Value => "DatePickerValue",
-    ]
-);
-
-define_catalog_component!(
     dialog,
     Dialog,
     DialogModel,
@@ -1391,10 +1370,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Combobox
         | UiComponentId::Command
         | UiComponentId::ContextMenu
-        | UiComponentId::DataTable => None,
-        UiComponentId::DatePicker => Some(any_nodes(date_picker_render_nodes(
-            &default_date_picker_model(),
-        ))),
+        | UiComponentId::DataTable
+        | UiComponentId::DatePicker => None,
         UiComponentId::Dialog => Some(any_nodes(dialog_render_nodes(&default_dialog_model()))),
         UiComponentId::Direction => Some(any_nodes(direction_render_nodes(
             &default_direction_model(),
@@ -1517,6 +1494,7 @@ mod tests {
                     | UiComponentId::Command
                     | UiComponentId::ContextMenu
                     | UiComponentId::DataTable
+                    | UiComponentId::DatePicker
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1533,17 +1511,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_date_picker_model().state();
-        assert!(!state.is_active(DatePickerPart::Root));
+        let mut state = default_dialog_model().state();
+        assert!(!state.is_active(DialogPart::Root));
         assert_eq!(
-            state.apply(DatePickerIntent::Toggle(DatePickerPart::Root)),
-            DatePickerChange::Opened(DatePickerPart::Root)
+            state.apply(DialogIntent::Toggle(DialogPart::Root)),
+            DialogChange::Opened(DialogPart::Root)
         );
-        assert!(state.is_active(DatePickerPart::Root));
+        assert!(state.is_active(DialogPart::Root));
         assert_eq!(
-            state.apply(DatePickerIntent::Toggle(DatePickerPart::Root)),
-            DatePickerChange::Closed(DatePickerPart::Root)
+            state.apply(DialogIntent::Toggle(DialogPart::Root)),
+            DialogChange::Closed(DialogPart::Root)
         );
-        assert!(!state.is_active(DatePickerPart::Root));
+        assert!(!state.is_active(DialogPart::Root));
     }
 }

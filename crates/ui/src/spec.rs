@@ -289,22 +289,23 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, RenderContract,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
-        data_table_render_nodes, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model,
-        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_group_model, default_button_model, default_calendar_model,
-        default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
-        default_collapsible_model, default_combobox_model, default_command_model,
-        default_context_menu_model, default_data_table_model, scale,
+        data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
+        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
+        default_attachment_model, default_avatar_model, default_badge_model,
+        default_breadcrumb_model, default_bubble_model, default_button_group_model,
+        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
+        default_chart_model, default_checkbox_model, default_collapsible_model,
+        default_combobox_model, default_command_model, default_context_menu_model,
+        default_data_table_model, default_date_picker_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -436,6 +437,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::DatePicker {
+            return bevy_primitives_for_date_picker(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -666,6 +674,45 @@ pub mod bevy_adapter {
                     state,
                     intent: data_table_intent_for_part(node.part),
                     selected: node.selected,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_date_picker(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_date_picker_model().with_default_open(true);
+        let date_picker_state = model.state();
+        date_picker_render_nodes(&model, &date_picker_state)
+            .into_iter()
+            .map(|node| {
+                let role = date_picker_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: date_picker_kind_for_part(node.part, node.date.is_some()),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: date_picker_size_for_part(node.part, node.date.is_some()),
+                    fill: fill_for_tone(
+                        date_picker_tone_for_part(
+                            node.part,
+                            node.selected,
+                            node.open,
+                            node.current_month,
+                            node.disabled,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: date_picker_intent_for_part(node.part, node.date.is_some()),
+                    selected: node.selected || node.open,
                     disabled: node.disabled,
                 }
             })
@@ -2050,6 +2097,73 @@ pub mod bevy_adapter {
             DataTablePart::Row => Vec2::new(scale::space::XL3, scale::space::L),
             DataTablePart::Cell => Vec2::new(scale::space::XL, scale::space::M),
             DataTablePart::Pagination => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    const fn date_picker_kind_for_part(part: DatePickerPart, day_node: bool) -> UiWidgetSlotKind {
+        match part {
+            DatePickerPart::Root => UiWidgetSlotKind::Section,
+            DatePickerPart::Trigger => UiWidgetSlotKind::Button,
+            DatePickerPart::Popover => UiWidgetSlotKind::Overlay,
+            DatePickerPart::Calendar if day_node => UiWidgetSlotKind::Button,
+            DatePickerPart::Calendar => UiWidgetSlotKind::List,
+            DatePickerPart::Value => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn date_picker_role_for_part(part: DatePickerPart) -> UiBlockRole {
+        match part {
+            DatePickerPart::Root => UiBlockRole::Root,
+            DatePickerPart::Trigger => UiBlockRole::Action,
+            DatePickerPart::Popover => UiBlockRole::Overlay,
+            DatePickerPart::Calendar => UiBlockRole::Control,
+            DatePickerPart::Value => UiBlockRole::Text,
+        }
+    }
+
+    const fn date_picker_tone_for_part(
+        part: DatePickerPart,
+        selected: bool,
+        open: bool,
+        current_month: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            DatePickerPart::Trigger if open || selected => UiBlockTone::Brand,
+            DatePickerPart::Calendar if selected => UiBlockTone::Brand,
+            DatePickerPart::Calendar if !current_month => UiBlockTone::Muted,
+            DatePickerPart::Popover if open => UiBlockTone::Surface,
+            DatePickerPart::Value if selected => UiBlockTone::Brand,
+            DatePickerPart::Root
+            | DatePickerPart::Trigger
+            | DatePickerPart::Popover
+            | DatePickerPart::Calendar
+            | DatePickerPart::Value => UiBlockTone::Surface,
+        }
+    }
+
+    const fn date_picker_intent_for_part(part: DatePickerPart, day_node: bool) -> UiWidgetIntent {
+        match part {
+            DatePickerPart::Trigger => UiWidgetIntent::Toggle,
+            DatePickerPart::Calendar if day_node => UiWidgetIntent::Select,
+            DatePickerPart::Calendar => UiWidgetIntent::Navigate,
+            DatePickerPart::Root | DatePickerPart::Popover | DatePickerPart::Value => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn date_picker_size_for_part(part: DatePickerPart, day_node: bool) -> Vec2 {
+        match part {
+            DatePickerPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            DatePickerPart::Trigger => Vec2::new(scale::space::XL3, scale::space::L),
+            DatePickerPart::Popover => Vec2::new(scale::space::XL3, scale::space::XL3),
+            DatePickerPart::Calendar if day_node => Vec2::new(scale::space::L, scale::space::L),
+            DatePickerPart::Calendar => Vec2::new(scale::space::XL3, scale::space::XL2),
+            DatePickerPart::Value => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

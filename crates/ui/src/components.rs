@@ -18,7 +18,8 @@ use crate::{
     ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
     ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
     ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
-    DataTablePart, DataTableState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
+    DatePickerPart, DatePickerState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
     UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
@@ -26,20 +27,20 @@ use crate::{
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
-    default_accordion_items, default_alert_dialog_model, default_alert_model,
-    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
+    default_alert_model, default_aspect_ratio_model, default_attachment_model,
+    default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     default_combobox_model, default_command_model, default_context_menu_model,
-    default_data_table_model, max_data_table_page_index, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model,
+    default_data_table_model, default_date_picker_model, max_data_table_page_index, month_name,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
 };
 
 const HEALTH_CARD: &str =
@@ -535,6 +536,22 @@ const DATA_TABLE_PAGINATION: &str = "flex flex-wrap items-center justify-between
 const DATA_TABLE_PAGE_LABEL: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
 const DATA_TABLE_PAGE_BUTTON: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DATA_TABLE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DATE_PICKER_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const DATE_PICKER_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const DATE_PICKER_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_VALUE: &str = "truncate text-text-1";
+const DATE_PICKER_VALUE_EMPTY: &str = "truncate text-text-muted";
+const DATE_PICKER_MARKER: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-3 text-00 font-7 text-text-muted";
+const DATE_PICKER_POPOVER: &str =
+    "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs shadow-2";
+const DATE_PICKER_POPOVER_HIDDEN: &str = "hidden";
+const DATE_PICKER_POPOVER_HEADER: &str = "flex items-center justify-between gap-2xs";
+const DATE_PICKER_CLEAR: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -5045,11 +5062,287 @@ const fn data_table_state_label(loading: bool, disabled: bool, selected: bool) -
     }
 }
 
-catalog_component!(
-    DatePicker,
-    crate::DatePickerModel,
-    crate::default_date_picker_model
-);
+#[component]
+pub fn DatePicker(
+    #[prop(optional, default = default_date_picker_model())] model: DatePickerModel,
+) -> AnyView {
+    if let Err(report) = validate_date_picker_model(&model) {
+        let message = format!("DatePicker validation failed: {report}");
+        return view! {
+            <div class=DATE_PICKER_ERROR data-ui-component="date-picker" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = date_picker_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == DatePickerPart::Root)
+        .expect("invariant: date picker render nodes include root")
+        .clone();
+    let trigger = input_nodes
+        .iter()
+        .find(|node| node.part == DatePickerPart::Trigger)
+        .expect("invariant: date picker render nodes include trigger")
+        .clone();
+    let value = input_nodes
+        .iter()
+        .find(|node| node.part == DatePickerPart::Value)
+        .expect("invariant: date picker render nodes include value")
+        .clone();
+    let value_model = model.clone();
+    let days_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=date_picker_root_class(density, disabled)
+            data-ui-component="date-picker"
+            data-ui-part=DatePickerPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    date_picker_state_label(loading, disabled, state.is_open(), state.selected().is_some()).to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || state.with(|state| date_picker_trigger_class(density, state.is_open(), disabled).to_owned())
+                data-ui-part=DatePickerPart::Trigger.label()
+                data-ui-value=trigger.value
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DatePickerIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DatePickerIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(DatePickerIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                <span>{trigger.label}</span>
+                <span
+                    class=move || {
+                        state.with(|state| date_picker_value_class(state.selected().is_some()).to_owned())
+                    }
+                    data-ui-part=DatePickerPart::Value.label()
+                    data-ui-value=value.value
+                >
+                    {move || {
+                        state.with(|state| {
+                            date_picker_render_nodes(&value_model, state)
+                                .into_iter()
+                                .find(|node| node.part == DatePickerPart::Value)
+                                .map(|node| node.label)
+                                .unwrap_or_else(|| "Select date".to_owned())
+                        })
+                    }}
+                </span>
+                <span class=DATE_PICKER_MARKER aria-hidden="true">"cal"</span>
+            </button>
+            <div
+                class=move || state.with(|state| date_picker_popover_class(state.is_open()).to_owned())
+                data-ui-part=DatePickerPart::Popover.label()
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                <header class=DATE_PICKER_POPOVER_HEADER>
+                    <button
+                        type="button"
+                        class=CALENDAR_NAV
+                        aria-label="Previous month"
+                        disabled=blocked
+                        on:click=move |_| {
+                            if !blocked {
+                                set_state.update(|state| {
+                                    let _ = state.apply(DatePickerIntent::PreviousMonth);
+                                });
+                            }
+                        }
+                    >
+                        "<"
+                    </button>
+                    <h3 class=CALENDAR_TITLE>
+                        {move || {
+                            state.with(|state| {
+                                format!("{} {}", month_name(state.visible_month()), state.visible_year())
+                            })
+                        }}
+                    </h3>
+                    <button
+                        type="button"
+                        class=CALENDAR_NAV
+                        aria-label="Next month"
+                        disabled=blocked
+                        on:click=move |_| {
+                            if !blocked {
+                                set_state.update(|state| {
+                                    let _ = state.apply(DatePickerIntent::NextMonth);
+                                });
+                            }
+                        }
+                    >
+                        ">"
+                    </button>
+                </header>
+                <div class=CALENDAR_GRID data-ui-part=DatePickerPart::Calendar.label() role="grid">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                        .into_iter()
+                        .map(|weekday| {
+                            view! {
+                                <span class=CALENDAR_WEEKDAY role="columnheader">{weekday}</span>
+                            }
+                        })
+                        .collect_view()}
+                    {move || {
+                        state.with(|state| {
+                            date_picker_render_nodes(&days_model, state)
+                                .into_iter()
+                                .filter(|node| {
+                                    node.part == DatePickerPart::Calendar && node.date.is_some()
+                                })
+                                .map(|node| date_picker_day_view(node, blocked, set_state))
+                                .collect_view()
+                        })
+                    }}
+                </div>
+                <button
+                    type="button"
+                    class=DATE_PICKER_CLEAR
+                    data-ui-part=DatePickerPart::Value.label()
+                    disabled=move || state.with(|state| blocked || state.selected().is_none())
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DatePickerIntent::Clear);
+                            });
+                        }
+                    }
+                >
+                    "Clear"
+                </button>
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+fn date_picker_day_view(
+    node: crate::DatePickerRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<DatePickerState>,
+) -> AnyView {
+    let date = node
+        .date
+        .expect("invariant: date picker calendar day nodes include a date");
+    let item_disabled = node.disabled || blocked;
+    view! {
+        <button
+            type="button"
+            class=calendar_day_class(node.current_month, node.selected, false)
+            data-ui-part=DatePickerPart::Calendar.label()
+            data-ui-value=node.value
+            data-ui-index=node.index.to_string()
+            aria-label=node.detail
+            aria-pressed=node.selected.to_string()
+            disabled=item_disabled
+            on:click=move |_| {
+                if !item_disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(DatePickerIntent::Select(date));
+                    });
+                }
+            }
+        >
+            {node.label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn date_picker_root_class(density: DatePickerDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return DATE_PICKER_ROOT_DISABLED;
+    }
+    match density {
+        DatePickerDensity::Standard => DATE_PICKER_ROOT,
+        DatePickerDensity::Dense => DATE_PICKER_ROOT_DENSE,
+    }
+}
+
+const fn date_picker_trigger_class(
+    density: DatePickerDensity,
+    open: bool,
+    disabled: bool,
+) -> &'static str {
+    if open && !disabled {
+        DATE_PICKER_TRIGGER_OPEN
+    } else {
+        match density {
+            DatePickerDensity::Standard => DATE_PICKER_TRIGGER,
+            DatePickerDensity::Dense => DATE_PICKER_TRIGGER_DENSE,
+        }
+    }
+}
+
+const fn date_picker_value_class(selected: bool) -> &'static str {
+    if selected {
+        DATE_PICKER_VALUE
+    } else {
+        DATE_PICKER_VALUE_EMPTY
+    }
+}
+
+const fn date_picker_popover_class(open: bool) -> &'static str {
+    if open {
+        DATE_PICKER_POPOVER
+    } else {
+        DATE_PICKER_POPOVER_HIDDEN
+    }
+}
+
+const fn date_picker_state_label(
+    loading: bool,
+    disabled: bool,
+    open: bool,
+    selected: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else if selected {
+        "selected"
+    } else {
+        "empty"
+    }
+}
+
 catalog_component!(Dialog, crate::DialogModel, crate::default_dialog_model);
 catalog_component!(
     Direction,
