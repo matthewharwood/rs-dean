@@ -285,11 +285,12 @@ pub mod bevy_adapter {
 
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, catalog_component_any_render_nodes_for_component,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, scale,
+        AspectRatioPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        catalog_component_any_render_nodes_for_component, component_implementation,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -328,6 +329,13 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::AspectRatio {
+            return bevy_primitives_for_aspect_ratio(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -345,6 +353,34 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_aspect_ratio(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        aspect_ratio_render_nodes(&default_aspect_ratio_model())
+            .into_iter()
+            .map(|node| {
+                let role = aspect_ratio_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: aspect_ratio_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: aspect_ratio_size(node.width, node.height, role),
+                    fill: fill_for_tone(aspect_ratio_tone_for_part(node.part), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: UiWidgetIntent::None,
+                    selected: node.loading,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -447,6 +483,29 @@ pub mod bevy_adapter {
             AlertDialogPart::Header => UiWidgetSlotKind::Header,
             AlertDialogPart::Footer => UiWidgetSlotKind::Panel,
             AlertDialogPart::Action | AlertDialogPart::Cancel => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn aspect_ratio_kind_for_part(part: AspectRatioPart) -> UiWidgetSlotKind {
+        match part {
+            AspectRatioPart::Root => UiWidgetSlotKind::Section,
+            AspectRatioPart::Frame => UiWidgetSlotKind::Panel,
+            AspectRatioPart::Media => UiWidgetSlotKind::Media,
+        }
+    }
+
+    const fn aspect_ratio_role_for_part(part: AspectRatioPart) -> UiBlockRole {
+        match part {
+            AspectRatioPart::Root => UiBlockRole::Root,
+            AspectRatioPart::Frame => UiBlockRole::Layout,
+            AspectRatioPart::Media => UiBlockRole::Media,
+        }
+    }
+
+    const fn aspect_ratio_tone_for_part(part: AspectRatioPart) -> UiBlockTone {
+        match part {
+            AspectRatioPart::Root | AspectRatioPart::Frame => UiBlockTone::Surface,
+            AspectRatioPart::Media => UiBlockTone::Success,
         }
     }
 
@@ -581,6 +640,18 @@ pub mod bevy_adapter {
             }
             UiBlockRole::Layout => Vec2::new(scale::space::XL2, scale::space::XS3),
             _ => Vec2::new(scale::space::XL3, scale::space::M),
+        }
+    }
+
+    fn aspect_ratio_size(width: u16, height: u16, role: UiBlockRole) -> Vec2 {
+        match role {
+            UiBlockRole::Root | UiBlockRole::Layout | UiBlockRole::Media => {
+                let width = f32::from(width);
+                let height = f32::from(height);
+                let display_width = scale::space::XL4;
+                Vec2::new(display_width, display_width * height / width)
+            }
+            _ => size_for_role(role),
         }
     }
 

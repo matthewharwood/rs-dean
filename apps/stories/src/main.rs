@@ -1,8 +1,9 @@
 use leptos::prelude::*;
 use rs_dean_ui::{
     Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertDialog,
-    AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, HealthCard,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
+    AspectRatioFit, AspectRatioModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -95,6 +96,24 @@ fn Stories() -> impl IntoView {
                             <AlertDialog model=invalid_alert_dialog_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <AlertDialog model=themed_alert_dialog_story_model() default_open=true />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-aspect-ratio" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Aspect Ratio"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 04 implemented as a stateless media-frame contract backed by a validated shared Rust model and Bevy-readable ratio primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <AspectRatio model=default_aspect_ratio_story_model() />
+                            <AspectRatio model=contain_aspect_ratio_story_model() />
+                            <AspectRatio model=loading_aspect_ratio_story_model() />
+                            <AspectRatio model=disabled_aspect_ratio_story_model() />
+                            <AspectRatio model=invalid_aspect_ratio_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <AspectRatio model=themed_aspect_ratio_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -256,6 +275,57 @@ fn themed_alert_dialog_story_model() -> AlertDialogModel {
         AlertDialogButton::new("Cancel", "cancel-share"),
     )
     .with_size(AlertDialogSize::Small)
+}
+
+fn default_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Course preview",
+        "A stable 16:9 frame for images, canvases, and embedded lesson media.",
+    )
+}
+
+fn contain_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Avatar crop",
+        "A square frame that preserves the full media bounds with contain behavior.",
+    )
+    .with_ratio(1, 1)
+    .with_fit(AspectRatioFit::Contain)
+}
+
+fn loading_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Generating preview",
+        "Loading keeps the frame height stable while media data resolves.",
+    )
+    .with_ratio(4, 3)
+    .loading()
+}
+
+fn disabled_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Locked recording",
+        "Disabled media keeps its frame but removes interactive affordance.",
+    )
+    .with_ratio(21, 9)
+    .disabled()
+}
+
+fn invalid_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Invalid media",
+        "The validation boundary renders an invalid state instead of accepting a zero ratio side.",
+    )
+    .with_ratio(0, 9)
+}
+
+fn themed_aspect_ratio_story_model() -> AspectRatioModel {
+    AspectRatioModel::new(
+        "Theme scoped media",
+        "The same semantic tokens resolve through a nested Cyberpunk theme scope.",
+    )
+    .with_ratio(3, 2)
+    .with_fit(AspectRatioFit::Cover)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

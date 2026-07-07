@@ -1,6 +1,7 @@
 pub mod accordion;
 pub mod alert;
 pub mod alert_dialog;
+pub mod aspect_ratio;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -25,6 +26,10 @@ pub use alert_dialog::{
     AlertDialogButton, AlertDialogChange, AlertDialogIntent, AlertDialogModel, AlertDialogPart,
     AlertDialogRenderNode, AlertDialogSize, AlertDialogState, alert_dialog_dom_id,
     alert_dialog_render_nodes, default_alert_dialog_model, validate_alert_dialog_model,
+};
+pub use aspect_ratio::{
+    AspectRatioFit, AspectRatioModel, AspectRatioPart, AspectRatioRenderNode,
+    aspect_ratio_render_nodes, default_aspect_ratio_model, validate_aspect_ratio_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

@@ -33,7 +33,18 @@ Accordion. The second sweep found no further Accordion, Alert, or Alert Dialog
 changes were needed because their validator boundary, render-node root
 convention, story proof, and Bevy adapter shape now match.
 
-All-issue sweep pass: Aspect Ratio through Typography complete. The shared
+Concrete component pass: Aspect Ratio complete. The fourth issue now has a
+typed stateless Rust model, fit and ratio contract, `garde` validation, render
+nodes, token-only Leptos component, dedicated story proof, and Bevy primitive
+derivation from the same model. The sweep found that generated concrete catalog
+coverage was not enough for issue 04 because consumers need an owned ratio
+contract and renderer-specific frame semantics. Aspect Ratio moved out of the
+generic catalog component set and now joins Accordion, Alert, and Alert Dialog
+as a bespoke component. Issues 01 through 03 were re-audited against this
+learning; no API changes were needed because their bespoke contracts already
+own their domain-specific state or anatomy.
+
+All-issue sweep pass: Attachment through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -41,7 +52,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Aspect Ratio through Typography now have
+Concrete all-issue sweep pass: Attachment through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    aspect_ratio,
-    AspectRatio,
-    AspectRatioModel,
-    AspectRatioPart,
-    AspectRatioRenderNode,
-    AspectRatioState,
-    AspectRatioIntent,
-    AspectRatioChange,
-    validate_aspect_ratio_model,
-    aspect_ratio_render_nodes,
-    default_aspect_ratio_model,
-    [Root => "AspectRatio", Frame => "AspectRatioFrame", Media => "AspectRatioMedia"]
-);
-
-define_catalog_component!(
     attachment,
     Attachment,
     AttachmentModel,
@@ -1726,10 +1711,10 @@ pub fn catalog_component_any_render_nodes_for_component(
     id: UiComponentId,
 ) -> Option<Vec<CatalogAnyRenderNode>> {
     match id {
-        UiComponentId::Accordion | UiComponentId::Alert | UiComponentId::AlertDialog => None,
-        UiComponentId::AspectRatio => Some(any_nodes(aspect_ratio_render_nodes(
-            &default_aspect_ratio_model(),
-        ))),
+        UiComponentId::Accordion
+        | UiComponentId::Alert
+        | UiComponentId::AlertDialog
+        | UiComponentId::AspectRatio => None,
         UiComponentId::Attachment => Some(any_nodes(attachment_render_nodes(
             &default_attachment_model(),
         ))),
@@ -1871,7 +1856,10 @@ mod tests {
             let nodes = catalog_component_any_render_nodes_for_component(id);
             if matches!(
                 id,
-                UiComponentId::Accordion | UiComponentId::Alert | UiComponentId::AlertDialog
+                UiComponentId::Accordion
+                    | UiComponentId::Alert
+                    | UiComponentId::AlertDialog
+                    | UiComponentId::AspectRatio
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

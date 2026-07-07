@@ -2,13 +2,15 @@ use leptos::prelude::*;
 
 use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
-    AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone,
-    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone, AspectRatioFit,
+    AspectRatioModel, AspectRatioPart, CatalogComponentModel, CatalogComponentPart,
+    CatalogComponentRenderNode, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    default_aspect_ratio_model, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model,
 };
 
 const HEALTH_CARD: &str =
@@ -122,6 +124,28 @@ const ALERT_DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-
 const ALERT_DIALOG_ACTION_DESTRUCTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ALERT_DIALOG_CANCEL: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ALERT_DIALOG_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const ASPECT_RATIO_ROOT: &str = "grid w-full gap-2xs text-text-1";
+const ASPECT_RATIO_FIGURE: &str = "m-0 grid gap-2xs";
+const ASPECT_RATIO_FRAME: &str = "relative grid w-full overflow-hidden rounded-box border border-border-subtle bg-surface-2 p-2xs shadow-1";
+const ASPECT_RATIO_MEDIA_COVER: &str =
+    "grid h-full w-full place-items-center rounded-field bg-primary-soft p-s text-center";
+const ASPECT_RATIO_MEDIA_CONTAIN: &str = "grid h-full w-full place-items-center rounded-field border border-border-faint bg-surface-1 p-s text-center";
+const ASPECT_RATIO_MEDIA_LOADING: &str =
+    "grid h-full w-full place-items-center rounded-field bg-surface-3 p-s text-center";
+const ASPECT_RATIO_MEDIA_DISABLED: &str =
+    "grid h-full w-full place-items-center rounded-field bg-surface-2 p-s text-center";
+const ASPECT_RATIO_MEDIA_STACK: &str = "grid gap-2xs";
+const ASPECT_RATIO_MEDIA_MARKER: &str = "mx-auto grid size-xl place-items-center rounded-field border border-border-subtle bg-surface-elevated text-1 font-7 text-brand shadow-1";
+const ASPECT_RATIO_MEDIA_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const ASPECT_RATIO_MEDIA_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const ASPECT_RATIO_MEDIA_MUTED: &str = "m-0 text-0 font-6 leading-0 text-text-muted";
+const ASPECT_RATIO_CAPTION: &str = "flex flex-wrap items-start justify-between gap-2xs";
+const ASPECT_RATIO_CAPTION_TEXT: &str = "grid min-w-0 gap-3xs";
+const ASPECT_RATIO_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const ASPECT_RATIO_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const ASPECT_RATIO_BADGE: &str = "inline-flex rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
+const ASPECT_RATIO_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1088,11 +1112,121 @@ pub fn Accordion(
     .into_any()
 }
 
-catalog_component!(
-    AspectRatio,
-    crate::AspectRatioModel,
-    crate::default_aspect_ratio_model
-);
+#[component]
+pub fn AspectRatio(
+    #[prop(optional, default = default_aspect_ratio_model())] model: AspectRatioModel,
+) -> AnyView {
+    if let Err(report) = validate_aspect_ratio_model(&model) {
+        let message = format!("AspectRatio validation failed: {report}");
+        return view! {
+            <section class=ASPECT_RATIO_ROOT data-ui-component="aspect-ratio" data-ui-state="invalid">
+                <p class=ASPECT_RATIO_ERROR role="alert">{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
+    let nodes = aspect_ratio_render_nodes(&model);
+    let frame = nodes
+        .iter()
+        .find(|node| node.part == AspectRatioPart::Frame)
+        .expect("invariant: aspect ratio render nodes include frame");
+    let media = nodes
+        .iter()
+        .find(|node| node.part == AspectRatioPart::Media)
+        .expect("invariant: aspect ratio render nodes include media");
+    let frame_label = frame.label.clone();
+    let frame_detail = frame.detail.clone();
+    let media_label = media.label.clone();
+    let media_detail = media.detail.clone();
+    let ratio_label = model.ratio_label();
+    let frame_style = model.aspect_ratio_style();
+    let fit = model.fit.label();
+    let media_class = aspect_ratio_media_class(model.fit, model.loading, model.disabled);
+    let state = aspect_ratio_state(&model);
+    let loading = model.loading;
+    let disabled = model.disabled;
+
+    view! {
+        <section
+            class=ASPECT_RATIO_ROOT
+            data-ui-component="aspect-ratio"
+            data-ui-state=state
+            data-ui-ratio=ratio_label.clone()
+            data-ui-fit=fit
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            <figure class=ASPECT_RATIO_FIGURE data-ui-part="AspectRatio">
+                <div
+                    class=ASPECT_RATIO_FRAME
+                    style=frame_style
+                    data-ui-part="AspectRatioFrame"
+                    data-ui-ratio=ratio_label.clone()
+                    aria-label=frame_label.clone()
+                >
+                    <div class=media_class data-ui-part="AspectRatioMedia" data-ui-fit=fit>
+                        {if loading {
+                            view! {
+                                <p class=ASPECT_RATIO_MEDIA_MUTED role="status">
+                                    "Loading media"
+                                </p>
+                            }
+                                .into_any()
+                        } else {
+                            view! {
+                                <div class=ASPECT_RATIO_MEDIA_STACK>
+                                    <span class=ASPECT_RATIO_MEDIA_MARKER aria-hidden="true">
+                                        {ratio_label.clone()}
+                                    </span>
+                                    <p class=ASPECT_RATIO_MEDIA_LABEL>{media_label}</p>
+                                    <p class=ASPECT_RATIO_MEDIA_DETAIL>{media_detail}</p>
+                                </div>
+                            }
+                                .into_any()
+                        }}
+                    </div>
+                </div>
+                <figcaption class=ASPECT_RATIO_CAPTION>
+                    <span class=ASPECT_RATIO_CAPTION_TEXT>
+                        <span class=ASPECT_RATIO_LABEL>{frame_label}</span>
+                        <span class=ASPECT_RATIO_DETAIL>{frame_detail}</span>
+                    </span>
+                    <span class=ASPECT_RATIO_BADGE>{ratio_label.clone()}</span>
+                </figcaption>
+            </figure>
+        </section>
+    }
+    .into_any()
+}
+
+const fn aspect_ratio_media_class(
+    fit: AspectRatioFit,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        ASPECT_RATIO_MEDIA_DISABLED
+    } else if loading {
+        ASPECT_RATIO_MEDIA_LOADING
+    } else {
+        match fit {
+            AspectRatioFit::Cover => ASPECT_RATIO_MEDIA_COVER,
+            AspectRatioFit::Contain => ASPECT_RATIO_MEDIA_CONTAIN,
+        }
+    }
+}
+
+const fn aspect_ratio_state(model: &AspectRatioModel) -> &'static str {
+    if model.disabled {
+        "disabled"
+    } else if model.loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     Attachment,
     crate::AttachmentModel,
