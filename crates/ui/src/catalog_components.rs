@@ -504,25 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    collapsible,
-    Collapsible,
-    CollapsibleModel,
-    CollapsiblePart,
-    CollapsibleRenderNode,
-    CollapsibleState,
-    CollapsibleIntent,
-    CollapsibleChange,
-    validate_collapsible_model,
-    collapsible_render_nodes,
-    default_collapsible_model,
-    [
-        Root => "Collapsible",
-        Trigger => "CollapsibleTrigger",
-        Content => "CollapsibleContent",
-    ]
-);
-
-define_catalog_component!(
     combobox,
     Combobox,
     ComboboxModel,
@@ -1492,10 +1473,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Card
         | UiComponentId::Carousel
         | UiComponentId::Chart
-        | UiComponentId::Checkbox => None,
-        UiComponentId::Collapsible => Some(any_nodes(collapsible_render_nodes(
-            &default_collapsible_model(),
-        ))),
+        | UiComponentId::Checkbox
+        | UiComponentId::Collapsible => None,
         UiComponentId::Combobox => {
             Some(any_nodes(combobox_render_nodes(&default_combobox_model())))
         }
@@ -1626,6 +1605,7 @@ mod tests {
                     | UiComponentId::Carousel
                     | UiComponentId::Chart
                     | UiComponentId::Checkbox
+                    | UiComponentId::Collapsible
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1642,17 +1622,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_collapsible_model().state();
-        assert!(!state.is_active(CollapsiblePart::Root));
+        let mut state = default_combobox_model().state();
+        assert!(!state.is_active(ComboboxPart::Root));
         assert_eq!(
-            state.apply(CollapsibleIntent::Toggle(CollapsiblePart::Root)),
-            CollapsibleChange::Opened(CollapsiblePart::Root)
+            state.apply(ComboboxIntent::Toggle(ComboboxPart::Root)),
+            ComboboxChange::Opened(ComboboxPart::Root)
         );
-        assert!(state.is_active(CollapsiblePart::Root));
+        assert!(state.is_active(ComboboxPart::Root));
         assert_eq!(
-            state.apply(CollapsibleIntent::Toggle(CollapsiblePart::Root)),
-            CollapsibleChange::Closed(CollapsiblePart::Root)
+            state.apply(ComboboxIntent::Toggle(ComboboxPart::Root)),
+            ComboboxChange::Closed(ComboboxPart::Root)
         );
-        assert!(!state.is_active(CollapsiblePart::Root));
+        assert!(!state.is_active(ComboboxPart::Root));
     }
 }

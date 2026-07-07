@@ -13,22 +13,25 @@ use crate::{
     CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
     CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode, ChartDensity,
     ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
-    CheckboxIntent, CheckboxModel, CheckboxPart, ComponentImplementation, ThemeChoice, ThemeId,
-    UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
+    CollapsibleModel, CollapsiblePart, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
     accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
     avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
     button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
     carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, component_implementation, component_spec, default_accordion_items,
-    default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
-    default_attachment_model, default_avatar_model, default_badge_model, default_breadcrumb_model,
-    default_bubble_model, default_button_group_model, default_button_model, default_calendar_model,
-    default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
+    checkbox_render_nodes, collapsible_render_nodes, component_implementation, component_spec,
+    default_accordion_items, default_alert_dialog_model, default_alert_model,
+    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    default_button_group_model, default_button_model, default_calendar_model, default_card_model,
+    default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
     month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
     validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
     validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model,
 };
 
 const HEALTH_CARD: &str =
@@ -420,6 +423,21 @@ const CHECKBOX_DESCRIPTION_INVALID: &str = "m-0 text-00 font-6 leading-0 text-da
 const CHECKBOX_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const CHECKBOX_REQUIRED: &str = "text-danger";
 const CHECKBOX_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const COLLAPSIBLE_ROOT: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const COLLAPSIBLE_ROOT_DENSE: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const COLLAPSIBLE_ROOT_DISABLED: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled";
+const COLLAPSIBLE_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COLLAPSIBLE_TRIGGER_DENSE: &str = "flex min-h-field w-full items-center justify-between gap-2xs px-xs py-2xs text-left text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COLLAPSIBLE_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs bg-selected-tint px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COLLAPSIBLE_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-disabled";
+const COLLAPSIBLE_INDICATOR: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
+const COLLAPSIBLE_CONTENT: &str =
+    "border-t border-border-subtle bg-surface-1 p-s text-0 leading-0 text-text-2";
+const COLLAPSIBLE_CONTENT_DENSE: &str =
+    "border-t border-border-subtle bg-surface-1 p-xs text-00 leading-0 text-text-2";
+const COLLAPSIBLE_CONTENT_HIDDEN: &str = "hidden";
+const COLLAPSIBLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -3733,11 +3751,165 @@ const fn checkbox_state_label(
     }
 }
 
-catalog_component!(
-    Collapsible,
-    crate::CollapsibleModel,
-    crate::default_collapsible_model
-);
+#[component]
+pub fn Collapsible(
+    #[prop(optional, default = default_collapsible_model())] model: CollapsibleModel,
+) -> AnyView {
+    if let Err(report) = validate_collapsible_model(&model) {
+        let message = format!("Collapsible validation failed: {report}");
+        return view! {
+            <div class=COLLAPSIBLE_ERROR data-ui-component="collapsible" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let trigger_model = model.clone();
+    let content_model = model.clone();
+    let nodes = collapsible_render_nodes(&model, &model.state());
+    let root = nodes
+        .iter()
+        .find(|node| node.part == CollapsiblePart::Root)
+        .expect("invariant: collapsible render nodes include root")
+        .clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=collapsible_root_class(density, disabled)
+            data-ui-component="collapsible"
+            data-ui-part=CollapsiblePart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| collapsible_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| collapsible_trigger_class(density, disabled, state.is_open()).to_owned())
+                }
+                data-ui-part=CollapsiblePart::Trigger.label()
+                data-ui-value=root.value
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(CollapsibleIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                <span>
+                    {move || {
+                        state.with(|state| {
+                            collapsible_render_nodes(&trigger_model, state)
+                                .into_iter()
+                                .find(|node| node.part == CollapsiblePart::Trigger)
+                                .map(|node| node.label)
+                                .unwrap_or_else(|| "Collapsible".to_owned())
+                        })
+                    }}
+                </span>
+                <span class=COLLAPSIBLE_INDICATOR aria-hidden="true">
+                    {move || state.with(|state| collapsible_indicator_text(state.is_open()).to_owned())}
+                </span>
+            </button>
+            {move || {
+                state.with(|state| {
+                    collapsible_render_nodes(&content_model, state)
+                        .into_iter()
+                        .find(|node| node.part == CollapsiblePart::Content)
+                        .map(|node| {
+                            view! {
+                                <div
+                                    class=collapsible_content_class(density, state.is_open())
+                                    data-ui-part=CollapsiblePart::Content.label()
+                                    hidden=!state.is_open()
+                                >
+                                    {node.detail}
+                                </div>
+                            }
+                        })
+                        .unwrap_or_else(|| {
+                            view! {
+                                <div
+                                    class=COLLAPSIBLE_CONTENT_HIDDEN
+                                    data-ui-part=CollapsiblePart::Content.label()
+                                    hidden=true
+                                >
+                                    {String::new()}
+                                </div>
+                            }
+                        })
+                })
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+const fn collapsible_root_class(density: CollapsibleDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return COLLAPSIBLE_ROOT_DISABLED;
+    }
+    match density {
+        CollapsibleDensity::Standard => COLLAPSIBLE_ROOT,
+        CollapsibleDensity::Dense => COLLAPSIBLE_ROOT_DENSE,
+    }
+}
+
+const fn collapsible_trigger_class(
+    density: CollapsibleDensity,
+    disabled: bool,
+    open: bool,
+) -> &'static str {
+    if disabled {
+        return COLLAPSIBLE_TRIGGER_DISABLED;
+    }
+    if open {
+        return COLLAPSIBLE_TRIGGER_OPEN;
+    }
+    match density {
+        CollapsibleDensity::Standard => COLLAPSIBLE_TRIGGER,
+        CollapsibleDensity::Dense => COLLAPSIBLE_TRIGGER_DENSE,
+    }
+}
+
+const fn collapsible_content_class(density: CollapsibleDensity, open: bool) -> &'static str {
+    if !open {
+        return COLLAPSIBLE_CONTENT_HIDDEN;
+    }
+    match density {
+        CollapsibleDensity::Standard => COLLAPSIBLE_CONTENT,
+        CollapsibleDensity::Dense => COLLAPSIBLE_CONTENT_DENSE,
+    }
+}
+
+const fn collapsible_indicator_text(open: bool) -> &'static str {
+    if open { "-" } else { "+" }
+}
+
+const fn collapsible_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     Combobox,
     crate::ComboboxModel,

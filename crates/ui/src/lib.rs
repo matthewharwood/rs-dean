@@ -16,6 +16,7 @@ pub mod catalog;
 pub mod catalog_components;
 pub mod chart;
 pub mod checkbox;
+pub mod collapsible;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -102,6 +103,11 @@ pub use checkbox::{
     CheckboxChange, CheckboxChecked, CheckboxDensity, CheckboxIntent, CheckboxModel, CheckboxPart,
     CheckboxRenderNode, CheckboxState, checkbox_render_nodes, default_checkbox_model,
     validate_checkbox_model,
+};
+pub use collapsible::{
+    CollapsibleChange, CollapsibleDensity, CollapsibleIntent, CollapsibleModel, CollapsiblePart,
+    CollapsibleRenderNode, CollapsibleState, collapsible_render_nodes, default_collapsible_model,
+    validate_collapsible_model,
 };
 #[cfg(feature = "leptos")]
 pub use components::*;

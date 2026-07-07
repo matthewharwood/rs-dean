@@ -289,19 +289,19 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
-        chart_render_nodes, checkbox_render_nodes, component_implementation,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-        default_badge_model, default_breadcrumb_model, default_bubble_model,
+        CollapsiblePart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model,
+        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
         default_button_group_model, default_button_model, default_calendar_model,
         default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
-        scale,
+        default_collapsible_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -407,6 +407,13 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Collapsible {
+            return bevy_primitives_for_collapsible(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -455,6 +462,39 @@ pub mod bevy_adapter {
                     state,
                     intent: checkbox_intent_for_part(node.part),
                     selected: node.checked.is_active(),
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_collapsible(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_collapsible_model();
+        let collapsible_state = model.state();
+        collapsible_render_nodes(&model, &collapsible_state)
+            .into_iter()
+            .map(|node| {
+                let role = collapsible_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: collapsible_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: collapsible_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        collapsible_tone_for_part(node.part, node.open, node.disabled),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: collapsible_intent_for_part(node.part),
+                    selected: node.open,
                     disabled: node.disabled,
                 }
             })
@@ -1514,6 +1554,57 @@ pub mod bevy_adapter {
             CheckboxPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
             CheckboxPart::Label => Vec2::new(scale::space::XL2, scale::space::S),
             CheckboxPart::Description => Vec2::new(scale::space::XL2, scale::space::S),
+        }
+    }
+
+    const fn collapsible_kind_for_part(part: CollapsiblePart) -> UiWidgetSlotKind {
+        match part {
+            CollapsiblePart::Root => UiWidgetSlotKind::Section,
+            CollapsiblePart::Trigger => UiWidgetSlotKind::Button,
+            CollapsiblePart::Content => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn collapsible_role_for_part(part: CollapsiblePart) -> UiBlockRole {
+        match part {
+            CollapsiblePart::Root => UiBlockRole::Root,
+            CollapsiblePart::Trigger => UiBlockRole::Action,
+            CollapsiblePart::Content => UiBlockRole::Content,
+        }
+    }
+
+    const fn collapsible_tone_for_part(
+        part: CollapsiblePart,
+        open: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            CollapsiblePart::Trigger => {
+                if open {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            CollapsiblePart::Root | CollapsiblePart::Content => UiBlockTone::Surface,
+        }
+    }
+
+    const fn collapsible_intent_for_part(part: CollapsiblePart) -> UiWidgetIntent {
+        match part {
+            CollapsiblePart::Trigger => UiWidgetIntent::Toggle,
+            CollapsiblePart::Root | CollapsiblePart::Content => UiWidgetIntent::None,
+        }
+    }
+
+    fn collapsible_size_for_part(part: CollapsiblePart) -> Vec2 {
+        match part {
+            CollapsiblePart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
+            CollapsiblePart::Trigger => Vec2::new(scale::space::XL3, scale::space::L),
+            CollapsiblePart::Content => Vec2::new(scale::space::XL3, scale::space::XL),
         }
     }
 

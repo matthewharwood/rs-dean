@@ -10,8 +10,8 @@ use rs_dean_ui::{
     CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
     CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
     Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, Checkbox, CheckboxChecked,
-    CheckboxDensity, CheckboxModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, HealthCard,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -339,6 +339,24 @@ fn Stories() -> impl IntoView {
                             <Checkbox model=invalid_checkbox_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Checkbox model=themed_checkbox_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-collapsible" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Collapsible"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 17 implemented as a single disclosure region backed by a validated shared Rust model, renderer-local open state, trigger/content anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Collapsible model=default_collapsible_story_model() />
+                            <Collapsible model=dense_collapsible_story_model() />
+                            <Collapsible model=loading_collapsible_story_model() />
+                            <Collapsible model=disabled_collapsible_story_model() />
+                            <Collapsible model=invalid_collapsible_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Collapsible model=themed_collapsible_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1118,6 +1136,60 @@ fn themed_checkbox_story_model() -> CheckboxModel {
     CheckboxModel::new("Theme scoped checkbox", "theme-scoped-checkbox")
         .with_description("The same control resolves through a nested Forest theme scope.")
         .indeterminate()
+}
+
+fn default_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "token-stack",
+        "Shared token stack",
+        "A single disclosure region can expose implementation notes without creating durable state.",
+    )
+    .open()
+}
+
+fn dense_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "compact-disclosure",
+        "Compact disclosure",
+        "Dense mode keeps the same trigger and content anatomy with tighter token spacing.",
+    )
+    .with_density(CollapsibleDensity::Dense)
+}
+
+fn loading_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "loading-disclosure",
+        "Hydrating disclosure",
+        "The trigger is blocked while renderer-local state hydrates from the consumer boundary.",
+    )
+    .loading()
+}
+
+fn disabled_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "locked-disclosure",
+        "Locked disclosure",
+        "Disabled disclosure keeps the content contract visible to Bevy primitives.",
+    )
+    .open()
+    .disabled()
+}
+
+fn invalid_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "invalid-disclosure",
+        "",
+        "Missing title should fail validation.",
+    )
+}
+
+fn themed_collapsible_story_model() -> CollapsibleModel {
+    CollapsibleModel::new(
+        "theme-disclosure",
+        "Theme scoped disclosure",
+        "The same semantic classes resolve through the nested Luxury theme scope.",
+    )
+    .open()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
