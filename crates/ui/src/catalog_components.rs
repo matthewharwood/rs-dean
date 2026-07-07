@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    calendar,
-    Calendar,
-    CalendarModel,
-    CalendarPart,
-    CalendarRenderNode,
-    CalendarState,
-    CalendarIntent,
-    CalendarChange,
-    validate_calendar_model,
-    calendar_render_nodes,
-    default_calendar_model,
-    [
-        Root => "Calendar",
-        Header => "CalendarHeader",
-        Grid => "CalendarGrid",
-        Day => "CalendarDay",
-        Range => "CalendarRange",
-    ]
-);
-
-define_catalog_component!(
     card,
     Card,
     CardModel,
@@ -1593,10 +1572,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Breadcrumb
         | UiComponentId::Bubble
         | UiComponentId::Button
-        | UiComponentId::ButtonGroup => None,
-        UiComponentId::Calendar => {
-            Some(any_nodes(calendar_render_nodes(&default_calendar_model())))
-        }
+        | UiComponentId::ButtonGroup
+        | UiComponentId::Calendar => None,
         UiComponentId::Card => Some(any_nodes(card_render_nodes(&default_card_model()))),
         UiComponentId::Carousel => {
             Some(any_nodes(carousel_render_nodes(&default_carousel_model())))
@@ -1733,6 +1710,7 @@ mod tests {
                     | UiComponentId::Bubble
                     | UiComponentId::Button
                     | UiComponentId::ButtonGroup
+                    | UiComponentId::Calendar
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1749,17 +1727,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_calendar_model().state();
-        assert!(!state.is_active(CalendarPart::Root));
+        let mut state = default_card_model().state();
+        assert!(!state.is_active(CardPart::Root));
         assert_eq!(
-            state.apply(CalendarIntent::Toggle(CalendarPart::Root)),
-            CalendarChange::Opened(CalendarPart::Root)
+            state.apply(CardIntent::Toggle(CardPart::Root)),
+            CardChange::Opened(CardPart::Root)
         );
-        assert!(state.is_active(CalendarPart::Root));
+        assert!(state.is_active(CardPart::Root));
         assert_eq!(
-            state.apply(CalendarIntent::Toggle(CalendarPart::Root)),
-            CalendarChange::Closed(CalendarPart::Root)
+            state.apply(CardIntent::Toggle(CardPart::Root)),
+            CardChange::Closed(CardPart::Root)
         );
-        assert!(!state.is_active(CalendarPart::Root));
+        assert!(!state.is_active(CardPart::Root));
     }
 }

@@ -287,17 +287,17 @@ pub mod bevy_adapter {
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
-        ButtonKind, ButtonPart, ButtonSize, ButtonVariant, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes,
+        ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes,
         catalog_component_any_render_nodes_for_component, component_implementation,
         default_accordion_items, default_alert_dialog_model, default_alert_model,
         default_aspect_ratio_model, default_attachment_model, default_avatar_model,
         default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_group_model, default_button_model, scale,
+        default_button_group_model, default_button_model, default_calendar_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -376,6 +376,13 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Calendar {
+            return bevy_primitives_for_calendar(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -393,6 +400,45 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_calendar(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_calendar_model();
+        let calendar_state = model.state();
+        calendar_render_nodes(&model, &calendar_state)
+            .into_iter()
+            .map(|node| {
+                let role = calendar_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: calendar_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: calendar_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        calendar_tone_for_part(
+                            node.part,
+                            node.mode,
+                            node.selected,
+                            node.in_range,
+                            node.current_month,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: calendar_intent_for_part(node.part, node.mode),
+                    selected: node.selected || node.in_range,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -1096,6 +1142,72 @@ pub mod bevy_adapter {
                 ButtonGroupOrientation::Horizontal => Vec2::new(scale::space::XS3, scale::space::L),
                 ButtonGroupOrientation::Vertical => Vec2::new(scale::space::XL, scale::space::XS3),
             },
+        }
+    }
+
+    const fn calendar_kind_for_part(part: CalendarPart) -> UiWidgetSlotKind {
+        match part {
+            CalendarPart::Root => UiWidgetSlotKind::Section,
+            CalendarPart::Header => UiWidgetSlotKind::Header,
+            CalendarPart::Grid => UiWidgetSlotKind::List,
+            CalendarPart::Day => UiWidgetSlotKind::Button,
+            CalendarPart::Range => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn calendar_role_for_part(part: CalendarPart) -> UiBlockRole {
+        match part {
+            CalendarPart::Root => UiBlockRole::Root,
+            CalendarPart::Header => UiBlockRole::Header,
+            CalendarPart::Grid => UiBlockRole::Layout,
+            CalendarPart::Day => UiBlockRole::Action,
+            CalendarPart::Range => UiBlockRole::Indicator,
+        }
+    }
+
+    const fn calendar_tone_for_part(
+        part: CalendarPart,
+        mode: CalendarSelectionMode,
+        selected: bool,
+        in_range: bool,
+        current_month: bool,
+    ) -> UiBlockTone {
+        match part {
+            CalendarPart::Day if selected => UiBlockTone::Brand,
+            CalendarPart::Day if in_range => UiBlockTone::Accent,
+            CalendarPart::Day if !current_month => UiBlockTone::Muted,
+            CalendarPart::Range if selected => match mode {
+                CalendarSelectionMode::Single => UiBlockTone::Brand,
+                CalendarSelectionMode::Range => UiBlockTone::Accent,
+            },
+            CalendarPart::Header => UiBlockTone::Brand,
+            CalendarPart::Root | CalendarPart::Grid | CalendarPart::Range | CalendarPart::Day => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn calendar_intent_for_part(
+        part: CalendarPart,
+        mode: CalendarSelectionMode,
+    ) -> UiWidgetIntent {
+        match part {
+            CalendarPart::Header => UiWidgetIntent::Navigate,
+            CalendarPart::Day | CalendarPart::Range => match mode {
+                CalendarSelectionMode::Single => UiWidgetIntent::Select,
+                CalendarSelectionMode::Range => UiWidgetIntent::Select,
+            },
+            CalendarPart::Root | CalendarPart::Grid => UiWidgetIntent::None,
+        }
+    }
+
+    fn calendar_size_for_part(part: CalendarPart) -> Vec2 {
+        match part {
+            CalendarPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            CalendarPart::Header => Vec2::new(scale::space::XL2, scale::space::L),
+            CalendarPart::Grid => Vec2::new(scale::space::XL3, scale::space::XL2),
+            CalendarPart::Day => Vec2::new(scale::space::L, scale::space::L),
+            CalendarPart::Range => Vec2::new(scale::space::XL2, scale::space::S),
         }
     }
 

@@ -6,7 +6,8 @@ use rs_dean_ui::{
     AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
     BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, Bubble,
     BubbleAction, BubbleModel, BubbleSide, Button, ButtonGroup, ButtonGroupItem, ButtonGroupModel,
-    ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, HealthCard,
+    ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, Calendar,
+    CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, HealthCard,
     ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
@@ -245,6 +246,24 @@ fn Stories() -> impl IntoView {
                             <ButtonGroup model=invalid_button_group_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <ButtonGroup model=themed_button_group_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-calendar" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Calendar"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 12 implemented as a date grid primitive backed by a validated shared Rust model, local single/range selection state, month navigation, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Calendar model=default_calendar_story_model() />
+                            <Calendar model=range_calendar_story_model() />
+                            <Calendar model=loading_calendar_story_model() />
+                            <Calendar model=disabled_calendar_story_model() />
+                            <Calendar model=invalid_calendar_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Calendar model=themed_calendar_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -731,6 +750,44 @@ fn themed_button_group_story_model() -> ButtonGroupModel {
     .with_variant(ButtonVariant::Primary)
     .with_size(ButtonSize::Small)
     .with_selected("center")
+}
+
+fn default_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 7).with_selected(CalendarDate::new(2026, 7, 7))
+}
+
+fn range_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 7)
+        .with_mode(CalendarSelectionMode::Range)
+        .with_range(CalendarRange::new(
+            CalendarDate::new(2026, 7, 6),
+            CalendarDate::new(2026, 7, 10),
+        ))
+}
+
+fn loading_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 8)
+        .with_selected(CalendarDate::new(2026, 8, 14))
+        .loading()
+}
+
+fn disabled_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 9)
+        .with_selected(CalendarDate::new(2026, 9, 21))
+        .disabled()
+}
+
+fn invalid_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 13)
+}
+
+fn themed_calendar_story_model() -> CalendarModel {
+    CalendarModel::new(2026, 10)
+        .with_mode(CalendarSelectionMode::Range)
+        .with_range(CalendarRange::new(
+            CalendarDate::new(2026, 10, 12),
+            CalendarDate::new(2026, 10, 16),
+        ))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

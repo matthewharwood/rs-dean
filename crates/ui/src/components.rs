@@ -9,20 +9,21 @@ use crate::{
     BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
     BubblePart, BubbleSide, ButtonGroupIntent, ButtonGroupModel, ButtonGroupOrientation,
     ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
-    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CatalogComponentModel,
+    CatalogComponentPart, CatalogComponentRenderNode, ComponentImplementation, ThemeChoice,
+    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
     default_badge_model, default_breadcrumb_model, default_bubble_model,
-    default_button_group_model, default_button_model, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model,
+    default_button_group_model, default_button_model, default_calendar_model, month_name,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
 };
 
 const HEALTH_CARD: &str =
@@ -309,6 +310,24 @@ const BUTTON_GROUP_LABEL_ICON: &str = "sr-only";
 const BUTTON_GROUP_SEPARATOR_HORIZONTAL: &str = "w-selector bg-border-subtle";
 const BUTTON_GROUP_SEPARATOR_VERTICAL: &str = "h-selector bg-border-subtle";
 const BUTTON_GROUP_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const CALENDAR_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CALENDAR_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CALENDAR_HEADER: &str = "flex items-center justify-between gap-xs";
+const CALENDAR_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CALENDAR_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const CALENDAR_GRID: &str = "grid grid-cols-7 gap-2xs";
+const CALENDAR_WEEKDAY: &str =
+    "grid min-h-s place-items-center text-00 font-7 uppercase text-text-muted";
+const CALENDAR_DAY: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-faint bg-surface-1 px-2xs py-3xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const CALENDAR_DAY_SELECTED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-0 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CALENDAR_DAY_RANGE: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CALENDAR_DAY_OUTSIDE: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-faint bg-surface-2 px-2xs py-3xs text-0 font-6 leading-0 text-text-muted disabled:text-text-disabled";
+const CALENDAR_RANGE: &str =
+    "rounded-field border border-border-subtle bg-surface-2 p-xs text-0 leading-0 text-text-2";
+const CALENDAR_RANGE_ACTIVE: &str =
+    "rounded-field border border-brand bg-primary-soft p-xs text-0 font-7 leading-0 text-text-1";
+const CALENDAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -2673,11 +2692,191 @@ const fn button_group_state_label(loading: bool, disabled: bool) -> &'static str
     }
 }
 
-catalog_component!(
-    Calendar,
-    crate::CalendarModel,
-    crate::default_calendar_model
-);
+#[component]
+pub fn Calendar(
+    #[prop(optional, default = default_calendar_model())] model: CalendarModel,
+) -> AnyView {
+    if let Err(report) = validate_calendar_model(&model) {
+        let message = format!("Calendar validation failed: {report}");
+        return view! {
+            <div class=CALENDAR_ERROR data-ui-component="calendar" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let mode = model.mode;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let model_for_days = model.clone();
+    let model_for_range = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=calendar_root_class(disabled)
+            data-ui-component="calendar"
+            data-ui-part=CalendarPart::Root.label()
+            data-ui-mode=mode.label()
+            data-ui-state=calendar_state_label(loading, disabled)
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <header class=CALENDAR_HEADER data-ui-part=CalendarPart::Header.label()>
+                <button
+                    type="button"
+                    class=CALENDAR_NAV
+                    aria-label="Previous month"
+                    disabled=blocked
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(CalendarIntent::PreviousMonth);
+                            });
+                        }
+                    }
+                >
+                    "<"
+                </button>
+                <h3 class=CALENDAR_TITLE>
+                    {move || {
+                        state.with(|state| {
+                            format!("{} {}", month_name(state.visible_month()), state.visible_year())
+                        })
+                    }}
+                </h3>
+                <button
+                    type="button"
+                    class=CALENDAR_NAV
+                    aria-label="Next month"
+                    disabled=blocked
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(CalendarIntent::NextMonth);
+                            });
+                        }
+                    }
+                >
+                    ">"
+                </button>
+            </header>
+            <div class=CALENDAR_GRID data-ui-part=CalendarPart::Grid.label() role="grid">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                    .into_iter()
+                    .map(|weekday| {
+                        view! {
+                            <span class=CALENDAR_WEEKDAY role="columnheader">{weekday}</span>
+                        }
+                    })
+                    .collect_view()}
+                {move || {
+                    state.with(|state| {
+                        calendar_render_nodes(&model_for_days, state)
+                            .into_iter()
+                            .filter(|node| node.part == CalendarPart::Day)
+                            .map(|node| {
+                                let date = node
+                                    .date
+                                    .expect("invariant: calendar day nodes include a date");
+                                let date_value = date.value();
+                                let detail = node.detail.clone();
+                                let selected = node.selected;
+                                let item_disabled = node.disabled || blocked;
+                                let intent = match mode {
+                                    CalendarSelectionMode::Single => CalendarIntent::Select(date),
+                                    CalendarSelectionMode::Range => CalendarIntent::SelectRange(date),
+                                };
+                                view! {
+                                    <button
+                                        type="button"
+                                        class=calendar_day_class(
+                                            node.current_month,
+                                            selected,
+                                            node.in_range,
+                                        )
+                                        data-ui-part=CalendarPart::Day.label()
+                                        data-ui-value=date_value
+                                        data-ui-index=node.index.to_string()
+                                        aria-label=detail
+                                        aria-pressed=selected.to_string()
+                                        disabled=item_disabled
+                                        on:click=move |_| {
+                                            if !item_disabled {
+                                                let intent = intent.clone();
+                                                set_state.update(|state| {
+                                                    let _ = state.apply(intent);
+                                                });
+                                            }
+                                        }
+                                    >
+                                        {node.label.clone()}
+                                    </button>
+                                }
+                            })
+                            .collect_view()
+                    })
+                }}
+            </div>
+            {move || {
+                state.with(|state| {
+                    let range = calendar_render_nodes(&model_for_range, state)
+                        .into_iter()
+                        .find(|node| node.part == CalendarPart::Range)
+                        .expect("invariant: calendar render nodes include range");
+                    view! {
+                        <p class=calendar_range_class(range.selected) data-ui-part=CalendarPart::Range.label()>
+                            {range.detail}
+                        </p>
+                    }
+                    .into_any()
+                })
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+const fn calendar_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        CALENDAR_ROOT_DISABLED
+    } else {
+        CALENDAR_ROOT
+    }
+}
+
+const fn calendar_day_class(current_month: bool, selected: bool, in_range: bool) -> &'static str {
+    if selected {
+        CALENDAR_DAY_SELECTED
+    } else if in_range {
+        CALENDAR_DAY_RANGE
+    } else if current_month {
+        CALENDAR_DAY
+    } else {
+        CALENDAR_DAY_OUTSIDE
+    }
+}
+
+const fn calendar_range_class(selected: bool) -> &'static str {
+    if selected {
+        CALENDAR_RANGE_ACTIVE
+    } else {
+        CALENDAR_RANGE
+    }
+}
+
+const fn calendar_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Card, crate::CardModel, crate::default_card_model);
 catalog_component!(
     Carousel,

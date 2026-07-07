@@ -9,6 +9,7 @@ pub mod breadcrumb;
 pub mod bubble;
 pub mod button;
 pub mod button_group;
+pub mod calendar;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -68,6 +69,11 @@ pub use button_group::{
     ButtonGroupChange, ButtonGroupIntent, ButtonGroupItem, ButtonGroupModel,
     ButtonGroupOrientation, ButtonGroupPart, ButtonGroupRenderNode, ButtonGroupState,
     button_group_render_nodes, default_button_group_model, validate_button_group_model,
+};
+pub use calendar::{
+    CalendarChange, CalendarDate, CalendarIntent, CalendarModel, CalendarPart, CalendarRange,
+    CalendarRenderNode, CalendarSelectionMode, CalendarState, calendar_render_nodes,
+    default_calendar_model, month_name, month_short_name, validate_calendar_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,
