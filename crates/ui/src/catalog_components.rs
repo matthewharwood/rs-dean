@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    item,
-    Item,
-    ItemModel,
-    ItemPart,
-    ItemRenderNode,
-    ItemState,
-    ItemIntent,
-    ItemChange,
-    validate_item_model,
-    item_render_nodes,
-    default_item_model,
-    [
-        Root => "Item",
-        Media => "ItemMedia",
-        Content => "ItemContent",
-        Title => "ItemTitle",
-        Description => "ItemDescription",
-        Actions => "ItemActions",
-    ]
-);
-
-define_catalog_component!(
     kbd,
     Kbd,
     KbdModel,
@@ -1172,8 +1150,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::HoverCard
         | UiComponentId::Input
         | UiComponentId::InputGroup
-        | UiComponentId::InputOtp => None,
-        UiComponentId::Item => Some(any_nodes(item_render_nodes(&default_item_model()))),
+        | UiComponentId::InputOtp
+        | UiComponentId::Item => None,
         UiComponentId::Kbd => Some(any_nodes(kbd_render_nodes(&default_kbd_model()))),
         UiComponentId::Label => Some(any_nodes(label_render_nodes(&default_label_model()))),
         UiComponentId::Marker => Some(any_nodes(marker_render_nodes(&default_marker_model()))),
@@ -1286,6 +1264,7 @@ mod tests {
                     | UiComponentId::Input
                     | UiComponentId::InputGroup
                     | UiComponentId::InputOtp
+                    | UiComponentId::Item
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1302,17 +1281,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_item_model().state();
-        assert!(!state.is_active(ItemPart::Root));
+        let mut state = default_kbd_model().state();
+        assert!(!state.is_active(KbdPart::Root));
         assert_eq!(
-            state.apply(ItemIntent::Toggle(ItemPart::Root)),
-            ItemChange::Opened(ItemPart::Root)
+            state.apply(KbdIntent::Toggle(KbdPart::Root)),
+            KbdChange::Opened(KbdPart::Root)
         );
-        assert!(state.is_active(ItemPart::Root));
+        assert!(state.is_active(KbdPart::Root));
         assert_eq!(
-            state.apply(ItemIntent::Toggle(ItemPart::Root)),
-            ItemChange::Closed(ItemPart::Root)
+            state.apply(KbdIntent::Toggle(KbdPart::Root)),
+            KbdChange::Closed(KbdPart::Root)
         );
-        assert!(!state.is_active(ItemPart::Root));
+        assert!(!state.is_active(KbdPart::Root));
     }
 }

@@ -291,7 +291,7 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart,
+        EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
         RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
         alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
@@ -311,10 +311,10 @@ pub mod bevy_adapter {
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
         default_empty_model, default_field_model, default_hover_card_model,
         default_input_group_model, default_input_model, default_input_otp_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_item_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, scale,
+        input_render_nodes, item_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -480,6 +480,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Item {
+            return bevy_primitives_for_item(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -948,6 +951,45 @@ pub mod bevy_adapter {
                     state,
                     intent: input_otp_intent_for_part(node.part, node.actionable),
                     selected: node.focused || node.active || node.filled || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_item(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_item_model();
+        let item_state = model.state();
+        item_render_nodes(&model, &item_state)
+            .into_iter()
+            .map(|node| {
+                let role = item_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: item_primitive_part(&node),
+                    kind: item_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: item_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        item_tone_for_part(
+                            node.part,
+                            node.active,
+                            node.invalid,
+                            node.visible,
+                            node.actionable,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: item_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -2889,6 +2931,79 @@ pub mod bevy_adapter {
             InputOtpPart::Group => Vec2::new(scale::space::XL3, scale::space::L),
             InputOtpPart::Slot => Vec2::new(scale::space::L, scale::space::L),
             InputOtpPart::Separator => Vec2::new(scale::space::S, scale::space::M),
+        }
+    }
+
+    fn item_primitive_part(node: &crate::ItemRenderNode) -> String {
+        match (node.part, node.index) {
+            (ItemPart::Actions, Some(index)) => format!("{}:{index}", node.part.label()),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn item_kind_for_part(part: ItemPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            ItemPart::Root => UiWidgetSlotKind::Section,
+            ItemPart::Media => UiWidgetSlotKind::Avatar,
+            ItemPart::Content => UiWidgetSlotKind::Panel,
+            ItemPart::Title => UiWidgetSlotKind::Title,
+            ItemPart::Description => UiWidgetSlotKind::Description,
+            ItemPart::Actions if actionable => UiWidgetSlotKind::Button,
+            ItemPart::Actions => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn item_role_for_part(part: ItemPart) -> UiBlockRole {
+        match part {
+            ItemPart::Root => UiBlockRole::Root,
+            ItemPart::Media => UiBlockRole::Media,
+            ItemPart::Content => UiBlockRole::Content,
+            ItemPart::Title => UiBlockRole::Header,
+            ItemPart::Description => UiBlockRole::Text,
+            ItemPart::Actions => UiBlockRole::Action,
+        }
+    }
+
+    const fn item_tone_for_part(
+        part: ItemPart,
+        active: bool,
+        invalid: bool,
+        visible: bool,
+        actionable: bool,
+    ) -> UiBlockTone {
+        if invalid {
+            return UiBlockTone::Danger;
+        }
+        match part {
+            ItemPart::Actions if active || actionable => UiBlockTone::Brand,
+            ItemPart::Media if visible => UiBlockTone::Success,
+            ItemPart::Media | ItemPart::Actions => UiBlockTone::Muted,
+            ItemPart::Root | ItemPart::Content | ItemPart::Title | ItemPart::Description => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn item_intent_for_part(part: ItemPart, actionable: bool) -> UiWidgetIntent {
+        match part {
+            ItemPart::Actions if actionable => UiWidgetIntent::Activate,
+            ItemPart::Root
+            | ItemPart::Media
+            | ItemPart::Content
+            | ItemPart::Title
+            | ItemPart::Description
+            | ItemPart::Actions => UiWidgetIntent::None,
+        }
+    }
+
+    fn item_size_for_part(part: ItemPart) -> Vec2 {
+        match part {
+            ItemPart::Root => Vec2::new(scale::space::XL3, scale::space::XL),
+            ItemPart::Media => Vec2::new(scale::space::L, scale::space::L),
+            ItemPart::Content => Vec2::new(scale::space::XL2, scale::space::L),
+            ItemPart::Title => Vec2::new(scale::space::XL2, scale::space::S),
+            ItemPart::Description => Vec2::new(scale::space::XL2, scale::space::S),
+            ItemPart::Actions => Vec2::new(scale::space::XL, scale::space::M),
         }
     }
 

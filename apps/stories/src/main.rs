@@ -20,8 +20,8 @@ use rs_dean_ui::{
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
-    InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
+    ItemDensity, ItemModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -638,6 +638,24 @@ fn Stories() -> impl IntoView {
                             <InputOtp model=invalid_input_otp_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <InputOtp model=themed_input_otp_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-item" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Item"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 33 implemented as a flexible content row backed by validated shared Rust media/content/title/description/action nodes, renderer-local action state, and Bevy-readable repeatable action primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Item model=default_item_story_model() />
+                            <Item model=dense_item_story_model() />
+                            <Item model=loading_item_story_model() />
+                            <Item model=disabled_item_story_model() />
+                            <Item model=invalid_item_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Item model=themed_item_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2386,6 +2404,61 @@ fn themed_input_otp_story_model() -> InputOtpModel {
         .with_group_size(4)
         .with_separator(" ")
         .with_label("Recovery code")
+}
+
+fn default_item_story_model() -> ItemModel {
+    ItemModel::new(
+        "Token migration",
+        "Theme-aware rows use the same shared palette in Leptos and Bevy.",
+    )
+    .with_media("UI")
+    .with_actions(vec![
+        ItemAction::new("Open", "open-token-migration"),
+        ItemAction::new("Queue", "queue-token-migration"),
+    ])
+}
+
+fn dense_item_story_model() -> ItemModel {
+    ItemModel::new(
+        "Bevy primitive",
+        "The same render node can become a scene item.",
+    )
+    .with_density(ItemDensity::Dense)
+    .with_media("B")
+    .with_actions(vec![ItemAction::new("Inspect", "inspect-bevy-primitive")])
+}
+
+fn loading_item_story_model() -> ItemModel {
+    default_item_story_model().loading()
+}
+
+fn disabled_item_story_model() -> ItemModel {
+    ItemModel::new("Locked item", "This row is visible but unavailable.")
+        .with_media("L")
+        .with_actions(vec![ItemAction::new("Open", "open-locked-item").disabled()])
+        .disabled()
+}
+
+fn invalid_item_story_model() -> ItemModel {
+    ItemModel::new(
+        "Missing owner",
+        "Assign an owner before this item can advance.",
+    )
+    .with_media("!")
+    .with_actions(vec![ItemAction::new("Resolve", "resolve-missing-owner")])
+    .with_error("Owner is required.")
+}
+
+fn themed_item_story_model() -> ItemModel {
+    ItemModel::new(
+        "Theme scoped row",
+        "Semantic tokens keep the action surface portable.",
+    )
+    .with_media("R")
+    .with_actions(vec![
+        ItemAction::new("Open", "open-theme-row"),
+        ItemAction::new("Pin", "pin-theme-row"),
+    ])
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

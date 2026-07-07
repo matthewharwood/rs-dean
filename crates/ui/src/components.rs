@@ -26,13 +26,13 @@ use crate::{
     EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, HoverCardDensity, HoverCardIntent,
     HoverCardModel, HoverCardPart, InputDensity, InputGroupIntent, InputGroupModel, InputGroupPart,
     InputGroupState, InputIntent, InputModel, InputOtpIntent, InputOtpModel, InputOtpPart,
-    InputOtpState, InputPart, InputState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    InputOtpState, InputPart, InputState, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemState,
+    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -43,20 +43,21 @@ use crate::{
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
-    default_input_otp_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model,
+    default_input_otp_model, default_item_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model,
 };
 
 const HEALTH_CARD: &str =
@@ -774,6 +775,32 @@ const INPUT_OTP_SEPARATOR: &str =
 const INPUT_OTP_SEPARATOR_DENSE: &str =
     "inline-flex min-h-s items-center px-3xs text-0 font-7 text-text-muted";
 const INPUT_OTP_SEPARATOR_HIDDEN: &str = "hidden";
+const ITEM_ROOT: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const ITEM_ROOT_DENSE: &str = "flex w-full max-w-md items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
+const ITEM_ROOT_INVALID: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-danger bg-error-soft p-xs text-text-1 shadow-1";
+const ITEM_ROOT_LOADING: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const ITEM_ROOT_DISABLED: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-xs text-text-disabled";
+const ITEM_MEDIA: &str = "grid size-xl shrink-0 place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
+const ITEM_MEDIA_DENSE: &str = "grid size-l shrink-0 place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
+const ITEM_MEDIA_DISABLED: &str = "grid size-xl shrink-0 place-items-center rounded-field border border-border-muted bg-surface-3 text-00 font-7 text-text-disabled";
+const ITEM_MEDIA_HIDDEN: &str = "hidden";
+const ITEM_CONTENT: &str = "grid min-w-0 flex-1 gap-3xs";
+const ITEM_CONTENT_DENSE: &str = "grid min-w-0 flex-1 gap-0";
+const ITEM_TITLE: &str = "m-0 truncate text-0 font-7 leading-0 text-text-1";
+const ITEM_TITLE_DENSE: &str = "m-0 truncate text-00 font-7 leading-0 text-text-1";
+const ITEM_TITLE_DISABLED: &str = "m-0 truncate text-0 font-7 leading-0 text-text-disabled";
+const ITEM_DESCRIPTION: &str = "m-0 text-00 leading-0 text-text-2";
+const ITEM_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-muted";
+const ITEM_DESCRIPTION_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const ITEM_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const ITEM_ACTIONS: &str = "flex shrink-0 flex-wrap items-center justify-end gap-2xs";
+const ITEM_ACTIONS_HIDDEN: &str = "hidden";
+const ITEM_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ITEM_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ITEM_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ITEM_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
+const ITEM_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
 struct WidgetViewNode {
@@ -7933,7 +7960,312 @@ const fn input_otp_separator_class(density: InputDensity, visible: bool) -> &'st
     }
 }
 
-catalog_component!(Item, crate::ItemModel, crate::default_item_model);
+#[component]
+pub fn Item(#[prop(optional, default = default_item_model())] model: ItemModel) -> AnyView {
+    if let Err(report) = validate_item_model(&model) {
+        let message = format!("Item validation failed: {report}");
+        return view! {
+            <div class=ITEM_ERROR data-ui-component="item" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = item_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ItemPart::Root)
+        .expect("invariant: item render nodes include root")
+        .clone();
+    let media = nodes
+        .iter()
+        .find(|node| node.part == ItemPart::Media)
+        .expect("invariant: item render nodes include media")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == ItemPart::Content)
+        .expect("invariant: item render nodes include content")
+        .clone();
+    let title = nodes
+        .iter()
+        .find(|node| node.part == ItemPart::Title)
+        .expect("invariant: item render nodes include title")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == ItemPart::Description)
+        .expect("invariant: item render nodes include description")
+        .clone();
+    let actions = nodes
+        .into_iter()
+        .filter(|node| node.part == ItemPart::Actions)
+        .collect::<Vec<_>>();
+    let actions_visible = actions.iter().any(|node| node.visible);
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let media_value = media.value;
+    let media_label = media.label;
+    let media_visible = media.visible;
+    let media_disabled = media.disabled;
+    let content_value = content.value;
+    let title_value = title.value;
+    let title_label = title.label;
+    let description_value = description.value;
+    let description_detail = description.detail;
+    let (state, set_state) = signal(state_model);
+    let context = ItemViewContext {
+        density,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <article
+            role="listitem"
+            class=item_root_class(density, invalid, loading, disabled)
+            data-ui-component="item"
+            data-ui-part=ItemPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    item_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_active(ItemPart::Actions),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <span
+                class=item_media_class(density, media_visible, media_disabled)
+                data-ui-part=ItemPart::Media.label()
+                data-ui-value=media_value
+                aria-hidden=(!media_visible).to_string()
+            >
+                {media_label}
+            </span>
+            <div
+                class=item_content_class(density)
+                data-ui-part=ItemPart::Content.label()
+                data-ui-value=content_value
+            >
+                <h3 class=item_title_class(density, disabled) data-ui-part=ItemPart::Title.label() data-ui-value=title_value>
+                    {title_label}
+                </h3>
+                <p
+                    class=item_description_class(density, invalid, disabled)
+                    data-ui-part=ItemPart::Description.label()
+                    data-ui-value=description_value
+                    aria-invalid=invalid.to_string()
+                >
+                    {description_detail}
+                </p>
+            </div>
+            <div
+                class=item_actions_class(actions_visible)
+                data-ui-part=ItemPart::Actions.label()
+                aria-hidden=(!actions_visible).to_string()
+            >
+                {actions
+                    .into_iter()
+                    .filter(|node| node.visible)
+                    .map(|node| item_action_view(node, context))
+                    .collect_view()}
+            </div>
+        </article>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct ItemViewContext {
+    density: ItemDensity,
+    blocked: bool,
+    state: ReadSignal<ItemState>,
+    set_state: WriteSignal<ItemState>,
+}
+
+fn item_action_view(node: crate::ItemRenderNode, context: ItemViewContext) -> AnyView {
+    let disabled = node.disabled || context.blocked || !node.actionable;
+    let value_for_class = node.value.clone();
+    let value_for_pressed = node.value.clone();
+    let value_for_focus = node.value.clone();
+    let value_for_click = node.value.clone();
+    let value_for_data = node.value;
+    let label = node.label;
+    view! {
+        <button
+            type="button"
+            class=move || {
+                context.state.with(|state| {
+                    item_action_class(
+                        context.density,
+                        state.is_action_active(&value_for_class),
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=ItemPart::Actions.label()
+            data-ui-index=node.index.map(|index| index.to_string()).unwrap_or_default()
+            data-ui-value=value_for_data
+            aria-pressed=move || {
+                context
+                    .state
+                    .with(|state| state.is_action_active(&value_for_pressed).to_string())
+            }
+            disabled=disabled
+            on:focus=move |_| {
+                if !disabled {
+                    let value = value_for_focus.clone();
+                    context.set_state.update(|state| {
+                        let _ = state.apply(ItemIntent::FocusAction(value));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(ItemIntent::Blur);
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    context.set_state.update(|state| {
+                        let _ = state.apply(ItemIntent::ActivateAction(value));
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn item_root_class(
+    density: ItemDensity,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return ITEM_ROOT_DISABLED;
+    }
+    if loading {
+        return ITEM_ROOT_LOADING;
+    }
+    if invalid {
+        return ITEM_ROOT_INVALID;
+    }
+    match density {
+        ItemDensity::Standard => ITEM_ROOT,
+        ItemDensity::Dense => ITEM_ROOT_DENSE,
+    }
+}
+
+const fn item_media_class(density: ItemDensity, visible: bool, disabled: bool) -> &'static str {
+    if !visible {
+        return ITEM_MEDIA_HIDDEN;
+    }
+    if disabled {
+        return ITEM_MEDIA_DISABLED;
+    }
+    match density {
+        ItemDensity::Standard => ITEM_MEDIA,
+        ItemDensity::Dense => ITEM_MEDIA_DENSE,
+    }
+}
+
+const fn item_content_class(density: ItemDensity) -> &'static str {
+    match density {
+        ItemDensity::Standard => ITEM_CONTENT,
+        ItemDensity::Dense => ITEM_CONTENT_DENSE,
+    }
+}
+
+const fn item_title_class(density: ItemDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return ITEM_TITLE_DISABLED;
+    }
+    match density {
+        ItemDensity::Standard => ITEM_TITLE,
+        ItemDensity::Dense => ITEM_TITLE_DENSE,
+    }
+}
+
+const fn item_description_class(
+    density: ItemDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return ITEM_DESCRIPTION_DISABLED;
+    }
+    if invalid {
+        return ITEM_DESCRIPTION_INVALID;
+    }
+    match density {
+        ItemDensity::Standard => ITEM_DESCRIPTION,
+        ItemDensity::Dense => ITEM_DESCRIPTION_DENSE,
+    }
+}
+
+const fn item_actions_class(visible: bool) -> &'static str {
+    if visible {
+        ITEM_ACTIONS
+    } else {
+        ITEM_ACTIONS_HIDDEN
+    }
+}
+
+const fn item_action_class(density: ItemDensity, active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        ITEM_ACTION_DISABLED
+    } else if active {
+        ITEM_ACTION_ACTIVE
+    } else {
+        match density {
+            ItemDensity::Standard => ITEM_ACTION,
+            ItemDensity::Dense => ITEM_ACTION_DENSE,
+        }
+    }
+}
+
+const fn item_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    action_active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if action_active {
+        "active"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Kbd, crate::KbdModel, crate::default_kbd_model);
 catalog_component!(Label, crate::LabelModel, crate::default_label_model);
 catalog_component!(Marker, crate::MarkerModel, crate::default_marker_model);
