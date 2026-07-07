@@ -3,8 +3,8 @@ use rs_dean_ui::{
     Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertDialog,
     AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
-    AttachmentModel, Avatar, AvatarModel, AvatarSize, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
+    BadgeVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -151,6 +151,24 @@ fn Stories() -> impl IntoView {
                             <Avatar model=invalid_avatar_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Avatar model=themed_avatar_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-badge" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Badge"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 07 implemented as a compact status contract backed by a validated shared Rust model, renderer-local highlight state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Badge model=default_badge_story_model() />
+                            <Badge model=no_icon_badge_story_model() />
+                            <Badge model=loading_badge_story_model() />
+                            <Badge model=disabled_badge_story_model() />
+                            <Badge model=invalid_badge_story_model() />
+                            <ThemeScope theme=ThemeId::Lofi>
+                                <Badge model=themed_badge_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -425,6 +443,41 @@ fn invalid_avatar_story_model() -> AvatarModel {
 
 fn themed_avatar_story_model() -> AvatarModel {
     AvatarModel::new("Theme Scope", "TS").with_size(AvatarSize::Large)
+}
+
+fn default_badge_story_model() -> BadgeModel {
+    BadgeModel::new("Ready")
+}
+
+fn no_icon_badge_story_model() -> BadgeModel {
+    BadgeModel::new("Beta")
+        .with_tone(BadgeTone::Info)
+        .with_size(BadgeSize::Small)
+        .without_icon()
+}
+
+fn loading_badge_story_model() -> BadgeModel {
+    BadgeModel::new("Syncing")
+        .with_tone(BadgeTone::Brand)
+        .loading()
+}
+
+fn disabled_badge_story_model() -> BadgeModel {
+    BadgeModel::new("Paused")
+        .with_tone(BadgeTone::Muted)
+        .with_variant(BadgeVariant::Outline)
+        .disabled()
+}
+
+fn invalid_badge_story_model() -> BadgeModel {
+    BadgeModel::new("")
+}
+
+fn themed_badge_story_model() -> BadgeModel {
+    BadgeModel::new("Critical")
+        .with_tone(BadgeTone::Destructive)
+        .with_variant(BadgeVariant::Solid)
+        .with_icon("High")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

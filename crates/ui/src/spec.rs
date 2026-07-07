@@ -285,13 +285,14 @@ pub mod bevy_adapter {
 
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
-        AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, RenderContract, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        catalog_component_any_render_nodes_for_component, component_implementation,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, default_attachment_model, default_avatar_model, scale,
+        AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, catalog_component_any_render_nodes_for_component,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model,
+        default_avatar_model, default_badge_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -347,6 +348,9 @@ pub mod bevy_adapter {
         if id == UiComponentId::Avatar {
             return bevy_primitives_for_avatar(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::Badge {
+            return bevy_primitives_for_badge(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -364,6 +368,35 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_badge(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_badge_model();
+        badge_render_nodes(&model, model.state())
+            .into_iter()
+            .map(|node| {
+                let role = badge_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: badge_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: badge_size_for_part(node.part),
+                    fill: fill_for_tone(badge_tone(node.tone), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: UiWidgetIntent::None,
+                    selected: node.highlighted,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -652,6 +685,42 @@ pub mod bevy_adapter {
             AvatarPart::Root | AvatarPart::Image | AvatarPart::Fallback => {
                 Vec2::new(scale::space::XL, scale::space::XL)
             }
+        }
+    }
+
+    const fn badge_kind_for_part(part: BadgePart) -> UiWidgetSlotKind {
+        match part {
+            BadgePart::Root => UiWidgetSlotKind::Section,
+            BadgePart::Icon => UiWidgetSlotKind::Marker,
+            BadgePart::Text => UiWidgetSlotKind::Badge,
+        }
+    }
+
+    const fn badge_role_for_part(part: BadgePart) -> UiBlockRole {
+        match part {
+            BadgePart::Root => UiBlockRole::Root,
+            BadgePart::Icon => UiBlockRole::Indicator,
+            BadgePart::Text => UiBlockRole::Text,
+        }
+    }
+
+    const fn badge_tone(tone: BadgeTone) -> UiBlockTone {
+        match tone {
+            BadgeTone::Default => UiBlockTone::Surface,
+            BadgeTone::Brand => UiBlockTone::Brand,
+            BadgeTone::Info => UiBlockTone::Info,
+            BadgeTone::Success => UiBlockTone::Success,
+            BadgeTone::Warning => UiBlockTone::Warning,
+            BadgeTone::Destructive => UiBlockTone::Danger,
+            BadgeTone::Muted => UiBlockTone::Muted,
+        }
+    }
+
+    fn badge_size_for_part(part: BadgePart) -> Vec2 {
+        match part {
+            BadgePart::Root => Vec2::new(scale::space::XL, scale::space::M),
+            BadgePart::Icon => Vec2::new(scale::space::S, scale::space::S),
+            BadgePart::Text => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

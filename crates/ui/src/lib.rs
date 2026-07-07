@@ -4,6 +4,7 @@ pub mod alert_dialog;
 pub mod aspect_ratio;
 pub mod attachment;
 pub mod avatar;
+pub mod badge;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -41,6 +42,10 @@ pub use attachment::{
 pub use avatar::{
     AvatarChange, AvatarImage, AvatarIntent, AvatarModel, AvatarPart, AvatarRenderNode, AvatarSize,
     AvatarState, AvatarVisual, avatar_render_nodes, default_avatar_model, validate_avatar_model,
+};
+pub use badge::{
+    BadgeChange, BadgeIntent, BadgeModel, BadgePart, BadgeRenderNode, BadgeSize, BadgeState,
+    BadgeTone, BadgeVariant, badge_render_nodes, default_badge_model, validate_badge_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

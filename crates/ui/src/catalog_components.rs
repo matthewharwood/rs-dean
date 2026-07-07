@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    badge,
-    Badge,
-    BadgeModel,
-    BadgePart,
-    BadgeRenderNode,
-    BadgeState,
-    BadgeIntent,
-    BadgeChange,
-    validate_badge_model,
-    badge_render_nodes,
-    default_badge_model,
-    [Root => "Badge", Icon => "BadgeIcon", Text => "BadgeText"]
-);
-
-define_catalog_component!(
     breadcrumb,
     Breadcrumb,
     BreadcrumbModel,
@@ -1680,8 +1665,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::AlertDialog
         | UiComponentId::AspectRatio
         | UiComponentId::Attachment
-        | UiComponentId::Avatar => None,
-        UiComponentId::Badge => Some(any_nodes(badge_render_nodes(&default_badge_model()))),
+        | UiComponentId::Avatar
+        | UiComponentId::Badge => None,
         UiComponentId::Breadcrumb => Some(any_nodes(breadcrumb_render_nodes(
             &default_breadcrumb_model(),
         ))),
@@ -1824,6 +1809,7 @@ mod tests {
                     | UiComponentId::AspectRatio
                     | UiComponentId::Attachment
                     | UiComponentId::Avatar
+                    | UiComponentId::Badge
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

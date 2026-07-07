@@ -4,16 +4,18 @@ use crate::{
     AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
     AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone, AspectRatioFit,
     AspectRatioModel, AspectRatioPart, AttachmentIntent, AttachmentKind, AttachmentModel,
-    AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual,
-    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual, BadgeIntent,
+    BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, CatalogComponentModel,
+    CatalogComponentPart, CatalogComponentRenderNode, ComponentImplementation, ThemeChoice,
+    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    default_badge_model, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model,
 };
 
 const HEALTH_CARD: &str =
@@ -182,6 +184,36 @@ const AVATAR_FALLBACK_LARGE: &str =
 const AVATAR_FALLBACK_MUTED: &str =
     "grid h-full w-full place-items-center bg-surface-3 text-0 font-7 text-text-muted";
 const AVATAR_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const BADGE_BASE: &str = "inline-flex items-center justify-center whitespace-nowrap rounded-pill border transition-colors hover:bg-hover-tint";
+const BADGE_SIZE_SMALL: &str = "min-h-s gap-3xs px-2xs py-3xs text-00 font-7 leading-0";
+const BADGE_SIZE_MEDIUM: &str = "min-h-field gap-2xs px-xs py-2xs text-0 font-7 leading-0";
+const BADGE_SOFT_DEFAULT: &str = "border-border-subtle bg-surface-2 text-text-1";
+const BADGE_SOFT_BRAND: &str = "border-brand bg-primary-soft text-text-1";
+const BADGE_SOFT_INFO: &str = "border-info bg-info-soft text-text-1";
+const BADGE_SOFT_SUCCESS: &str = "border-success bg-success-soft text-text-1";
+const BADGE_SOFT_WARNING: &str = "border-warning bg-warning-soft text-text-1";
+const BADGE_SOFT_DESTRUCTIVE: &str = "border-danger bg-error-soft text-text-1";
+const BADGE_SOFT_MUTED: &str = "border-border-muted bg-surface-3 text-text-muted";
+const BADGE_SOLID_DEFAULT: &str = "border-border-strong bg-surface-3 text-text-1";
+const BADGE_SOLID_BRAND: &str = "border-brand bg-brand text-text-on-brand";
+const BADGE_SOLID_INFO: &str = "border-info bg-info text-text-on-brand";
+const BADGE_SOLID_SUCCESS: &str = "border-success bg-success text-text-on-brand";
+const BADGE_SOLID_WARNING: &str = "border-warning bg-warning text-text-1";
+const BADGE_SOLID_DESTRUCTIVE: &str = "border-danger bg-danger text-text-on-brand";
+const BADGE_SOLID_MUTED: &str = "border-border-muted bg-surface-3 text-text-muted";
+const BADGE_OUTLINE_DEFAULT: &str = "border-border-strong bg-surface-1 text-text-1";
+const BADGE_OUTLINE_BRAND: &str = "border-brand bg-surface-1 text-brand";
+const BADGE_OUTLINE_INFO: &str = "border-info bg-surface-1 text-info";
+const BADGE_OUTLINE_SUCCESS: &str = "border-success bg-surface-1 text-success";
+const BADGE_OUTLINE_WARNING: &str = "border-warning bg-surface-1 text-warning";
+const BADGE_OUTLINE_DESTRUCTIVE: &str = "border-danger bg-surface-1 text-danger";
+const BADGE_OUTLINE_MUTED: &str = "border-border-muted bg-surface-1 text-text-muted";
+const BADGE_DISABLED: &str = "opacity-disabled";
+const BADGE_HIGHLIGHTED: &str = "shadow-1";
+const BADGE_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
+const BADGE_TEXT: &str = "truncate";
+const BADGE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1557,7 +1589,145 @@ const fn avatar_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Badge, crate::BadgeModel, crate::default_badge_model);
+#[component]
+pub fn Badge(#[prop(optional, default = default_badge_model())] model: BadgeModel) -> AnyView {
+    if let Err(report) = validate_badge_model(&model) {
+        let message = format!("Badge validation failed: {report}");
+        return view! {
+            <span class=BADGE_ERROR data-ui-component="badge" data-ui-state="invalid" role="alert">
+                {message}
+            </span>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = badge_render_nodes(&model, initial_state);
+    let icon = nodes
+        .iter()
+        .find(|node| node.part == BadgePart::Icon)
+        .expect("invariant: badge render nodes include icon");
+    let text = nodes
+        .iter()
+        .find(|node| node.part == BadgePart::Text)
+        .expect("invariant: badge render nodes include text");
+    let icon_value = icon.value.clone();
+    let text_value = text.value.clone();
+    let text_label = text.label.clone();
+    let has_icon = model.icon.is_some();
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let size = model.size;
+    let tone = model.tone;
+    let variant = model.variant;
+    let (state, set_state) = signal(initial_state);
+    let highlighted = Memo::new(move |_| state.with(|state| state.is_highlighted()));
+
+    view! {
+        <span
+            class=move || badge_root_class(size, tone, variant, disabled, highlighted.get())
+            data-ui-component="badge"
+            data-ui-part="Badge"
+            data-ui-size=size.label()
+            data-ui-tone=tone.label()
+            data-ui-variant=variant.label()
+            data-ui-state=badge_state_label(loading, disabled)
+            data-ui-highlighted=move || highlighted.get().to_string()
+            role="status"
+            aria-label=text_label.clone()
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+            on:mouseenter=move |_| {
+                if !disabled && !loading {
+                    set_state.update(|state| {
+                        let _ = state.apply(BadgeIntent::Highlight);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                set_state.update(|state| {
+                    let _ = state.apply(BadgeIntent::ClearHighlight);
+                });
+            }
+        >
+            {move || {
+                if loading {
+                    view! { <span class=BADGE_ICON data-ui-part="BadgeIcon" aria-hidden="true">"..."</span> }
+                        .into_any()
+                } else if has_icon {
+                    view! { <span class=BADGE_ICON data-ui-part="BadgeIcon" aria-hidden="true">{icon_value.clone()}</span> }
+                        .into_any()
+                } else {
+                    ().into_any()
+                }
+            }}
+            <span class=BADGE_TEXT data-ui-part="BadgeText">
+                {move || if loading { "Loading".to_owned() } else { text_value.clone() }}
+            </span>
+        </span>
+    }
+    .into_any()
+}
+
+fn badge_root_class(
+    size: BadgeSize,
+    tone: BadgeTone,
+    variant: BadgeVariant,
+    disabled: bool,
+    highlighted: bool,
+) -> String {
+    let size_class = match size {
+        BadgeSize::Small => BADGE_SIZE_SMALL,
+        BadgeSize::Medium => BADGE_SIZE_MEDIUM,
+    };
+    let tone_class = badge_tone_class(tone, variant);
+    let disabled_class = if disabled { BADGE_DISABLED } else { "" };
+    let highlighted_class = if highlighted { BADGE_HIGHLIGHTED } else { "" };
+    format!("{BADGE_BASE} {size_class} {tone_class} {disabled_class} {highlighted_class}")
+}
+
+const fn badge_tone_class(tone: BadgeTone, variant: BadgeVariant) -> &'static str {
+    match variant {
+        BadgeVariant::Soft => match tone {
+            BadgeTone::Default => BADGE_SOFT_DEFAULT,
+            BadgeTone::Brand => BADGE_SOFT_BRAND,
+            BadgeTone::Info => BADGE_SOFT_INFO,
+            BadgeTone::Success => BADGE_SOFT_SUCCESS,
+            BadgeTone::Warning => BADGE_SOFT_WARNING,
+            BadgeTone::Destructive => BADGE_SOFT_DESTRUCTIVE,
+            BadgeTone::Muted => BADGE_SOFT_MUTED,
+        },
+        BadgeVariant::Solid => match tone {
+            BadgeTone::Default => BADGE_SOLID_DEFAULT,
+            BadgeTone::Brand => BADGE_SOLID_BRAND,
+            BadgeTone::Info => BADGE_SOLID_INFO,
+            BadgeTone::Success => BADGE_SOLID_SUCCESS,
+            BadgeTone::Warning => BADGE_SOLID_WARNING,
+            BadgeTone::Destructive => BADGE_SOLID_DESTRUCTIVE,
+            BadgeTone::Muted => BADGE_SOLID_MUTED,
+        },
+        BadgeVariant::Outline => match tone {
+            BadgeTone::Default => BADGE_OUTLINE_DEFAULT,
+            BadgeTone::Brand => BADGE_OUTLINE_BRAND,
+            BadgeTone::Info => BADGE_OUTLINE_INFO,
+            BadgeTone::Success => BADGE_OUTLINE_SUCCESS,
+            BadgeTone::Warning => BADGE_OUTLINE_WARNING,
+            BadgeTone::Destructive => BADGE_OUTLINE_DESTRUCTIVE,
+            BadgeTone::Muted => BADGE_OUTLINE_MUTED,
+        },
+    }
+}
+
+const fn badge_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     Breadcrumb,
     crate::BreadcrumbModel,
