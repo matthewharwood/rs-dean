@@ -19,6 +19,7 @@ pub mod checkbox;
 pub mod collapsible;
 pub mod combobox;
 pub mod command;
+pub mod context_menu;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -123,6 +124,11 @@ pub use command::{
 };
 #[cfg(feature = "leptos")]
 pub use components::*;
+pub use context_menu::{
+    ContextMenuAction, ContextMenuChange, ContextMenuDensity, ContextMenuEntry, ContextMenuIntent,
+    ContextMenuModel, ContextMenuPart, ContextMenuRenderNode, ContextMenuState, ContextMenuSubmenu,
+    context_menu_render_nodes, default_context_menu_model, validate_context_menu_model,
+};
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
     component_implementation, implementation_issue_marker, implemented_components,

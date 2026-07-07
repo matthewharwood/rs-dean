@@ -16,25 +16,27 @@ use crate::{
     CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
     CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
     ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
-    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
+    ContextMenuPart, ContextMenuState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
     UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
     calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
-    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
-    default_alert_model, default_aspect_ratio_model, default_attachment_model,
-    default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-    default_button_group_model, default_button_model, default_calendar_model, default_card_model,
-    default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
-    default_combobox_model, default_command_model, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model,
+    component_implementation, component_spec, context_menu_render_nodes, default_accordion_items,
+    default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
+    default_attachment_model, default_avatar_model, default_badge_model, default_breadcrumb_model,
+    default_bubble_model, default_button_group_model, default_button_model, default_calendar_model,
+    default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
+    default_collapsible_model, default_combobox_model, default_command_model,
+    default_context_menu_model, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model,
 };
 
 const HEALTH_CARD: &str =
@@ -479,6 +481,29 @@ const COMMAND_SHORTCUT: &str = "rounded-field border border-border-muted bg-surf
 const COMMAND_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
 const COMMAND_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const CONTEXT_MENU_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CONTEXT_MENU_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CONTEXT_MENU_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CONTEXT_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_CONTENT: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const CONTEXT_MENU_CONTENT_HIDDEN: &str = "hidden";
+const CONTEXT_MENU_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM_DANGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
+const CONTEXT_MENU_ITEM_LABEL: &str = "m-0 text-0 font-7 leading-0";
+const CONTEXT_MENU_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const CONTEXT_MENU_SHORTCUT: &str = "rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs font-mono text-00 text-text-muted shadow-1";
+const CONTEXT_MENU_SEPARATOR: &str = "h-3xs rounded-pill bg-border-subtle";
+const CONTEXT_MENU_SUBMENU: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_SUBMENU_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_SUBMENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-disabled";
+const CONTEXT_MENU_SUBMENU_MARKER: &str = "text-00 font-7 text-text-muted";
+const CONTEXT_MENU_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -4376,11 +4401,285 @@ const fn command_state_label(loading: bool, disabled: bool, open: bool) -> &'sta
     }
 }
 
-catalog_component!(
-    ContextMenu,
-    crate::ContextMenuModel,
-    crate::default_context_menu_model
-);
+#[component]
+pub fn ContextMenu(
+    #[prop(optional, default = default_context_menu_model())] model: ContextMenuModel,
+) -> AnyView {
+    if let Err(report) = validate_context_menu_model(&model) {
+        let message = format!("ContextMenu validation failed: {report}");
+        return view! {
+            <div class=CONTEXT_MENU_ERROR data-ui-component="context-menu" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = context_menu_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == ContextMenuPart::Root)
+        .expect("invariant: context menu render nodes include root")
+        .clone();
+    let trigger = input_nodes
+        .iter()
+        .find(|node| node.part == ContextMenuPart::Trigger)
+        .expect("invariant: context menu render nodes include trigger")
+        .clone();
+    let list_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=context_menu_root_class(density, disabled)
+            data-ui-component="context-menu"
+            data-ui-part=ContextMenuPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| context_menu_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=context_menu_trigger_class(density)
+                data-ui-part=ContextMenuPart::Trigger.label()
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ContextMenuIntent::Toggle);
+                        });
+                    }
+                }
+                on:contextmenu=move |event| {
+                    event.prevent_default();
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ContextMenuIntent::Open);
+                        });
+                    }
+                }
+            >
+                {trigger.label}
+            </button>
+            <div
+                role="menu"
+                class=move || state.with(|state| context_menu_content_class(state.is_open()).to_owned())
+                data-ui-part=ContextMenuPart::Content.label()
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                {move || {
+                    state.with(|state| {
+                        context_menu_render_nodes(&list_model, state)
+                            .into_iter()
+                            .filter(|node| {
+                                matches!(
+                                    node.part,
+                                    ContextMenuPart::Item
+                                        | ContextMenuPart::Separator
+                                        | ContextMenuPart::Submenu
+                                ) && node.visible
+                            })
+                            .map(|node| match node.part {
+                                ContextMenuPart::Item => context_menu_item_view(node, blocked, set_state),
+                                ContextMenuPart::Separator => view! {
+                                    <div
+                                        role="separator"
+                                        class=CONTEXT_MENU_SEPARATOR
+                                        data-ui-part=ContextMenuPart::Separator.label()
+                                        data-ui-value=node.value
+                                    ></div>
+                                }
+                                .into_any(),
+                                ContextMenuPart::Submenu => context_menu_submenu_view(node, blocked, set_state),
+                                ContextMenuPart::Root
+                                | ContextMenuPart::Trigger
+                                | ContextMenuPart::Content => view! { <span></span> }.into_any(),
+                            })
+                            .collect_view()
+                    })
+                }}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+fn context_menu_item_view(
+    node: crate::ContextMenuRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<ContextMenuState>,
+) -> AnyView {
+    let value_for_focus = node.value.clone();
+    let value_for_click = node.value.clone();
+    let label = node.label.clone();
+    let detail = node.detail.clone();
+    let shortcut = node.shortcut.clone();
+    let selected = node.selected;
+    let active = node.active;
+    let disabled = node.disabled;
+    let destructive = node.destructive;
+    view! {
+        <button
+            type="button"
+            role="menuitem"
+            class=context_menu_item_class(selected, active, disabled, destructive)
+            data-ui-part=ContextMenuPart::Item.label()
+            data-ui-value=node.value
+            data-ui-parent=node.parent_value
+            aria-selected=(selected || active).to_string()
+            disabled=disabled
+            on:focus=move |_| {
+                if !blocked {
+                    let value = value_for_focus.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(ContextMenuIntent::Focus(value));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !blocked {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(ContextMenuIntent::Select(value));
+                    });
+                }
+            }
+        >
+            <span class=CONTEXT_MENU_ITEM_BODY>
+                <span class=CONTEXT_MENU_ITEM_LABEL>{label}</span>
+                {if detail.is_empty() {
+                    view! { <span></span> }.into_any()
+                } else {
+                    view! { <span class=CONTEXT_MENU_ITEM_DETAIL>{detail}</span> }.into_any()
+                }}
+            </span>
+            {if shortcut.is_empty() {
+                view! { <span></span> }.into_any()
+            } else {
+                view! { <span class=CONTEXT_MENU_SHORTCUT>{shortcut}</span> }.into_any()
+            }}
+        </button>
+    }
+    .into_any()
+}
+
+fn context_menu_submenu_view(
+    node: crate::ContextMenuRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<ContextMenuState>,
+) -> AnyView {
+    let value_for_focus = node.value.clone();
+    let value_for_click = node.value.clone();
+    let disabled = node.disabled;
+    let submenu_open = node.submenu_open;
+    view! {
+        <button
+            type="button"
+            role="menuitem"
+            class=context_menu_submenu_class(submenu_open, disabled)
+            data-ui-part=ContextMenuPart::Submenu.label()
+            data-ui-value=node.value
+            aria-expanded=submenu_open.to_string()
+            disabled=disabled
+            on:focus=move |_| {
+                if !blocked {
+                    let value = value_for_focus.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(ContextMenuIntent::Focus(value));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !blocked {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(ContextMenuIntent::OpenSubmenu(value));
+                    });
+                }
+            }
+        >
+            <span>{node.label}</span>
+            <span class=CONTEXT_MENU_SUBMENU_MARKER>{if submenu_open { "open" } else { ">" }}</span>
+        </button>
+    }
+    .into_any()
+}
+
+const fn context_menu_root_class(density: ContextMenuDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return CONTEXT_MENU_ROOT_DISABLED;
+    }
+    match density {
+        ContextMenuDensity::Standard => CONTEXT_MENU_ROOT,
+        ContextMenuDensity::Dense => CONTEXT_MENU_ROOT_DENSE,
+    }
+}
+
+const fn context_menu_trigger_class(density: ContextMenuDensity) -> &'static str {
+    match density {
+        ContextMenuDensity::Standard => CONTEXT_MENU_TRIGGER,
+        ContextMenuDensity::Dense => CONTEXT_MENU_TRIGGER_DENSE,
+    }
+}
+
+const fn context_menu_content_class(open: bool) -> &'static str {
+    if open {
+        CONTEXT_MENU_CONTENT
+    } else {
+        CONTEXT_MENU_CONTENT_HIDDEN
+    }
+}
+
+const fn context_menu_item_class(
+    selected: bool,
+    active: bool,
+    disabled: bool,
+    destructive: bool,
+) -> &'static str {
+    if disabled {
+        CONTEXT_MENU_ITEM_DISABLED
+    } else if destructive {
+        CONTEXT_MENU_ITEM_DANGER
+    } else if selected {
+        CONTEXT_MENU_ITEM_SELECTED
+    } else if active {
+        CONTEXT_MENU_ITEM_ACTIVE
+    } else {
+        CONTEXT_MENU_ITEM
+    }
+}
+
+const fn context_menu_submenu_class(open: bool, disabled: bool) -> &'static str {
+    if disabled {
+        CONTEXT_MENU_SUBMENU_DISABLED
+    } else if open {
+        CONTEXT_MENU_SUBMENU_OPEN
+    } else {
+        CONTEXT_MENU_SUBMENU
+    }
+}
+
+const fn context_menu_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     DataTable,
     crate::DataTableModel,

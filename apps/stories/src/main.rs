@@ -12,8 +12,9 @@ use rs_dean_ui::{
     Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, Checkbox, CheckboxChecked,
     CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, Combobox,
     ComboboxDensity, ComboboxModel, ComboboxOption, Command, CommandDensity, CommandGroup,
-    CommandItem, CommandModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    CommandItem, CommandModel, ContextMenu, ContextMenuAction, ContextMenuDensity,
+    ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -395,6 +396,24 @@ fn Stories() -> impl IntoView {
                             <Command model=invalid_command_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Command model=themed_command_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-context-menu" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Context Menu"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 20 implemented as a pointer-triggered menu backed by validated shared Rust entries/submenus, renderer-local open/active/selected/submenu state, separator anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <ContextMenu model=default_context_menu_story_model() />
+                            <ContextMenu model=dense_context_menu_story_model() />
+                            <ContextMenu model=loading_context_menu_story_model() />
+                            <ContextMenu model=disabled_context_menu_story_model() />
+                            <ContextMenu model=invalid_context_menu_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <ContextMenu model=themed_context_menu_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1383,6 +1402,113 @@ fn themed_command_story_model() -> CommandModel {
     .with_placeholder("Search themed command")
     .with_selected_value("success")
     .with_highlighted_value("brand")
+}
+
+fn default_context_menu_story_model() -> ContextMenuModel {
+    ContextMenuModel::new(vec![
+        ContextMenuEntry::item(
+            ContextMenuAction::new("Back", "back")
+                .with_detail("Return to the previous route.")
+                .with_shortcut("Cmd+["),
+        ),
+        ContextMenuEntry::item(
+            ContextMenuAction::new("Reload", "reload")
+                .with_detail("Refresh the current surface.")
+                .with_shortcut("Cmd+R"),
+        ),
+        ContextMenuEntry::separator("navigation-separator"),
+        ContextMenuEntry::submenu(ContextMenuSubmenu::new(
+            "Insert",
+            "insert",
+            vec![
+                ContextMenuAction::new("Card", "insert-card").with_shortcut("C"),
+                ContextMenuAction::new("Chart", "insert-chart").with_shortcut("H"),
+            ],
+        )),
+        ContextMenuEntry::separator("danger-separator"),
+        ContextMenuEntry::item(
+            ContextMenuAction::new("Delete", "delete")
+                .with_detail("Remove the focused object.")
+                .destructive(),
+        ),
+    ])
+    .with_trigger_label("Right click surface")
+    .with_selected_value("reload")
+    .with_active_value("insert")
+    .with_open_submenu("insert")
+}
+
+fn dense_context_menu_story_model() -> ContextMenuModel {
+    ContextMenuModel::new(vec![
+        ContextMenuEntry::item(ContextMenuAction::new("Open", "open").with_shortcut("O")),
+        ContextMenuEntry::item(ContextMenuAction::new("Rename", "rename").with_shortcut("R")),
+        ContextMenuEntry::separator("dense-separator"),
+        ContextMenuEntry::submenu(ContextMenuSubmenu::new(
+            "Move to",
+            "move",
+            vec![
+                ContextMenuAction::new("Inbox", "move-inbox"),
+                ContextMenuAction::new("Archive", "move-archive"),
+            ],
+        )),
+    ])
+    .with_density(ContextMenuDensity::Dense)
+    .with_trigger_label("Dense menu")
+    .with_active_value("move")
+    .with_open_submenu("move")
+}
+
+fn loading_context_menu_story_model() -> ContextMenuModel {
+    default_context_menu_story_model().loading()
+}
+
+fn disabled_context_menu_story_model() -> ContextMenuModel {
+    ContextMenuModel::new(vec![
+        ContextMenuEntry::item(ContextMenuAction::new("Available", "available")),
+        ContextMenuEntry::item(ContextMenuAction::new("Blocked", "blocked").disabled()),
+        ContextMenuEntry::separator("disabled-separator"),
+        ContextMenuEntry::submenu(
+            ContextMenuSubmenu::new(
+                "Locked submenu",
+                "locked-submenu",
+                vec![ContextMenuAction::new("Nested", "nested")],
+            )
+            .disabled(),
+        ),
+    ])
+    .with_selected_value("available")
+    .disabled()
+}
+
+fn invalid_context_menu_story_model() -> ContextMenuModel {
+    ContextMenuModel::new(vec![
+        ContextMenuEntry::item(ContextMenuAction::new("Duplicate", "same")),
+        ContextMenuEntry::submenu(ContextMenuSubmenu::new(
+            "Nested duplicate",
+            "nested-duplicate",
+            vec![ContextMenuAction::new("Duplicate again", "same")],
+        )),
+    ])
+}
+
+fn themed_context_menu_story_model() -> ContextMenuModel {
+    ContextMenuModel::new(vec![
+        ContextMenuEntry::item(ContextMenuAction::new("Inspect token", "inspect-token")),
+        ContextMenuEntry::item(ContextMenuAction::new("Copy class", "copy-class")),
+        ContextMenuEntry::separator("theme-separator"),
+        ContextMenuEntry::submenu(ContextMenuSubmenu::new(
+            "Theme scope",
+            "theme-scope",
+            vec![
+                ContextMenuAction::new("Leptos DOM", "leptos-dom"),
+                ContextMenuAction::new("Bevy primitive", "bevy-primitive"),
+            ],
+        )),
+    ])
+    .with_trigger_label("Theme scoped menu")
+    .with_selected_value("copy-class")
+    .with_active_value("theme-scope")
+    .with_open_submenu("theme-scope")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

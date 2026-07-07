@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    context_menu,
-    ContextMenu,
-    ContextMenuModel,
-    ContextMenuPart,
-    ContextMenuRenderNode,
-    ContextMenuState,
-    ContextMenuIntent,
-    ContextMenuChange,
-    validate_context_menu_model,
-    context_menu_render_nodes,
-    default_context_menu_model,
-    [
-        Root => "ContextMenu",
-        Trigger => "ContextMenuTrigger",
-        Content => "ContextMenuContent",
-        Item => "ContextMenuItem",
-        Separator => "ContextMenuSeparator",
-        Submenu => "ContextMenuSubmenu",
-    ]
-);
-
-define_catalog_component!(
     data_table,
     DataTable,
     DataTableModel,
@@ -1433,10 +1411,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Checkbox
         | UiComponentId::Collapsible
         | UiComponentId::Combobox
-        | UiComponentId::Command => None,
-        UiComponentId::ContextMenu => Some(any_nodes(context_menu_render_nodes(
-            &default_context_menu_model(),
-        ))),
+        | UiComponentId::Command
+        | UiComponentId::ContextMenu => None,
         UiComponentId::DataTable => Some(any_nodes(data_table_render_nodes(
             &default_data_table_model(),
         ))),
@@ -1563,6 +1539,7 @@ mod tests {
                     | UiComponentId::Collapsible
                     | UiComponentId::Combobox
                     | UiComponentId::Command
+                    | UiComponentId::ContextMenu
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1579,17 +1556,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_context_menu_model().state();
-        assert!(!state.is_active(ContextMenuPart::Root));
+        let mut state = default_data_table_model().state();
+        assert!(!state.is_active(DataTablePart::Root));
         assert_eq!(
-            state.apply(ContextMenuIntent::Toggle(ContextMenuPart::Root)),
-            ContextMenuChange::Opened(ContextMenuPart::Root)
+            state.apply(DataTableIntent::Toggle(DataTablePart::Root)),
+            DataTableChange::Opened(DataTablePart::Root)
         );
-        assert!(state.is_active(ContextMenuPart::Root));
+        assert!(state.is_active(DataTablePart::Root));
         assert_eq!(
-            state.apply(ContextMenuIntent::Toggle(ContextMenuPart::Root)),
-            ContextMenuChange::Closed(ContextMenuPart::Root)
+            state.apply(DataTableIntent::Toggle(DataTablePart::Root)),
+            DataTableChange::Closed(DataTablePart::Root)
         );
-        assert!(!state.is_active(ContextMenuPart::Root));
+        assert!(!state.is_active(DataTablePart::Root));
     }
 }

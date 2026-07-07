@@ -289,21 +289,22 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, ComboboxPart, CommandPart, RenderContract, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, RenderContract, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
         accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
-        command_render_nodes, component_implementation, default_accordion_items,
-        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
-        default_attachment_model, default_avatar_model, default_badge_model,
-        default_breadcrumb_model, default_bubble_model, default_button_group_model,
-        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
-        default_chart_model, default_checkbox_model, default_collapsible_model,
-        default_combobox_model, default_command_model, scale,
+        command_render_nodes, component_implementation, context_menu_render_nodes,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+        default_badge_model, default_breadcrumb_model, default_bubble_model,
+        default_button_group_model, default_button_model, default_calendar_model,
+        default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
+        default_collapsible_model, default_combobox_model, default_command_model,
+        default_context_menu_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -425,6 +426,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Command {
             return bevy_primitives_for_command(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::ContextMenu {
+            return bevy_primitives_for_context_menu(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
@@ -579,6 +587,45 @@ pub mod bevy_adapter {
                     state,
                     intent: command_intent_for_part(node.part),
                     selected: node.selected || node.highlighted,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_context_menu(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_context_menu_model();
+        let context_menu_state = model.state();
+        context_menu_render_nodes(&model, &context_menu_state)
+            .into_iter()
+            .map(|node| {
+                let role = context_menu_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: context_menu_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: context_menu_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        context_menu_tone_for_part(
+                            node.part,
+                            node.active,
+                            node.selected,
+                            node.destructive,
+                            node.visible,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: context_menu_intent_for_part(node.part),
+                    selected: node.selected || node.active || node.submenu_open,
                     disabled: node.disabled,
                 }
             })
@@ -1822,6 +1869,87 @@ pub mod bevy_adapter {
             CommandPart::Group => Vec2::new(scale::space::XL3, scale::space::S),
             CommandPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
             CommandPart::Shortcut => Vec2::new(scale::space::M, scale::space::S),
+        }
+    }
+
+    const fn context_menu_kind_for_part(part: ContextMenuPart) -> UiWidgetSlotKind {
+        match part {
+            ContextMenuPart::Root => UiWidgetSlotKind::Section,
+            ContextMenuPart::Trigger => UiWidgetSlotKind::Button,
+            ContextMenuPart::Content => UiWidgetSlotKind::List,
+            ContextMenuPart::Item => UiWidgetSlotKind::Button,
+            ContextMenuPart::Separator => UiWidgetSlotKind::Separator,
+            ContextMenuPart::Submenu => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn context_menu_role_for_part(part: ContextMenuPart) -> UiBlockRole {
+        match part {
+            ContextMenuPart::Root => UiBlockRole::Root,
+            ContextMenuPart::Trigger => UiBlockRole::Action,
+            ContextMenuPart::Content => UiBlockRole::Overlay,
+            ContextMenuPart::Item => UiBlockRole::Item,
+            ContextMenuPart::Separator => UiBlockRole::Layout,
+            ContextMenuPart::Submenu => UiBlockRole::Navigation,
+        }
+    }
+
+    const fn context_menu_tone_for_part(
+        part: ContextMenuPart,
+        active: bool,
+        selected: bool,
+        destructive: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            ContextMenuPart::Item => {
+                if destructive {
+                    UiBlockTone::Danger
+                } else if selected || active {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            ContextMenuPart::Submenu => {
+                if active {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            ContextMenuPart::Content => {
+                if visible {
+                    UiBlockTone::Surface
+                } else {
+                    UiBlockTone::Muted
+                }
+            }
+            ContextMenuPart::Trigger => UiBlockTone::Brand,
+            ContextMenuPart::Separator => UiBlockTone::Muted,
+            ContextMenuPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn context_menu_intent_for_part(part: ContextMenuPart) -> UiWidgetIntent {
+        match part {
+            ContextMenuPart::Trigger => UiWidgetIntent::Toggle,
+            ContextMenuPart::Item => UiWidgetIntent::Select,
+            ContextMenuPart::Submenu => UiWidgetIntent::Open,
+            ContextMenuPart::Root | ContextMenuPart::Content | ContextMenuPart::Separator => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn context_menu_size_for_part(part: ContextMenuPart) -> Vec2 {
+        match part {
+            ContextMenuPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            ContextMenuPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
+            ContextMenuPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
+            ContextMenuPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
+            ContextMenuPart::Separator => Vec2::new(scale::space::XL3, scale::space::XS),
+            ContextMenuPart::Submenu => Vec2::new(scale::space::XL3, scale::space::L),
         }
     }
 
