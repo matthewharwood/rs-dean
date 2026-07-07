@@ -7,19 +7,22 @@ use crate::{
     AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual, BadgeIntent,
     BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, BreadcrumbDensity, BreadcrumbEntry,
     BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
-    BubblePart, BubbleSide, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize,
-    ButtonVariant, CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
+    BubblePart, BubbleSide, ButtonGroupIntent, ButtonGroupModel, ButtonGroupOrientation,
+    ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
+    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
     ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
     UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, default_bubble_model, default_button_model,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model, validate_button_model,
+    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    default_button_group_model, default_button_model, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model,
 };
 
 const HEALTH_CARD: &str =
@@ -281,6 +284,31 @@ const BUTTON_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 lea
 const BUTTON_LABEL: &str = "truncate";
 const BUTTON_LABEL_ICON: &str = "sr-only";
 const BUTTON_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const BUTTON_GROUP_ROOT_HORIZONTAL: &str = "inline-flex max-w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 p-3xs text-text-1 shadow-1";
+const BUTTON_GROUP_ROOT_VERTICAL: &str = "inline-grid max-w-full overflow-hidden rounded-field border border-border-strong bg-surface-1 p-3xs text-text-1 shadow-1";
+const BUTTON_GROUP_ROOT_DISABLED: &str = "opacity-disabled";
+const BUTTON_GROUP_ITEM_BASE: &str = "inline-flex max-w-full items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const BUTTON_GROUP_ITEM_SMALL: &str = "min-h-s gap-2xs px-2xs py-3xs text-00 font-7 leading-0";
+const BUTTON_GROUP_ITEM_MEDIUM: &str = "min-h-field gap-2xs px-xs py-2xs text-0 font-7 leading-0";
+const BUTTON_GROUP_ITEM_LARGE: &str = "min-h-field gap-xs px-s py-xs text-1 font-7 leading-2";
+const BUTTON_GROUP_ITEM_ICON: &str = "size-l gap-0 p-0 text-0 font-7 leading-0";
+const BUTTON_GROUP_ITEM_IDLE: &str = "bg-surface-1 text-text-1 hover:bg-hover-tint";
+const BUTTON_GROUP_ITEM_SELECTED_PRIMARY: &str = "bg-brand text-text-on-brand hover:bg-brand";
+const BUTTON_GROUP_ITEM_SELECTED_SECONDARY: &str =
+    "bg-selected-tint text-text-1 hover:bg-selected-tint";
+const BUTTON_GROUP_ITEM_SELECTED_DESTRUCTIVE: &str = "bg-danger text-text-on-brand hover:bg-danger";
+const BUTTON_GROUP_ITEM_SELECTED_OUTLINE: &str =
+    "bg-primary-soft text-text-1 hover:bg-selected-tint";
+const BUTTON_GROUP_ITEM_SELECTED_GHOST: &str = "bg-hover-tint text-text-1 hover:bg-hover-tint";
+const BUTTON_GROUP_ITEM_SELECTED_LINK: &str = "bg-selected-tint text-link hover:bg-selected-tint";
+const BUTTON_GROUP_ITEM_DISABLED: &str = "text-text-disabled";
+const BUTTON_GROUP_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
+const BUTTON_GROUP_LABEL: &str = "truncate";
+const BUTTON_GROUP_LABEL_ICON: &str = "sr-only";
+const BUTTON_GROUP_SEPARATOR_HORIZONTAL: &str = "w-selector bg-border-subtle";
+const BUTTON_GROUP_SEPARATOR_VERTICAL: &str = "h-selector bg-border-subtle";
+const BUTTON_GROUP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -2432,11 +2460,219 @@ const fn button_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(
-    ButtonGroup,
-    crate::ButtonGroupModel,
-    crate::default_button_group_model
-);
+#[component]
+pub fn ButtonGroup(
+    #[prop(optional, default = default_button_group_model())] model: ButtonGroupModel,
+) -> AnyView {
+    if let Err(report) = validate_button_group_model(&model) {
+        let message = format!("Button Group validation failed: {report}");
+        return view! {
+            <div class=BUTTON_GROUP_ERROR data-ui-component="button-group" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = button_group_render_nodes(&model, &initial_state);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ButtonGroupPart::Root)
+        .expect("invariant: button group render nodes include root");
+    let items = nodes
+        .iter()
+        .filter(|node| node.part == ButtonGroupPart::Item)
+        .cloned()
+        .collect::<Vec<_>>();
+    let item_count = items.len();
+    let orientation = model.orientation;
+    let variant = model.variant;
+    let size = model.size;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let root_value = root.value.clone();
+    let state_label = button_group_state_label(loading, disabled);
+    let (state, set_state) = signal(initial_state);
+
+    view! {
+        <div
+            class=button_group_root_class(orientation, loading || disabled)
+            data-ui-component="button-group"
+            data-ui-part=ButtonGroupPart::Root.label()
+            data-ui-orientation=orientation.label()
+            data-ui-variant=variant.label()
+            data-ui-size=size.label()
+            data-ui-state=state_label
+            data-ui-value=root_value
+            role="group"
+            aria-orientation=orientation.label()
+            aria-disabled=(loading || disabled).to_string()
+            aria-busy=loading.to_string()
+        >
+            {items
+                .into_iter()
+                .enumerate()
+                .map(|(position, node)| {
+                    let value = node.value.clone();
+                    let value_for_class = value.clone();
+                    let value_for_click = value.clone();
+                    let label = if loading {
+                        "Loading".to_owned()
+                    } else {
+                        node.label.clone()
+                    };
+                    let icon = if loading {
+                        Some("...".to_owned())
+                    } else {
+                        node.icon.clone()
+                    };
+                    let has_visible_icon = icon.is_some();
+                    let item_disabled = node.disabled || loading || disabled;
+                    view! {
+                        <>
+                            <button
+                                type="button"
+                                class=move || button_group_item_class(
+                                    variant,
+                                    size,
+                                    state.with(|state| state.is_selected(&value_for_class)),
+                                    item_disabled,
+                                )
+                                data-ui-part=ButtonGroupPart::Item.label()
+                                data-ui-value=value.clone()
+                                data-ui-index=node.index.to_string()
+                                aria-pressed=move || state.with(|state| state.is_selected(&value)).to_string()
+                                disabled=item_disabled
+                                on:click=move |_| {
+                                    if !item_disabled {
+                                        set_state.update(|state| {
+                                            let _ = state.apply(ButtonGroupIntent::Select(value_for_click.clone()));
+                                        });
+                                    }
+                                }
+                            >
+                                {button_group_icon_view(icon.clone())}
+                                <span class=button_group_label_class(size, has_visible_icon) data-ui-part="ButtonGroupItemLabel">
+                                    {label.clone()}
+                                </span>
+                            </button>
+                            {if position + 1 == item_count {
+                                ().into_any()
+                            } else {
+                                view! {
+                                    <span
+                                        class=button_group_separator_class(orientation)
+                                        data-ui-part=ButtonGroupPart::Separator.label()
+                                        role="separator"
+                                        aria-orientation=orientation.label()
+                                    ></span>
+                                }
+                                .into_any()
+                            }}
+                        </>
+                    }
+                    .into_any()
+                })
+                .collect_view()}
+        </div>
+    }
+    .into_any()
+}
+
+fn button_group_icon_view(icon: Option<String>) -> AnyView {
+    icon.map(|icon| {
+        view! {
+            <span class=BUTTON_GROUP_ICON aria-hidden="true">
+                {icon}
+            </span>
+        }
+        .into_any()
+    })
+    .unwrap_or_else(|| ().into_any())
+}
+
+fn button_group_root_class(orientation: ButtonGroupOrientation, blocked: bool) -> String {
+    format!(
+        "{} {}",
+        match orientation {
+            ButtonGroupOrientation::Horizontal => BUTTON_GROUP_ROOT_HORIZONTAL,
+            ButtonGroupOrientation::Vertical => BUTTON_GROUP_ROOT_VERTICAL,
+        },
+        if blocked {
+            BUTTON_GROUP_ROOT_DISABLED
+        } else {
+            ""
+        },
+    )
+}
+
+fn button_group_item_class(
+    variant: ButtonVariant,
+    size: ButtonSize,
+    selected: bool,
+    disabled: bool,
+) -> String {
+    format!(
+        "{BUTTON_GROUP_ITEM_BASE} {} {} {}",
+        button_group_item_size_class(size),
+        button_group_item_variant_class(variant, selected),
+        if disabled {
+            BUTTON_GROUP_ITEM_DISABLED
+        } else {
+            ""
+        },
+    )
+}
+
+const fn button_group_item_size_class(size: ButtonSize) -> &'static str {
+    match size {
+        ButtonSize::Small => BUTTON_GROUP_ITEM_SMALL,
+        ButtonSize::Medium => BUTTON_GROUP_ITEM_MEDIUM,
+        ButtonSize::Large => BUTTON_GROUP_ITEM_LARGE,
+        ButtonSize::Icon => BUTTON_GROUP_ITEM_ICON,
+    }
+}
+
+const fn button_group_item_variant_class(variant: ButtonVariant, selected: bool) -> &'static str {
+    if !selected {
+        return BUTTON_GROUP_ITEM_IDLE;
+    }
+    match variant {
+        ButtonVariant::Primary => BUTTON_GROUP_ITEM_SELECTED_PRIMARY,
+        ButtonVariant::Secondary => BUTTON_GROUP_ITEM_SELECTED_SECONDARY,
+        ButtonVariant::Destructive => BUTTON_GROUP_ITEM_SELECTED_DESTRUCTIVE,
+        ButtonVariant::Outline => BUTTON_GROUP_ITEM_SELECTED_OUTLINE,
+        ButtonVariant::Ghost => BUTTON_GROUP_ITEM_SELECTED_GHOST,
+        ButtonVariant::Link => BUTTON_GROUP_ITEM_SELECTED_LINK,
+    }
+}
+
+const fn button_group_label_class(size: ButtonSize, has_visible_icon: bool) -> &'static str {
+    if matches!(size, ButtonSize::Icon) && has_visible_icon {
+        BUTTON_GROUP_LABEL_ICON
+    } else {
+        BUTTON_GROUP_LABEL
+    }
+}
+
+const fn button_group_separator_class(orientation: ButtonGroupOrientation) -> &'static str {
+    match orientation {
+        ButtonGroupOrientation::Horizontal => BUTTON_GROUP_SEPARATOR_HORIZONTAL,
+        ButtonGroupOrientation::Vertical => BUTTON_GROUP_SEPARATOR_VERTICAL,
+    }
+}
+
+const fn button_group_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     Calendar,
     crate::CalendarModel,

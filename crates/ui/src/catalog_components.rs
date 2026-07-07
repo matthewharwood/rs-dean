@@ -504,25 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    button_group,
-    ButtonGroup,
-    ButtonGroupModel,
-    ButtonGroupPart,
-    ButtonGroupRenderNode,
-    ButtonGroupState,
-    ButtonGroupIntent,
-    ButtonGroupChange,
-    validate_button_group_model,
-    button_group_render_nodes,
-    default_button_group_model,
-    [
-        Root => "ButtonGroup",
-        Item => "ButtonGroupItem",
-        Separator => "ButtonGroupSeparator",
-    ]
-);
-
-define_catalog_component!(
     calendar,
     Calendar,
     CalendarModel,
@@ -1611,10 +1592,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Badge
         | UiComponentId::Breadcrumb
         | UiComponentId::Bubble
-        | UiComponentId::Button => None,
-        UiComponentId::ButtonGroup => Some(any_nodes(button_group_render_nodes(
-            &default_button_group_model(),
-        ))),
+        | UiComponentId::Button
+        | UiComponentId::ButtonGroup => None,
         UiComponentId::Calendar => {
             Some(any_nodes(calendar_render_nodes(&default_calendar_model())))
         }
@@ -1753,6 +1732,7 @@ mod tests {
                     | UiComponentId::Breadcrumb
                     | UiComponentId::Bubble
                     | UiComponentId::Button
+                    | UiComponentId::ButtonGroup
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1769,17 +1749,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_button_group_model().state();
-        assert!(!state.is_active(ButtonGroupPart::Root));
+        let mut state = default_calendar_model().state();
+        assert!(!state.is_active(CalendarPart::Root));
         assert_eq!(
-            state.apply(ButtonGroupIntent::Toggle(ButtonGroupPart::Root)),
-            ButtonGroupChange::Opened(ButtonGroupPart::Root)
+            state.apply(CalendarIntent::Toggle(CalendarPart::Root)),
+            CalendarChange::Opened(CalendarPart::Root)
         );
-        assert!(state.is_active(ButtonGroupPart::Root));
+        assert!(state.is_active(CalendarPart::Root));
         assert_eq!(
-            state.apply(ButtonGroupIntent::Toggle(ButtonGroupPart::Root)),
-            ButtonGroupChange::Closed(ButtonGroupPart::Root)
+            state.apply(CalendarIntent::Toggle(CalendarPart::Root)),
+            CalendarChange::Closed(CalendarPart::Root)
         );
-        assert!(!state.is_active(ButtonGroupPart::Root));
+        assert!(!state.is_active(CalendarPart::Root));
     }
 }

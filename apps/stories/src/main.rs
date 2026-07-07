@@ -5,8 +5,9 @@ use rs_dean_ui::{
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
     AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
     BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, Bubble,
-    BubbleAction, BubbleModel, BubbleSide, Button, ButtonKind, ButtonModel, ButtonSize,
-    ButtonVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    BubbleAction, BubbleModel, BubbleSide, Button, ButtonGroup, ButtonGroupItem, ButtonGroupModel,
+    ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, HealthCard,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -226,6 +227,24 @@ fn Stories() -> impl IntoView {
                             <Button model=invalid_button_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Button model=themed_button_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-button-group" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Button Group"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 11 implemented as a grouped action primitive backed by a validated shared Rust model, renderer-local selected state, repeated item/separator anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <ButtonGroup model=default_button_group_story_model() />
+                            <ButtonGroup model=vertical_button_group_story_model() />
+                            <ButtonGroup model=loading_button_group_story_model() />
+                            <ButtonGroup model=disabled_button_group_story_model() />
+                            <ButtonGroup model=invalid_button_group_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <ButtonGroup model=themed_button_group_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -662,6 +681,56 @@ fn themed_button_story_model() -> ButtonModel {
         .with_variant(ButtonVariant::Destructive)
         .with_size(ButtonSize::Large)
         .with_icon("Del")
+}
+
+fn default_button_group_story_model() -> ButtonGroupModel {
+    ButtonGroupModel::new(vec![
+        ButtonGroupItem::new("Day", "day").with_icon("D"),
+        ButtonGroupItem::new("Week", "week").with_icon("W"),
+        ButtonGroupItem::new("Month", "month").with_icon("M"),
+    ])
+    .with_selected("week")
+}
+
+fn vertical_button_group_story_model() -> ButtonGroupModel {
+    ButtonGroupModel::new(vec![
+        ButtonGroupItem::new("Draft", "draft"),
+        ButtonGroupItem::new("Review", "review"),
+        ButtonGroupItem::new("Publish", "publish"),
+    ])
+    .with_orientation(ButtonGroupOrientation::Vertical)
+    .with_variant(ButtonVariant::Outline)
+    .with_selected("review")
+}
+
+fn loading_button_group_story_model() -> ButtonGroupModel {
+    default_button_group_story_model().loading()
+}
+
+fn disabled_button_group_story_model() -> ButtonGroupModel {
+    ButtonGroupModel::new(vec![
+        ButtonGroupItem::new("A", "a").with_icon("A"),
+        ButtonGroupItem::new("B", "b").with_icon("B").disabled(),
+        ButtonGroupItem::new("C", "c").with_icon("C"),
+    ])
+    .with_size(ButtonSize::Icon)
+    .with_selected("a")
+    .disabled()
+}
+
+fn invalid_button_group_story_model() -> ButtonGroupModel {
+    ButtonGroupModel::new(Vec::new())
+}
+
+fn themed_button_group_story_model() -> ButtonGroupModel {
+    ButtonGroupModel::new(vec![
+        ButtonGroupItem::new("Left", "left").with_icon("L"),
+        ButtonGroupItem::new("Center", "center").with_icon("C"),
+        ButtonGroupItem::new("Right", "right").with_icon("R"),
+    ])
+    .with_variant(ButtonVariant::Primary)
+    .with_size(ButtonSize::Small)
+    .with_selected("center")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -8,6 +8,7 @@ pub mod badge;
 pub mod breadcrumb;
 pub mod bubble;
 pub mod button;
+pub mod button_group;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -62,6 +63,11 @@ pub use bubble::{
 pub use button::{
     ButtonChange, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonRenderNode, ButtonSize,
     ButtonState, ButtonVariant, button_render_nodes, default_button_model, validate_button_model,
+};
+pub use button_group::{
+    ButtonGroupChange, ButtonGroupIntent, ButtonGroupItem, ButtonGroupModel,
+    ButtonGroupOrientation, ButtonGroupPart, ButtonGroupRenderNode, ButtonGroupState,
+    button_group_render_nodes, default_button_group_model, validate_button_group_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

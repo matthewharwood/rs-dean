@@ -286,16 +286,18 @@ pub mod bevy_adapter {
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
-        BreadcrumbPart, BubblePart, BubbleSide, ButtonKind, ButtonPart, ButtonSize, ButtonVariant,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_render_nodes, catalog_component_any_render_nodes_for_component,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model,
-        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_model, scale,
+        BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
+        ButtonKind, ButtonPart, ButtonSize, ButtonVariant, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes,
+        catalog_component_any_render_nodes_for_component, component_implementation,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+        default_badge_model, default_breadcrumb_model, default_bubble_model,
+        default_button_group_model, default_button_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -367,6 +369,13 @@ pub mod bevy_adapter {
         if id == UiComponentId::Button {
             return bevy_primitives_for_button(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::ButtonGroup {
+            return bevy_primitives_for_button_group(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -384,6 +393,39 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_button_group(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_button_group_model();
+        let button_group_state = model.state();
+        button_group_render_nodes(&model, &button_group_state)
+            .into_iter()
+            .map(|node| {
+                let role = button_group_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: button_group_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: button_group_size_for_part(node.part, node.size, node.orientation),
+                    fill: fill_for_tone(
+                        button_group_tone_for_part(node.part, node.variant, node.selected),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: button_group_intent_for_part(node.part),
+                    selected: node.selected,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -990,6 +1032,70 @@ pub mod bevy_adapter {
             },
             ButtonPart::Icon => Vec2::new(scale::space::S, scale::space::S),
             ButtonPart::Label => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    const fn button_group_kind_for_part(part: ButtonGroupPart) -> UiWidgetSlotKind {
+        match part {
+            ButtonGroupPart::Root => UiWidgetSlotKind::Section,
+            ButtonGroupPart::Item => UiWidgetSlotKind::Button,
+            ButtonGroupPart::Separator => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn button_group_role_for_part(part: ButtonGroupPart) -> UiBlockRole {
+        match part {
+            ButtonGroupPart::Root => UiBlockRole::Root,
+            ButtonGroupPart::Item => UiBlockRole::Action,
+            ButtonGroupPart::Separator => UiBlockRole::Layout,
+        }
+    }
+
+    const fn button_group_tone_for_part(
+        part: ButtonGroupPart,
+        variant: ButtonVariant,
+        selected: bool,
+    ) -> UiBlockTone {
+        match part {
+            ButtonGroupPart::Root | ButtonGroupPart::Separator => UiBlockTone::Surface,
+            ButtonGroupPart::Item if !selected => UiBlockTone::Surface,
+            ButtonGroupPart::Item => match variant {
+                ButtonVariant::Primary | ButtonVariant::Link => UiBlockTone::Brand,
+                ButtonVariant::Secondary | ButtonVariant::Outline | ButtonVariant::Ghost => {
+                    UiBlockTone::Accent
+                }
+                ButtonVariant::Destructive => UiBlockTone::Danger,
+            },
+        }
+    }
+
+    const fn button_group_intent_for_part(part: ButtonGroupPart) -> UiWidgetIntent {
+        match part {
+            ButtonGroupPart::Item => UiWidgetIntent::Select,
+            ButtonGroupPart::Root | ButtonGroupPart::Separator => UiWidgetIntent::None,
+        }
+    }
+
+    fn button_group_size_for_part(
+        part: ButtonGroupPart,
+        size: ButtonSize,
+        orientation: ButtonGroupOrientation,
+    ) -> Vec2 {
+        match part {
+            ButtonGroupPart::Root => match orientation {
+                ButtonGroupOrientation::Horizontal => Vec2::new(scale::space::XL3, scale::space::L),
+                ButtonGroupOrientation::Vertical => Vec2::new(scale::space::XL2, scale::space::XL2),
+            },
+            ButtonGroupPart::Item => match size {
+                ButtonSize::Small => Vec2::new(scale::space::L, scale::space::S),
+                ButtonSize::Medium => Vec2::new(scale::space::XL, scale::space::L),
+                ButtonSize::Large => Vec2::new(scale::space::XL2, scale::space::XL),
+                ButtonSize::Icon => Vec2::new(scale::space::L, scale::space::L),
+            },
+            ButtonGroupPart::Separator => match orientation {
+                ButtonGroupOrientation::Horizontal => Vec2::new(scale::space::XS3, scale::space::L),
+                ButtonGroupOrientation::Vertical => Vec2::new(scale::space::XL, scale::space::XS3),
+            },
         }
     }
 
