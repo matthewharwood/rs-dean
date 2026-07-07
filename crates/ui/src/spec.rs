@@ -291,7 +291,7 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        EmptyPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
         UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
         alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
         avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -308,8 +308,8 @@ pub mod bevy_adapter {
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, scale,
+        default_empty_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -445,6 +445,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Empty {
+            return bevy_primitives_for_empty(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -704,6 +707,39 @@ pub mod bevy_adapter {
                     state,
                     intent: dropdown_menu_intent_for_part(node.part),
                     selected: node.selected || node.active,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_empty(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_empty_model();
+        let empty_state = model.state();
+        empty_render_nodes(&model, &empty_state)
+            .into_iter()
+            .map(|node| {
+                let role = empty_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: empty_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: empty_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        empty_tone_for_part(node.part, node.active, node.actionable),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: empty_intent_for_part(node.part, node.actionable),
+                    selected: node.active,
                     disabled: node.disabled,
                 }
             })
@@ -2284,6 +2320,66 @@ pub mod bevy_adapter {
             DropdownMenuPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
             DropdownMenuPart::Label => Vec2::new(scale::space::XL3, scale::space::S),
             DropdownMenuPart::Separator => Vec2::new(scale::space::XL3, scale::space::XS),
+        }
+    }
+
+    const fn empty_kind_for_part(part: EmptyPart) -> UiWidgetSlotKind {
+        match part {
+            EmptyPart::Root => UiWidgetSlotKind::Section,
+            EmptyPart::Header => UiWidgetSlotKind::Header,
+            EmptyPart::Title => UiWidgetSlotKind::Title,
+            EmptyPart::Description => UiWidgetSlotKind::Description,
+            EmptyPart::Content => UiWidgetSlotKind::Panel,
+            EmptyPart::Action => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn empty_role_for_part(part: EmptyPart) -> UiBlockRole {
+        match part {
+            EmptyPart::Root => UiBlockRole::Root,
+            EmptyPart::Header | EmptyPart::Title => UiBlockRole::Header,
+            EmptyPart::Description => UiBlockRole::Text,
+            EmptyPart::Content => UiBlockRole::Feedback,
+            EmptyPart::Action => UiBlockRole::Action,
+        }
+    }
+
+    const fn empty_tone_for_part(part: EmptyPart, active: bool, actionable: bool) -> UiBlockTone {
+        match part {
+            EmptyPart::Action => {
+                if active || actionable {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Muted
+                }
+            }
+            EmptyPart::Content => UiBlockTone::Warning,
+            EmptyPart::Root | EmptyPart::Header | EmptyPart::Title | EmptyPart::Description => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn empty_intent_for_part(part: EmptyPart, actionable: bool) -> UiWidgetIntent {
+        match part {
+            EmptyPart::Action if actionable => UiWidgetIntent::Activate,
+            EmptyPart::Root
+            | EmptyPart::Header
+            | EmptyPart::Title
+            | EmptyPart::Description
+            | EmptyPart::Content
+            | EmptyPart::Action => UiWidgetIntent::None,
+        }
+    }
+
+    fn empty_size_for_part(part: EmptyPart) -> Vec2 {
+        match part {
+            EmptyPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            EmptyPart::Header => Vec2::new(scale::space::XL3, scale::space::L),
+            EmptyPart::Title => Vec2::new(scale::space::XL2, scale::space::M),
+            EmptyPart::Description => Vec2::new(scale::space::XL3, scale::space::M),
+            EmptyPart::Content => Vec2::new(scale::space::XL3, scale::space::XL),
+            EmptyPart::Action => Vec2::new(scale::space::XL2, scale::space::L),
         }
     }
 

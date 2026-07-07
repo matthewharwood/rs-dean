@@ -22,13 +22,14 @@ use crate::{
     DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
     DialogState, DirectionIntent, DirectionModel, DirectionPart, DirectionValue, DrawerIntent,
     DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
-    DropdownMenuModel, DropdownMenuPart, DropdownMenuState, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
+    EmptyPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -38,16 +39,17 @@ use crate::{
     default_combobox_model, default_command_model, default_context_menu_model,
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_empty_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, max_data_table_page_index, month_name,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
     validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model,
+    validate_dropdown_menu_model, validate_empty_model,
 };
 
 const HEALTH_CARD: &str =
@@ -653,6 +655,28 @@ const DROPDOWN_MENU_LABEL: &str =
     "px-xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
 const DROPDOWN_MENU_SEPARATOR: &str = "my-3xs h-3xs rounded-pill bg-border-subtle";
 const DROPDOWN_MENU_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const EMPTY_ROOT: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-border-subtle bg-surface-1 p-m text-center text-text-1 shadow-1";
+const EMPTY_ROOT_DENSE: &str = "grid w-full max-w-md justify-items-center gap-xs rounded-field border border-border-subtle bg-surface-1 p-s text-center text-text-1 shadow-1";
+const EMPTY_ROOT_LOADING: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-info bg-info-soft p-m text-center text-text-1 shadow-1";
+const EMPTY_ROOT_DISABLED: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-border-muted bg-surface-2 p-m text-center text-text-disabled";
+const EMPTY_HEADER: &str = "grid justify-items-center gap-2xs";
+const EMPTY_HEADER_DENSE: &str = "grid justify-items-center gap-3xs";
+const EMPTY_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const EMPTY_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const EMPTY_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const EMPTY_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const EMPTY_CONTENT: &str = "grid w-full justify-items-center gap-2xs rounded-field border border-border-faint bg-surface-2 p-s";
+const EMPTY_CONTENT_DENSE: &str = "grid w-full justify-items-center gap-3xs rounded-field border border-border-faint bg-surface-2 p-xs";
+const EMPTY_MARKER: &str = "grid size-xl place-items-center rounded-field border border-border-subtle bg-primary-soft text-0 font-7 text-brand";
+const EMPTY_MARKER_DENSE: &str = "grid size-l place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
+const EMPTY_CONTENT_TEXT: &str = "m-0 text-0 leading-0 text-text-2";
+const EMPTY_CONTENT_TEXT_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const EMPTY_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const EMPTY_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const EMPTY_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const EMPTY_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const EMPTY_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -6455,7 +6479,236 @@ const fn dropdown_menu_state_label(loading: bool, disabled: bool, open: bool) ->
     }
 }
 
-catalog_component!(Empty, crate::EmptyModel, crate::default_empty_model);
+#[component]
+pub fn Empty(#[prop(optional, default = default_empty_model())] model: EmptyModel) -> AnyView {
+    if let Err(report) = validate_empty_model(&model) {
+        let message = format!("Empty validation failed: {report}");
+        return view! {
+            <div class=EMPTY_ERROR data-ui-component="empty" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = empty_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Root)
+        .expect("invariant: empty render nodes include root")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Header)
+        .expect("invariant: empty render nodes include header")
+        .clone();
+    let title = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Title)
+        .expect("invariant: empty render nodes include title")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Description)
+        .expect("invariant: empty render nodes include description")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Content)
+        .expect("invariant: empty render nodes include content")
+        .clone();
+    let action = nodes
+        .iter()
+        .find(|node| node.part == EmptyPart::Action)
+        .expect("invariant: empty render nodes include action")
+        .clone();
+    let density = root.density;
+    let (state, set_state) = signal(state_model);
+    let action_disabled = action.disabled || blocked;
+    let action_value_for_data = action.value.clone();
+    let action_value_for_click = action.value.clone();
+    let action_label = if loading {
+        "Loading".to_owned()
+    } else {
+        action.label.clone()
+    };
+    let action_view = if action.actionable {
+        view! {
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        empty_action_class(
+                            density,
+                            state.is_active(EmptyPart::Action),
+                            action_disabled,
+                        )
+                    })
+                }
+                data-ui-part=EmptyPart::Action.label()
+                data-ui-value=action_value_for_data
+                aria-pressed=move || {
+                    state.with(|state| state.is_active(EmptyPart::Action).to_string())
+                }
+                disabled=action_disabled
+                on:focus=move |_| {
+                    if !action_disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(EmptyIntent::Focus(EmptyPart::Action));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !action_disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(EmptyIntent::Blur(EmptyPart::Action));
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !action_disabled {
+                        let value = action_value_for_click.clone();
+                        set_state.update(|state| {
+                            let _ = state.apply(EmptyIntent::Activate(value));
+                        });
+                    }
+                }
+            >
+                {action_label}
+            </button>
+        }
+        .into_any()
+    } else {
+        view! {
+            <button
+                type="button"
+                class=EMPTY_ACTION_DISABLED
+                data-ui-part=EmptyPart::Action.label()
+                data-ui-value=action_value_for_data
+                aria-disabled="true"
+                disabled=true
+            >
+                {action_label}
+            </button>
+        }
+        .into_any()
+    };
+
+    view! {
+        <section
+            class=empty_root_class(density, loading, disabled)
+            data-ui-component="empty"
+            data-ui-part=EmptyPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=empty_state_label(loading, disabled)
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <header class=empty_header_class(density) data-ui-part=header.part.label()>
+                <h3 class=empty_title_class(density) data-ui-part=title.part.label()>
+                    {title.label}
+                </h3>
+                <p class=empty_description_class(density) data-ui-part=description.part.label()>
+                    {description.detail}
+                </p>
+            </header>
+            <div class=empty_content_class(density) data-ui-part=content.part.label()>
+                <span class=empty_marker_class(density) aria-hidden="true">
+                    {content.label}
+                </span>
+                <p class=empty_content_text_class(density)>
+                    {content.detail}
+                </p>
+            </div>
+            {action_view}
+        </section>
+    }
+    .into_any()
+}
+
+const fn empty_root_class(density: EmptyDensity, loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        return EMPTY_ROOT_DISABLED;
+    }
+    if loading {
+        return EMPTY_ROOT_LOADING;
+    }
+    match density {
+        EmptyDensity::Standard => EMPTY_ROOT,
+        EmptyDensity::Dense => EMPTY_ROOT_DENSE,
+    }
+}
+
+const fn empty_header_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_HEADER,
+        EmptyDensity::Dense => EMPTY_HEADER_DENSE,
+    }
+}
+
+const fn empty_title_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_TITLE,
+        EmptyDensity::Dense => EMPTY_TITLE_DENSE,
+    }
+}
+
+const fn empty_description_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_DESCRIPTION,
+        EmptyDensity::Dense => EMPTY_DESCRIPTION_DENSE,
+    }
+}
+
+const fn empty_content_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_CONTENT,
+        EmptyDensity::Dense => EMPTY_CONTENT_DENSE,
+    }
+}
+
+const fn empty_marker_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_MARKER,
+        EmptyDensity::Dense => EMPTY_MARKER_DENSE,
+    }
+}
+
+const fn empty_content_text_class(density: EmptyDensity) -> &'static str {
+    match density {
+        EmptyDensity::Standard => EMPTY_CONTENT_TEXT,
+        EmptyDensity::Dense => EMPTY_CONTENT_TEXT_DENSE,
+    }
+}
+
+const fn empty_action_class(density: EmptyDensity, active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        EMPTY_ACTION_DISABLED
+    } else if active {
+        EMPTY_ACTION_ACTIVE
+    } else {
+        match density {
+            EmptyDensity::Standard => EMPTY_ACTION,
+            EmptyDensity::Dense => EMPTY_ACTION_DENSE,
+        }
+    }
+}
+
+const fn empty_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Field, crate::FieldModel, crate::default_field_model);
 catalog_component!(
     HoverCard,

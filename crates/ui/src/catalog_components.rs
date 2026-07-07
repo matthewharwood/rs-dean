@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    empty,
-    Empty,
-    EmptyModel,
-    EmptyPart,
-    EmptyRenderNode,
-    EmptyState,
-    EmptyIntent,
-    EmptyChange,
-    validate_empty_model,
-    empty_render_nodes,
-    default_empty_model,
-    [
-        Root => "Empty",
-        Header => "EmptyHeader",
-        Title => "EmptyTitle",
-        Description => "EmptyDescription",
-        Content => "EmptyContent",
-        Action => "EmptyAction",
-    ]
-);
-
-define_catalog_component!(
     field,
     Field,
     FieldModel,
@@ -1289,8 +1267,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Dialog
         | UiComponentId::Direction
         | UiComponentId::Drawer
-        | UiComponentId::DropdownMenu => None,
-        UiComponentId::Empty => Some(any_nodes(empty_render_nodes(&default_empty_model()))),
+        | UiComponentId::DropdownMenu
+        | UiComponentId::Empty => None,
         UiComponentId::Field => Some(any_nodes(field_render_nodes(&default_field_model()))),
         UiComponentId::HoverCard => Some(any_nodes(hover_card_render_nodes(
             &default_hover_card_model(),
@@ -1409,6 +1387,7 @@ mod tests {
                     | UiComponentId::Direction
                     | UiComponentId::Drawer
                     | UiComponentId::DropdownMenu
+                    | UiComponentId::Empty
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1425,17 +1404,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_empty_model().state();
-        assert!(!state.is_active(EmptyPart::Root));
+        let mut state = default_field_model().state();
+        assert!(!state.is_active(FieldPart::Root));
         assert_eq!(
-            state.apply(EmptyIntent::Toggle(EmptyPart::Root)),
-            EmptyChange::Opened(EmptyPart::Root)
+            state.apply(FieldIntent::Toggle(FieldPart::Root)),
+            FieldChange::Opened(FieldPart::Root)
         );
-        assert!(state.is_active(EmptyPart::Root));
+        assert!(state.is_active(FieldPart::Root));
         assert_eq!(
-            state.apply(EmptyIntent::Toggle(EmptyPart::Root)),
-            EmptyChange::Closed(EmptyPart::Root)
+            state.apply(FieldIntent::Toggle(FieldPart::Root)),
+            FieldChange::Closed(FieldPart::Root)
         );
-        assert!(!state.is_active(EmptyPart::Root));
+        assert!(!state.is_active(FieldPart::Root));
     }
 }

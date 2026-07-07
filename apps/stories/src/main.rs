@@ -18,7 +18,8 @@ use rs_dean_ui::{
     DatePickerDensity, DatePickerModel, Dialog, DialogAction, DialogMode, DialogModel, DialogSize,
     Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
-    HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    Empty, EmptyAction, EmptyDensity, EmptyModel, HealthCard, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -527,6 +528,24 @@ fn Stories() -> impl IntoView {
                             <DropdownMenu model=invalid_dropdown_menu_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <DropdownMenu model=themed_dropdown_menu_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-empty" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Empty"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 27 implemented as a structured empty-state primitive backed by validated shared Rust copy/action state, renderer-local activation, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Empty model=default_empty_story_model() />
+                            <Empty model=dense_empty_story_model() />
+                            <Empty model=loading_empty_story_model() />
+                            <Empty model=disabled_empty_story_model() />
+                            <Empty model=invalid_empty_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Empty model=themed_empty_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1994,6 +2013,54 @@ fn themed_dropdown_menu_story_model() -> DropdownMenuModel {
         .with_trigger_label("Theme actions")
         .with_content_label("Theme menu actions")
         .with_selected_value("delete")
+}
+
+fn default_empty_story_model() -> EmptyModel {
+    EmptyModel::new(
+        "No lessons queued",
+        "The current filters do not match any scheduled review cards.",
+    )
+    .with_content("Clear the filter or create a new lesson to keep the queue moving.")
+    .with_action(EmptyAction::new("Create lesson", "create-lesson"))
+}
+
+fn dense_empty_story_model() -> EmptyModel {
+    EmptyModel::new(
+        "No matches",
+        "Dense empty states preserve the same anatomy with tighter spacing.",
+    )
+    .with_density(EmptyDensity::Dense)
+    .with_illustration_label("0")
+    .with_content("Try a broader search term.")
+    .with_action(EmptyAction::new("Reset search", "reset-search"))
+}
+
+fn loading_empty_story_model() -> EmptyModel {
+    default_empty_story_model().loading()
+}
+
+fn disabled_empty_story_model() -> EmptyModel {
+    EmptyModel::new(
+        "State locked",
+        "The empty-state action is unavailable until durable state hydrates.",
+    )
+    .with_content("The copy remains visible while action affordances are disabled.")
+    .with_action(EmptyAction::new("Create", "create-locked").disabled())
+    .disabled()
+}
+
+fn invalid_empty_story_model() -> EmptyModel {
+    EmptyModel::new("", "The validation boundary rejects empty titles.")
+}
+
+fn themed_empty_story_model() -> EmptyModel {
+    EmptyModel::new(
+        "Theme scoped empty",
+        "The same semantic empty-state tokens resolve through a nested Forest theme.",
+    )
+    .with_illustration_label("UI")
+    .with_content("Leptos DOM and Bevy primitives consume the same Empty render nodes.")
+    .with_action(EmptyAction::new("Inspect", "inspect-empty-theme"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

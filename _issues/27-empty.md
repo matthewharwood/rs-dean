@@ -41,5 +41,5 @@ Ship a Rust-first `Empty` component that follows the shadcn composition model wh
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
-- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Concrete typed empty-state model, optional illustration label, recovery action contract, part enum, render nodes, `garde` validation, renderer-local focus/activation state, token-only Leptos component, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.
