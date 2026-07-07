@@ -30,6 +30,7 @@ pub mod dropdown_menu;
 pub mod empty;
 pub mod field;
 pub mod hover_card;
+pub mod input;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -181,6 +182,10 @@ pub use hover_card::{
     HoverCardChange, HoverCardDensity, HoverCardIntent, HoverCardModel, HoverCardPart,
     HoverCardRenderNode, HoverCardState, default_hover_card_model, hover_card_render_nodes,
     validate_hover_card_model,
+};
+pub use input::{
+    InputAction, InputChange, InputDensity, InputIntent, InputKind, InputModel, InputPart,
+    InputRenderNode, InputState, default_input_model, input_render_nodes, validate_input_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

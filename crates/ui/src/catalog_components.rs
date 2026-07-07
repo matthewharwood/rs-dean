@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    input,
-    Input,
-    InputModel,
-    InputPart,
-    InputRenderNode,
-    InputState,
-    InputIntent,
-    InputChange,
-    validate_input_model,
-    input_render_nodes,
-    default_input_model,
-    [
-        Root => "Input",
-        Prefix => "InputPrefix",
-        Control => "InputControl",
-        Suffix => "InputSuffix",
-    ]
-);
-
-define_catalog_component!(
     input_group,
     InputGroup,
     InputGroupModel,
@@ -1229,8 +1209,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::DropdownMenu
         | UiComponentId::Empty
         | UiComponentId::Field
-        | UiComponentId::HoverCard => None,
-        UiComponentId::Input => Some(any_nodes(input_render_nodes(&default_input_model()))),
+        | UiComponentId::HoverCard
+        | UiComponentId::Input => None,
         UiComponentId::InputGroup => Some(any_nodes(input_group_render_nodes(
             &default_input_group_model(),
         ))),
@@ -1347,6 +1327,7 @@ mod tests {
                     | UiComponentId::Empty
                     | UiComponentId::Field
                     | UiComponentId::HoverCard
+                    | UiComponentId::Input
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1363,17 +1344,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_input_model().state();
-        assert!(!state.is_active(InputPart::Root));
+        let mut state = default_input_group_model().state();
+        assert!(!state.is_active(InputGroupPart::Root));
         assert_eq!(
-            state.apply(InputIntent::Toggle(InputPart::Root)),
-            InputChange::Opened(InputPart::Root)
+            state.apply(InputGroupIntent::Toggle(InputGroupPart::Root)),
+            InputGroupChange::Opened(InputGroupPart::Root)
         );
-        assert!(state.is_active(InputPart::Root));
+        assert!(state.is_active(InputGroupPart::Root));
         assert_eq!(
-            state.apply(InputIntent::Toggle(InputPart::Root)),
-            InputChange::Closed(InputPart::Root)
+            state.apply(InputGroupIntent::Toggle(InputGroupPart::Root)),
+            InputGroupChange::Closed(InputGroupPart::Root)
         );
-        assert!(!state.is_active(InputPart::Root));
+        assert!(!state.is_active(InputGroupPart::Root));
     }
 }

@@ -24,13 +24,13 @@ use crate::{
     DrawerModel, DrawerPart, DrawerSide, DrawerState, DropdownMenuDensity, DropdownMenuIntent,
     DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
     EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, HoverCardDensity, HoverCardIntent,
-    HoverCardModel, HoverCardPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    HoverCardModel, HoverCardPart, InputDensity, InputIntent, InputModel, InputPart, InputState,
+    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -42,8 +42,8 @@ use crate::{
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, dialog_render_nodes,
     direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, max_data_table_page_index, month_name,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    field_render_nodes, hover_card_render_nodes, input_render_nodes, max_data_table_page_index,
+    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
     validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
     validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
@@ -52,7 +52,7 @@ use crate::{
     validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
     validate_dialog_model, validate_direction_model, validate_drawer_model,
     validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model,
+    validate_hover_card_model, validate_input_model,
 };
 
 const HEALTH_CARD: &str =
@@ -727,6 +727,32 @@ const HOVER_CARD_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const HOVER_CARD_ARROW: &str = "grid size-s place-items-center rounded-field border border-border-subtle bg-surface-elevated text-00 font-7 text-text-muted shadow-1";
 const HOVER_CARD_ARROW_HIDDEN: &str = "hidden";
 const HOVER_CARD_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const INPUT_ROOT: &str = "grid w-full max-w-md gap-2xs text-text-1";
+const INPUT_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const INPUT_ROW: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 text-text-1 shadow-1 transition-colors focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring";
+const INPUT_ROW_DENSE: &str = "flex min-h-s w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 text-text-1 shadow-1 transition-colors focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring";
+const INPUT_ROW_FOCUSED: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-brand bg-surface-1 text-text-1 shadow-2 transition-colors";
+const INPUT_ROW_DENSE_FOCUSED: &str = "flex min-h-s w-full items-stretch overflow-hidden rounded-field border border-brand bg-surface-1 text-text-1 shadow-2 transition-colors";
+const INPUT_ROW_INVALID: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-danger bg-error-soft text-text-1 shadow-1 transition-colors";
+const INPUT_ROW_DENSE_INVALID: &str = "flex min-h-s w-full items-stretch overflow-hidden rounded-field border border-danger bg-error-soft text-text-1 shadow-1 transition-colors";
+const INPUT_ROW_LOADING: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-info bg-info-soft text-text-1 shadow-1";
+const INPUT_ROW_DISABLED: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-border-muted bg-surface-2 text-text-disabled opacity-disabled";
+const INPUT_PREFIX: &str = "inline-flex items-center border-r border-border-subtle bg-surface-2 px-xs text-0 font-6 text-text-muted";
+const INPUT_PREFIX_DENSE: &str = "inline-flex items-center border-r border-border-subtle bg-surface-2 px-2xs text-00 font-6 text-text-muted";
+const INPUT_PREFIX_HIDDEN: &str = "hidden";
+const INPUT_CONTROL: &str = "min-w-0 flex-1 bg-transparent px-xs py-2xs text-0 leading-0 text-text-1 outline-none placeholder:text-text-muted disabled:text-text-disabled";
+const INPUT_CONTROL_DENSE: &str = "min-w-0 flex-1 bg-transparent px-2xs py-3xs text-00 leading-0 text-text-1 outline-none placeholder:text-text-muted disabled:text-text-disabled";
+const INPUT_CONTROL_DISABLED: &str =
+    "min-w-0 flex-1 bg-transparent px-xs py-2xs text-0 leading-0 text-text-disabled outline-none";
+const INPUT_SUFFIX: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const INPUT_SUFFIX_DENSE: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-2xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const INPUT_SUFFIX_ACTIVE: &str = "inline-flex shrink-0 items-center justify-center border-l border-brand bg-primary-soft px-xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const INPUT_SUFFIX_DISABLED: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-muted bg-surface-2 px-xs text-0 font-6 text-text-disabled opacity-disabled";
+const INPUT_SUFFIX_HIDDEN: &str = "hidden";
+const INPUT_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const INPUT_ERROR_HIDDEN: &str = "hidden";
+const INPUT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -7207,7 +7233,271 @@ const fn hover_card_state_label(loading: bool, disabled: bool, open: bool) -> &'
     }
 }
 
-catalog_component!(Input, crate::InputModel, crate::default_input_model);
+#[component]
+pub fn Input(
+    #[prop(optional, default = crate::default_input_model())] model: InputModel,
+) -> AnyView {
+    if let Err(report) = validate_input_model(&model) {
+        let message = format!("Input validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="input" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let input_kind = model.input_kind;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let required = model.required;
+    let error_detail = model
+        .error
+        .clone()
+        .unwrap_or_else(|| "No input error".to_owned());
+    let state_model = model.state();
+    let nodes = input_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == InputPart::Root)
+        .expect("invariant: input render nodes include root")
+        .clone();
+    let prefix = nodes
+        .iter()
+        .find(|node| node.part == InputPart::Prefix)
+        .expect("invariant: input render nodes include prefix")
+        .clone();
+    let control = nodes
+        .iter()
+        .find(|node| node.part == InputPart::Control)
+        .expect("invariant: input render nodes include control")
+        .clone();
+    let suffix = nodes
+        .iter()
+        .find(|node| node.part == InputPart::Suffix)
+        .expect("invariant: input render nodes include suffix")
+        .clone();
+    let invalid = root.invalid;
+    let placeholder = control.label.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=input_root_class(disabled)
+            data-ui-component="input"
+            data-ui-part=InputPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-kind=input_kind.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    input_state_label(loading, disabled, invalid, state.is_focused()).to_owned()
+                })
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <div
+                class=move || {
+                    state.with(|state| {
+                        input_row_class(density, state.is_focused(), invalid, loading, disabled)
+                            .to_owned()
+                    })
+                }
+            >
+                <span
+                    class=input_prefix_class(density, prefix.visible)
+                    data-ui-part=InputPart::Prefix.label()
+                    data-ui-value=prefix.value
+                    aria-hidden=(!prefix.visible).to_string()
+                >
+                    {prefix.label}
+                </span>
+                <input
+                    type=input_kind.label()
+                    class=input_control_class(density, blocked)
+                    data-ui-part=InputPart::Control.label()
+                    placeholder=placeholder
+                    aria-label="Input"
+                    aria-invalid=invalid.to_string()
+                    required=required
+                    disabled=blocked
+                    prop:value=move || state.with(|state| state.value().to_owned())
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(InputIntent::Focus);
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(InputIntent::Blur);
+                            });
+                        }
+                    }
+                    on:input=move |event| {
+                        if !blocked {
+                            let value = event_target_value(&event);
+                            set_state.update(|state| {
+                                let _ = state.apply(InputIntent::Input(value));
+                            });
+                        }
+                    }
+                />
+                {input_suffix_view(suffix, density, blocked, set_state)}
+            </div>
+            <p
+                class=input_error_class(invalid)
+                data-ui-part=InputPart::Control.label()
+                aria-hidden=(!invalid).to_string()
+            >
+                {error_detail}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+fn input_suffix_view(
+    node: crate::InputRenderNode,
+    density: InputDensity,
+    blocked: bool,
+    set_state: WriteSignal<InputState>,
+) -> AnyView {
+    let disabled = node.disabled || blocked || !node.actionable;
+    let value_for_click = node.value.clone();
+    let value_for_data = node.value;
+    let label = node.label;
+    let visible = node.visible;
+    let active = node.active;
+    view! {
+        <button
+            type="button"
+            class=move || {
+                input_suffix_class(density, visible, active, disabled).to_owned()
+            }
+            data-ui-part=InputPart::Suffix.label()
+            data-ui-value=value_for_data
+            aria-hidden=(!visible).to_string()
+            disabled=disabled
+            on:click=move |_| {
+                if !disabled {
+                    let value = value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(InputIntent::ActivateSuffix(value));
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn input_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        INPUT_ROOT_DISABLED
+    } else {
+        INPUT_ROOT
+    }
+}
+
+const fn input_row_class(
+    density: InputDensity,
+    focused: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return INPUT_ROW_DISABLED;
+    }
+    if loading {
+        return INPUT_ROW_LOADING;
+    }
+    match (density, invalid, focused) {
+        (InputDensity::Standard, true, _) => INPUT_ROW_INVALID,
+        (InputDensity::Dense, true, _) => INPUT_ROW_DENSE_INVALID,
+        (InputDensity::Standard, false, true) => INPUT_ROW_FOCUSED,
+        (InputDensity::Dense, false, true) => INPUT_ROW_DENSE_FOCUSED,
+        (InputDensity::Standard, false, false) => INPUT_ROW,
+        (InputDensity::Dense, false, false) => INPUT_ROW_DENSE,
+    }
+}
+
+const fn input_prefix_class(density: InputDensity, visible: bool) -> &'static str {
+    if !visible {
+        return INPUT_PREFIX_HIDDEN;
+    }
+    match density {
+        InputDensity::Standard => INPUT_PREFIX,
+        InputDensity::Dense => INPUT_PREFIX_DENSE,
+    }
+}
+
+const fn input_control_class(density: InputDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return INPUT_CONTROL_DISABLED;
+    }
+    match density {
+        InputDensity::Standard => INPUT_CONTROL,
+        InputDensity::Dense => INPUT_CONTROL_DENSE,
+    }
+}
+
+const fn input_suffix_class(
+    density: InputDensity,
+    visible: bool,
+    active: bool,
+    disabled: bool,
+) -> &'static str {
+    if !visible {
+        return INPUT_SUFFIX_HIDDEN;
+    }
+    if disabled {
+        return INPUT_SUFFIX_DISABLED;
+    }
+    if active {
+        return INPUT_SUFFIX_ACTIVE;
+    }
+    match density {
+        InputDensity::Standard => INPUT_SUFFIX,
+        InputDensity::Dense => INPUT_SUFFIX_DENSE,
+    }
+}
+
+const fn input_error_class(visible: bool) -> &'static str {
+    if visible {
+        INPUT_ERROR_TEXT
+    } else {
+        INPUT_ERROR_HIDDEN
+    }
+}
+
+const fn input_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     InputGroup,
     crate::InputGroupModel,

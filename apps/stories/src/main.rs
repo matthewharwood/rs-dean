@@ -19,8 +19,8 @@ use rs_dean_ui::{
     Direction, DirectionModel, DirectionValue, Drawer, DrawerAction, DrawerModel, DrawerSide,
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
-    HealthCard, HoverCard, HoverCardDensity, HoverCardModel, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
+    InputKind, InputModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -583,6 +583,24 @@ fn Stories() -> impl IntoView {
                             <HoverCard model=invalid_hover_card_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <HoverCard model=themed_hover_card_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-input" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Input"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 30 implemented as a single-line form control backed by validated shared Rust prefix/control/suffix state, renderer-local draft input state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Input model=default_input_story_model() />
+                            <Input model=dense_input_story_model() />
+                            <Input model=loading_input_story_model() />
+                            <Input model=disabled_input_story_model() />
+                            <Input model=invalid_input_story_model() />
+                            <ThemeScope theme=ThemeId::Lofi>
+                                <Input model=themed_input_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2202,6 +2220,51 @@ fn themed_hover_card_story_model() -> HoverCardModel {
     .with_metadata("Luxury")
     .with_arrow_label("Theme arrow")
     .default_open()
+}
+
+fn default_input_story_model() -> InputModel {
+    InputModel::new("engmanager.xyz")
+        .with_input_kind(InputKind::Url)
+        .with_value("engmanager.xyz")
+        .with_prefix("https://")
+        .with_suffix(InputAction::new("Copy", "copy-url"))
+        .required()
+}
+
+fn dense_input_story_model() -> InputModel {
+    InputModel::new("Search components")
+        .with_density(InputDensity::Dense)
+        .with_input_kind(InputKind::Search)
+        .with_prefix("UI")
+        .with_suffix(InputAction::new("Go", "search-components"))
+}
+
+fn loading_input_story_model() -> InputModel {
+    default_input_story_model().loading()
+}
+
+fn disabled_input_story_model() -> InputModel {
+    InputModel::new("Locked value")
+        .with_value("stable-id")
+        .with_prefix("id:")
+        .with_suffix(InputAction::new("Copy", "copy-locked").disabled())
+        .disabled()
+}
+
+fn invalid_input_story_model() -> InputModel {
+    InputModel::new("Email")
+        .with_input_kind(InputKind::Email)
+        .with_prefix("@")
+        .with_error("Email address is required.")
+        .required()
+}
+
+fn themed_input_story_model() -> InputModel {
+    InputModel::new("theme token")
+        .with_input_kind(InputKind::Text)
+        .with_value("surface-elevated")
+        .with_prefix("token:")
+        .with_suffix(InputAction::new("Apply", "apply-token"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

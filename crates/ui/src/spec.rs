@@ -291,12 +291,13 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, FieldPart, HoverCardPart, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        EmptyPart, FieldPart, HoverCardPart, InputPart, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -308,9 +309,10 @@ pub mod bevy_adapter {
         default_combobox_model, default_command_model, default_context_menu_model,
         default_data_table_model, default_date_picker_model, default_dialog_model,
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
-        default_empty_model, default_field_model, default_hover_card_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, scale,
+        default_empty_model, default_field_model, default_hover_card_model, default_input_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -459,6 +461,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Input {
+            return bevy_primitives_for_input(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -817,6 +822,39 @@ pub mod bevy_adapter {
                     state,
                     intent: hover_card_intent_for_part(node.part),
                     selected: node.open || node.active,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_input(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_input_model();
+        let input_state = model.state();
+        input_render_nodes(&model, &input_state)
+            .into_iter()
+            .map(|node| {
+                let role = input_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: input_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: input_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        input_tone_for_part(node.part, node.focused, node.invalid, node.visible),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: input_intent_for_part(node.part, node.actionable),
+                    selected: node.focused || node.active || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -2562,6 +2600,59 @@ pub mod bevy_adapter {
             HoverCardPart::Trigger => Vec2::new(scale::space::XL2, scale::space::L),
             HoverCardPart::Content => Vec2::new(scale::space::XL3, scale::space::XL2),
             HoverCardPart::Arrow => Vec2::new(scale::space::S, scale::space::S),
+        }
+    }
+
+    const fn input_kind_for_part(part: InputPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            InputPart::Root => UiWidgetSlotKind::Section,
+            InputPart::Prefix => UiWidgetSlotKind::Text,
+            InputPart::Control => UiWidgetSlotKind::Input,
+            InputPart::Suffix if actionable => UiWidgetSlotKind::Button,
+            InputPart::Suffix => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn input_role_for_part(part: InputPart) -> UiBlockRole {
+        match part {
+            InputPart::Root => UiBlockRole::Root,
+            InputPart::Prefix | InputPart::Suffix => UiBlockRole::Action,
+            InputPart::Control => UiBlockRole::Control,
+        }
+    }
+
+    const fn input_tone_for_part(
+        part: InputPart,
+        focused: bool,
+        invalid: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        if invalid {
+            return UiBlockTone::Danger;
+        }
+        match part {
+            InputPart::Control if focused => UiBlockTone::Brand,
+            InputPart::Suffix if visible => UiBlockTone::Brand,
+            InputPart::Prefix if visible => UiBlockTone::Muted,
+            InputPart::Prefix | InputPart::Suffix => UiBlockTone::Muted,
+            InputPart::Root | InputPart::Control => UiBlockTone::Surface,
+        }
+    }
+
+    const fn input_intent_for_part(part: InputPart, actionable: bool) -> UiWidgetIntent {
+        match part {
+            InputPart::Control => UiWidgetIntent::Input,
+            InputPart::Suffix if actionable => UiWidgetIntent::Activate,
+            InputPart::Root | InputPart::Prefix | InputPart::Suffix => UiWidgetIntent::None,
+        }
+    }
+
+    fn input_size_for_part(part: InputPart) -> Vec2 {
+        match part {
+            InputPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            InputPart::Prefix => Vec2::new(scale::space::L, scale::space::M),
+            InputPart::Control => Vec2::new(scale::space::XL3, scale::space::L),
+            InputPart::Suffix => Vec2::new(scale::space::L, scale::space::M),
         }
     }
 
