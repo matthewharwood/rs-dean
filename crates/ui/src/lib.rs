@@ -1,6 +1,8 @@
 pub mod accordion;
 pub mod alert;
+pub mod alert_dialog;
 pub mod catalog;
+mod dom;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -17,6 +19,11 @@ pub use accordion::{
 pub use alert::{
     AlertAction, AlertDensity, AlertIntent, AlertModel, AlertPart, AlertRenderNode, AlertTone,
     alert_render_nodes, default_alert_model, validate_alert_model,
+};
+pub use alert_dialog::{
+    AlertDialogButton, AlertDialogChange, AlertDialogIntent, AlertDialogModel, AlertDialogPart,
+    AlertDialogRenderNode, AlertDialogSize, AlertDialogState, alert_dialog_dom_id,
+    alert_dialog_render_nodes, default_alert_dialog_model, validate_alert_dialog_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

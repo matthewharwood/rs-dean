@@ -1,6 +1,9 @@
 # Component Implementation Sweep Log
 
-Protocol: implement one component, then re-audit every previously implemented component before moving to the next issue. Any learning is folded back into the shared recipe, renderer, or tests, then the sweep restarts at the first implemented component.
+Sweep Process: implement one component, then re-audit every previously
+implemented component before moving to the next issue. Any learning is folded
+back into the shared recipe, renderer, or tests, then the sweep restarts at the
+first implemented component.
 
 Completed pass: Accordion through Typography.
 
@@ -20,6 +23,16 @@ story proof, and Bevy adapter already match the shared setup. Alert was updated
 during the sweep so its root render node identifies the component while
 `AlertTitle` carries user copy, matching Accordion's root-node convention.
 
+Concrete component pass: Alert Dialog complete. The third issue now has a typed
+ephemeral Rust model, button contract, renderer-local state transition API,
+`garde` validation, render nodes, token-only Leptos component, dedicated story
+proof, and Bevy primitive derivation from the same model. The first sweep found
+shared DOM id slugging was duplicated between Accordion and Alert Dialog, so the
+id algorithm moved into an internal `dom` helper and the sweep restarted at
+Accordion. The second sweep found no further Accordion, Alert, or Alert Dialog
+changes were needed because their validator boundary, render-node root
+convention, story proof, and Bevy adapter shape now match.
+
 ## Consolidated Learnings
 
 - Bespoke one-off APIs would drift across Leptos and Bevy, so the implementation source of truth is the combination of `ComponentImplementation` in `crates/ui/src/kit.rs` and literal `UiWidget` constructors in `crates/ui/src/widgets.rs`.
@@ -28,6 +41,8 @@ during the sweep so its root render node identifies the component while
 - Consumer-durable state is documented as app-owned and persisted through `crates/state` / `rs-dean-idb`; component renderers only emit typed intent boundaries.
 - The token-class guard scans every `crates/ui/src` Rust file so later component work cannot reintroduce stock Tailwind design-scale utilities.
 - Concrete components use `garde` at the shared Rust model boundary before a renderer accepts props, so Leptos and Bevy consume the same validated component contract.
+- The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
+- DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 

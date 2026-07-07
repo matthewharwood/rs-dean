@@ -1,7 +1,8 @@
 use leptos::prelude::*;
 use rs_dean_ui::{
-    Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertModel,
-    AlertTone, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    Accordion, AccordionItem, AccordionMode, Alert, AlertAction, AlertDensity, AlertDialog,
+    AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, HealthCard,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -76,6 +77,24 @@ fn Stories() -> impl IntoView {
                             <Alert model=invalid_alert_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Alert model=themed_alert_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-alert-dialog" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Alert Dialog"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 03 implemented as a renderer-local confirmation flow backed by a validated shared Rust model and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <AlertDialog model=default_alert_dialog_story_model() />
+                            <AlertDialog model=open_destructive_alert_dialog_story_model() default_open=true />
+                            <AlertDialog model=small_loading_alert_dialog_story_model() default_open=true />
+                            <AlertDialog model=disabled_alert_dialog_story_model() />
+                            <AlertDialog model=invalid_alert_dialog_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <AlertDialog model=themed_alert_dialog_story_model() default_open=true />
                             </ThemeScope>
                         </div>
                     </section>
@@ -171,6 +190,72 @@ fn themed_alert_story_model() -> AlertModel {
     )
     .with_tone(AlertTone::Default)
     .with_action(AlertAction::new("Inspect", "inspect-theme"))
+}
+
+fn default_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "Archive deck",
+        "Archive this deck?",
+        "The deck will be hidden from the active queue until a durable state restore reactivates it.",
+        AlertDialogButton::new("Archive", "archive-deck"),
+        AlertDialogButton::new("Cancel", "cancel-archive"),
+    )
+}
+
+fn open_destructive_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "Delete draft",
+        "Delete this draft?",
+        "This cannot be undone. The draft and its local review state will be removed.",
+        AlertDialogButton::new("Delete", "delete-draft"),
+        AlertDialogButton::new("Cancel", "cancel-delete"),
+    )
+    .destructive()
+}
+
+fn small_loading_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "Publish",
+        "Publish static bundle?",
+        "The gate is already creating the release artifact for Pages.",
+        AlertDialogButton::new("Publish", "publish-pages"),
+        AlertDialogButton::new("Cancel", "cancel-publish"),
+    )
+    .with_size(AlertDialogSize::Small)
+    .loading()
+}
+
+fn disabled_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "Reset progress",
+        "Reset progress?",
+        "The app must hydrate durable state before this destructive action is available.",
+        AlertDialogButton::new("Reset", "reset-progress"),
+        AlertDialogButton::new("Cancel", "cancel-reset"),
+    )
+    .destructive()
+    .disabled()
+}
+
+fn invalid_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "",
+        "Missing title",
+        "The validation boundary renders an invalid state instead of accepting an empty trigger label.",
+        AlertDialogButton::new("Confirm", "confirm-invalid"),
+        AlertDialogButton::new("Cancel", "cancel-invalid"),
+    )
+}
+
+fn themed_alert_dialog_story_model() -> AlertDialogModel {
+    AlertDialogModel::new(
+        "Share project",
+        "Share this project?",
+        "The confirmation surface resolves through the nested Luxury theme scope.",
+        AlertDialogButton::new("Share", "share-project"),
+        AlertDialogButton::new("Cancel", "cancel-share"),
+    )
+    .with_size(AlertDialogSize::Small)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::dom::ui_dom_id;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AccordionMode {
@@ -258,23 +260,7 @@ pub fn accordion_render_nodes(
 }
 
 pub fn accordion_dom_id(prefix: &str, value: &str) -> String {
-    let mut id = String::with_capacity(prefix.len() + value.len() + 1);
-    id.push_str(prefix);
-    id.push('-');
-    let mut previous_dash = false;
-    for character in value.chars() {
-        if character.is_ascii_alphanumeric() {
-            id.push(character.to_ascii_lowercase());
-            previous_dash = false;
-        } else if !previous_dash {
-            id.push('-');
-            previous_dash = true;
-        }
-    }
-    while id.ends_with('-') {
-        id.pop();
-    }
-    id
+    ui_dom_id(prefix, value)
 }
 
 pub fn default_accordion_items() -> Vec<AccordionItem> {

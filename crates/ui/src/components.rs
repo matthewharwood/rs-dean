@@ -1,11 +1,13 @@
 use leptos::prelude::*;
 
 use crate::{
-    AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertModel,
-    AlertTone, ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidget, UiWidgetPattern, UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id,
-    component_implementation, component_spec, default_accordion_items, default_alert_model,
-    validate_accordion_model, validate_alert_model, widget_for_component,
+    AccordionIntent, AccordionItem, AccordionMode, AccordionModel, AlertDensity, AlertDialogIntent,
+    AlertDialogModel, AlertDialogSize, AlertDialogState, AlertModel, AlertTone,
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidget,
+    UiWidgetPattern, UiWidgetSlot, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
+    default_alert_model, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, widget_for_component,
 };
 
 const HEALTH_CARD: &str =
@@ -98,6 +100,25 @@ const ALERT_MARKER_WARNING: &str =
     "grid size-s shrink-0 place-items-center rounded-pill bg-warning text-00 font-7 text-text-1";
 const ALERT_MARKER_DESTRUCTIVE: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-danger text-00 font-7 text-text-on-brand";
 const ALERT_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const ALERT_DIALOG_ROOT: &str = "grid w-full gap-xs text-text-1";
+const ALERT_DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_OVERLAY: &str =
+    "grid w-full place-items-center rounded-box bg-surface-overlay p-s";
+const ALERT_DIALOG_CONTENT: &str = "grid w-full gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const ALERT_DIALOG_CONTENT_SMALL: &str = "grid w-full gap-xs rounded-box border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const ALERT_DIALOG_CONTENT_DESTRUCTIVE: &str = "grid w-full gap-s rounded-box border border-danger bg-surface-elevated p-s text-text-1 shadow-3";
+const ALERT_DIALOG_CONTENT_SMALL_DESTRUCTIVE: &str = "grid w-full gap-xs rounded-box border border-danger bg-surface-elevated p-xs text-text-1 shadow-2";
+const ALERT_DIALOG_HEADER: &str = "grid gap-2xs";
+const ALERT_DIALOG_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const ALERT_DIALOG_TITLE_SMALL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const ALERT_DIALOG_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const ALERT_DIALOG_DESCRIPTION_SMALL: &str = "m-0 text-00 leading-0 text-text-2";
+const ALERT_DIALOG_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
+const ALERT_DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_ACTION_DESTRUCTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_CANCEL: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[component]
@@ -235,6 +256,7 @@ pub fn ComponentDemo(id: UiComponentId) -> AnyView {
     match id {
         UiComponentId::Accordion => view! { <Accordion /> }.into_any(),
         UiComponentId::Alert => view! { <Alert /> }.into_any(),
+        UiComponentId::AlertDialog => view! { <AlertDialog /> }.into_any(),
         _ => render_widget(widget_for_component(id)).into_any(),
     }
 }
@@ -640,6 +662,204 @@ const fn alert_state(model: &AlertModel) -> &'static str {
 }
 
 #[component]
+pub fn AlertDialog(
+    #[prop(optional, default = default_alert_dialog_model())] model: AlertDialogModel,
+    #[prop(optional, default = false)] default_open: bool,
+) -> AnyView {
+    if let Err(report) = validate_alert_dialog_model(&model) {
+        let message = format!("AlertDialog validation failed: {report}");
+        return view! {
+            <section class=ALERT_DIALOG_ROOT data-ui-component="alert-dialog" data-ui-state="invalid">
+                <p class=ALERT_DIALOG_ERROR role="alert">{message}</p>
+            </section>
+        }
+        .into_any();
+    }
+
+    let initial_state = if default_open {
+        AlertDialogState::open()
+    } else {
+        AlertDialogState::closed()
+    };
+    let (state, set_state) = signal(initial_state);
+    let is_open = Memo::new(move |_| state.with(|state| state.is_open()));
+    let trigger_label = model.trigger_label;
+    let title = model.title;
+    let description = model.description;
+    let title_id = alert_dialog_dom_id("alert-dialog-title", &model.action.value);
+    let description_id = alert_dialog_dom_id("alert-dialog-description", &model.action.value);
+    let content_class = alert_dialog_content_class(model.size, model.destructive);
+    let title_class = alert_dialog_title_class(model.size);
+    let description_class = alert_dialog_description_class(model.size);
+    let action_class = alert_dialog_action_class(model.destructive);
+    let action_value = model.action.value;
+    let action_label = if model.loading {
+        "Working".to_owned()
+    } else {
+        model.action.label
+    };
+    let action_disabled = model.disabled || model.loading || model.action.disabled;
+    let cancel_value = model.cancel.value;
+    let cancel_label = model.cancel.label;
+    let cancel_disabled = model.disabled || model.loading || model.cancel.disabled;
+    let disabled = model.disabled;
+    let loading = model.loading;
+    let size = model.size.label();
+    let tone = if model.destructive {
+        "destructive"
+    } else {
+        "default"
+    };
+    let action_state = if action_disabled { "disabled" } else { "ready" };
+    let cancel_state = if cancel_disabled { "disabled" } else { "ready" };
+
+    let open_dialog = move |_| {
+        if disabled {
+            return;
+        }
+        set_state.update(|state| {
+            let _ = state.apply(AlertDialogIntent::Open);
+        });
+    };
+    let is_open_for_trigger = is_open;
+    let is_open_for_root = is_open;
+    let is_open_for_overlay = is_open;
+
+    view! {
+        <section
+            class=ALERT_DIALOG_ROOT
+            data-ui-component="alert-dialog"
+            data-ui-size=size
+            data-ui-tone=tone
+            data-ui-state=move || {
+                if is_open_for_root.get() {
+                    "open"
+                } else if disabled {
+                    "disabled"
+                } else {
+                    "closed"
+                }
+            }
+            aria-busy=loading.to_string()
+        >
+            <button
+                type="button"
+                class=ALERT_DIALOG_TRIGGER
+                data-ui-part="AlertDialogTrigger"
+                aria-haspopup="dialog"
+                aria-expanded=move || is_open_for_trigger.get().to_string()
+                disabled=disabled
+                on:click=open_dialog
+            >
+                {trigger_label}
+            </button>
+            {move || {
+                if is_open_for_overlay.get() {
+                    let action_value_for_click = action_value.clone();
+                    let confirm_dialog = move |_| {
+                        if action_disabled {
+                            return;
+                        }
+                        set_state.update(|state| {
+                            let _ = state.apply(AlertDialogIntent::Confirm(
+                                action_value_for_click.clone(),
+                            ));
+                        });
+                    };
+                    let cancel_dialog = move |_| {
+                        if cancel_disabled {
+                            return;
+                        }
+                        set_state.update(|state| {
+                            let _ = state.apply(AlertDialogIntent::Cancel);
+                        });
+                    };
+
+                    view! {
+                        <div class=ALERT_DIALOG_OVERLAY data-ui-part="AlertDialog">
+                            <section
+                                class=content_class
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby=title_id.clone()
+                                aria-describedby=description_id.clone()
+                                data-ui-part="AlertDialogContent"
+                            >
+                                <header class=ALERT_DIALOG_HEADER data-ui-part="AlertDialogHeader">
+                                    <h3 id=title_id.clone() class=title_class>{title.clone()}</h3>
+                                    <p id=description_id.clone() class=description_class>{description.clone()}</p>
+                                </header>
+                                <footer class=ALERT_DIALOG_FOOTER data-ui-part="AlertDialogFooter">
+                                    <button
+                                        type="button"
+                                        class=ALERT_DIALOG_CANCEL
+                                        data-ui-part="AlertDialogCancel"
+                                        data-ui-intent="close"
+                                        data-ui-action=cancel_value.clone()
+                                        data-ui-state=cancel_state
+                                        disabled=cancel_disabled
+                                        on:click=cancel_dialog
+                                    >
+                                        {cancel_label.clone()}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class=action_class
+                                        data-ui-part="AlertDialogAction"
+                                        data-ui-intent="activate"
+                                        data-ui-action=action_value.clone()
+                                        data-ui-state=action_state
+                                        disabled=action_disabled
+                                        on:click=confirm_dialog
+                                    >
+                                        {action_label.clone()}
+                                    </button>
+                                </footer>
+                            </section>
+                        </div>
+                    }
+                        .into_any()
+                } else {
+                    ().into_any()
+                }
+            }}
+        </section>
+    }
+    .into_any()
+}
+
+const fn alert_dialog_content_class(size: AlertDialogSize, destructive: bool) -> &'static str {
+    match (size, destructive) {
+        (AlertDialogSize::Default, false) => ALERT_DIALOG_CONTENT,
+        (AlertDialogSize::Default, true) => ALERT_DIALOG_CONTENT_DESTRUCTIVE,
+        (AlertDialogSize::Small, false) => ALERT_DIALOG_CONTENT_SMALL,
+        (AlertDialogSize::Small, true) => ALERT_DIALOG_CONTENT_SMALL_DESTRUCTIVE,
+    }
+}
+
+const fn alert_dialog_title_class(size: AlertDialogSize) -> &'static str {
+    match size {
+        AlertDialogSize::Default => ALERT_DIALOG_TITLE,
+        AlertDialogSize::Small => ALERT_DIALOG_TITLE_SMALL,
+    }
+}
+
+const fn alert_dialog_description_class(size: AlertDialogSize) -> &'static str {
+    match size {
+        AlertDialogSize::Default => ALERT_DIALOG_DESCRIPTION,
+        AlertDialogSize::Small => ALERT_DIALOG_DESCRIPTION_SMALL,
+    }
+}
+
+const fn alert_dialog_action_class(destructive: bool) -> &'static str {
+    if destructive {
+        ALERT_DIALOG_ACTION_DESTRUCTIVE
+    } else {
+        ALERT_DIALOG_ACTION
+    }
+}
+
+#[component]
 pub fn Accordion(
     #[prop(optional, default = default_accordion_items())] items: Vec<AccordionItem>,
     #[prop(optional, default = AccordionMode::Single)] mode: AccordionMode,
@@ -761,7 +981,6 @@ pub fn Accordion(
     .into_any()
 }
 
-literal_component!(AlertDialog, AlertDialog);
 literal_component!(AspectRatio, AspectRatio);
 literal_component!(Attachment, Attachment);
 literal_component!(Avatar, Avatar);

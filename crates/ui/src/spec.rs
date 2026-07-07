@@ -281,10 +281,11 @@ pub mod bevy_adapter {
     use bevy::prelude::{Color, Vec2};
 
     use crate::{
-        AccordionMode, AccordionModel, AccordionPart, AlertPart, RenderContract, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_render_nodes, component_implementation,
-        default_accordion_items, default_alert_model, scale, widget_for_component,
+        AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, component_implementation, default_accordion_items,
+        default_alert_dialog_model, default_alert_model, scale, widget_for_component,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -316,6 +317,13 @@ pub mod bevy_adapter {
         if id == UiComponentId::Alert {
             return bevy_primitives_for_alert(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::AlertDialog {
+            return bevy_primitives_for_alert_dialog(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         widget_for_component(id)
             .slots
             .into_iter()
@@ -333,6 +341,37 @@ pub mod bevy_adapter {
                 intent: slot.intent,
                 selected: slot.selected,
                 disabled: slot.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_alert_dialog(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        alert_dialog_render_nodes(&default_alert_dialog_model(), AlertDialogState::open())
+            .into_iter()
+            .map(|node| {
+                let role = alert_dialog_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: alert_dialog_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: size_for_role(role),
+                    fill: fill_for_tone(
+                        alert_dialog_tone_for_part(node.part, node.destructive),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: alert_dialog_intent_for_part(node.part),
+                    selected: node.open,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -394,6 +433,62 @@ pub mod bevy_adapter {
                 }
             })
             .collect()
+    }
+
+    const fn alert_dialog_kind_for_part(part: AlertDialogPart) -> UiWidgetSlotKind {
+        match part {
+            AlertDialogPart::Root => UiWidgetSlotKind::Section,
+            AlertDialogPart::Trigger => UiWidgetSlotKind::Button,
+            AlertDialogPart::Content => UiWidgetSlotKind::Overlay,
+            AlertDialogPart::Header => UiWidgetSlotKind::Header,
+            AlertDialogPart::Footer => UiWidgetSlotKind::Panel,
+            AlertDialogPart::Action | AlertDialogPart::Cancel => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn alert_dialog_role_for_part(part: AlertDialogPart) -> UiBlockRole {
+        match part {
+            AlertDialogPart::Root => UiBlockRole::Root,
+            AlertDialogPart::Trigger | AlertDialogPart::Action | AlertDialogPart::Cancel => {
+                UiBlockRole::Action
+            }
+            AlertDialogPart::Content => UiBlockRole::Overlay,
+            AlertDialogPart::Header => UiBlockRole::Header,
+            AlertDialogPart::Footer => UiBlockRole::Layout,
+        }
+    }
+
+    const fn alert_dialog_tone_for_part(part: AlertDialogPart, destructive: bool) -> UiBlockTone {
+        match part {
+            AlertDialogPart::Root | AlertDialogPart::Content => {
+                if destructive {
+                    UiBlockTone::Danger
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            AlertDialogPart::Action => {
+                if destructive {
+                    UiBlockTone::Danger
+                } else {
+                    UiBlockTone::Brand
+                }
+            }
+            AlertDialogPart::Trigger | AlertDialogPart::Cancel => UiBlockTone::Brand,
+            AlertDialogPart::Header | AlertDialogPart::Footer => UiBlockTone::Surface,
+        }
+    }
+
+    const fn alert_dialog_intent_for_part(part: AlertDialogPart) -> UiWidgetIntent {
+        match part {
+            AlertDialogPart::Trigger => UiWidgetIntent::Open,
+            AlertDialogPart::Action => UiWidgetIntent::Activate,
+            AlertDialogPart::Cancel => UiWidgetIntent::Close,
+            AlertDialogPart::Root
+            | AlertDialogPart::Content
+            | AlertDialogPart::Header
+            | AlertDialogPart::Footer => UiWidgetIntent::None,
+        }
     }
 
     const fn alert_kind_for_part(part: AlertPart) -> UiWidgetSlotKind {
