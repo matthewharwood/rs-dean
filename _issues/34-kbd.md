@@ -43,3 +43,4 @@ Ship a Rust-first `Kbd` component that follows the shadcn composition model whil
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete `crates/ui/src/kbd.rs`, `Kbd` Leptos renderer, story fixtures, and Bevy primitive adapter implemented with repeatable key nodes.

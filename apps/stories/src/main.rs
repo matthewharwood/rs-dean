@@ -21,7 +21,8 @@ use rs_dean_ui::{
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
     InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
-    ItemDensity, ItemModel, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, ShadcnComponentGallery,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -656,6 +657,24 @@ fn Stories() -> impl IntoView {
                             <Item model=invalid_item_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Item model=themed_item_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-kbd" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Kbd"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 34 implemented as a keyboard shortcut token backed by validated shared Rust key/chord nodes, renderer-local key focus state, and Bevy-readable repeatable key primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Kbd model=default_kbd_story_model() />
+                            <Kbd model=dense_kbd_story_model() />
+                            <Kbd model=loading_kbd_story_model() />
+                            <Kbd model=disabled_kbd_story_model() />
+                            <Kbd model=invalid_kbd_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Kbd model=themed_kbd_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2459,6 +2478,49 @@ fn themed_item_story_model() -> ItemModel {
         ItemAction::new("Open", "open-theme-row"),
         ItemAction::new("Pin", "pin-theme-row"),
     ])
+}
+
+fn default_kbd_story_model() -> KbdModel {
+    KbdModel::new(vec![KbdKey::new("Cmd"), KbdKey::new("K")])
+        .with_separator(" + ")
+        .with_aria_label("Open command menu")
+}
+
+fn dense_kbd_story_model() -> KbdModel {
+    KbdModel::new(vec![KbdKey::new("Shift"), KbdKey::new("P")])
+        .with_density(KbdDensity::Dense)
+        .with_separator(" + ")
+        .with_aria_label("Open palette")
+}
+
+fn loading_kbd_story_model() -> KbdModel {
+    default_kbd_story_model().loading()
+}
+
+fn disabled_kbd_story_model() -> KbdModel {
+    KbdModel::new(vec![
+        KbdKey::new("Ctrl"),
+        KbdKey::new("S").with_value("save"),
+    ])
+    .with_separator(" + ")
+    .with_aria_label("Save disabled")
+    .disabled()
+}
+
+fn invalid_kbd_story_model() -> KbdModel {
+    KbdModel::new(vec![KbdKey::new("Alt"), KbdKey::new("Enter")])
+        .with_separator(" + ")
+        .with_error("Shortcut is already assigned.")
+}
+
+fn themed_kbd_story_model() -> KbdModel {
+    KbdModel::new(vec![
+        KbdKey::new("Ctrl"),
+        KbdKey::new("Shift"),
+        KbdKey::new("D"),
+    ])
+    .with_separator(" + ")
+    .with_aria_label("Toggle diagnostics")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -34,6 +34,7 @@ pub mod input;
 pub mod input_group;
 pub mod input_otp;
 pub mod item;
+pub mod kbd;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -202,6 +203,10 @@ pub use input_otp::{
 pub use item::{
     ItemAction, ItemChange, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemRenderNode,
     ItemState, default_item_model, item_render_nodes, validate_item_model,
+};
+pub use kbd::{
+    KbdChange, KbdDensity, KbdIntent, KbdKey, KbdModel, KbdPart, KbdRenderNode, KbdState,
+    default_kbd_model, kbd_chord_label, kbd_render_nodes, validate_kbd_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

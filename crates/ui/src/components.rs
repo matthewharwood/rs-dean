@@ -27,12 +27,13 @@ use crate::{
     HoverCardModel, HoverCardPart, InputDensity, InputGroupIntent, InputGroupModel, InputGroupPart,
     InputGroupState, InputIntent, InputModel, InputOtpIntent, InputOtpModel, InputOtpPart,
     InputOtpState, InputPart, InputState, ItemDensity, ItemIntent, ItemModel, ItemPart, ItemState,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -43,21 +44,21 @@ use crate::{
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
-    default_input_otp_model, default_item_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model,
+    default_input_otp_model, default_item_model, default_kbd_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, max_data_table_page_index, month_name,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model,
 };
 
 const HEALTH_CARD: &str =
@@ -800,6 +801,22 @@ const ITEM_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center
 const ITEM_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const ITEM_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
 const ITEM_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const KBD_ROOT: &str = "inline-flex max-w-full items-center rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
+const KBD_ROOT_DENSE: &str = "inline-flex max-w-full items-center rounded-field border border-border-subtle bg-surface-1 p-3xs text-text-1 shadow-1";
+const KBD_ROOT_INVALID: &str = "inline-flex max-w-full items-center rounded-field border border-danger bg-error-soft p-2xs text-text-1 shadow-1";
+const KBD_ROOT_LOADING: &str = "inline-flex max-w-full items-center rounded-field border border-info bg-info-soft p-2xs text-text-1 shadow-1";
+const KBD_ROOT_DISABLED: &str = "inline-flex max-w-full items-center rounded-field border border-border-muted bg-surface-2 p-2xs text-text-disabled";
+const KBD_CHORD: &str = "inline-flex max-w-full items-center gap-2xs";
+const KBD_CHORD_DENSE: &str = "inline-flex max-w-full items-center gap-3xs";
+const KBD_KEY: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const KBD_KEY_DENSE: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-3xs py-3xs font-mono text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const KBD_KEY_FOCUSED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const KBD_KEY_INVALID: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-danger bg-error-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1 shadow-1";
+const KBD_KEY_LOADING: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-info bg-info-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1";
+const KBD_KEY_DISABLED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs font-mono text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const KBD_SEPARATOR: &str = "text-00 font-6 leading-0 text-text-muted";
+const KBD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -8266,7 +8283,267 @@ const fn item_state_label(
     }
 }
 
-catalog_component!(Kbd, crate::KbdModel, crate::default_kbd_model);
+#[component]
+pub fn Kbd(#[prop(optional, default = default_kbd_model())] model: KbdModel) -> AnyView {
+    if let Err(report) = validate_kbd_model(&model) {
+        let message = format!("Kbd validation failed: {report}");
+        return view! {
+            <div class=KBD_ERROR data-ui-component="kbd" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let separator = model.separator.clone();
+    let state_model = model.state();
+    let nodes = kbd_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == KbdPart::Root)
+        .expect("invariant: kbd render nodes include root")
+        .clone();
+    let chord = nodes
+        .iter()
+        .find(|node| node.part == KbdPart::Chord)
+        .expect("invariant: kbd render nodes include chord")
+        .clone();
+    let key_nodes = nodes
+        .into_iter()
+        .filter(|node| node.part == KbdPart::Key)
+        .collect::<Vec<_>>();
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let chord_value = chord.value;
+    let chord_label = chord.label;
+    let root_aria_label = chord_label.clone();
+    let chord_detail = chord.detail;
+    let (state, set_state) = signal(state_model);
+    let context = KbdViewContext {
+        density,
+        invalid,
+        loading,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <span
+            role="group"
+            class=kbd_root_class(density, invalid, loading, disabled)
+            data-ui-component="kbd"
+            data-ui-part=KbdPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    kbd_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_focused(KbdPart::Chord),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_aria_label
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <span
+                class=kbd_chord_class(density)
+                data-ui-part=KbdPart::Chord.label()
+                data-ui-value=chord_value
+                aria-label=chord_label
+                aria-invalid=invalid.to_string()
+                title=chord_detail
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(KbdIntent::FocusChord);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(KbdIntent::Blur);
+                        });
+                    }
+                }
+            >
+                {key_nodes
+                    .into_iter()
+                    .map(|node| kbd_key_view(node, separator.clone(), context))
+                    .collect_view()}
+            </span>
+        </span>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct KbdViewContext {
+    density: KbdDensity,
+    invalid: bool,
+    loading: bool,
+    blocked: bool,
+    state: ReadSignal<KbdState>,
+    set_state: WriteSignal<KbdState>,
+}
+
+fn kbd_key_view(node: crate::KbdRenderNode, separator: String, context: KbdViewContext) -> AnyView {
+    let index = node
+        .index
+        .expect("invariant: kbd key render node includes index");
+    let disabled = node.disabled || context.blocked;
+    let show_separator = index > 0;
+    let value_for_data = node.value;
+    let label = node.label;
+    let detail = node.detail;
+    let tab_index = if disabled { "-1" } else { "0" };
+    view! {
+        {if show_separator {
+            view! {
+                <span class=KBD_SEPARATOR aria-hidden="true">
+                    {separator.clone()}
+                </span>
+            }
+            .into_any()
+        } else {
+            ().into_any()
+        }}
+        <kbd
+            class=move || {
+                context.state.with(|state| {
+                    kbd_key_class(
+                        context.density,
+                        state.is_key_focused(index),
+                        context.invalid,
+                        context.loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=KbdPart::Key.label()
+            data-ui-index=index.to_string()
+            data-ui-value=value_for_data
+            aria-label=detail
+            aria-disabled=disabled.to_string()
+            tabindex=tab_index
+            on:focus=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(KbdIntent::FocusKey(index));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(KbdIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(KbdIntent::FocusKey(index));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(KbdIntent::Blur);
+                    });
+                }
+            }
+        >
+            {label}
+        </kbd>
+    }
+    .into_any()
+}
+
+const fn kbd_root_class(
+    density: KbdDensity,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return KBD_ROOT_DISABLED;
+    }
+    if loading {
+        return KBD_ROOT_LOADING;
+    }
+    if invalid {
+        return KBD_ROOT_INVALID;
+    }
+    match density {
+        KbdDensity::Standard => KBD_ROOT,
+        KbdDensity::Dense => KBD_ROOT_DENSE,
+    }
+}
+
+const fn kbd_chord_class(density: KbdDensity) -> &'static str {
+    match density {
+        KbdDensity::Standard => KBD_CHORD,
+        KbdDensity::Dense => KBD_CHORD_DENSE,
+    }
+}
+
+const fn kbd_key_class(
+    density: KbdDensity,
+    focused: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return KBD_KEY_DISABLED;
+    }
+    if loading {
+        return KBD_KEY_LOADING;
+    }
+    if invalid {
+        return KBD_KEY_INVALID;
+    }
+    if focused {
+        return KBD_KEY_FOCUSED;
+    }
+    match density {
+        KbdDensity::Standard => KBD_KEY,
+        KbdDensity::Dense => KBD_KEY_DENSE,
+    }
+}
+
+const fn kbd_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Label, crate::LabelModel, crate::default_label_model);
 catalog_component!(Marker, crate::MarkerModel, crate::default_marker_model);
 catalog_component!(Menubar, crate::MenubarModel, crate::default_menubar_model);

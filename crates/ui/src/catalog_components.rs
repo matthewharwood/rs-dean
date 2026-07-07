@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    kbd,
-    Kbd,
-    KbdModel,
-    KbdPart,
-    KbdRenderNode,
-    KbdState,
-    KbdIntent,
-    KbdChange,
-    validate_kbd_model,
-    kbd_render_nodes,
-    default_kbd_model,
-    [Root => "Kbd", Key => "KbdKey", Chord => "KbdChord"]
-);
-
-define_catalog_component!(
     label,
     Label,
     LabelModel,
@@ -1151,8 +1136,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Input
         | UiComponentId::InputGroup
         | UiComponentId::InputOtp
-        | UiComponentId::Item => None,
-        UiComponentId::Kbd => Some(any_nodes(kbd_render_nodes(&default_kbd_model()))),
+        | UiComponentId::Item
+        | UiComponentId::Kbd => None,
         UiComponentId::Label => Some(any_nodes(label_render_nodes(&default_label_model()))),
         UiComponentId::Marker => Some(any_nodes(marker_render_nodes(&default_marker_model()))),
         UiComponentId::Menubar => Some(any_nodes(menubar_render_nodes(&default_menubar_model()))),
@@ -1265,6 +1250,7 @@ mod tests {
                     | UiComponentId::InputGroup
                     | UiComponentId::InputOtp
                     | UiComponentId::Item
+                    | UiComponentId::Kbd
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1281,17 +1267,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_kbd_model().state();
-        assert!(!state.is_active(KbdPart::Root));
+        let mut state = default_label_model().state();
+        assert!(!state.is_active(LabelPart::Root));
         assert_eq!(
-            state.apply(KbdIntent::Toggle(KbdPart::Root)),
-            KbdChange::Opened(KbdPart::Root)
+            state.apply(LabelIntent::Toggle(LabelPart::Root)),
+            LabelChange::Opened(LabelPart::Root)
         );
-        assert!(state.is_active(KbdPart::Root));
+        assert!(state.is_active(LabelPart::Root));
         assert_eq!(
-            state.apply(KbdIntent::Toggle(KbdPart::Root)),
-            KbdChange::Closed(KbdPart::Root)
+            state.apply(LabelIntent::Toggle(LabelPart::Root)),
+            LabelChange::Closed(LabelPart::Root)
         );
-        assert!(!state.is_active(KbdPart::Root));
+        assert!(!state.is_active(LabelPart::Root));
     }
 }

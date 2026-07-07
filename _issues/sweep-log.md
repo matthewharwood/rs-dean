@@ -359,7 +359,18 @@ primitive names and Leptos keeps the shadcn data attribute. Issues 01 through
 because repeatable action and repeatable primitive naming had already been
 settled by Bubble, Button Group, and Input OTP.
 
-All-issue sweep pass: Kbd through Typography complete. The shared
+Concrete component pass: Kbd complete. The thirty-fourth issue now has a typed
+keyboard-shortcut model, density/key/separator contracts, repeatable `KbdKey`
+render nodes, renderer-local key focus state, `garde` validation, token-only
+Leptos `<kbd>` rendering, dedicated story proof, and Bevy primitive derivation
+from the same model. The sweep found that typography tokens can still need
+repeatable domain data and local focus styling while remaining non-durable
+display state. Issues 01 through 33 were re-audited against this learning; no
+earlier API changes were needed because repeated-key primitive naming follows
+the same stable indexed convention established for Item, Input OTP, and other
+repeatable components.
+
+All-issue sweep pass: Label through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -367,7 +378,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Kbd through Typography now have
+Concrete all-issue sweep pass: Label through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -398,6 +409,7 @@ uses a renderer-neutral owned view node.
 - Composed input controls reuse Input's density, input kind, and action vocabulary so grouped controls do not create parallel form-control APIs.
 - Repeatable fixed-length controls expose stable indexed primitive names to Bevy while keeping canonical shadcn anatomy labels in Leptos data attributes.
 - Display rows expose repeatable action nodes through one canonical anatomy part, with stable Bevy primitive indexes and renderer-local activation state.
+- Typography tokens can own repeatable domain data and local focus styling without becoming durable app state.
 - Message and media display components can own renderer-local ephemeral state for activation feedback while keeping durable file selections and uploads in `crates/state` / `rs-dean-idb`.
 - Messaging components can own renderer-local action feedback and side-aware layout while durable transcript/message updates stay app-owned.
 - Identity media components can own renderer-local load/error fallback state while keeping durable profile identity in app/state models.
