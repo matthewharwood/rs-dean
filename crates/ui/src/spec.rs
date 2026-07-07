@@ -286,14 +286,15 @@ pub mod bevy_adapter {
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
-        BreadcrumbPart, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone,
-        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        BreadcrumbPart, BubblePart, BubbleSide, RenderContract, StateContract, Theme, UiBlockRole,
+        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
         alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
         attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        catalog_component_any_render_nodes_for_component, component_implementation,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-        default_badge_model, default_breadcrumb_model, scale,
+        bubble_render_nodes, catalog_component_any_render_nodes_for_component,
+        component_implementation, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model,
+        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
+        scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -359,6 +360,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Bubble {
+            return bevy_primitives_for_bubble(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -376,6 +380,36 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_bubble(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_bubble_model();
+        let bubble_state = model.state();
+        bubble_render_nodes(&model, &bubble_state)
+            .into_iter()
+            .map(|node| {
+                let role = bubble_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: bubble_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: bubble_size_for_part(node.part),
+                    fill: fill_for_tone(bubble_tone_for_part(node.part, node.side), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: bubble_intent_for_part(node.part),
+                    selected: node.active,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -815,6 +849,55 @@ pub mod bevy_adapter {
                 Vec2::new(scale::space::L, scale::space::S)
             }
             BreadcrumbPart::Separator => Vec2::new(scale::space::S, scale::space::S),
+        }
+    }
+
+    const fn bubble_kind_for_part(part: BubblePart) -> UiWidgetSlotKind {
+        match part {
+            BubblePart::Root => UiWidgetSlotKind::Section,
+            BubblePart::Avatar => UiWidgetSlotKind::Avatar,
+            BubblePart::Content => UiWidgetSlotKind::Description,
+            BubblePart::Meta => UiWidgetSlotKind::Text,
+            BubblePart::Actions => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn bubble_role_for_part(part: BubblePart) -> UiBlockRole {
+        match part {
+            BubblePart::Root => UiBlockRole::Root,
+            BubblePart::Avatar => UiBlockRole::Media,
+            BubblePart::Content => UiBlockRole::Content,
+            BubblePart::Meta => UiBlockRole::Text,
+            BubblePart::Actions => UiBlockRole::Action,
+        }
+    }
+
+    const fn bubble_tone_for_part(part: BubblePart, side: BubbleSide) -> UiBlockTone {
+        match part {
+            BubblePart::Avatar => UiBlockTone::Accent,
+            BubblePart::Actions => UiBlockTone::Brand,
+            BubblePart::Root | BubblePart::Content | BubblePart::Meta => match side {
+                BubbleSide::Incoming => UiBlockTone::Surface,
+                BubbleSide::Outgoing => UiBlockTone::Brand,
+                BubbleSide::System => UiBlockTone::Muted,
+            },
+        }
+    }
+
+    const fn bubble_intent_for_part(part: BubblePart) -> UiWidgetIntent {
+        match part {
+            BubblePart::Actions => UiWidgetIntent::Activate,
+            BubblePart::Root | BubblePart::Avatar | BubblePart::Content | BubblePart::Meta => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn bubble_size_for_part(part: BubblePart) -> Vec2 {
+        match part {
+            BubblePart::Root | BubblePart::Content => Vec2::new(scale::space::XL, scale::space::L),
+            BubblePart::Avatar => Vec2::new(scale::space::L, scale::space::L),
+            BubblePart::Meta | BubblePart::Actions => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

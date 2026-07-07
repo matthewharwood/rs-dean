@@ -6,6 +6,7 @@ pub mod attachment;
 pub mod avatar;
 pub mod badge;
 pub mod breadcrumb;
+pub mod bubble;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -52,6 +53,10 @@ pub use breadcrumb::{
     BreadcrumbChange, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbIntent, BreadcrumbModel,
     BreadcrumbPart, BreadcrumbRenderNode, BreadcrumbState, breadcrumb_render_nodes,
     default_breadcrumb_model, validate_breadcrumb_model,
+};
+pub use bubble::{
+    BubbleAction, BubbleChange, BubbleIntent, BubbleModel, BubblePart, BubbleRenderNode,
+    BubbleSide, BubbleState, bubble_render_nodes, default_bubble_model, validate_bubble_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

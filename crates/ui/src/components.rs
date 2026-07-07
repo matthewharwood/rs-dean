@@ -6,18 +6,19 @@ use crate::{
     AspectRatioModel, AspectRatioPart, AttachmentIntent, AttachmentKind, AttachmentModel,
     AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual, BadgeIntent,
     BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, BreadcrumbDensity, BreadcrumbEntry,
-    BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, CatalogComponentModel,
-    CatalogComponentPart, CatalogComponentRenderNode, ComponentImplementation, ThemeChoice,
-    ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
+    BubblePart, BubbleSide, CatalogComponentModel, CatalogComponentPart,
+    CatalogComponentRenderNode, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, validate_accordion_model,
+    default_badge_model, default_breadcrumb_model, default_bubble_model, validate_accordion_model,
     validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
     validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model,
+    validate_breadcrumb_model, validate_bubble_model,
 };
 
 const HEALTH_CARD: &str =
@@ -234,6 +235,33 @@ const BREADCRUMB_SEPARATOR: &str = "text-text-muted";
 const BREADCRUMB_LOADING: &str =
     "inline-flex min-h-s items-center rounded-field bg-surface-3 px-xs py-3xs text-text-muted";
 const BREADCRUMB_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const BUBBLE_ROOT_INCOMING: &str = "flex w-full min-w-0 items-start gap-xs text-text-1";
+const BUBBLE_ROOT_OUTGOING: &str =
+    "flex w-full min-w-0 flex-row-reverse items-start gap-xs text-text-1";
+const BUBBLE_ROOT_SYSTEM: &str = "flex w-full min-w-0 justify-center text-text-1";
+const BUBBLE_ROOT_DISABLED: &str = "flex w-full min-w-0 items-start gap-xs text-text-disabled";
+const BUBBLE_AVATAR: &str = "grid size-l shrink-0 place-items-center rounded-pill border border-border-subtle bg-primary-soft text-00 font-7 text-text-1";
+const BUBBLE_AVATAR_OUTGOING: &str = "grid size-l shrink-0 place-items-center rounded-pill border border-brand bg-brand text-00 font-7 text-text-on-brand";
+const BUBBLE_AVATAR_SYSTEM: &str = "hidden";
+const BUBBLE_PANEL_INCOMING: &str =
+    "grid max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s shadow-1";
+const BUBBLE_PANEL_OUTGOING: &str =
+    "grid max-w-2xl gap-2xs rounded-box border border-brand bg-primary-soft p-s shadow-1";
+const BUBBLE_PANEL_SYSTEM: &str =
+    "grid max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s";
+const BUBBLE_PANEL_LOADING: &str =
+    "grid max-w-2xl gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
+const BUBBLE_PANEL_DISABLED: &str =
+    "grid max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s";
+const BUBBLE_CONTENT: &str = "m-0 text-0 leading-0 text-text-1";
+const BUBBLE_CONTENT_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
+const BUBBLE_META: &str = "m-0 text-00 leading-0 text-text-muted";
+const BUBBLE_META_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const BUBBLE_ACTIONS: &str = "flex flex-wrap items-center gap-2xs pt-2xs";
+const BUBBLE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const BUBBLE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const BUBBLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -1974,7 +2002,175 @@ const fn breadcrumb_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Bubble, crate::BubbleModel, crate::default_bubble_model);
+#[component]
+pub fn Bubble(#[prop(optional, default = default_bubble_model())] model: BubbleModel) -> AnyView {
+    if let Err(report) = validate_bubble_model(&model) {
+        let message = format!("Bubble validation failed: {report}");
+        return view! {
+            <article class=BUBBLE_ROOT_INCOMING data-ui-component="bubble" data-ui-state="invalid">
+                <p class=BUBBLE_ERROR role="alert">{message}</p>
+            </article>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = bubble_render_nodes(&model, &initial_state);
+    let avatar = nodes
+        .iter()
+        .find(|node| node.part == BubblePart::Avatar)
+        .expect("invariant: bubble render nodes include avatar");
+    let content = nodes
+        .iter()
+        .find(|node| node.part == BubblePart::Content)
+        .expect("invariant: bubble render nodes include content");
+    let meta = nodes
+        .iter()
+        .find(|node| node.part == BubblePart::Meta)
+        .expect("invariant: bubble render nodes include meta");
+    let action_nodes = nodes
+        .iter()
+        .filter(|node| node.part == BubblePart::Actions)
+        .cloned()
+        .collect::<Vec<_>>();
+    let avatar_value = avatar.value.clone();
+    let avatar_label = avatar.label.clone();
+    let content_value = content.value.clone();
+    let meta_value = meta.value.clone();
+    let side = model.side;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let (state, set_state) = signal(initial_state);
+
+    view! {
+        <article
+            class=bubble_root_class(side, disabled)
+            data-ui-component="bubble"
+            data-ui-part="Bubble"
+            data-ui-side=side.label()
+            data-ui-state=bubble_state_label(loading, disabled)
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+        >
+            <span class=bubble_avatar_class(side) data-ui-part="BubbleAvatar" aria-label=avatar_label>
+                {avatar_value}
+            </span>
+            <div class=bubble_panel_class(side, loading, disabled)>
+                <p class=bubble_content_class(disabled) data-ui-part="BubbleContent">
+                    {if loading { "Loading message".to_owned() } else { content_value }}
+                </p>
+                <p class=bubble_meta_class(disabled) data-ui-part="BubbleMeta">
+                    {if loading { "Pending".to_owned() } else { meta_value }}
+                </p>
+                <div class=BUBBLE_ACTIONS data-ui-part="BubbleActions">
+                    {action_nodes
+                        .into_iter()
+                        .map(|node| {
+                            let value = node.value.clone();
+                            let value_for_class = value.clone();
+                            let value_for_click = value.clone();
+                            let button_disabled = node.disabled || loading || disabled;
+                            let label = if loading {
+                                "Loading".to_owned()
+                            } else {
+                                node.label.clone()
+                            };
+                            view! {
+                                <button
+                                    type="button"
+                                    class=move || bubble_action_class(state.with(|state| state.is_active(&value_for_class)))
+                                    data-ui-action=value.clone()
+                                    data-ui-intent="activate"
+                                    disabled=button_disabled
+                                    on:click=move |_| {
+                                        if !button_disabled {
+                                            set_state.update(|state| {
+                                                let _ = state.apply(BubbleIntent::Activate(value_for_click.clone()));
+                                            });
+                                        }
+                                    }
+                                >
+                                    {label}
+                                </button>
+                            }
+                            .into_any()
+                        })
+                        .collect_view()}
+                </div>
+            </div>
+        </article>
+    }
+    .into_any()
+}
+
+const fn bubble_root_class(side: BubbleSide, disabled: bool) -> &'static str {
+    if disabled {
+        BUBBLE_ROOT_DISABLED
+    } else {
+        match side {
+            BubbleSide::Incoming => BUBBLE_ROOT_INCOMING,
+            BubbleSide::Outgoing => BUBBLE_ROOT_OUTGOING,
+            BubbleSide::System => BUBBLE_ROOT_SYSTEM,
+        }
+    }
+}
+
+const fn bubble_avatar_class(side: BubbleSide) -> &'static str {
+    match side {
+        BubbleSide::Incoming => BUBBLE_AVATAR,
+        BubbleSide::Outgoing => BUBBLE_AVATAR_OUTGOING,
+        BubbleSide::System => BUBBLE_AVATAR_SYSTEM,
+    }
+}
+
+const fn bubble_panel_class(side: BubbleSide, loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        BUBBLE_PANEL_DISABLED
+    } else if loading {
+        BUBBLE_PANEL_LOADING
+    } else {
+        match side {
+            BubbleSide::Incoming => BUBBLE_PANEL_INCOMING,
+            BubbleSide::Outgoing => BUBBLE_PANEL_OUTGOING,
+            BubbleSide::System => BUBBLE_PANEL_SYSTEM,
+        }
+    }
+}
+
+const fn bubble_content_class(disabled: bool) -> &'static str {
+    if disabled {
+        BUBBLE_CONTENT_DISABLED
+    } else {
+        BUBBLE_CONTENT
+    }
+}
+
+const fn bubble_meta_class(disabled: bool) -> &'static str {
+    if disabled {
+        BUBBLE_META_DISABLED
+    } else {
+        BUBBLE_META
+    }
+}
+
+const fn bubble_action_class(active: bool) -> &'static str {
+    if active {
+        BUBBLE_ACTION_ACTIVE
+    } else {
+        BUBBLE_ACTION
+    }
+}
+
+const fn bubble_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Button, crate::ButtonModel, crate::default_button_model);
 catalog_component!(
     ButtonGroup,

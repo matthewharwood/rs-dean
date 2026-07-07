@@ -4,8 +4,9 @@ use rs_dean_ui::{
     AlertDialogButton, AlertDialogModel, AlertDialogSize, AlertModel, AlertTone, AspectRatio,
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
     AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
-    BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, HealthCard,
-    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
+    BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, Bubble,
+    BubbleAction, BubbleModel, BubbleSide, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -188,6 +189,24 @@ fn Stories() -> impl IntoView {
                             <Breadcrumb model=invalid_breadcrumb_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Breadcrumb model=themed_breadcrumb_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-bubble" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Bubble"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 09 implemented as a sender-aware message contract backed by a validated shared Rust model, renderer-local action state, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Bubble model=default_bubble_story_model() />
+                            <Bubble model=outgoing_bubble_story_model() />
+                            <Bubble model=loading_bubble_story_model() />
+                            <Bubble model=disabled_bubble_story_model() />
+                            <Bubble model=invalid_bubble_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Bubble model=themed_bubble_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -540,6 +559,51 @@ fn themed_breadcrumb_story_model() -> BreadcrumbModel {
         BreadcrumbEntry::page("Catppuccin"),
     ])
     .with_separator(">")
+}
+
+fn default_bubble_story_model() -> BubbleModel {
+    BubbleModel::new(
+        "Codex",
+        "AI",
+        "The sweep is ready for review.",
+        "Delivered now",
+    )
+}
+
+fn outgoing_bubble_story_model() -> BubbleModel {
+    BubbleModel::new(
+        "Matthew",
+        "MH",
+        "Ship the next component when the gate is green.",
+        "Sent now",
+    )
+    .with_side(BubbleSide::Outgoing)
+    .with_actions(vec![BubbleAction::new("Edit", "edit-message")])
+}
+
+fn loading_bubble_story_model() -> BubbleModel {
+    BubbleModel::new("Codex", "AI", "Hydrating response", "Pending").loading()
+}
+
+fn disabled_bubble_story_model() -> BubbleModel {
+    BubbleModel::new(
+        "Archive",
+        "AR",
+        "This message is locked by the transcript.",
+        "Read only",
+    )
+    .with_actions(vec![BubbleAction::new("Reply", "reply").disabled()])
+    .disabled()
+}
+
+fn invalid_bubble_story_model() -> BubbleModel {
+    BubbleModel::new("", "AI", "Missing sender", "Invalid")
+}
+
+fn themed_bubble_story_model() -> BubbleModel {
+    BubbleModel::new("System", "SYS", "Theme-scoped audit note.", "Pinned")
+        .with_side(BubbleSide::System)
+        .with_actions(vec![BubbleAction::new("Resolve", "resolve-note")])
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

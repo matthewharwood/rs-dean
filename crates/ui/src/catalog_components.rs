@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    bubble,
-    Bubble,
-    BubbleModel,
-    BubblePart,
-    BubbleRenderNode,
-    BubbleState,
-    BubbleIntent,
-    BubbleChange,
-    validate_bubble_model,
-    bubble_render_nodes,
-    default_bubble_model,
-    [
-        Root => "Bubble",
-        Avatar => "BubbleAvatar",
-        Content => "BubbleContent",
-        Meta => "BubbleMeta",
-        Actions => "BubbleActions",
-    ]
-);
-
-define_catalog_component!(
     button,
     Button,
     ButtonModel,
@@ -1645,8 +1624,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Attachment
         | UiComponentId::Avatar
         | UiComponentId::Badge
-        | UiComponentId::Breadcrumb => None,
-        UiComponentId::Bubble => Some(any_nodes(bubble_render_nodes(&default_bubble_model()))),
+        | UiComponentId::Breadcrumb
+        | UiComponentId::Bubble => None,
         UiComponentId::Button => Some(any_nodes(button_render_nodes(&default_button_model()))),
         UiComponentId::ButtonGroup => Some(any_nodes(button_group_render_nodes(
             &default_button_group_model(),
@@ -1787,6 +1766,7 @@ mod tests {
                     | UiComponentId::Avatar
                     | UiComponentId::Badge
                     | UiComponentId::Breadcrumb
+                    | UiComponentId::Bubble
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {

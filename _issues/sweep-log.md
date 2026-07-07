@@ -86,7 +86,17 @@ against this learning; no earlier API changes were needed because their
 repeatable surfaces are either not present or already represented in typed
 domain data.
 
-All-issue sweep pass: Bubble through Typography complete. The shared
+Concrete component pass: Bubble complete. The ninth issue now has a typed Rust
+model, sender side/avatar/content/meta/action contracts, repeatable action
+render nodes, renderer-local action state, `garde` validation, token-only
+Leptos component, dedicated story proof, and Bevy primitive derivation from the
+same model. The sweep found that messaging surfaces need side-aware layout and
+action feedback in the shared domain contract while durable transcript updates
+stay with the app/state layer. Issues 01 through 08 were re-audited against
+this learning; no earlier API changes were needed because their renderer-local
+state does not imply durable message or navigation ownership.
+
+All-issue sweep pass: Button through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -94,7 +104,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Bubble through Typography now have
+Concrete all-issue sweep pass: Button through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -116,6 +126,7 @@ uses a renderer-neutral owned view node.
 - Non-bespoke catalog components now expose concrete generated Rust APIs over the shared implementation so consumer code gets named model, part, state, intent, validation, and render-node types without duplicating behavior.
 - The shared Leptos slot renderer accepts owned view nodes, which keeps consumer-provided model copy valid while preserving token-only classes.
 - Message and media display components can own renderer-local ephemeral state for activation feedback while keeping durable file selections and uploads in `crates/state` / `rs-dean-idb`.
+- Messaging components can own renderer-local action feedback and side-aware layout while durable transcript/message updates stay app-owned.
 - Identity media components can own renderer-local load/error fallback state while keeping durable profile identity in app/state models.
 - Repeatable shadcn anatomy parts are valid component structure; validation enforces catalog membership and full coverage instead of uniqueness, while bespoke components can model repeated anatomy directly in typed domain data.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
@@ -123,4 +134,4 @@ uses a renderer-neutral owned view node.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found eight cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, and model repeatable concrete anatomy in domain data when the component’s semantics depend on item order.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found nine cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component’s semantics depend on item order, and keep messaging side/action state renderer-local unless the app persists a real transcript decision.
