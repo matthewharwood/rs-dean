@@ -403,7 +403,18 @@ against this learning; no earlier API changes were needed because existing
 menu components already isolate renderer-local open state from durable app
 state.
 
-All-issue sweep pass: Message through Typography complete. The shared
+Concrete component pass: Message complete. The thirty-eighth issue now has a
+typed durable-message model, density/side/action contracts, header/content/
+footer/action render nodes, renderer-local focus/hover/action state, `garde`
+validation, token-only Leptos message rendering, dedicated story proof, and
+Bevy primitive derivation from the same model. The sweep found that messaging
+components should keep transcript ownership app-durable while modeling side
+and action feedback as renderer-local UI state. Issues 01 through 37 were
+re-audited against this learning; no earlier API changes were needed because
+Bubble, Attachment, Marker, and Menubar already keep durable workflow state
+outside renderer-local interaction caches.
+
+All-issue sweep pass: Message Scroller through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -411,7 +422,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Message through Typography now have
+Concrete all-issue sweep pass: Message Scroller through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

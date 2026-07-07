@@ -39,6 +39,7 @@ pub mod kit;
 pub mod label;
 pub mod marker;
 pub mod menubar;
+pub mod message;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -228,6 +229,11 @@ pub use menubar::{
     MenubarChange, MenubarDensity, MenubarIntent, MenubarItem, MenubarMenu, MenubarModel,
     MenubarPart, MenubarRenderNode, MenubarState, default_menubar_model, menubar_render_nodes,
     validate_menubar_model,
+};
+pub use message::{
+    MessageAction, MessageChange, MessageDensity, MessageIntent, MessageModel, MessagePart,
+    MessageRenderNode, MessageSide, MessageState, default_message_model, message_render_nodes,
+    validate_message_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

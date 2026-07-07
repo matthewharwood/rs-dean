@@ -23,8 +23,8 @@ use rs_dean_ui::{
     InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel, Item, ItemAction,
     ItemDensity, ItemModel, Kbd, KbdDensity, KbdKey, KbdModel, Label, LabelDensity, LabelModel,
     LabelRequirement, Marker, MarkerAnchor, MarkerDensity, MarkerModel, MarkerTone, Menubar,
-    MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    MenubarDensity, MenubarItem, MenubarMenu, MenubarModel, Message, MessageAction, MessageDensity,
+    MessageModel, MessageSide, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -731,6 +731,24 @@ fn Stories() -> impl IntoView {
                             <Menubar model=invalid_menubar_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Menubar model=themed_menubar_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-message" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Message"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 38 implemented as a durable message surface backed by validated shared Rust header/content/footer/action nodes, renderer-local action state, and Bevy-readable message primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Message model=default_message_story_model() />
+                            <Message model=dense_outgoing_message_story_model() />
+                            <Message model=loading_message_story_model() />
+                            <Message model=disabled_message_story_model() />
+                            <Message model=invalid_message_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Message model=themed_message_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2714,6 +2732,69 @@ fn themed_menubar_story_model() -> MenubarModel {
         ),
     ])
     .with_default_open("tools")
+}
+
+fn default_message_story_model() -> MessageModel {
+    MessageModel::new(
+        "Codex",
+        "Today at 9:41",
+        "The next component is ready for sweep review.",
+        "Delivered",
+    )
+    .with_actions(vec![
+        MessageAction::new("Reply", "reply"),
+        MessageAction::new("Resolve", "resolve"),
+    ])
+}
+
+fn dense_outgoing_message_story_model() -> MessageModel {
+    MessageModel::new(
+        "Matthew",
+        "Today at 9:42",
+        "Ship the contract first, then sweep the earlier components.",
+        "Read",
+    )
+    .with_density(MessageDensity::Dense)
+    .with_side(MessageSide::Outgoing)
+    .with_actions(vec![MessageAction::new("Edit", "edit")])
+}
+
+fn loading_message_story_model() -> MessageModel {
+    default_message_story_model().loading()
+}
+
+fn disabled_message_story_model() -> MessageModel {
+    MessageModel::new(
+        "Archive",
+        "Yesterday",
+        "This transcript entry is locked by the durable state owner.",
+        "Archived",
+    )
+    .with_side(MessageSide::System)
+    .with_actions(vec![MessageAction::new("Open", "open-archive").disabled()])
+    .disabled()
+}
+
+fn invalid_message_story_model() -> MessageModel {
+    MessageModel::new(
+        "Sync",
+        "Retry required",
+        "The persisted transcript did not accept this update.",
+        "Failed",
+    )
+    .with_side(MessageSide::Outgoing)
+    .with_error("Message failed to persist.")
+}
+
+fn themed_message_story_model() -> MessageModel {
+    MessageModel::new(
+        "Theme runner",
+        "Token preview",
+        "Message colors, type, spacing, radius, and actions resolve through the shared theme.",
+        "Ready",
+    )
+    .with_side(MessageSide::Incoming)
+    .with_actions(vec![MessageAction::new("Inspect", "inspect-theme")])
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

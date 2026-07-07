@@ -292,11 +292,11 @@ pub mod bevy_adapter {
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
         EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
-        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, RenderContract,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
+        MessageSide, RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -313,11 +313,11 @@ pub mod bevy_adapter {
         default_empty_model, default_field_model, default_hover_card_model,
         default_input_group_model, default_input_model, default_input_otp_model,
         default_item_model, default_kbd_model, default_label_model, default_marker_model,
-        default_menubar_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_menubar_model, default_message_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, scale,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -498,6 +498,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Menubar {
             return bevy_primitives_for_menubar(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Message {
+            return bevy_primitives_for_message(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1150,6 +1153,37 @@ pub mod bevy_adapter {
                     state,
                     intent: menubar_intent_for_part(node.part, node.actionable),
                     selected: node.open || node.focused || node.selected || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_message(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_message_model();
+        let message_state = model.state();
+        message_render_nodes(&model, &message_state)
+            .into_iter()
+            .map(|node| {
+                let role = message_role_for_part(node.part);
+                let tone = message_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: message_primitive_part(&node),
+                    kind: message_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: message_size_for_part(node.part),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: message_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -3404,6 +3438,73 @@ pub mod bevy_adapter {
             MenubarPart::Trigger => Vec2::new(scale::space::M, scale::space::S),
             MenubarPart::Content => Vec2::new(scale::space::XL2, scale::space::XL),
             MenubarPart::Item => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    fn message_primitive_part(node: &crate::MessageRenderNode) -> String {
+        match node.part {
+            MessagePart::Actions => format!("{}:{}", node.part.label(), node.value),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn message_kind_for_part(part: MessagePart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            MessagePart::Root => UiWidgetSlotKind::Section,
+            MessagePart::Header => UiWidgetSlotKind::Header,
+            MessagePart::Content => UiWidgetSlotKind::Description,
+            MessagePart::Footer => UiWidgetSlotKind::Text,
+            MessagePart::Actions if actionable => UiWidgetSlotKind::Button,
+            MessagePart::Actions => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn message_role_for_part(part: MessagePart) -> UiBlockRole {
+        match part {
+            MessagePart::Root => UiBlockRole::Root,
+            MessagePart::Header => UiBlockRole::Header,
+            MessagePart::Content => UiBlockRole::Content,
+            MessagePart::Footer => UiBlockRole::Text,
+            MessagePart::Actions => UiBlockRole::Action,
+        }
+    }
+
+    fn message_tone_for_node(node: &crate::MessageRenderNode) -> UiBlockTone {
+        if !node.visible || node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active || node.actionable {
+            return UiBlockTone::Brand;
+        }
+        match (node.part, node.side) {
+            (MessagePart::Root | MessagePart::Content, MessageSide::Outgoing) => UiBlockTone::Brand,
+            (MessagePart::Root | MessagePart::Content, MessageSide::System) => UiBlockTone::Muted,
+            (MessagePart::Root | MessagePart::Content, MessageSide::Incoming) => {
+                UiBlockTone::Surface
+            }
+            (MessagePart::Header | MessagePart::Footer, _) => UiBlockTone::Surface,
+            (MessagePart::Actions, _) => UiBlockTone::Brand,
+        }
+    }
+
+    const fn message_intent_for_part(part: MessagePart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (MessagePart::Actions, true) => UiWidgetIntent::Activate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn message_size_for_part(part: MessagePart) -> Vec2 {
+        match part {
+            MessagePart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            MessagePart::Header | MessagePart::Footer => {
+                Vec2::new(scale::space::XL2, scale::space::S)
+            }
+            MessagePart::Content => Vec2::new(scale::space::XL2, scale::space::L),
+            MessagePart::Actions => Vec2::new(scale::space::M, scale::space::S),
         }
     }
 

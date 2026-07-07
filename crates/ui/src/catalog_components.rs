@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    message,
-    Message,
-    MessageModel,
-    MessagePart,
-    MessageRenderNode,
-    MessageState,
-    MessageIntent,
-    MessageChange,
-    validate_message_model,
-    message_render_nodes,
-    default_message_model,
-    [
-        Root => "Message",
-        Header => "MessageHeader",
-        Content => "MessageContent",
-        Footer => "MessageFooter",
-        Actions => "MessageActions",
-    ]
-);
-
-define_catalog_component!(
     message_scroller,
     MessageScroller,
     MessageScrollerModel,
@@ -1084,8 +1063,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Kbd
         | UiComponentId::Label
         | UiComponentId::Marker
-        | UiComponentId::Menubar => None,
-        UiComponentId::Message => Some(any_nodes(message_render_nodes(&default_message_model()))),
+        | UiComponentId::Menubar
+        | UiComponentId::Message => None,
         UiComponentId::MessageScroller => Some(any_nodes(message_scroller_render_nodes(
             &default_message_scroller_model(),
         ))),
@@ -1198,6 +1177,7 @@ mod tests {
                     | UiComponentId::Label
                     | UiComponentId::Marker
                     | UiComponentId::Menubar
+                    | UiComponentId::Message
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1214,17 +1194,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_message_model().state();
-        assert!(!state.is_active(MessagePart::Root));
+        let mut state = default_message_scroller_model().state();
+        assert!(!state.is_active(MessageScrollerPart::Root));
         assert_eq!(
-            state.apply(MessageIntent::Toggle(MessagePart::Root)),
-            MessageChange::Opened(MessagePart::Root)
+            state.apply(MessageScrollerIntent::Toggle(MessageScrollerPart::Root)),
+            MessageScrollerChange::Opened(MessageScrollerPart::Root)
         );
-        assert!(state.is_active(MessagePart::Root));
+        assert!(state.is_active(MessageScrollerPart::Root));
         assert_eq!(
-            state.apply(MessageIntent::Toggle(MessagePart::Root)),
-            MessageChange::Closed(MessagePart::Root)
+            state.apply(MessageScrollerIntent::Toggle(MessageScrollerPart::Root)),
+            MessageScrollerChange::Closed(MessageScrollerPart::Root)
         );
-        assert!(!state.is_active(MessagePart::Root));
+        assert!(!state.is_active(MessageScrollerPart::Root));
     }
 }

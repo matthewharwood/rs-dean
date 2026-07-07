@@ -30,7 +30,8 @@ use crate::{
     KbdDensity, KbdIntent, KbdModel, KbdPart, KbdState, LabelDensity, LabelIntent, LabelModel,
     LabelPart, LabelRequirement, LabelState, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,
     MarkerState, MarkerTone, MenubarDensity, MenubarIntent, MenubarModel, MenubarPart,
-    MenubarState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    MenubarState, MessageDensity, MessageIntent, MessageModel, MessagePart, MessageSide,
+    MessageState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
     UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
@@ -48,23 +49,23 @@ use crate::{
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
     default_input_otp_model, default_item_model, default_kbd_model, default_label_model,
-    default_marker_model, default_menubar_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
-    max_data_table_page_index, menubar_render_nodes, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model,
+    default_marker_model, default_menubar_model, default_message_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
 };
 
 const HEALTH_CARD: &str =
@@ -893,6 +894,41 @@ const MENUBAR_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-
 const MENUBAR_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-disabled opacity-disabled";
 const MENUBAR_SHORTCUT: &str = "ml-s text-00 font-6 leading-0 text-text-muted";
 const MENUBAR_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const MESSAGE_ROOT_INCOMING: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_OUTGOING: &str = "ml-auto grid w-full max-w-2xl gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_SYSTEM: &str = "mx-auto grid w-full max-w-xl gap-xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 transition-colors";
+const MESSAGE_ROOT_DENSE_INCOMING: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_DENSE_OUTGOING: &str = "ml-auto grid w-full max-w-2xl gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_DENSE_SYSTEM: &str = "mx-auto grid w-full max-w-xl gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-text-1 transition-colors";
+const MESSAGE_ROOT_ACTIVE: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-brand bg-selected-tint p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_LOADING: &str =
+    "grid w-full max-w-2xl gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
+const MESSAGE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const MESSAGE_HEADER: &str = "flex min-w-0 flex-wrap items-start justify-between gap-xs";
+const MESSAGE_HEADER_DENSE: &str = "flex min-w-0 flex-wrap items-start justify-between gap-2xs";
+const MESSAGE_SENDER: &str = "m-0 min-w-0 truncate text-0 font-7 leading-0 text-text-1";
+const MESSAGE_SENDER_DISABLED: &str =
+    "m-0 min-w-0 truncate text-0 font-6 leading-0 text-text-disabled";
+const MESSAGE_META: &str = "m-0 shrink-0 text-00 font-6 leading-0 text-text-muted";
+const MESSAGE_META_DISABLED: &str = "m-0 shrink-0 text-00 font-6 leading-0 text-text-disabled";
+const MESSAGE_CONTENT: &str = "m-0 whitespace-pre-wrap text-0 leading-0 text-text-1";
+const MESSAGE_CONTENT_DENSE: &str = "m-0 whitespace-pre-wrap text-00 leading-0 text-text-1";
+const MESSAGE_CONTENT_DISABLED: &str =
+    "m-0 whitespace-pre-wrap text-0 leading-0 text-text-disabled";
+const MESSAGE_FOOTER: &str = "flex min-w-0 flex-wrap items-center justify-between gap-xs border-t border-border-subtle pt-xs";
+const MESSAGE_FOOTER_DENSE: &str = "flex min-w-0 flex-wrap items-center justify-between gap-2xs border-t border-border-subtle pt-2xs";
+const MESSAGE_STATUS: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
+const MESSAGE_STATUS_INVALID: &str = "m-0 text-00 font-7 leading-0 text-danger";
+const MESSAGE_STATUS_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
+const MESSAGE_ACTIONS: &str = "flex flex-wrap items-center gap-2xs";
+const MESSAGE_ACTIONS_HIDDEN: &str = "hidden";
+const MESSAGE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-3xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const MESSAGE_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const MESSAGE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -9629,7 +9665,364 @@ const fn menubar_state_label(
     }
 }
 
-catalog_component!(Message, crate::MessageModel, crate::default_message_model);
+#[component]
+pub fn Message(
+    #[prop(optional, default = default_message_model())] model: MessageModel,
+) -> AnyView {
+    if let Err(report) = validate_message_model(&model) {
+        let message = format!("Message validation failed: {report}");
+        return view! {
+            <div class=MESSAGE_ERROR data-ui-component="message" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = message_render_nodes(&model, &initial_state);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == MessagePart::Root)
+        .expect("invariant: message render nodes include root")
+        .clone();
+    let header = nodes
+        .iter()
+        .find(|node| node.part == MessagePart::Header)
+        .expect("invariant: message render nodes include header")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == MessagePart::Content)
+        .expect("invariant: message render nodes include content")
+        .clone();
+    let footer = nodes
+        .iter()
+        .find(|node| node.part == MessagePart::Footer)
+        .expect("invariant: message render nodes include footer")
+        .clone();
+    let action_nodes = nodes
+        .into_iter()
+        .filter(|node| node.part == MessagePart::Actions)
+        .collect::<Vec<_>>();
+    let actions_visible = action_nodes.iter().any(|node| node.visible);
+    let density = root.density;
+    let side = root.side;
+    let invalid = root.invalid;
+    let loading = root.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let root_value = root.value;
+    let root_label = root.label;
+    let root_detail = root.detail;
+    let header_label = header.label;
+    let header_meta = if loading {
+        "Pending".to_owned()
+    } else {
+        header.value
+    };
+    let content_text = if loading {
+        "Loading message".to_owned()
+    } else {
+        content.value
+    };
+    let footer_text = if invalid {
+        footer.detail
+    } else if loading {
+        "Sending".to_owned()
+    } else {
+        footer.value
+    };
+    let (state, set_state) = signal(initial_state);
+    let context = MessageViewContext {
+        density,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <article
+            class=move || {
+                state.with(|state| {
+                    message_root_class(
+                        density,
+                        side,
+                        state.is_active_part(MessagePart::Root) || state.active_action().is_some(),
+                        invalid,
+                        loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="message"
+            data-ui-part=MessagePart::Root.label()
+            data-ui-density=density.label()
+            data-ui-side=side.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    message_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_active_part(MessagePart::Root),
+                        state.active_action().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_label
+            aria-busy=loading.to_string()
+            aria-disabled=blocked.to_string()
+            aria-invalid=invalid.to_string()
+            title=root_detail
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Hover(MessagePart::Root));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Leave);
+                    });
+                }
+            }
+        >
+            <header
+                class=message_header_class(density)
+                data-ui-part=MessagePart::Header.label()
+            >
+                <p class=message_sender_class(disabled)>{header_label}</p>
+                <p class=message_meta_class(disabled)>{header_meta}</p>
+            </header>
+            <p
+                class=message_content_class(density, disabled)
+                data-ui-part=MessagePart::Content.label()
+            >
+                {content_text}
+            </p>
+            <footer
+                class=message_footer_class(density)
+                data-ui-part=MessagePart::Footer.label()
+            >
+                <p class=message_status_class(invalid, disabled)>{footer_text}</p>
+                <div
+                    class=message_actions_class(actions_visible)
+                    data-ui-part=MessagePart::Actions.label()
+                    aria-hidden=(!actions_visible).to_string()
+                >
+                    {action_nodes
+                        .into_iter()
+                        .filter(|node| node.visible)
+                        .map(|node| message_action_view(node, context))
+                        .collect_view()}
+                </div>
+            </footer>
+        </article>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct MessageViewContext {
+    density: MessageDensity,
+    blocked: bool,
+    state: ReadSignal<MessageState>,
+    set_state: WriteSignal<MessageState>,
+}
+
+fn message_action_view(node: crate::MessageRenderNode, context: MessageViewContext) -> AnyView {
+    let disabled = node.disabled || context.blocked;
+    let value = node.value;
+    let value_for_class = value.clone();
+    let value_for_data = value.clone();
+    let value_for_click = value.clone();
+    let label = node.label;
+    view! {
+        <button
+            type="button"
+            class=move || {
+                context.state.with(|state| {
+                    message_action_class(
+                        context.density,
+                        state.is_active_action(value_for_class.as_str()),
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=MessagePart::Actions.label()
+            data-ui-index=node.index.to_string()
+            data-ui-action=value_for_data
+            data-ui-intent="activate"
+            disabled=disabled
+            on:focus=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Focus(MessagePart::Actions));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Hover(MessagePart::Actions));
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(MessageIntent::Activate(value_for_click.clone()));
+                    });
+                }
+            }
+        >
+            {label}
+        </button>
+    }
+    .into_any()
+}
+
+const fn message_root_class(
+    density: MessageDensity,
+    side: MessageSide,
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MESSAGE_ROOT_DISABLED;
+    }
+    if loading {
+        return MESSAGE_ROOT_LOADING;
+    }
+    if invalid {
+        return MESSAGE_ROOT_INVALID;
+    }
+    if active {
+        return MESSAGE_ROOT_ACTIVE;
+    }
+    match (density, side) {
+        (MessageDensity::Standard, MessageSide::Incoming) => MESSAGE_ROOT_INCOMING,
+        (MessageDensity::Standard, MessageSide::Outgoing) => MESSAGE_ROOT_OUTGOING,
+        (MessageDensity::Standard, MessageSide::System) => MESSAGE_ROOT_SYSTEM,
+        (MessageDensity::Dense, MessageSide::Incoming) => MESSAGE_ROOT_DENSE_INCOMING,
+        (MessageDensity::Dense, MessageSide::Outgoing) => MESSAGE_ROOT_DENSE_OUTGOING,
+        (MessageDensity::Dense, MessageSide::System) => MESSAGE_ROOT_DENSE_SYSTEM,
+    }
+}
+
+const fn message_header_class(density: MessageDensity) -> &'static str {
+    match density {
+        MessageDensity::Standard => MESSAGE_HEADER,
+        MessageDensity::Dense => MESSAGE_HEADER_DENSE,
+    }
+}
+
+const fn message_sender_class(disabled: bool) -> &'static str {
+    if disabled {
+        MESSAGE_SENDER_DISABLED
+    } else {
+        MESSAGE_SENDER
+    }
+}
+
+const fn message_meta_class(disabled: bool) -> &'static str {
+    if disabled {
+        MESSAGE_META_DISABLED
+    } else {
+        MESSAGE_META
+    }
+}
+
+const fn message_content_class(density: MessageDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return MESSAGE_CONTENT_DISABLED;
+    }
+    match density {
+        MessageDensity::Standard => MESSAGE_CONTENT,
+        MessageDensity::Dense => MESSAGE_CONTENT_DENSE,
+    }
+}
+
+const fn message_footer_class(density: MessageDensity) -> &'static str {
+    match density {
+        MessageDensity::Standard => MESSAGE_FOOTER,
+        MessageDensity::Dense => MESSAGE_FOOTER_DENSE,
+    }
+}
+
+const fn message_status_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        MESSAGE_STATUS_DISABLED
+    } else if invalid {
+        MESSAGE_STATUS_INVALID
+    } else {
+        MESSAGE_STATUS
+    }
+}
+
+const fn message_actions_class(visible: bool) -> &'static str {
+    if visible {
+        MESSAGE_ACTIONS
+    } else {
+        MESSAGE_ACTIONS_HIDDEN
+    }
+}
+
+const fn message_action_class(
+    density: MessageDensity,
+    active: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return MESSAGE_ACTION_DISABLED;
+    }
+    if active {
+        return MESSAGE_ACTION_ACTIVE;
+    }
+    match density {
+        MessageDensity::Standard => MESSAGE_ACTION,
+        MessageDensity::Dense => MESSAGE_ACTION_DENSE,
+    }
+}
+
+const fn message_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active: bool,
+    action_active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if action_active {
+        "action-active"
+    } else if active {
+        "active"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     MessageScroller,
     crate::MessageScrollerModel,
