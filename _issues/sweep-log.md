@@ -506,7 +506,17 @@ should expose axis state without owning durable scroll position; Resizable was
 re-audited against that learning and required no change because its durable
 layout sizes remain consumer-owned while local handle state stays ephemeral.
 
-All-issue sweep pass: Select through Typography complete. The shared
+Concrete component pass: Select complete. The component now has typed Rust
+groups/options, `garde` validation for unique group/option values and
+selected-value membership, renderer-local open/focus state, token-only Leptos
+trigger/listbox rendering, dedicated story proof, and Bevy primitive derivation
+from the same render nodes. The sweep found that custom select controls need
+their own open/focus contract instead of reusing Native Select's platform
+control state. Native Select, Combobox, Radio Group, and Scroll Area were
+re-audited against that learning; no earlier changes were required because each
+keeps its renderer-local affordances separate from durable selected values.
+
+All-issue sweep pass: Separator through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -514,7 +524,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Select through Typography now have
+Concrete all-issue sweep pass: Separator through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

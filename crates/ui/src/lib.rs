@@ -49,6 +49,7 @@ pub mod progress;
 pub mod radio_group;
 pub mod resizable;
 pub mod scroll_area;
+pub mod select;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -292,6 +293,11 @@ pub use scroll_area::{
     ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, ScrollAreaRenderNode, ScrollAreaState,
     default_scroll_area_items, default_scroll_area_model, scroll_area_render_nodes,
     validate_scroll_area_model,
+};
+pub use select::{
+    SelectChange, SelectDensity, SelectGroup, SelectIntent, SelectModel, SelectOption, SelectPart,
+    SelectRenderNode, SelectState, default_select_groups, default_select_model,
+    select_render_nodes, selected_select_label, validate_select_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

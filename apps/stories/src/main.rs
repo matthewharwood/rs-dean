@@ -31,8 +31,9 @@ use rs_dean_ui::{
     Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel, RadioGroup,
     RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation, Resizable,
     ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ScrollArea,
-    ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
+    SelectGroup, SelectModel, SelectOption, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -922,6 +923,24 @@ fn Stories() -> impl IntoView {
                             <ScrollArea model=invalid_scroll_area_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <ScrollArea model=themed_scroll_area_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-select" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Select"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 48 implemented as a trigger-based listbox backed by validated shared Rust groups/options, renderer-local open/focus/selection state, and Bevy-readable select primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Select model=default_select_story_model() />
+                            <Select model=dense_select_story_model() />
+                            <Select model=loading_select_story_model() />
+                            <Select model=disabled_select_story_model() />
+                            <Select model=invalid_select_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Select model=themed_select_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3482,6 +3501,67 @@ fn themed_scroll_area_story_model() -> ScrollAreaModel {
     ScrollAreaModel::new(scroll_area_story_items())
         .with_label("Theme scoped feed")
         .with_overflow(ScrollAreaOverflow::Horizontal)
+}
+
+fn select_story_groups() -> Vec<SelectGroup> {
+    vec![
+        SelectGroup::new(
+            "Application surfaces",
+            "surfaces",
+            vec![
+                SelectOption::new("Marketing app", "marketing")
+                    .with_detail("Leptos static marketing surface."),
+                SelectOption::new("Story harness", "stories")
+                    .with_detail("Isolated reusable component proof."),
+            ],
+        ),
+        SelectGroup::new(
+            "Renderers",
+            "renderers",
+            vec![
+                SelectOption::new("Leptos DOM", "leptos")
+                    .with_detail("Token-only DOM component rendering."),
+                SelectOption::new("Bevy WebGPU", "bevy").with_detail("Scene primitive derivation."),
+            ],
+        ),
+    ]
+}
+
+fn default_select_story_model() -> SelectModel {
+    SelectModel::new(select_story_groups())
+        .with_label("Renderer target")
+        .with_placeholder("Choose target")
+        .with_selected_value("leptos")
+        .required()
+}
+
+fn dense_select_story_model() -> SelectModel {
+    default_select_story_model()
+        .with_density(SelectDensity::Dense)
+        .with_selected_value("stories")
+}
+
+fn loading_select_story_model() -> SelectModel {
+    default_select_story_model().loading()
+}
+
+fn disabled_select_story_model() -> SelectModel {
+    default_select_story_model()
+        .with_label("Locked target")
+        .with_selected_value("marketing")
+        .disabled()
+}
+
+fn invalid_select_story_model() -> SelectModel {
+    default_select_story_model()
+        .without_selected_value()
+        .with_error("A renderer target is required before this state can persist.")
+}
+
+fn themed_select_story_model() -> SelectModel {
+    SelectModel::new(select_story_groups())
+        .with_label("Theme scoped target")
+        .with_selected_value("bevy")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

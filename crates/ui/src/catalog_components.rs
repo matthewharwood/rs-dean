@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    select,
-    Select,
-    SelectModel,
-    SelectPart,
-    SelectRenderNode,
-    SelectState,
-    SelectIntent,
-    SelectChange,
-    validate_select_model,
-    select_render_nodes,
-    default_select_model,
-    [
-        Root => "Select",
-        Trigger => "SelectTrigger",
-        Value => "SelectValue",
-        Content => "SelectContent",
-        Item => "SelectItem",
-        Group => "SelectGroup",
-    ]
-);
-
-define_catalog_component!(
     separator,
     Separator,
     SeparatorModel,
@@ -888,8 +866,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Progress
         | UiComponentId::RadioGroup
         | UiComponentId::Resizable
-        | UiComponentId::ScrollArea => None,
-        UiComponentId::Select => Some(any_nodes(select_render_nodes(&default_select_model()))),
+        | UiComponentId::ScrollArea
+        | UiComponentId::Select => None,
         UiComponentId::Separator => Some(any_nodes(separator_render_nodes(
             &default_separator_model(),
         ))),
@@ -986,6 +964,7 @@ mod tests {
                     | UiComponentId::RadioGroup
                     | UiComponentId::Resizable
                     | UiComponentId::ScrollArea
+                    | UiComponentId::Select
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1002,17 +981,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_select_model().state();
-        assert!(!state.is_active(SelectPart::Root));
+        let mut state = default_separator_model().state();
+        assert!(!state.is_active(SeparatorPart::Root));
         assert_eq!(
-            state.apply(SelectIntent::Toggle(SelectPart::Root)),
-            SelectChange::Opened(SelectPart::Root)
+            state.apply(SeparatorIntent::Toggle(SeparatorPart::Root)),
+            SeparatorChange::Opened(SeparatorPart::Root)
         );
-        assert!(state.is_active(SelectPart::Root));
+        assert!(state.is_active(SeparatorPart::Root));
         assert_eq!(
-            state.apply(SelectIntent::Toggle(SelectPart::Root)),
-            SelectChange::Closed(SelectPart::Root)
+            state.apply(SeparatorIntent::Toggle(SeparatorPart::Root)),
+            SeparatorChange::Closed(SeparatorPart::Root)
         );
-        assert!(!state.is_active(SelectPart::Root));
+        assert!(!state.is_active(SeparatorPart::Root));
     }
 }

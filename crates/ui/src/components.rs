@@ -40,13 +40,14 @@ use crate::{
     ProgressModel, ProgressPart, RadioGroupDensity, RadioGroupIntent, RadioGroupModel,
     RadioGroupOrientation, RadioGroupPart, ResizableDensity, ResizableIntent, ResizableModel,
     ResizableOrientation, ResizablePart, ScrollAreaAxis, ScrollAreaDensity, ScrollAreaIntent,
-    ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, SelectDensity, SelectIntent, SelectModel,
+    SelectPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -62,29 +63,30 @@ use crate::{
     default_message_scroller_model, default_native_select_model, default_navigation_menu_model,
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model, validate_menubar_model, validate_message_model,
-    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model, validate_popover_model, validate_progress_model,
-    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
+    default_select_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
+    scroll_area_render_nodes, select_render_nodes, selected_select_label, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model, validate_message_model, validate_message_scroller_model,
+    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
+    validate_popover_model, validate_progress_model, validate_radio_group_model,
+    validate_resizable_model, validate_scroll_area_model, validate_select_model,
 };
 
 const HEALTH_CARD: &str =
@@ -1010,6 +1012,37 @@ const SCROLL_AREA_BAR_HORIZONTAL: &str = "h-2xs w-m";
 const SCROLL_AREA_CORNER: &str = "size-2xs rounded-field bg-border-subtle";
 const SCROLL_AREA_CORNER_ACTIVE: &str = "size-2xs rounded-field bg-brand";
 const SCROLL_AREA_CORNER_HIDDEN: &str = "hidden";
+const SELECT_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
+const SELECT_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
+const SELECT_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SELECT_LABEL_DISABLED: &str =
+    "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
+const SELECT_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SELECT_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SELECT_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_TRIGGER_INVALID: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-disabled opacity-disabled";
+const SELECT_VALUE: &str = "truncate";
+const SELECT_CHEVRON: &str = "text-text-muted";
+const SELECT_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-3";
+const SELECT_CONTENT_DENSE: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs text-text-1 shadow-2";
+const SELECT_CONTENT_HIDDEN: &str = "hidden";
+const SELECT_GROUP: &str =
+    "grid gap-3xs border-t border-border-subtle pt-2xs first:border-t-0 first:pt-0";
+const SELECT_GROUP_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SELECT_GROUP_LABEL_DISABLED: &str =
+    "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
+const SELECT_ITEM: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_ITEM_DENSE: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_ITEM_SELECTED: &str = "grid gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_ITEM_FOCUSED: &str = "grid gap-3xs rounded-field border border-brand bg-surface-1 p-xs text-left shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SELECT_ITEM_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
+const SELECT_ITEM_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SELECT_ITEM_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
+const SELECT_ITEM_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const SELECT_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const SELECT_ITEM_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const SELECT_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
 const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -13290,7 +13323,307 @@ fn scroll_area_state_label(
     }
 }
 
-catalog_component!(Select, crate::SelectModel, crate::default_select_model);
+#[component]
+pub fn Select(#[prop(optional, default = default_select_model())] model: SelectModel) -> AnyView {
+    if let Err(report) = validate_select_model(&model) {
+        let message = format!("Select validation failed: {report}");
+        return view! {
+            <div class=SELECT_TRIGGER_INVALID data-ui-component="select" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let required = model.required;
+    let state_model = model.state();
+    let nodes = select_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SelectPart::Root)
+        .expect("invariant: select render nodes include root")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_content_label = root.detail.clone();
+    let root_error = root.detail.clone();
+    let groups = model.groups.clone();
+    let label_model = model.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=select_root_class(disabled)
+            data-ui-component="select"
+            data-ui-part=SelectPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    select_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_open(),
+                        state.focused_value(),
+                        state.selected_value(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <p class=select_label_class(disabled)>
+                {root_label}
+                {required.then_some(view! { <span class=CHECKBOX_REQUIRED>" *"</span> })}
+            </p>
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        select_trigger_class(density, state.is_open(), invalid, blocked).to_owned()
+                    })
+                }
+                data-ui-part=SelectPart::Trigger.label()
+                data-ui-value=move || {
+                    state.with(|state| state.selected_value().unwrap_or("none").to_owned())
+                }
+                aria-haspopup="listbox"
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SelectIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                <span class=SELECT_VALUE data-ui-part=SelectPart::Value.label()>
+                    {move || state.with(|state| selected_select_label(&label_model, state))}
+                </span>
+                <span class=SELECT_CHEVRON aria-hidden="true">"v"</span>
+            </button>
+            <div
+                class=move || {
+                    state.with(|state| select_content_class(density, state.is_open()).to_owned())
+                }
+                data-ui-part=SelectPart::Content.label()
+                hidden=move || state.with(|state| !state.is_open())
+                role="listbox"
+                aria-label=root_content_label
+            >
+                {groups
+                    .into_iter()
+                    .enumerate()
+                    .map(|(group_index, group)| {
+                        let group_value = group.value.clone();
+                        let group_label = group.label.clone();
+                        let group_options = group.options.clone();
+                        let group_disabled = blocked || group.disabled;
+                        view! {
+                            <div
+                                class=SELECT_GROUP
+                                data-ui-part=SelectPart::Group.label()
+                                data-ui-value=group_value
+                                data-ui-index=group_index.to_string()
+                            >
+                                <p class=select_group_label_class(group_disabled)>{group_label}</p>
+                                {group_options
+                                    .into_iter()
+                                    .enumerate()
+                                    .map(|(index, option)| {
+                                        let option_value_for_class = option.value.clone();
+                                        let option_value_for_data = option.value.clone();
+                                        let option_value_for_selected = option.value.clone();
+                                        let option_value_for_focus = option.value.clone();
+                                        let option_value_for_select = option.value.clone();
+                                        let option_disabled = group_disabled || option.disabled;
+                                        view! {
+                                            <button
+                                                type="button"
+                                                role="option"
+                                                class=move || {
+                                                    state.with(|state| {
+                                                        select_item_class(
+                                                            density,
+                                                            state.is_selected(&option_value_for_class),
+                                                            state.is_focused(&option_value_for_class),
+                                                            option_disabled,
+                                                        )
+                                                        .to_owned()
+                                                    })
+                                                }
+                                                data-ui-part=SelectPart::Item.label()
+                                                data-ui-value=option_value_for_data
+                                                data-ui-index=index.to_string()
+                                                aria-selected=move || {
+                                                    state.with(|state| state.is_selected(&option_value_for_selected).to_string())
+                                                }
+                                                disabled=option_disabled
+                                                on:focus=move |_| {
+                                                    if !option_disabled {
+                                                        let value = option_value_for_focus.clone();
+                                                        set_state.update(|state| {
+                                                            let _ = state.apply(SelectIntent::Focus(value));
+                                                        });
+                                                    }
+                                                }
+                                                on:click=move |_| {
+                                                    if !option_disabled {
+                                                        let value = option_value_for_select.clone();
+                                                        set_state.update(|state| {
+                                                            let _ = state.apply(SelectIntent::Select(value));
+                                                        });
+                                                    }
+                                                }
+                                            >
+                                                <span class=select_item_title_class(density, option_disabled)>
+                                                    {option.label}
+                                                </span>
+                                                <span class=select_item_detail_class(option_disabled)>
+                                                    {option.detail}
+                                                </span>
+                                            </button>
+                                        }
+                                    })
+                                    .collect_view()}
+                            </div>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+            {invalid.then_some(view! { <p class=SELECT_ERROR>{root_error}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+const fn select_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        SELECT_ROOT_DISABLED
+    } else {
+        SELECT_ROOT
+    }
+}
+
+const fn select_label_class(disabled: bool) -> &'static str {
+    if disabled {
+        SELECT_LABEL_DISABLED
+    } else {
+        SELECT_LABEL
+    }
+}
+
+const fn select_trigger_class(
+    density: SelectDensity,
+    open: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SELECT_TRIGGER_DISABLED;
+    }
+    if invalid {
+        return SELECT_TRIGGER_INVALID;
+    }
+    if open {
+        return SELECT_TRIGGER_OPEN;
+    }
+    match density {
+        SelectDensity::Standard => SELECT_TRIGGER,
+        SelectDensity::Dense => SELECT_TRIGGER_DENSE,
+    }
+}
+
+const fn select_content_class(density: SelectDensity, open: bool) -> &'static str {
+    if !open {
+        return SELECT_CONTENT_HIDDEN;
+    }
+    match density {
+        SelectDensity::Standard => SELECT_CONTENT,
+        SelectDensity::Dense => SELECT_CONTENT_DENSE,
+    }
+}
+
+const fn select_group_label_class(disabled: bool) -> &'static str {
+    if disabled {
+        SELECT_GROUP_LABEL_DISABLED
+    } else {
+        SELECT_GROUP_LABEL
+    }
+}
+
+const fn select_item_class(
+    density: SelectDensity,
+    selected: bool,
+    focused: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SELECT_ITEM_DISABLED;
+    }
+    if selected {
+        return SELECT_ITEM_SELECTED;
+    }
+    if focused {
+        return SELECT_ITEM_FOCUSED;
+    }
+    match density {
+        SelectDensity::Standard => SELECT_ITEM,
+        SelectDensity::Dense => SELECT_ITEM_DENSE,
+    }
+}
+
+const fn select_item_title_class(density: SelectDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return SELECT_ITEM_TITLE_DISABLED;
+    }
+    match density {
+        SelectDensity::Standard => SELECT_ITEM_TITLE,
+        SelectDensity::Dense => SELECT_ITEM_TITLE_DENSE,
+    }
+}
+
+const fn select_item_detail_class(disabled: bool) -> &'static str {
+    if disabled {
+        SELECT_ITEM_DETAIL_DISABLED
+    } else {
+        SELECT_ITEM_DETAIL
+    }
+}
+
+fn select_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    focused_value: Option<&str>,
+    selected_value: Option<&str>,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if open {
+        focused_value
+            .map(|value| format!("open-{value}"))
+            .unwrap_or_else(|| "open".to_owned())
+    } else if let Some(value) = selected_value {
+        format!("selected-{value}")
+    } else {
+        "empty".to_owned()
+    }
+}
+
 catalog_component!(
     Separator,
     crate::SeparatorModel,
