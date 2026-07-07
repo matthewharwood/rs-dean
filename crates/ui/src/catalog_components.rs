@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    skeleton,
-    Skeleton,
-    SkeletonModel,
-    SkeletonPart,
-    SkeletonRenderNode,
-    SkeletonState,
-    SkeletonIntent,
-    SkeletonChange,
-    validate_skeleton_model,
-    skeleton_render_nodes,
-    default_skeleton_model,
-    [
-        Root => "Skeleton",
-        Block => "SkeletonBlock",
-        Text => "SkeletonText",
-        Media => "SkeletonMedia",
-    ]
-);
-
-define_catalog_component!(
     slider,
     Slider,
     SliderModel,
@@ -810,10 +790,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Select
         | UiComponentId::Separator
         | UiComponentId::Sheet
-        | UiComponentId::Sidebar => None,
-        UiComponentId::Skeleton => {
-            Some(any_nodes(skeleton_render_nodes(&default_skeleton_model())))
-        }
+        | UiComponentId::Sidebar
+        | UiComponentId::Skeleton => None,
         UiComponentId::Slider => Some(any_nodes(slider_render_nodes(&default_slider_model()))),
         UiComponentId::Sonner => Some(any_nodes(sonner_render_nodes(&default_sonner_model()))),
         UiComponentId::Spinner => Some(any_nodes(spinner_render_nodes(&default_spinner_model()))),
@@ -906,6 +884,7 @@ mod tests {
                     | UiComponentId::Separator
                     | UiComponentId::Sheet
                     | UiComponentId::Sidebar
+                    | UiComponentId::Skeleton
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -922,17 +901,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_skeleton_model().state();
-        assert!(!state.is_active(SkeletonPart::Root));
+        let mut state = default_slider_model().state();
+        assert!(!state.is_active(SliderPart::Root));
         assert_eq!(
-            state.apply(SkeletonIntent::Toggle(SkeletonPart::Root)),
-            SkeletonChange::Opened(SkeletonPart::Root)
+            state.apply(SliderIntent::Toggle(SliderPart::Root)),
+            SliderChange::Opened(SliderPart::Root)
         );
-        assert!(state.is_active(SkeletonPart::Root));
+        assert!(state.is_active(SliderPart::Root));
         assert_eq!(
-            state.apply(SkeletonIntent::Toggle(SkeletonPart::Root)),
-            SkeletonChange::Closed(SkeletonPart::Root)
+            state.apply(SliderIntent::Toggle(SliderPart::Root)),
+            SliderChange::Closed(SliderPart::Root)
         );
-        assert!(!state.is_active(SkeletonPart::Root));
+        assert!(!state.is_active(SliderPart::Root));
     }
 }

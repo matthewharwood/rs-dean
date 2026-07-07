@@ -295,12 +295,13 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, SheetPart, SidebarPart, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -319,15 +320,17 @@ pub mod bevy_adapter {
         default_native_select_model, default_navigation_menu_model, default_pagination_model,
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
-        default_separator_model, default_sheet_model, default_sidebar_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_separator_model, default_sheet_model, default_sidebar_model,
+        default_skeleton_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
+        skeleton_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -586,6 +589,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Sidebar {
             return bevy_primitives_for_sidebar(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Skeleton {
+            return bevy_primitives_for_skeleton(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1674,6 +1684,37 @@ pub mod bevy_adapter {
                     state,
                     intent: sidebar_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.focused,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_skeleton(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_skeleton_model();
+        let skeleton_state = model.state();
+        skeleton_render_nodes(&model, &skeleton_state)
+            .into_iter()
+            .map(|node| {
+                let role = skeleton_role_for_part(node.part);
+                let tone = skeleton_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: skeleton_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: skeleton_size_for_part(node.part, node.text_lines),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: skeleton_intent_for_part(node.part, node.loading, node.disabled),
+                    selected: node.active || node.animation_paused || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -4836,6 +4877,61 @@ pub mod bevy_adapter {
             (SidebarPart::Menu, _) => Vec2::new(scale::space::XL2, scale::space::M),
             (SidebarPart::Footer, _) => Vec2::new(scale::space::XL2, scale::space::M),
             (SidebarPart::Rail, _) => Vec2::new(scale::space::S, scale::space::XL3),
+        }
+    }
+
+    const fn skeleton_kind_for_part(part: SkeletonPart) -> UiWidgetSlotKind {
+        match part {
+            SkeletonPart::Root => UiWidgetSlotKind::Section,
+            SkeletonPart::Block | SkeletonPart::Text => UiWidgetSlotKind::Skeleton,
+            SkeletonPart::Media => UiWidgetSlotKind::Media,
+        }
+    }
+
+    const fn skeleton_role_for_part(part: SkeletonPart) -> UiBlockRole {
+        match part {
+            SkeletonPart::Root => UiBlockRole::Root,
+            SkeletonPart::Block | SkeletonPart::Text => UiBlockRole::Indicator,
+            SkeletonPart::Media => UiBlockRole::Media,
+        }
+    }
+
+    fn skeleton_tone_for_node(node: &crate::SkeletonRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.animation_paused || node.active {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            SkeletonPart::Root => UiBlockTone::Surface,
+            SkeletonPart::Block | SkeletonPart::Text | SkeletonPart::Media => UiBlockTone::Muted,
+        }
+    }
+
+    const fn skeleton_intent_for_part(
+        part: SkeletonPart,
+        loading: bool,
+        disabled: bool,
+    ) -> UiWidgetIntent {
+        match (part, loading, disabled) {
+            (SkeletonPart::Root, true, false) => UiWidgetIntent::Toggle,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn skeleton_size_for_part(part: SkeletonPart, text_lines: u8) -> Vec2 {
+        match part {
+            SkeletonPart::Root => Vec2::new(scale::space::XL3, scale::space::XL2),
+            SkeletonPart::Block => Vec2::new(scale::space::XL2, scale::space::L),
+            SkeletonPart::Text => Vec2::new(
+                scale::space::XL2,
+                scale::space::XS * f32::from(text_lines.max(1)),
+            ),
+            SkeletonPart::Media => Vec2::new(scale::space::XL2, scale::space::XL),
         }
     }
 

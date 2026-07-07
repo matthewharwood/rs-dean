@@ -53,6 +53,7 @@ pub mod select;
 pub mod separator;
 pub mod sheet;
 pub mod sidebar;
+pub mod skeleton;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -315,6 +316,11 @@ pub use sidebar::{
     SidebarChange, SidebarDensity, SidebarGroup, SidebarIntent, SidebarItem, SidebarModel,
     SidebarPart, SidebarRenderNode, SidebarState, default_sidebar_groups, default_sidebar_model,
     sidebar_render_nodes, validate_sidebar_model,
+};
+pub use skeleton::{
+    SkeletonChange, SkeletonDensity, SkeletonIntent, SkeletonModel, SkeletonPart,
+    SkeletonRenderNode, SkeletonState, default_skeleton_model, skeleton_render_nodes,
+    validate_skeleton_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

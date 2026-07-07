@@ -549,7 +549,18 @@ and Drawer were re-audited against that learning; no earlier changes were
 required because each already owns its navigation or overlay semantics in a
 component-specific Rust contract.
 
-All-issue sweep pass: Skeleton through Typography complete. The shared
+Concrete component pass: Skeleton complete. The component now has typed Rust
+placeholder geometry, validated text-line count, loading/ready/static/disabled
+state, renderer-local focus and animation-pause state, token-only Leptos
+placeholder surfaces, dedicated story proof, and Bevy primitive derivation from
+the same render nodes. The sweep found that non-interactive loading components
+still need a concrete local state model so reduced-motion and hover/focus
+previews can remain renderer-local without becoming persisted app progress.
+Progress, Separator, Aspect Ratio, Avatar, and Empty were re-audited against
+that learning; no earlier changes were required because each already separates
+ephemeral renderer state from durable app state.
+
+All-issue sweep pass: Slider through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -557,7 +568,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Skeleton through Typography now have
+Concrete all-issue sweep pass: Slider through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

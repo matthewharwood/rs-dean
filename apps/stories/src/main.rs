@@ -34,8 +34,8 @@ use rs_dean_ui::{
     ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
     SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
     SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
-    SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
+    SkeletonDensity, SkeletonModel, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1000,6 +1000,25 @@ fn Stories() -> impl IntoView {
                             <Sidebar model=invalid_sidebar_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Sidebar model=themed_sidebar_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-skeleton" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Skeleton"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 52 implemented as a layout-preserving placeholder backed by validated shared Rust geometry, renderer-local focus/pause state, and Bevy-readable loading primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Skeleton model=default_skeleton_story_model() />
+                            <Skeleton model=dense_skeleton_story_model() />
+                            <Skeleton model=ready_skeleton_story_model() />
+                            <Skeleton model=static_skeleton_story_model() />
+                            <Skeleton model=disabled_skeleton_story_model() />
+                            <Skeleton model=invalid_skeleton_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Skeleton model=themed_skeleton_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3774,6 +3793,52 @@ fn themed_sidebar_story_model() -> SidebarModel {
     SidebarModel::new(sidebar_story_groups())
         .with_label("Theme scoped navigation")
         .with_active_value("themes")
+}
+
+fn default_skeleton_story_model() -> SkeletonModel {
+    SkeletonModel::new("Loading component summary")
+        .with_block_label("Title area")
+        .with_text_label("Summary copy")
+        .with_media_label("Preview frame")
+        .with_detail("A placeholder keeps the final layout stable while data hydrates.")
+}
+
+fn dense_skeleton_story_model() -> SkeletonModel {
+    default_skeleton_story_model()
+        .with_density(SkeletonDensity::Dense)
+        .with_text_lines(2)
+        .with_block_label("Compact title")
+}
+
+fn ready_skeleton_story_model() -> SkeletonModel {
+    default_skeleton_story_model()
+        .with_detail("Content is ready, so placeholder parts stay hidden without layout churn.")
+        .ready()
+}
+
+fn static_skeleton_story_model() -> SkeletonModel {
+    default_skeleton_story_model()
+        .with_detail("Motion can be disabled while preserving the same placeholder geometry.")
+        .with_text_lines(4)
+        .static_placeholder()
+}
+
+fn disabled_skeleton_story_model() -> SkeletonModel {
+    default_skeleton_story_model()
+        .with_detail("The loading surface is locked while the owner resolves durable state.")
+        .disabled()
+}
+
+fn invalid_skeleton_story_model() -> SkeletonModel {
+    default_skeleton_story_model()
+        .with_error("Skeleton layout metadata failed validation before render.")
+}
+
+fn themed_skeleton_story_model() -> SkeletonModel {
+    SkeletonModel::new("Theme scoped placeholder")
+        .with_density(SkeletonDensity::Dense)
+        .with_text_lines(3)
+        .with_detail("Semantic placeholder colors resolve through the nested theme.")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

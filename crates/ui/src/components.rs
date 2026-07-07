@@ -43,13 +43,14 @@ use crate::{
     ScrollAreaModel, ScrollAreaOverflow, ScrollAreaPart, SelectDensity, SelectIntent, SelectModel,
     SelectPart, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
     SeparatorPart, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetSide, SheetState,
-    SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, SkeletonDensity, SkeletonIntent,
+    SkeletonModel, SkeletonPart, SkeletonState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -66,31 +67,33 @@ use crate::{
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model, validate_menubar_model, validate_message_model,
-    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model, validate_popover_model, validate_progress_model,
-    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
-    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    default_skeleton_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
+    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
+    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model, validate_message_model, validate_message_scroller_model,
+    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
+    validate_popover_model, validate_progress_model, validate_radio_group_model,
+    validate_resizable_model, validate_scroll_area_model, validate_select_model,
+    validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    validate_skeleton_model,
 };
 
 const HEALTH_CARD: &str =
@@ -735,6 +738,47 @@ const SIDEBAR_FOOTER_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label 
 const SIDEBAR_FOOTER_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const SIDEBAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const SKELETON_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SKELETON_ROOT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SKELETON_ROOT_READY: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-2 p-s text-text-muted";
+const SKELETON_ROOT_INVALID: &str = "grid w-full max-w-md gap-s rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SKELETON_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SKELETON_CONTENT: &str = "grid gap-xs";
+const SKELETON_CONTENT_DENSE: &str = "grid gap-2xs";
+const SKELETON_BLOCK: &str = "h-l rounded-field bg-surface-3 transition-colors";
+const SKELETON_BLOCK_DENSE: &str = "h-m rounded-field bg-surface-3 transition-colors";
+const SKELETON_BLOCK_ACTIVE: &str =
+    "h-l rounded-field border border-brand bg-selected-tint shadow-1";
+const SKELETON_BLOCK_DENSE_ACTIVE: &str =
+    "h-m rounded-field border border-brand bg-selected-tint shadow-1";
+const SKELETON_BLOCK_INVALID: &str = "h-l rounded-field border border-danger bg-error-soft";
+const SKELETON_BLOCK_DENSE_INVALID: &str = "h-m rounded-field border border-danger bg-error-soft";
+const SKELETON_BLOCK_DISABLED: &str = "h-l rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_BLOCK_DENSE_DISABLED: &str = "h-m rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_LINE: &str = "h-xs rounded-pill bg-surface-3 transition-colors";
+const SKELETON_LINE_DENSE: &str = "h-2xs rounded-pill bg-surface-3 transition-colors";
+const SKELETON_LINE_ACTIVE: &str =
+    "h-xs rounded-pill border border-brand bg-selected-tint shadow-1";
+const SKELETON_LINE_DENSE_ACTIVE: &str =
+    "h-2xs rounded-pill border border-brand bg-selected-tint shadow-1";
+const SKELETON_LINE_INVALID: &str = "h-xs rounded-pill border border-danger bg-error-soft";
+const SKELETON_LINE_DENSE_INVALID: &str = "h-2xs rounded-pill border border-danger bg-error-soft";
+const SKELETON_LINE_DISABLED: &str = "h-xs rounded-pill bg-surface-2 opacity-disabled";
+const SKELETON_LINE_DENSE_DISABLED: &str = "h-2xs rounded-pill bg-surface-2 opacity-disabled";
+const SKELETON_MEDIA: &str = "min-h-xl rounded-field bg-surface-3 transition-colors";
+const SKELETON_MEDIA_DENSE: &str = "min-h-l rounded-field bg-surface-3 transition-colors";
+const SKELETON_MEDIA_ACTIVE: &str =
+    "min-h-xl rounded-field border border-brand bg-selected-tint shadow-1";
+const SKELETON_MEDIA_DENSE_ACTIVE: &str =
+    "min-h-l rounded-field border border-brand bg-selected-tint shadow-1";
+const SKELETON_MEDIA_INVALID: &str = "min-h-xl rounded-field border border-danger bg-error-soft";
+const SKELETON_MEDIA_DENSE_INVALID: &str =
+    "min-h-l rounded-field border border-danger bg-error-soft";
+const SKELETON_MEDIA_DISABLED: &str = "min-h-xl rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_MEDIA_DENSE_DISABLED: &str = "min-h-l rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_STATUS: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SKELETON_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
 const DROPDOWN_MENU_ROOT_DISABLED: &str =
@@ -14566,11 +14610,341 @@ fn sidebar_state_label(
     }
 }
 
-catalog_component!(
-    Skeleton,
-    crate::SkeletonModel,
-    crate::default_skeleton_model
-);
+#[component]
+pub fn Skeleton(
+    #[prop(optional, default = default_skeleton_model())] model: SkeletonModel,
+) -> AnyView {
+    if let Err(report) = validate_skeleton_model(&model) {
+        let message = format!("Skeleton validation failed: {report}");
+        return view! {
+            <div class=SKELETON_ERROR data-ui-component="skeleton" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let animated = model.animated;
+    let state_model = model.state();
+    let nodes = skeleton_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SkeletonPart::Root)
+        .expect("invariant: skeleton render nodes include root")
+        .clone();
+    let block = nodes
+        .iter()
+        .find(|node| node.part == SkeletonPart::Block)
+        .expect("invariant: skeleton render nodes include block")
+        .clone();
+    let text = nodes
+        .iter()
+        .find(|node| node.part == SkeletonPart::Text)
+        .expect("invariant: skeleton render nodes include text")
+        .clone();
+    let media = nodes
+        .iter()
+        .find(|node| node.part == SkeletonPart::Media)
+        .expect("invariant: skeleton render nodes include media")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=skeleton_root_class(density, loading, invalid, disabled)
+            data-ui-component="skeleton"
+            data-ui-part=SkeletonPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    skeleton_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        animated,
+                        state.animation_paused(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_label
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+            on:click=move |_| {
+                if loading && animated && !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SkeletonIntent::ToggleAnimation);
+                    });
+                }
+            }
+        >
+            <p class=SKELETON_STATUS>{root_detail}</p>
+            <div class=skeleton_content_class(density)>
+                {skeleton_placeholder_view(block, density, state, set_state)}
+                {skeleton_text_view(text, density, state, set_state)}
+                {skeleton_placeholder_view(media, density, state, set_state)}
+            </div>
+            {invalid.then_some(view! { <p class=SKELETON_ERROR>{root.detail}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+fn skeleton_placeholder_view(
+    node: crate::SkeletonRenderNode,
+    density: SkeletonDensity,
+    state: ReadSignal<SkeletonState>,
+    set_state: WriteSignal<SkeletonState>,
+) -> AnyView {
+    let part = node.part;
+    let hidden = !node.visible;
+    let invalid = node.invalid;
+    let disabled = node.disabled;
+    let label = node.label.clone();
+    view! {
+        <span
+            class=move || {
+                state.with(|state| {
+                    skeleton_placeholder_class(
+                        part,
+                        density,
+                        state.is_active(part),
+                        invalid,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=part.label()
+            data-ui-value=node.value
+            aria-hidden=hidden.to_string()
+            hidden=hidden
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SkeletonIntent::Focus(part));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SkeletonIntent::Blur(part));
+                    });
+                }
+            }
+        >
+            <span class="sr-only">{label}</span>
+        </span>
+    }
+    .into_any()
+}
+
+fn skeleton_text_view(
+    node: crate::SkeletonRenderNode,
+    density: SkeletonDensity,
+    state: ReadSignal<SkeletonState>,
+    set_state: WriteSignal<SkeletonState>,
+) -> AnyView {
+    let part = node.part;
+    let hidden = !node.visible;
+    let invalid = node.invalid;
+    let disabled = node.disabled;
+    let label = node.label.clone();
+    let text_lines = node.text_lines;
+    view! {
+        <div
+            class=SKELETON_CONTENT_DENSE
+            data-ui-part=part.label()
+            data-ui-value=node.value
+            aria-hidden=hidden.to_string()
+            hidden=hidden
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SkeletonIntent::Focus(part));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SkeletonIntent::Blur(part));
+                    });
+                }
+            }
+        >
+            <span class="sr-only">{label}</span>
+            {(0..text_lines)
+                .map(|index| {
+                    view! {
+                        <span
+                            class=move || {
+                                state.with(|state| {
+                                    skeleton_line_class(
+                                        density,
+                                        state.is_active(part),
+                                        invalid,
+                                        disabled,
+                                    )
+                                    .to_owned()
+                                })
+                            }
+                            data-ui-line=index.to_string()
+                        ></span>
+                    }
+                })
+                .collect_view()}
+        </div>
+    }
+    .into_any()
+}
+
+const fn skeleton_root_class(
+    density: SkeletonDensity,
+    loading: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SKELETON_ROOT_DISABLED;
+    }
+    if invalid {
+        return SKELETON_ROOT_INVALID;
+    }
+    if !loading {
+        return SKELETON_ROOT_READY;
+    }
+    match density {
+        SkeletonDensity::Standard => SKELETON_ROOT,
+        SkeletonDensity::Dense => SKELETON_ROOT_DENSE,
+    }
+}
+
+const fn skeleton_content_class(density: SkeletonDensity) -> &'static str {
+    match density {
+        SkeletonDensity::Standard => SKELETON_CONTENT,
+        SkeletonDensity::Dense => SKELETON_CONTENT_DENSE,
+    }
+}
+
+const fn skeleton_placeholder_class(
+    part: SkeletonPart,
+    density: SkeletonDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match part {
+        SkeletonPart::Block => skeleton_block_class(density, active, invalid, disabled),
+        SkeletonPart::Media => skeleton_media_class(density, active, invalid, disabled),
+        SkeletonPart::Root | SkeletonPart::Text => {
+            skeleton_line_class(density, active, invalid, disabled)
+        }
+    }
+}
+
+const fn skeleton_block_class(
+    density: SkeletonDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match (density, active, invalid, disabled) {
+        (_, _, _, true) => match density {
+            SkeletonDensity::Standard => SKELETON_BLOCK_DISABLED,
+            SkeletonDensity::Dense => SKELETON_BLOCK_DENSE_DISABLED,
+        },
+        (_, _, true, _) => match density {
+            SkeletonDensity::Standard => SKELETON_BLOCK_INVALID,
+            SkeletonDensity::Dense => SKELETON_BLOCK_DENSE_INVALID,
+        },
+        (_, true, _, _) => match density {
+            SkeletonDensity::Standard => SKELETON_BLOCK_ACTIVE,
+            SkeletonDensity::Dense => SKELETON_BLOCK_DENSE_ACTIVE,
+        },
+        (SkeletonDensity::Standard, _, _, _) => SKELETON_BLOCK,
+        (SkeletonDensity::Dense, _, _, _) => SKELETON_BLOCK_DENSE,
+    }
+}
+
+const fn skeleton_line_class(
+    density: SkeletonDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match (density, active, invalid, disabled) {
+        (_, _, _, true) => match density {
+            SkeletonDensity::Standard => SKELETON_LINE_DISABLED,
+            SkeletonDensity::Dense => SKELETON_LINE_DENSE_DISABLED,
+        },
+        (_, _, true, _) => match density {
+            SkeletonDensity::Standard => SKELETON_LINE_INVALID,
+            SkeletonDensity::Dense => SKELETON_LINE_DENSE_INVALID,
+        },
+        (_, true, _, _) => match density {
+            SkeletonDensity::Standard => SKELETON_LINE_ACTIVE,
+            SkeletonDensity::Dense => SKELETON_LINE_DENSE_ACTIVE,
+        },
+        (SkeletonDensity::Standard, _, _, _) => SKELETON_LINE,
+        (SkeletonDensity::Dense, _, _, _) => SKELETON_LINE_DENSE,
+    }
+}
+
+const fn skeleton_media_class(
+    density: SkeletonDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match (density, active, invalid, disabled) {
+        (_, _, _, true) => match density {
+            SkeletonDensity::Standard => SKELETON_MEDIA_DISABLED,
+            SkeletonDensity::Dense => SKELETON_MEDIA_DENSE_DISABLED,
+        },
+        (_, _, true, _) => match density {
+            SkeletonDensity::Standard => SKELETON_MEDIA_INVALID,
+            SkeletonDensity::Dense => SKELETON_MEDIA_DENSE_INVALID,
+        },
+        (_, true, _, _) => match density {
+            SkeletonDensity::Standard => SKELETON_MEDIA_ACTIVE,
+            SkeletonDensity::Dense => SKELETON_MEDIA_DENSE_ACTIVE,
+        },
+        (SkeletonDensity::Standard, _, _, _) => SKELETON_MEDIA,
+        (SkeletonDensity::Dense, _, _, _) => SKELETON_MEDIA_DENSE,
+    }
+}
+
+const fn skeleton_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    animated: bool,
+    animation_paused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if invalid {
+        "invalid"
+    } else if !loading {
+        "ready"
+    } else if animation_paused {
+        "paused"
+    } else if animated {
+        "loading"
+    } else {
+        "static"
+    }
+}
+
 catalog_component!(Slider, crate::SliderModel, crate::default_slider_model);
 catalog_component!(Sonner, crate::SonnerModel, crate::default_sonner_model);
 catalog_component!(Spinner, crate::SpinnerModel, crate::default_spinner_model);
