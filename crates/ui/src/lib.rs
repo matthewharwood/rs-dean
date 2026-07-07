@@ -18,6 +18,7 @@ pub mod chart;
 pub mod checkbox;
 pub mod collapsible;
 pub mod combobox;
+pub mod command;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -114,6 +115,11 @@ pub use combobox::{
     ComboboxChange, ComboboxDensity, ComboboxIntent, ComboboxModel, ComboboxOption, ComboboxPart,
     ComboboxRenderNode, ComboboxState, combobox_render_nodes, default_combobox_model,
     filtered_combobox_options, selected_combobox_label, validate_combobox_model,
+};
+pub use command::{
+    CommandChange, CommandDensity, CommandFilteredItem, CommandGroup, CommandIntent, CommandItem,
+    CommandModel, CommandPart, CommandRenderNode, CommandState, command_render_nodes,
+    default_command_model, filtered_command_items, selected_command_label, validate_command_model,
 };
 #[cfg(feature = "leptos")]
 pub use components::*;

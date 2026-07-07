@@ -190,7 +190,17 @@ against this learning; no earlier API changes were needed because previous
 components either do not filter collections or already validate selected values
 against typed item collections.
 
-All-issue sweep pass: Command through Typography complete. The shared
+Concrete component pass: Command complete. The nineteenth issue now has a
+typed group/item model, placeholder/empty-label/query contracts, repeated
+group/item/shortcut render nodes, renderer-local open/query/highlight/selected
+state, `garde` validation, token-only Leptos command rendering, dedicated
+story proof, and Bevy primitive derivation from the same model. The sweep found
+that searchable action palettes need shared grouping, shortcut, and highlighted
+value contracts instead of generic command slots. Issues 01 through 18 were
+re-audited against this learning; no earlier API changes were needed because
+only Command combines input-backed filtering with grouped action shortcuts.
+
+All-issue sweep pass: Context Menu through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -198,7 +208,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Command through Typography now have
+Concrete all-issue sweep pass: Context Menu through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -232,9 +242,10 @@ uses a renderer-neutral owned view node.
 - Tri-state form controls need an explicit checked-state enum so unchecked, checked, and indeterminate render identically across Leptos and Bevy.
 - Single-region disclosure controls need a shared boolean open-state contract so trigger disabled state and hidden content match across Leptos and Bevy.
 - Input-backed pickers need shared filtering and selected-value validation so Leptos input behavior and Bevy option primitives agree.
+- Searchable action palettes need shared grouping, shortcut, highlighted-value, and selected-value contracts so Leptos command behavior and Bevy item primitives agree.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found fifteen cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, and put input-backed filtering in the shared picker contract instead of renderer-local list logic.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found sixteen cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, encode tri-state form controls through a shared enum instead of renderer-local booleans, model single-region disclosure with a shared boolean open state instead of generated root-part toggles, put input-backed filtering in the shared picker contract instead of renderer-local list logic, and model searchable command palettes with grouped action and shortcut contracts instead of generated catalog slots.

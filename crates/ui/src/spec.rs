@@ -289,19 +289,21 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, ComboboxPart, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        CollapsiblePart, ComboboxPart, CommandPart, RenderContract, StateContract, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
-        component_implementation, default_accordion_items, default_alert_dialog_model,
-        default_alert_model, default_aspect_ratio_model, default_attachment_model,
-        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-        default_button_group_model, default_button_model, default_calendar_model,
-        default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
-        default_collapsible_model, default_combobox_model, scale,
+        command_render_nodes, component_implementation, default_accordion_items,
+        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
+        default_attachment_model, default_avatar_model, default_badge_model,
+        default_breadcrumb_model, default_bubble_model, default_button_group_model,
+        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
+        default_chart_model, default_checkbox_model, default_collapsible_model,
+        default_combobox_model, default_command_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -421,6 +423,9 @@ pub mod bevy_adapter {
                 implementation.state,
             );
         }
+        if id == UiComponentId::Command {
+            return bevy_primitives_for_command(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -536,6 +541,44 @@ pub mod bevy_adapter {
                     state,
                     intent: combobox_intent_for_part(node.part),
                     selected: node.selected,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_command(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_command_model();
+        let command_state = model.state();
+        command_render_nodes(&model, &command_state)
+            .into_iter()
+            .map(|node| {
+                let role = command_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: command_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: command_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        command_tone_for_part(
+                            node.part,
+                            node.highlighted,
+                            node.selected,
+                            node.visible,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: command_intent_for_part(node.part),
+                    selected: node.selected || node.highlighted,
                     disabled: node.disabled,
                 }
             })
@@ -1709,6 +1752,76 @@ pub mod bevy_adapter {
             ComboboxPart::List => Vec2::new(scale::space::XL3, scale::space::XL),
             ComboboxPart::Option => Vec2::new(scale::space::XL3, scale::space::L),
             ComboboxPart::Empty => Vec2::new(scale::space::XL3, scale::space::S),
+        }
+    }
+
+    const fn command_kind_for_part(part: CommandPart) -> UiWidgetSlotKind {
+        match part {
+            CommandPart::Root => UiWidgetSlotKind::Section,
+            CommandPart::Input => UiWidgetSlotKind::Input,
+            CommandPart::List => UiWidgetSlotKind::List,
+            CommandPart::Group => UiWidgetSlotKind::Header,
+            CommandPart::Item => UiWidgetSlotKind::Button,
+            CommandPart::Shortcut => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn command_role_for_part(part: CommandPart) -> UiBlockRole {
+        match part {
+            CommandPart::Root => UiBlockRole::Root,
+            CommandPart::Input => UiBlockRole::Control,
+            CommandPart::List => UiBlockRole::Navigation,
+            CommandPart::Group => UiBlockRole::Header,
+            CommandPart::Item => UiBlockRole::Item,
+            CommandPart::Shortcut => UiBlockRole::Text,
+        }
+    }
+
+    const fn command_tone_for_part(
+        part: CommandPart,
+        highlighted: bool,
+        selected: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        match part {
+            CommandPart::Item => {
+                if selected || highlighted {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            CommandPart::List => {
+                if visible {
+                    UiBlockTone::Surface
+                } else {
+                    UiBlockTone::Muted
+                }
+            }
+            CommandPart::Input => UiBlockTone::Brand,
+            CommandPart::Shortcut => UiBlockTone::Muted,
+            CommandPart::Group | CommandPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn command_intent_for_part(part: CommandPart) -> UiWidgetIntent {
+        match part {
+            CommandPart::Input => UiWidgetIntent::Input,
+            CommandPart::Item => UiWidgetIntent::Select,
+            CommandPart::Root | CommandPart::List | CommandPart::Group | CommandPart::Shortcut => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn command_size_for_part(part: CommandPart) -> Vec2 {
+        match part {
+            CommandPart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            CommandPart::Input => Vec2::new(scale::space::XL3, scale::space::L),
+            CommandPart::List => Vec2::new(scale::space::XL3, scale::space::XL2),
+            CommandPart::Group => Vec2::new(scale::space::XL3, scale::space::S),
+            CommandPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
+            CommandPart::Shortcut => Vec2::new(scale::space::M, scale::space::S),
         }
     }
 

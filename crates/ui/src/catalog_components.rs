@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    command,
-    Command,
-    CommandModel,
-    CommandPart,
-    CommandRenderNode,
-    CommandState,
-    CommandIntent,
-    CommandChange,
-    validate_command_model,
-    command_render_nodes,
-    default_command_model,
-    [
-        Root => "Command",
-        Input => "CommandInput",
-        List => "CommandList",
-        Group => "CommandGroup",
-        Item => "CommandItem",
-        Shortcut => "CommandShortcut",
-    ]
-);
-
-define_catalog_component!(
     context_menu,
     ContextMenu,
     ContextMenuModel,
@@ -1454,8 +1432,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Chart
         | UiComponentId::Checkbox
         | UiComponentId::Collapsible
-        | UiComponentId::Combobox => None,
-        UiComponentId::Command => Some(any_nodes(command_render_nodes(&default_command_model()))),
+        | UiComponentId::Combobox
+        | UiComponentId::Command => None,
         UiComponentId::ContextMenu => Some(any_nodes(context_menu_render_nodes(
             &default_context_menu_model(),
         ))),
@@ -1584,6 +1562,7 @@ mod tests {
                     | UiComponentId::Checkbox
                     | UiComponentId::Collapsible
                     | UiComponentId::Combobox
+                    | UiComponentId::Command
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1600,17 +1579,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_command_model().state();
-        assert!(!state.is_active(CommandPart::Root));
+        let mut state = default_context_menu_model().state();
+        assert!(!state.is_active(ContextMenuPart::Root));
         assert_eq!(
-            state.apply(CommandIntent::Toggle(CommandPart::Root)),
-            CommandChange::Opened(CommandPart::Root)
+            state.apply(ContextMenuIntent::Toggle(ContextMenuPart::Root)),
+            ContextMenuChange::Opened(ContextMenuPart::Root)
         );
-        assert!(state.is_active(CommandPart::Root));
+        assert!(state.is_active(ContextMenuPart::Root));
         assert_eq!(
-            state.apply(CommandIntent::Toggle(CommandPart::Root)),
-            CommandChange::Closed(CommandPart::Root)
+            state.apply(ContextMenuIntent::Toggle(ContextMenuPart::Root)),
+            ContextMenuChange::Closed(ContextMenuPart::Root)
         );
-        assert!(!state.is_active(CommandPart::Root));
+        assert!(!state.is_active(ContextMenuPart::Root));
     }
 }

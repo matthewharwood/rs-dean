@@ -15,24 +15,26 @@ use crate::{
     ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
     CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
     CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
-    ComboboxPart, ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, component_implementation, component_spec,
-    default_accordion_items, default_alert_dialog_model, default_alert_model,
-    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
+    default_alert_model, default_aspect_ratio_model, default_attachment_model,
+    default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
     default_button_group_model, default_button_model, default_calendar_model, default_card_model,
     default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
-    default_combobox_model, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model,
+    default_combobox_model, default_command_model, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model,
 };
 
 const HEALTH_CARD: &str =
@@ -454,6 +456,29 @@ const COMBOBOX_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
 const COMBOBOX_META: &str = "text-00 font-6 uppercase tracking-label text-text-muted";
 const COMBOBOX_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const COMMAND_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const COMMAND_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const COMMAND_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const COMMAND_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_LIST: &str = "grid max-h-4xl gap-2xs overflow-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
+const COMMAND_LIST_HIDDEN: &str = "hidden";
+const COMMAND_GROUP: &str =
+    "grid gap-2xs rounded-field border border-border-faint bg-surface-1 p-2xs";
+const COMMAND_GROUP_LABEL: &str =
+    "px-2xs pt-2xs text-00 font-7 uppercase tracking-label text-text-muted";
+const COMMAND_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_ITEM_HIGHLIGHTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const COMMAND_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
+const COMMAND_ITEM_LABEL: &str = "m-0 text-0 font-7 leading-0";
+const COMMAND_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
+const COMMAND_SHORTCUT: &str = "rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs font-mono text-00 text-text-muted shadow-1";
+const COMMAND_EMPTY: &str =
+    "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
+const COMMAND_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -4110,7 +4135,247 @@ const fn combobox_state_label(loading: bool, disabled: bool, open: bool) -> &'st
     }
 }
 
-catalog_component!(Command, crate::CommandModel, crate::default_command_model);
+#[component]
+pub fn Command(
+    #[prop(optional, default = default_command_model())] model: CommandModel,
+) -> AnyView {
+    if let Err(report) = validate_command_model(&model) {
+        let message = format!("Command validation failed: {report}");
+        return view! {
+            <div class=COMMAND_ERROR data-ui-component="command" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = command_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == CommandPart::Root)
+        .expect("invariant: command render nodes include root")
+        .clone();
+    let input = input_nodes
+        .iter()
+        .find(|node| node.part == CommandPart::Input)
+        .expect("invariant: command render nodes include input")
+        .clone();
+    let list_model = model.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=command_root_class(density, disabled)
+            data-ui-component="command"
+            data-ui-part=CommandPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| command_state_label(loading, disabled, state.is_open()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <input
+                type="text"
+                role="searchbox"
+                class=command_input_class(density)
+                data-ui-part=CommandPart::Input.label()
+                placeholder=input.label
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                prop:value=move || state.with(|state| state.query().to_owned())
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(CommandIntent::Open);
+                        });
+                    }
+                }
+                on:input=move |event| {
+                    if !blocked {
+                        let value = event_target_value(&event);
+                        set_state.update(|state| {
+                            let _ = state.apply(CommandIntent::Input(value));
+                        });
+                    }
+                }
+            />
+            <div
+                role="listbox"
+                class=move || state.with(|state| command_list_class(state.is_open()).to_owned())
+                data-ui-part=CommandPart::List.label()
+                hidden=move || state.with(|state| !state.is_open())
+            >
+                {move || {
+                    state.with(|state| {
+                        let nodes = command_render_nodes(&list_model, state);
+                        let has_items = nodes
+                            .iter()
+                            .any(|node| node.part == CommandPart::Item && node.visible);
+                        if !has_items {
+                            let list = nodes
+                                .into_iter()
+                                .find(|node| node.part == CommandPart::List)
+                                .expect("invariant: command render nodes include list");
+                            view! {
+                                <p
+                                    class=COMMAND_EMPTY
+                                    data-ui-part=CommandPart::List.label()
+                                >
+                                    {list.label}
+                                </p>
+                            }
+                            .into_any()
+                        } else {
+                            nodes
+                                .into_iter()
+                                .filter(|node| {
+                                    matches!(node.part, CommandPart::Group | CommandPart::Item)
+                                })
+                                .map(|node| {
+                                    match node.part {
+                                        CommandPart::Group => view! {
+                                            <div
+                                                role="group"
+                                                class=COMMAND_GROUP
+                                                data-ui-part=CommandPart::Group.label()
+                                                data-ui-value=node.value
+                                            >
+                                                <p class=COMMAND_GROUP_LABEL>{node.label}</p>
+                                            </div>
+                                        }
+                                        .into_any(),
+                                        CommandPart::Item => {
+                                            let value_for_focus = node.value.clone();
+                                            let value_for_click = node.value.clone();
+                                            let label = node.label.clone();
+                                            let detail = node.detail.clone();
+                                            let shortcut = node.shortcut.clone();
+                                            let selected = node.selected;
+                                            let highlighted = node.highlighted;
+                                            let disabled_item = node.disabled;
+                                            view! {
+                                                <button
+                                                    type="button"
+                                                    role="option"
+                                                    class=command_item_class(selected, highlighted, disabled_item)
+                                                    data-ui-part=CommandPart::Item.label()
+                                                    data-ui-value=node.value
+                                                    aria-selected=(selected || highlighted).to_string()
+                                                    disabled=disabled_item
+                                                    on:focus=move |_| {
+                                                        if !blocked {
+                                                            let value = value_for_focus.clone();
+                                                            set_state.update(|state| {
+                                                                let _ = state.apply(CommandIntent::Highlight(value));
+                                                            });
+                                                        }
+                                                    }
+                                                    on:click=move |_| {
+                                                        if !blocked {
+                                                            let value = value_for_click.clone();
+                                                            set_state.update(|state| {
+                                                                let _ = state.apply(CommandIntent::Select(value));
+                                                            });
+                                                        }
+                                                    }
+                                                >
+                                                    <span class=COMMAND_ITEM_BODY>
+                                                        <span class=COMMAND_ITEM_LABEL>{label}</span>
+                                                        {if detail.is_empty() {
+                                                            view! { <span></span> }.into_any()
+                                                        } else {
+                                                            view! { <span class=COMMAND_ITEM_DETAIL>{detail}</span> }.into_any()
+                                                        }}
+                                                    </span>
+                                                    {if shortcut.is_empty() {
+                                                        view! { <span></span> }.into_any()
+                                                    } else {
+                                                        view! {
+                                                            <span
+                                                                class=COMMAND_SHORTCUT
+                                                                data-ui-part=CommandPart::Shortcut.label()
+                                                            >
+                                                                {shortcut}
+                                                            </span>
+                                                        }
+                                                        .into_any()
+                                                    }}
+                                                </button>
+                                            }
+                                            .into_any()
+                                        }
+                                        CommandPart::Root
+                                        | CommandPart::Input
+                                        | CommandPart::List
+                                        | CommandPart::Shortcut => view! { <span></span> }.into_any(),
+                                    }
+                                })
+                                .collect_view()
+                                .into_any()
+                        }
+                    })
+                }}
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn command_root_class(density: CommandDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return COMMAND_ROOT_DISABLED;
+    }
+    match density {
+        CommandDensity::Standard => COMMAND_ROOT,
+        CommandDensity::Dense => COMMAND_ROOT_DENSE,
+    }
+}
+
+const fn command_input_class(density: CommandDensity) -> &'static str {
+    match density {
+        CommandDensity::Standard => COMMAND_INPUT,
+        CommandDensity::Dense => COMMAND_INPUT_DENSE,
+    }
+}
+
+const fn command_list_class(open: bool) -> &'static str {
+    if open {
+        COMMAND_LIST
+    } else {
+        COMMAND_LIST_HIDDEN
+    }
+}
+
+const fn command_item_class(selected: bool, highlighted: bool, disabled: bool) -> &'static str {
+    if disabled {
+        COMMAND_ITEM_DISABLED
+    } else if selected {
+        COMMAND_ITEM_SELECTED
+    } else if highlighted {
+        COMMAND_ITEM_HIGHLIGHTED
+    } else {
+        COMMAND_ITEM
+    }
+}
+
+const fn command_state_label(loading: bool, disabled: bool, open: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     ContextMenu,
     crate::ContextMenuModel,

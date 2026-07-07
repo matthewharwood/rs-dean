@@ -11,8 +11,9 @@ use rs_dean_ui::{
     CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
     Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, Checkbox, CheckboxChecked,
     CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, Combobox,
-    ComboboxDensity, ComboboxModel, ComboboxOption, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    ComboboxDensity, ComboboxModel, ComboboxOption, Command, CommandDensity, CommandGroup,
+    CommandItem, CommandModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -376,6 +377,24 @@ fn Stories() -> impl IntoView {
                             <Combobox model=invalid_combobox_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Combobox model=themed_combobox_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-command" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Command"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 19 implemented as a searchable command palette backed by validated shared Rust groups/items, renderer-local query/open/highlight/selected state, shortcut anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Command model=default_command_story_model() />
+                            <Command model=dense_command_story_model() />
+                            <Command model=loading_command_story_model() />
+                            <Command model=disabled_command_story_model() />
+                            <Command model=invalid_command_story_model() />
+                            <ThemeScope theme=ThemeId::Lofi>
+                                <Command model=themed_command_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1260,6 +1279,110 @@ fn themed_combobox_story_model() -> ComboboxModel {
     ])
     .with_placeholder("Search tone")
     .with_selected_value("success")
+}
+
+fn default_command_story_model() -> CommandModel {
+    CommandModel::new(vec![
+        CommandGroup::new(
+            "Workspace",
+            "workspace",
+            vec![
+                CommandItem::new("Run gate", "gate")
+                    .with_detail("Run cargo xtask gate.")
+                    .with_shortcut("G")
+                    .with_keywords(vec!["check".to_owned(), "ci".to_owned()]),
+                CommandItem::new("Open stories", "stories")
+                    .with_detail("Launch the UI story harness.")
+                    .with_shortcut("S"),
+            ],
+        ),
+        CommandGroup::new(
+            "Surfaces",
+            "surfaces",
+            vec![
+                CommandItem::new("Marketing app", "marketing")
+                    .with_detail("Open the Leptos marketing surface.")
+                    .with_shortcut("M"),
+                CommandItem::new("Bevy game", "game")
+                    .with_detail("Open the WebGPU game surface.")
+                    .with_shortcut("B"),
+            ],
+        ),
+    ])
+    .with_placeholder("Search command")
+    .with_selected_value("gate")
+    .with_highlighted_value("stories")
+}
+
+fn dense_command_story_model() -> CommandModel {
+    CommandModel::new(vec![CommandGroup::new(
+        "Components",
+        "components",
+        vec![
+            CommandItem::new("Accordion", "accordion").with_shortcut("A"),
+            CommandItem::new("Combobox", "combobox").with_shortcut("C"),
+            CommandItem::new("Command", "command").with_shortcut("K"),
+        ],
+    )])
+    .with_density(CommandDensity::Dense)
+    .with_placeholder("Filter component")
+    .with_default_query("co")
+    .with_highlighted_value("combobox")
+}
+
+fn loading_command_story_model() -> CommandModel {
+    default_command_story_model().loading()
+}
+
+fn disabled_command_story_model() -> CommandModel {
+    CommandModel::new(vec![CommandGroup::new(
+        "Locked",
+        "locked",
+        vec![
+            CommandItem::new("Available", "available").with_shortcut("A"),
+            CommandItem::new("Blocked", "blocked")
+                .with_shortcut("B")
+                .disabled(),
+        ],
+    )])
+    .with_selected_value("available")
+    .disabled()
+}
+
+fn invalid_command_story_model() -> CommandModel {
+    CommandModel::new(vec![CommandGroup::new(
+        "Duplicate",
+        "duplicate",
+        vec![
+            CommandItem::new("First", "same").with_shortcut("1"),
+            CommandItem::new("Second", "same").with_shortcut("2"),
+        ],
+    )])
+}
+
+fn themed_command_story_model() -> CommandModel {
+    CommandModel::new(vec![
+        CommandGroup::new(
+            "Theme",
+            "theme",
+            vec![
+                CommandItem::new("Brand route", "brand").with_shortcut("R"),
+                CommandItem::new("Success route", "success").with_shortcut("S"),
+                CommandItem::new("Danger route", "danger").with_shortcut("D"),
+            ],
+        ),
+        CommandGroup::new(
+            "Runtime",
+            "runtime",
+            vec![
+                CommandItem::new("Leptos DOM", "leptos").with_shortcut("L"),
+                CommandItem::new("Bevy scene", "bevy").with_shortcut("B"),
+            ],
+        ),
+    ])
+    .with_placeholder("Search themed command")
+    .with_selected_value("success")
+    .with_highlighted_value("brand")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
