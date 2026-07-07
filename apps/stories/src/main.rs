@@ -20,8 +20,8 @@ use rs_dean_ui::{
     DropdownMenu, DropdownMenuDensity, DropdownMenuEntry, DropdownMenuItem, DropdownMenuModel,
     Empty, EmptyAction, EmptyDensity, EmptyModel, Field, FieldDensity, FieldInputKind, FieldModel,
     HealthCard, HoverCard, HoverCardDensity, HoverCardModel, Input, InputAction, InputDensity,
-    InputGroup, InputGroupModel, InputKind, InputModel, ShadcnComponentGallery, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    InputGroup, InputGroupModel, InputKind, InputModel, InputOtp, InputOtpModel,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -620,6 +620,24 @@ fn Stories() -> impl IntoView {
                             <InputGroup model=invalid_input_group_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <InputGroup model=themed_input_group_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-input-otp" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Input OTP"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 32 implemented as a fixed-length code control backed by validated shared Rust slot/group/separator state, renderer-local focus and paste intents, and Bevy-readable repeatable slot nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <InputOtp model=default_input_otp_story_model() />
+                            <InputOtp model=dense_input_otp_story_model() />
+                            <InputOtp model=loading_input_otp_story_model() />
+                            <InputOtp model=disabled_input_otp_story_model() />
+                            <InputOtp model=invalid_input_otp_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <InputOtp model=themed_input_otp_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -2327,6 +2345,47 @@ fn themed_input_group_story_model() -> InputGroupModel {
         .with_value("brand")
         .with_addon("token")
         .with_button(InputAction::new("Apply", "apply-theme-token"))
+}
+
+fn default_input_otp_story_model() -> InputOtpModel {
+    InputOtpModel::new(6)
+        .with_value("123")
+        .with_group_size(3)
+        .required()
+}
+
+fn dense_input_otp_story_model() -> InputOtpModel {
+    InputOtpModel::new(6)
+        .with_density(InputDensity::Dense)
+        .with_value("42")
+        .with_group_size(2)
+}
+
+fn loading_input_otp_story_model() -> InputOtpModel {
+    default_input_otp_story_model().loading()
+}
+
+fn disabled_input_otp_story_model() -> InputOtpModel {
+    InputOtpModel::new(6)
+        .with_value("987654")
+        .with_group_size(3)
+        .disabled()
+}
+
+fn invalid_input_otp_story_model() -> InputOtpModel {
+    InputOtpModel::new(6)
+        .with_value("12")
+        .with_error("Enter the full six digit code.")
+        .required()
+}
+
+fn themed_input_otp_story_model() -> InputOtpModel {
+    InputOtpModel::new(8)
+        .alphanumeric()
+        .with_value("A1B2")
+        .with_group_size(4)
+        .with_separator(" ")
+        .with_label("Recovery code")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

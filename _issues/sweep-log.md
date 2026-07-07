@@ -334,7 +334,20 @@ types. Issues 01 through 30 were re-audited against this learning; Input was
 already the canonical source for those primitives, and no earlier component API
 needed to change.
 
-All-issue sweep pass: Input OTP through Typography complete. The shared
+Concrete component pass: Input OTP complete. The thirty-second issue now has a
+typed fixed-length OTP model, Input-shared density vocabulary, repeatable
+slot/group/separator anatomy, numeric and alphanumeric value validation,
+renderer-local focus/input/paste state, `garde` validation, token-only Leptos
+input-OTP rendering, dedicated story proof, and Bevy primitive derivation from
+the same repeatable slot nodes. The sweep found that repeatable control parts
+need stable per-index primitive names for Bevy while preserving the canonical
+shadcn anatomy label for Leptos data attributes. Issues 01 through 31 were
+re-audited against this learning; Button Group, Calendar, Data Table, and Date
+Picker Bevy primitive adapters were upgraded to use stable value/date/index
+suffixes for repeatable nodes, while their public Rust and Leptos APIs stayed
+unchanged.
+
+All-issue sweep pass: Item through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -342,7 +355,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Input OTP through Typography now have
+Concrete all-issue sweep pass: Item through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -371,6 +384,7 @@ uses a renderer-neutral owned view node.
 - Trigger-attached preview overlays keep hover/focus open state renderer-local while Bevy primitive proofs can start opened to expose content and arrow anatomy.
 - Bare input controls preserve optional prefix/suffix anatomy as disabled render nodes while keeping draft text renderer-local until consumers persist submitted values.
 - Composed input controls reuse Input's density, input kind, and action vocabulary so grouped controls do not create parallel form-control APIs.
+- Repeatable fixed-length controls expose stable indexed primitive names to Bevy while keeping canonical shadcn anatomy labels in Leptos data attributes.
 - Message and media display components can own renderer-local ephemeral state for activation feedback while keeping durable file selections and uploads in `crates/state` / `rs-dean-idb`.
 - Messaging components can own renderer-local action feedback and side-aware layout while durable transcript/message updates stay app-owned.
 - Identity media components can own renderer-local load/error fallback state while keeping durable profile identity in app/state models.

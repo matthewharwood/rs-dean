@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    input_otp,
-    InputOtp,
-    InputOtpModel,
-    InputOtpPart,
-    InputOtpRenderNode,
-    InputOtpState,
-    InputOtpIntent,
-    InputOtpChange,
-    validate_input_otp_model,
-    input_otp_render_nodes,
-    default_input_otp_model,
-    [
-        Root => "InputOtp",
-        Group => "InputOtpGroup",
-        Slot => "InputOtpSlot",
-        Separator => "InputOtpSeparator",
-    ]
-);
-
-define_catalog_component!(
     item,
     Item,
     ItemModel,
@@ -1191,10 +1171,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Field
         | UiComponentId::HoverCard
         | UiComponentId::Input
-        | UiComponentId::InputGroup => None,
-        UiComponentId::InputOtp => Some(any_nodes(input_otp_render_nodes(
-            &default_input_otp_model(),
-        ))),
+        | UiComponentId::InputGroup
+        | UiComponentId::InputOtp => None,
         UiComponentId::Item => Some(any_nodes(item_render_nodes(&default_item_model()))),
         UiComponentId::Kbd => Some(any_nodes(kbd_render_nodes(&default_kbd_model()))),
         UiComponentId::Label => Some(any_nodes(label_render_nodes(&default_label_model()))),
@@ -1307,6 +1285,7 @@ mod tests {
                     | UiComponentId::HoverCard
                     | UiComponentId::Input
                     | UiComponentId::InputGroup
+                    | UiComponentId::InputOtp
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1323,17 +1302,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_input_otp_model().state();
-        assert!(!state.is_active(InputOtpPart::Root));
+        let mut state = default_item_model().state();
+        assert!(!state.is_active(ItemPart::Root));
         assert_eq!(
-            state.apply(InputOtpIntent::Toggle(InputOtpPart::Root)),
-            InputOtpChange::Opened(InputOtpPart::Root)
+            state.apply(ItemIntent::Toggle(ItemPart::Root)),
+            ItemChange::Opened(ItemPart::Root)
         );
-        assert!(state.is_active(InputOtpPart::Root));
+        assert!(state.is_active(ItemPart::Root));
         assert_eq!(
-            state.apply(InputOtpIntent::Toggle(InputOtpPart::Root)),
-            InputOtpChange::Closed(InputOtpPart::Root)
+            state.apply(ItemIntent::Toggle(ItemPart::Root)),
+            ItemChange::Closed(ItemPart::Root)
         );
-        assert!(!state.is_active(InputOtpPart::Root));
+        assert!(!state.is_active(ItemPart::Root));
     }
 }

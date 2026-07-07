@@ -25,13 +25,14 @@ use crate::{
     DropdownMenuModel, DropdownMenuPart, DropdownMenuState, EmptyDensity, EmptyIntent, EmptyModel,
     EmptyPart, FieldDensity, FieldIntent, FieldModel, FieldPart, HoverCardDensity, HoverCardIntent,
     HoverCardModel, HoverCardPart, InputDensity, InputGroupIntent, InputGroupModel, InputGroupPart,
-    InputGroupState, InputIntent, InputModel, InputPart, InputState, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    InputGroupState, InputIntent, InputModel, InputOtpIntent, InputOtpModel, InputOtpPart,
+    InputOtpState, InputPart, InputState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -42,19 +43,20 @@ use crate::{
     default_data_table_model, default_date_picker_model, default_dialog_model,
     default_direction_model, default_drawer_model, default_dropdown_menu_model,
     default_empty_model, default_field_model, default_hover_card_model, default_input_group_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_render_nodes, max_data_table_page_index, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model,
+    default_input_otp_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    max_data_table_page_index, month_name, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model,
 };
 
 const HEALTH_CARD: &str =
@@ -756,6 +758,22 @@ const INPUT_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_ERROR_HIDDEN: &str = "hidden";
 const INPUT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const INPUT_OTP_GROUP: &str = "flex flex-wrap items-center gap-2xs";
+const INPUT_OTP_SLOT: &str = "grid size-l place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_DENSE: &str = "grid size-s place-items-center rounded-field border border-border-strong bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_FILLED: &str = "grid size-l place-items-center rounded-field border border-brand bg-primary-soft text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_DENSE_FILLED: &str = "grid size-s place-items-center rounded-field border border-brand bg-primary-soft text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_FOCUSED: &str = "grid size-l place-items-center rounded-field border border-brand bg-surface-1 text-center text-1 font-7 leading-2 text-text-1 shadow-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_DENSE_FOCUSED: &str = "grid size-s place-items-center rounded-field border border-brand bg-surface-1 text-center text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_INVALID: &str = "grid size-l place-items-center rounded-field border border-danger bg-error-soft text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_DENSE_INVALID: &str = "grid size-s place-items-center rounded-field border border-danger bg-error-soft text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const INPUT_OTP_SLOT_LOADING: &str = "grid size-l place-items-center rounded-field border border-info bg-info-soft text-center text-1 font-7 leading-2 text-text-1 shadow-1";
+const INPUT_OTP_SLOT_DISABLED: &str = "grid size-l place-items-center rounded-field border border-border-muted bg-surface-2 text-center text-1 font-7 leading-2 text-text-disabled opacity-disabled";
+const INPUT_OTP_SEPARATOR: &str =
+    "inline-flex min-h-field items-center px-2xs text-1 font-7 text-text-muted";
+const INPUT_OTP_SEPARATOR_DENSE: &str =
+    "inline-flex min-h-s items-center px-3xs text-0 font-7 text-text-muted";
+const INPUT_OTP_SEPARATOR_HIDDEN: &str = "hidden";
 
 #[derive(Clone)]
 struct WidgetViewNode {
@@ -7666,11 +7684,255 @@ fn input_group_button_view(
     .into_any()
 }
 
-catalog_component!(
-    InputOtp,
-    crate::InputOtpModel,
-    crate::default_input_otp_model
-);
+#[component]
+pub fn InputOtp(
+    #[prop(optional, default = default_input_otp_model())] model: InputOtpModel,
+) -> AnyView {
+    if let Err(report) = validate_input_otp_model(&model) {
+        let message = format!("InputOtp validation failed: {report}");
+        return view! {
+            <div class=INPUT_ERROR data-ui-component="input-otp" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let required = model.required;
+    let invalid = model.error.is_some();
+    let numeric_only = model.numeric_only;
+    let input_mode = if numeric_only { "numeric" } else { "text" };
+    let pattern = if numeric_only {
+        "[0-9]*"
+    } else {
+        "[A-Za-z0-9]*"
+    };
+    let error_detail = model
+        .error
+        .clone()
+        .unwrap_or_else(|| "No input OTP error".to_owned());
+    let state_model = model.state();
+    let nodes = input_otp_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == InputOtpPart::Root)
+        .expect("invariant: input OTP render nodes include root")
+        .clone();
+    let code_nodes = nodes
+        .into_iter()
+        .filter(|node| matches!(node.part, InputOtpPart::Slot | InputOtpPart::Separator))
+        .collect::<Vec<_>>();
+    let (state, set_state) = signal(state_model);
+    let view_context = InputOtpViewContext {
+        density,
+        input_mode,
+        pattern,
+        required,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <section
+            class=input_root_class(disabled)
+            data-ui-component="input-otp"
+            data-ui-part=InputOtpPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-mode=input_mode
+            data-ui-state=move || {
+                state.with(|state| {
+                    input_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.focused_slot().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=move || state.with(InputOtpState::value)
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <div
+                class=INPUT_OTP_GROUP
+                data-ui-part=InputOtpPart::Group.label()
+                data-ui-value=root.value
+                role="group"
+                aria-label=root.label
+                aria-invalid=invalid.to_string()
+            >
+                {code_nodes
+                    .into_iter()
+                    .map(|node| input_otp_code_node_view(node, view_context))
+                    .collect_view()}
+            </div>
+            <p
+                class=input_error_class(invalid)
+                data-ui-part=InputOtpPart::Root.label()
+                aria-hidden=(!invalid).to_string()
+            >
+                {error_detail}
+            </p>
+        </section>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct InputOtpViewContext {
+    density: InputDensity,
+    input_mode: &'static str,
+    pattern: &'static str,
+    required: bool,
+    blocked: bool,
+    state: ReadSignal<InputOtpState>,
+    set_state: WriteSignal<InputOtpState>,
+}
+
+fn input_otp_code_node_view(
+    node: crate::InputOtpRenderNode,
+    context: InputOtpViewContext,
+) -> AnyView {
+    match node.part {
+        InputOtpPart::Slot => {
+            let index = node
+                .index
+                .expect("invariant: input OTP slot render node includes index");
+            let invalid = node.invalid;
+            let loading = node.loading;
+            let disabled = node.disabled || context.blocked;
+            let placeholder = node.label;
+            let detail = node.detail;
+            view! {
+                <input
+                    type="text"
+                    inputmode=context.input_mode
+                    pattern=context.pattern
+                    maxlength="1"
+                    class=move || {
+                        context.state.with(|state| {
+                            input_otp_slot_class(
+                                context.density,
+                                state.is_slot_focused(index),
+                                state.slot_value(index).is_some(),
+                                invalid,
+                                loading,
+                                disabled,
+                            )
+                            .to_owned()
+                        })
+                    }
+                    data-ui-part=InputOtpPart::Slot.label()
+                    data-ui-index=index.to_string()
+                    data-ui-value=move || {
+                        context.state.with(|state| {
+                            state
+                                .slot_value(index)
+                                .map(|character| character.to_string())
+                                .unwrap_or_default()
+                        })
+                    }
+                    placeholder=placeholder
+                    aria-label=detail
+                    aria-invalid=invalid.to_string()
+                    required=context.required
+                    disabled=disabled
+                    prop:value=move || {
+                        context.state.with(|state| {
+                            state
+                                .slot_value(index)
+                                .map(|character| character.to_string())
+                                .unwrap_or_default()
+                        })
+                    }
+                    on:focus=move |_| {
+                        if !disabled {
+                            context.set_state.update(|state| {
+                                let _ = state.apply(InputOtpIntent::FocusSlot(index));
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !disabled {
+                            context.set_state.update(|state| {
+                                let _ = state.apply(InputOtpIntent::Blur);
+                            });
+                        }
+                    }
+                    on:input=move |event| {
+                        if !disabled {
+                            let value = event_target_value(&event);
+                            context.set_state.update(|state| {
+                                let _ = state.apply(InputOtpIntent::InputSlot { index, value });
+                            });
+                        }
+                    }
+                />
+            }
+            .into_any()
+        }
+        InputOtpPart::Separator => {
+            let visible = node.visible;
+            let label = node.label;
+            view! {
+                <span
+                    class=input_otp_separator_class(context.density, visible)
+                    data-ui-part=InputOtpPart::Separator.label()
+                    aria-hidden="true"
+                >
+                    {label}
+                </span>
+            }
+            .into_any()
+        }
+        InputOtpPart::Root | InputOtpPart::Group => {
+            unreachable!("invariant: input OTP root/group nodes are not rendered by code helper")
+        }
+    }
+}
+
+const fn input_otp_slot_class(
+    density: InputDensity,
+    focused: bool,
+    filled: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return INPUT_OTP_SLOT_DISABLED;
+    }
+    if loading {
+        return INPUT_OTP_SLOT_LOADING;
+    }
+    match (density, invalid, focused, filled) {
+        (InputDensity::Standard, true, _, _) => INPUT_OTP_SLOT_INVALID,
+        (InputDensity::Dense, true, _, _) => INPUT_OTP_SLOT_DENSE_INVALID,
+        (InputDensity::Standard, false, true, _) => INPUT_OTP_SLOT_FOCUSED,
+        (InputDensity::Dense, false, true, _) => INPUT_OTP_SLOT_DENSE_FOCUSED,
+        (InputDensity::Standard, false, false, true) => INPUT_OTP_SLOT_FILLED,
+        (InputDensity::Dense, false, false, true) => INPUT_OTP_SLOT_DENSE_FILLED,
+        (InputDensity::Standard, false, false, false) => INPUT_OTP_SLOT,
+        (InputDensity::Dense, false, false, false) => INPUT_OTP_SLOT_DENSE,
+    }
+}
+
+const fn input_otp_separator_class(density: InputDensity, visible: bool) -> &'static str {
+    if !visible {
+        return INPUT_OTP_SEPARATOR_HIDDEN;
+    }
+    match density {
+        InputDensity::Standard => INPUT_OTP_SEPARATOR,
+        InputDensity::Dense => INPUT_OTP_SEPARATOR_DENSE,
+    }
+}
+
 catalog_component!(Item, crate::ItemModel, crate::default_item_model);
 catalog_component!(Kbd, crate::KbdModel, crate::default_kbd_model);
 catalog_component!(Label, crate::LabelModel, crate::default_label_model);

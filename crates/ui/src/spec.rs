@@ -291,11 +291,11 @@ pub mod bevy_adapter {
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
         CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
         DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputPart, RenderContract,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -310,9 +310,10 @@ pub mod bevy_adapter {
         default_data_table_model, default_date_picker_model, default_dialog_model,
         default_direction_model, default_drawer_model, default_dropdown_menu_model,
         default_empty_model, default_field_model, default_hover_card_model,
-        default_input_group_model, default_input_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        default_input_group_model, default_input_model, default_input_otp_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, scale,
     };
 
@@ -468,6 +469,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::InputGroup {
             return bevy_primitives_for_input_group(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::InputOtp {
+            return bevy_primitives_for_input_otp(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -907,6 +915,45 @@ pub mod bevy_adapter {
             .collect()
     }
 
+    fn bevy_primitives_for_input_otp(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_input_otp_model();
+        let input_otp_state = model.state();
+        input_otp_render_nodes(&model, &input_otp_state)
+            .into_iter()
+            .map(|node| {
+                let role = input_otp_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: input_otp_primitive_part(&node),
+                    kind: input_otp_kind_for_part(node.part, node.actionable),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: input_otp_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        input_otp_tone_for_part(
+                            node.part,
+                            node.focused,
+                            node.filled,
+                            node.invalid,
+                            node.visible,
+                        ),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: input_otp_intent_for_part(node.part, node.actionable),
+                    selected: node.focused || node.active || node.filled || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
     fn bevy_primitives_for_data_table(
         theme: &Theme,
         render: RenderContract,
@@ -919,7 +966,7 @@ pub mod bevy_adapter {
             .map(|node| {
                 let role = data_table_role_for_part(node.part);
                 BevyUiPrimitive {
-                    part: node.part.label().to_owned(),
+                    part: data_table_primitive_part(&node),
                     kind: data_table_kind_for_part(node.part),
                     role,
                     label: node.label,
@@ -952,7 +999,7 @@ pub mod bevy_adapter {
             .map(|node| {
                 let role = date_picker_role_for_part(node.part);
                 BevyUiPrimitive {
-                    part: node.part.label().to_owned(),
+                    part: date_picker_primitive_part(&node),
                     kind: date_picker_kind_for_part(node.part, node.date.is_some()),
                     role,
                     label: node.label,
@@ -1194,7 +1241,7 @@ pub mod bevy_adapter {
             .map(|node| {
                 let role = calendar_role_for_part(node.part);
                 BevyUiPrimitive {
-                    part: node.part.label().to_owned(),
+                    part: calendar_primitive_part(&node),
                     kind: calendar_kind_for_part(node.part),
                     role,
                     label: node.label,
@@ -1233,7 +1280,7 @@ pub mod bevy_adapter {
             .map(|node| {
                 let role = button_group_role_for_part(node.part);
                 BevyUiPrimitive {
-                    part: node.part.label().to_owned(),
+                    part: button_group_primitive_part(&node),
                     kind: button_group_kind_for_part(node.part),
                     role,
                     label: node.label,
@@ -1859,6 +1906,15 @@ pub mod bevy_adapter {
         }
     }
 
+    fn button_group_primitive_part(node: &crate::ButtonGroupRenderNode) -> String {
+        match node.part {
+            ButtonGroupPart::Item | ButtonGroupPart::Separator => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            ButtonGroupPart::Root => node.part.label().to_owned(),
+        }
+    }
+
     const fn button_group_kind_for_part(part: ButtonGroupPart) -> UiWidgetSlotKind {
         match part {
             ButtonGroupPart::Root => UiWidgetSlotKind::Section,
@@ -1920,6 +1976,21 @@ pub mod bevy_adapter {
                 ButtonGroupOrientation::Horizontal => Vec2::new(scale::space::XS3, scale::space::L),
                 ButtonGroupOrientation::Vertical => Vec2::new(scale::space::XL, scale::space::XS3),
             },
+        }
+    }
+
+    fn calendar_primitive_part(node: &crate::CalendarRenderNode) -> String {
+        match node.part {
+            CalendarPart::Day => {
+                let value = node
+                    .date
+                    .map_or_else(|| node.index.to_string(), crate::CalendarDate::value);
+                format!("{}:{value}", node.part.label())
+            }
+            CalendarPart::Root
+            | CalendarPart::Header
+            | CalendarPart::Grid
+            | CalendarPart::Range => node.part.label().to_owned(),
         }
     }
 
@@ -2757,6 +2828,97 @@ pub mod bevy_adapter {
         }
     }
 
+    fn input_otp_primitive_part(node: &crate::InputOtpRenderNode) -> String {
+        match (node.part, node.index) {
+            (InputOtpPart::Slot, Some(index)) => format!("{}:{index}", node.part.label()),
+            (InputOtpPart::Separator, Some(index)) => format!("{}:{index}", node.part.label()),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn input_otp_kind_for_part(part: InputOtpPart, actionable: bool) -> UiWidgetSlotKind {
+        match part {
+            InputOtpPart::Root => UiWidgetSlotKind::Section,
+            InputOtpPart::Group => UiWidgetSlotKind::List,
+            InputOtpPart::Slot if actionable => UiWidgetSlotKind::Input,
+            InputOtpPart::Slot => UiWidgetSlotKind::Text,
+            InputOtpPart::Separator => UiWidgetSlotKind::Separator,
+        }
+    }
+
+    const fn input_otp_role_for_part(part: InputOtpPart) -> UiBlockRole {
+        match part {
+            InputOtpPart::Root => UiBlockRole::Root,
+            InputOtpPart::Group => UiBlockRole::Content,
+            InputOtpPart::Slot => UiBlockRole::Control,
+            InputOtpPart::Separator => UiBlockRole::Text,
+        }
+    }
+
+    const fn input_otp_tone_for_part(
+        part: InputOtpPart,
+        focused: bool,
+        filled: bool,
+        invalid: bool,
+        visible: bool,
+    ) -> UiBlockTone {
+        if invalid {
+            return UiBlockTone::Danger;
+        }
+        match part {
+            InputOtpPart::Slot if focused || filled => UiBlockTone::Brand,
+            InputOtpPart::Separator if visible => UiBlockTone::Muted,
+            InputOtpPart::Separator => UiBlockTone::Muted,
+            InputOtpPart::Root | InputOtpPart::Group | InputOtpPart::Slot => UiBlockTone::Surface,
+        }
+    }
+
+    const fn input_otp_intent_for_part(part: InputOtpPart, actionable: bool) -> UiWidgetIntent {
+        match part {
+            InputOtpPart::Slot if actionable => UiWidgetIntent::Input,
+            InputOtpPart::Root
+            | InputOtpPart::Group
+            | InputOtpPart::Slot
+            | InputOtpPart::Separator => UiWidgetIntent::None,
+        }
+    }
+
+    fn input_otp_size_for_part(part: InputOtpPart) -> Vec2 {
+        match part {
+            InputOtpPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            InputOtpPart::Group => Vec2::new(scale::space::XL3, scale::space::L),
+            InputOtpPart::Slot => Vec2::new(scale::space::L, scale::space::L),
+            InputOtpPart::Separator => Vec2::new(scale::space::S, scale::space::M),
+        }
+    }
+
+    fn data_table_primitive_part(node: &crate::DataTableRenderNode) -> String {
+        match node.part {
+            DataTablePart::Header => {
+                format!("{}:{}", node.part.label(), node.column_value)
+            }
+            DataTablePart::Row => {
+                let value = if node.row_value.is_empty() {
+                    node.value.as_str()
+                } else {
+                    node.row_value.as_str()
+                };
+                format!("{}:{value}", node.part.label())
+            }
+            DataTablePart::Cell => {
+                format!(
+                    "{}:{}:{}",
+                    node.part.label(),
+                    node.row_value,
+                    node.column_value
+                )
+            }
+            DataTablePart::Root | DataTablePart::Toolbar | DataTablePart::Pagination => {
+                node.part.label().to_owned()
+            }
+        }
+    }
+
     const fn data_table_kind_for_part(part: DataTablePart) -> UiWidgetSlotKind {
         match part {
             DataTablePart::Root => UiWidgetSlotKind::Table,
@@ -2814,6 +2976,18 @@ pub mod bevy_adapter {
             DataTablePart::Row => Vec2::new(scale::space::XL3, scale::space::L),
             DataTablePart::Cell => Vec2::new(scale::space::XL, scale::space::M),
             DataTablePart::Pagination => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    fn date_picker_primitive_part(node: &crate::DatePickerRenderNode) -> String {
+        match (node.part, node.index, node.date) {
+            (DatePickerPart::Calendar, index, Some(date)) if index > 0 => {
+                format!("{}:{}", node.part.label(), date.value())
+            }
+            (DatePickerPart::Calendar, index, None) if index > 0 => {
+                format!("{}:{index}", node.part.label())
+            }
+            _ => node.part.label().to_owned(),
         }
     }
 

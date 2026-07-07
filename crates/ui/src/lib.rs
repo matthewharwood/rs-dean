@@ -32,6 +32,7 @@ pub mod field;
 pub mod hover_card;
 pub mod input;
 pub mod input_group;
+pub mod input_otp;
 pub mod kit;
 pub mod spec;
 pub mod theme;
@@ -192,6 +193,10 @@ pub use input_group::{
     InputGroupChange, InputGroupIntent, InputGroupModel, InputGroupPart, InputGroupRenderNode,
     InputGroupState, default_input_group_model, input_group_render_nodes,
     validate_input_group_model,
+};
+pub use input_otp::{
+    InputOtpChange, InputOtpIntent, InputOtpModel, InputOtpPart, InputOtpRenderNode, InputOtpState,
+    default_input_otp_model, input_otp_render_nodes, validate_input_otp_model,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,
