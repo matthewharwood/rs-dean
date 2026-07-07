@@ -9,8 +9,9 @@ use rs_dean_ui::{
     ButtonGroupOrientation, ButtonKind, ButtonModel, ButtonSize, ButtonVariant, Calendar,
     CalendarDate, CalendarModel, CalendarRange, CalendarSelectionMode, Card, CardAction,
     CardDensity, CardModel, CardVariant, Carousel, CarouselDensity, CarouselModel, CarouselSlide,
-    Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    Chart, ChartDensity, ChartModel, ChartSeries, ChartTone, Checkbox, CheckboxChecked,
+    CheckboxDensity, CheckboxModel, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -320,6 +321,24 @@ fn Stories() -> impl IntoView {
                             <Chart model=invalid_chart_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Chart model=themed_chart_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-checkbox" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Checkbox"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 16 implemented as a tri-state form control backed by a validated shared Rust model, renderer-local checked state, checkbox anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Checkbox model=default_checkbox_story_model() />
+                            <Checkbox model=dense_checkbox_story_model() />
+                            <Checkbox model=loading_checkbox_story_model() />
+                            <Checkbox model=disabled_checkbox_story_model() />
+                            <Checkbox model=invalid_checkbox_story_model() />
+                            <ThemeScope theme=ThemeId::Forest>
+                                <Checkbox model=themed_checkbox_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1061,6 +1080,44 @@ fn themed_chart_story_model() -> ChartModel {
     )
     .with_density(ChartDensity::Dense)
     .with_selected_value("brand")
+}
+
+fn default_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Use shared theme tokens", "shared-theme")
+        .with_description("Leptos and Bevy read the same semantic checkbox state.")
+        .checked()
+}
+
+fn dense_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Compact preference", "compact-preference")
+        .with_density(CheckboxDensity::Dense)
+        .with_description("Dense layout keeps the same state contract.")
+}
+
+fn loading_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Syncing setting", "syncing-setting")
+        .with_description("The renderer blocks local toggles while hydration is pending.")
+        .loading()
+}
+
+fn disabled_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Locked rollout", "locked-rollout")
+        .with_description("Disabled checkboxes preserve the shared checked value.")
+        .with_checked(CheckboxChecked::Indeterminate)
+        .disabled()
+}
+
+fn invalid_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Accept the state contract", "accept-state-contract")
+        .with_description("The consumer owns durable choices through rs-dean-state.")
+        .required()
+        .with_error("This required option has not been accepted.")
+}
+
+fn themed_checkbox_story_model() -> CheckboxModel {
+    CheckboxModel::new("Theme scoped checkbox", "theme-scoped-checkbox")
+        .with_description("The same control resolves through a nested Forest theme scope.")
+        .indeterminate()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

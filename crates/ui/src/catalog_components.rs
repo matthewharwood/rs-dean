@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    checkbox,
-    Checkbox,
-    CheckboxModel,
-    CheckboxPart,
-    CheckboxRenderNode,
-    CheckboxState,
-    CheckboxIntent,
-    CheckboxChange,
-    validate_checkbox_model,
-    checkbox_render_nodes,
-    default_checkbox_model,
-    [
-        Root => "Checkbox",
-        Indicator => "CheckboxIndicator",
-        Label => "CheckboxLabel",
-        Description => "CheckboxDescription",
-    ]
-);
-
-define_catalog_component!(
     collapsible,
     Collapsible,
     CollapsibleModel,
@@ -1511,10 +1491,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Calendar
         | UiComponentId::Card
         | UiComponentId::Carousel
-        | UiComponentId::Chart => None,
-        UiComponentId::Checkbox => {
-            Some(any_nodes(checkbox_render_nodes(&default_checkbox_model())))
-        }
+        | UiComponentId::Chart
+        | UiComponentId::Checkbox => None,
         UiComponentId::Collapsible => Some(any_nodes(collapsible_render_nodes(
             &default_collapsible_model(),
         ))),
@@ -1647,6 +1625,7 @@ mod tests {
                     | UiComponentId::Card
                     | UiComponentId::Carousel
                     | UiComponentId::Chart
+                    | UiComponentId::Checkbox
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1663,17 +1642,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_checkbox_model().state();
-        assert!(!state.is_active(CheckboxPart::Root));
+        let mut state = default_collapsible_model().state();
+        assert!(!state.is_active(CollapsiblePart::Root));
         assert_eq!(
-            state.apply(CheckboxIntent::Toggle(CheckboxPart::Root)),
-            CheckboxChange::Opened(CheckboxPart::Root)
+            state.apply(CollapsibleIntent::Toggle(CollapsiblePart::Root)),
+            CollapsibleChange::Opened(CollapsiblePart::Root)
         );
-        assert!(state.is_active(CheckboxPart::Root));
+        assert!(state.is_active(CollapsiblePart::Root));
         assert_eq!(
-            state.apply(CheckboxIntent::Toggle(CheckboxPart::Root)),
-            CheckboxChange::Closed(CheckboxPart::Root)
+            state.apply(CollapsibleIntent::Toggle(CollapsiblePart::Root)),
+            CollapsibleChange::Closed(CollapsiblePart::Root)
         );
-        assert!(!state.is_active(CheckboxPart::Root));
+        assert!(!state.is_active(CollapsiblePart::Root));
     }
 }

@@ -12,22 +12,23 @@ use crate::{
     CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CardDensity, CardIntent,
     CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
     CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode, ChartDensity,
-    ChartIntent, ChartModel, ChartPart, ChartTone, ComponentImplementation, ThemeChoice, ThemeId,
+    ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
+    CheckboxIntent, CheckboxModel, CheckboxPart, ComponentImplementation, ThemeChoice, ThemeId,
     UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
     accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
     avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
     button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
     carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    component_implementation, component_spec, default_accordion_items, default_alert_dialog_model,
-    default_alert_model, default_aspect_ratio_model, default_attachment_model,
-    default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-    default_button_group_model, default_button_model, default_calendar_model, default_card_model,
-    default_carousel_model, default_chart_model, month_name, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model,
+    checkbox_render_nodes, component_implementation, component_spec, default_accordion_items,
+    default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
+    default_attachment_model, default_avatar_model, default_badge_model, default_breadcrumb_model,
+    default_bubble_model, default_button_group_model, default_button_model, default_calendar_model,
+    default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
+    month_name, validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
 };
 
 const HEALTH_CARD: &str =
@@ -401,6 +402,24 @@ const CHART_TOOLTIP: &str = "rounded-field border border-border-subtle bg-surfac
 const CHART_AXIS: &str =
     "border-t border-border-subtle pt-2xs text-00 font-6 uppercase tracking-label text-text-muted";
 const CHART_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const CHECKBOX_ROOT: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CHECKBOX_ROOT_DENSE: &str = "flex w-full max-w-md items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CHECKBOX_ROOT_INVALID: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const CHECKBOX_ROOT_DISABLED: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CHECKBOX_CONTROL: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-border-strong bg-surface-1 text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHECKBOX_CONTROL_CHECKED: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-brand text-00 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHECKBOX_CONTROL_INDETERMINATE: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-primary-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHECKBOX_CONTROL_INVALID: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-danger bg-error-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHECKBOX_CONTROL_DISABLED: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-border-muted bg-surface-3 text-00 font-7 leading-0 text-text-disabled";
+const CHECKBOX_TEXT: &str = "grid min-w-0 gap-3xs";
+const CHECKBOX_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const CHECKBOX_LABEL_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const CHECKBOX_DESCRIPTION: &str = "m-0 text-00 leading-0 text-text-2";
+const CHECKBOX_DESCRIPTION_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
+const CHECKBOX_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const CHECKBOX_REQUIRED: &str = "text-danger";
+const CHECKBOX_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -3538,11 +3557,182 @@ const fn chart_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(
-    Checkbox,
-    crate::CheckboxModel,
-    crate::default_checkbox_model
-);
+#[component]
+pub fn Checkbox(
+    #[prop(optional, default = default_checkbox_model())] model: CheckboxModel,
+) -> AnyView {
+    if let Err(report) = validate_checkbox_model(&model) {
+        let message = format!("Checkbox validation failed: {report}");
+        return view! {
+            <div class=CHECKBOX_ERROR data-ui-component="checkbox" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let nodes = checkbox_render_nodes(&model, &model.state());
+    let root = nodes
+        .iter()
+        .find(|node| node.part == CheckboxPart::Root)
+        .expect("invariant: checkbox render nodes include root")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == CheckboxPart::Label)
+        .expect("invariant: checkbox render nodes include label")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == CheckboxPart::Description)
+        .expect("invariant: checkbox render nodes include description")
+        .clone();
+    let required = root.required;
+    let value = root.value.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <div
+            class=checkbox_root_class(density, disabled, invalid)
+            data-ui-component="checkbox"
+            data-ui-part=CheckboxPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    checkbox_state_label(loading, disabled, invalid, state.checked()).to_owned()
+                })
+            }
+            data-ui-checked=move || state.with(|state| state.checked().label().to_owned())
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <button
+                type="button"
+                role="checkbox"
+                class=move || {
+                    state.with(|state| {
+                        checkbox_control_class(state.checked(), blocked, invalid).to_owned()
+                    })
+                }
+                data-ui-part=CheckboxPart::Indicator.label()
+                data-ui-value=value
+                aria-label=root.label
+                aria-checked=move || state.with(|state| state.checked().aria_checked().to_owned())
+                disabled=blocked
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(CheckboxIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                {move || state.with(|state| checkbox_indicator_text(state.checked()).to_owned())}
+            </button>
+            <div class=CHECKBOX_TEXT>
+                <p
+                    class=checkbox_label_class(disabled)
+                    data-ui-part=CheckboxPart::Label.label()
+                >
+                    {label.label}
+                    {required.then_some(view! { <span class=CHECKBOX_REQUIRED>" *"</span> })}
+                </p>
+                <p
+                    class=checkbox_description_class(disabled, invalid)
+                    data-ui-part=CheckboxPart::Description.label()
+                >
+                    {description.detail}
+                </p>
+            </div>
+        </div>
+    }
+    .into_any()
+}
+
+const fn checkbox_root_class(
+    density: CheckboxDensity,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return CHECKBOX_ROOT_DISABLED;
+    }
+    if invalid {
+        return CHECKBOX_ROOT_INVALID;
+    }
+    match density {
+        CheckboxDensity::Standard => CHECKBOX_ROOT,
+        CheckboxDensity::Dense => CHECKBOX_ROOT_DENSE,
+    }
+}
+
+const fn checkbox_control_class(
+    checked: CheckboxChecked,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return CHECKBOX_CONTROL_DISABLED;
+    }
+    if invalid {
+        return CHECKBOX_CONTROL_INVALID;
+    }
+    match checked {
+        CheckboxChecked::Unchecked => CHECKBOX_CONTROL,
+        CheckboxChecked::Checked => CHECKBOX_CONTROL_CHECKED,
+        CheckboxChecked::Indeterminate => CHECKBOX_CONTROL_INDETERMINATE,
+    }
+}
+
+const fn checkbox_label_class(disabled: bool) -> &'static str {
+    if disabled {
+        CHECKBOX_LABEL_DISABLED
+    } else {
+        CHECKBOX_LABEL
+    }
+}
+
+const fn checkbox_description_class(disabled: bool, invalid: bool) -> &'static str {
+    if disabled {
+        CHECKBOX_DESCRIPTION_DISABLED
+    } else if invalid {
+        CHECKBOX_DESCRIPTION_INVALID
+    } else {
+        CHECKBOX_DESCRIPTION
+    }
+}
+
+const fn checkbox_indicator_text(checked: CheckboxChecked) -> &'static str {
+    match checked {
+        CheckboxChecked::Unchecked => "",
+        CheckboxChecked::Checked => "x",
+        CheckboxChecked::Indeterminate => "-",
+    }
+}
+
+const fn checkbox_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    checked: CheckboxChecked,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else {
+        checked.label()
+    }
+}
+
 catalog_component!(
     Collapsible,
     crate::CollapsibleModel,

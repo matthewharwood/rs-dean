@@ -159,7 +159,17 @@ instead of generic chart slots. Issues 01 through 14 were re-audited against
 this learning; no earlier API changes were needed because their numeric data
 contracts are either absent or already component-specific.
 
-All-issue sweep pass: Checkbox through Typography complete. The shared
+Concrete component pass: Checkbox complete. The sixteenth issue now has a
+typed tri-state model, density/value/required/error contracts, four-part
+checkbox anatomy render nodes, renderer-local checked state, `garde`
+validation, token-only Leptos checkbox rendering, dedicated story proof, and
+Bevy primitive derivation from the same model. The sweep found that form
+controls with mixed state need an explicit shared enum instead of boolean-only
+renderer state or generic checkbox slots. Issues 01 through 15 were re-audited
+against this learning; no earlier API changes were needed because their local
+state machines already expose component-specific enums or value contracts.
+
+All-issue sweep pass: Collapsible through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -167,7 +177,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Checkbox through Typography now have
+Concrete all-issue sweep pass: Collapsible through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
@@ -198,9 +208,10 @@ uses a renderer-neutral owned view node.
 - Framed display surfaces keep footer actions in a component-specific model so generic catalog slots do not become the source of consumer action semantics.
 - Paged content components need typed item collections and shared navigation state so Leptos and Bevy derive previous/next disabled state from the same model.
 - Data visualization components need value-range validation and typed selected-series state so renderer tooltips, legends, and scene primitives agree.
+- Tri-state form controls need an explicit checked-state enum so unchecked, checked, and indeterminate render identically across Leptos and Bevy.
 - The Sweep Process is the standing rule for every next issue: implement the current component, audit all earlier concrete components, apply shared learnings, and restart at issue 01 until the implemented set is stable.
 - DOM ids for concrete components route through one internal helper, with component-specific public wrappers only where consumer or renderer code benefits from named APIs.
 
 ## Current Result
 
-All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found twelve cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, and keep date-grid arithmetic in the shared Rust contract.
+All 64 shadcn-inspired issues are implemented by shared recipes, literal Rust widget constructors, concrete typed Rust models, named Leptos components, the story renderer, Bevy primitive adapters, `garde` validation, and issue-file status checklists. The repeated sweep found thirteen cross-cutting improvements: keep per-component APIs thin, centralize durable state, renderer coverage, accessibility, variants, end-user outcomes, slots, and typed intents in Rust, validate generic widgets before framework-specific rendering, use owned render nodes where consumer-provided copy enters the renderer, keep message/media activation state ephemeral unless the app persists a real workflow decision, keep image load/error fallback local to the renderer, express compact status variants through the typed component API rather than generated catalog slots, model repeatable concrete anatomy in domain data when the component's semantics depend on item order, keep messaging side/action state renderer-local unless the app persists a real transcript decision, promote primary action primitives into bespoke typed APIs so generated catalog slots cannot drift from canonical Button styling, reuse Button's action vocabulary for grouped action components, keep date-grid arithmetic in the shared Rust contract, and encode tri-state form controls through a shared enum instead of renderer-local booleans.

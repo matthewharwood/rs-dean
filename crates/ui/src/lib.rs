@@ -15,6 +15,7 @@ pub mod carousel;
 pub mod catalog;
 pub mod catalog_components;
 pub mod chart;
+pub mod checkbox;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -96,6 +97,11 @@ pub use chart::{
     ChartChange, ChartDensity, ChartIntent, ChartModel, ChartPart, ChartRenderNode, ChartSeries,
     ChartState, ChartTone, chart_render_nodes, default_chart_model, default_chart_series,
     validate_chart_model,
+};
+pub use checkbox::{
+    CheckboxChange, CheckboxChecked, CheckboxDensity, CheckboxIntent, CheckboxModel, CheckboxPart,
+    CheckboxRenderNode, CheckboxState, checkbox_render_nodes, default_checkbox_model,
+    validate_checkbox_model,
 };
 #[cfg(feature = "leptos")]
 pub use components::*;

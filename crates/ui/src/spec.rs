@@ -288,19 +288,20 @@ pub mod bevy_adapter {
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
-        CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, RenderContract, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
-        chart_render_nodes, component_implementation, default_accordion_items,
-        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
-        default_attachment_model, default_avatar_model, default_badge_model,
-        default_breadcrumb_model, default_bubble_model, default_button_group_model,
-        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
-        default_chart_model, scale,
+        chart_render_nodes, checkbox_render_nodes, component_implementation,
+        default_accordion_items, default_alert_dialog_model, default_alert_model,
+        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+        default_badge_model, default_breadcrumb_model, default_bubble_model,
+        default_button_group_model, default_button_model, default_calendar_model,
+        default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
+        scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -399,6 +400,13 @@ pub mod bevy_adapter {
         if id == UiComponentId::Chart {
             return bevy_primitives_for_chart(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::Checkbox {
+            return bevy_primitives_for_checkbox(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -416,6 +424,39 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_checkbox(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_checkbox_model();
+        let checkbox_state = model.state();
+        checkbox_render_nodes(&model, &checkbox_state)
+            .into_iter()
+            .map(|node| {
+                let role = checkbox_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: checkbox_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: checkbox_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        checkbox_tone_for_part(node.part, node.checked, node.invalid),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: checkbox_intent_for_part(node.part),
+                    selected: node.checked.is_active(),
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -1415,6 +1456,64 @@ pub mod bevy_adapter {
             ChartPart::Legend => Vec2::new(scale::space::XL, scale::space::S),
             ChartPart::Tooltip => Vec2::new(scale::space::XL2, scale::space::S),
             ChartPart::Axis => Vec2::new(scale::space::XL2, scale::space::XS3),
+        }
+    }
+
+    const fn checkbox_kind_for_part(part: CheckboxPart) -> UiWidgetSlotKind {
+        match part {
+            CheckboxPart::Root => UiWidgetSlotKind::Section,
+            CheckboxPart::Indicator => UiWidgetSlotKind::Checkbox,
+            CheckboxPart::Label => UiWidgetSlotKind::Text,
+            CheckboxPart::Description => UiWidgetSlotKind::Description,
+        }
+    }
+
+    const fn checkbox_role_for_part(part: CheckboxPart) -> UiBlockRole {
+        match part {
+            CheckboxPart::Root => UiBlockRole::Root,
+            CheckboxPart::Indicator => UiBlockRole::Control,
+            CheckboxPart::Label => UiBlockRole::Header,
+            CheckboxPart::Description => UiBlockRole::Text,
+        }
+    }
+
+    const fn checkbox_tone_for_part(
+        part: CheckboxPart,
+        checked: CheckboxChecked,
+        invalid: bool,
+    ) -> UiBlockTone {
+        if invalid {
+            return UiBlockTone::Danger;
+        }
+        match part {
+            CheckboxPart::Indicator => {
+                if checked.is_active() {
+                    UiBlockTone::Brand
+                } else {
+                    UiBlockTone::Surface
+                }
+            }
+            CheckboxPart::Root | CheckboxPart::Label | CheckboxPart::Description => {
+                UiBlockTone::Surface
+            }
+        }
+    }
+
+    const fn checkbox_intent_for_part(part: CheckboxPart) -> UiWidgetIntent {
+        match part {
+            CheckboxPart::Indicator => UiWidgetIntent::Toggle,
+            CheckboxPart::Root | CheckboxPart::Label | CheckboxPart::Description => {
+                UiWidgetIntent::None
+            }
+        }
+    }
+
+    fn checkbox_size_for_part(part: CheckboxPart) -> Vec2 {
+        match part {
+            CheckboxPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            CheckboxPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
+            CheckboxPart::Label => Vec2::new(scale::space::XL2, scale::space::S),
+            CheckboxPart::Description => Vec2::new(scale::space::XL2, scale::space::S),
         }
     }
 
