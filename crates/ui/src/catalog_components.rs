@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    data_table,
-    DataTable,
-    DataTableModel,
-    DataTablePart,
-    DataTableRenderNode,
-    DataTableState,
-    DataTableIntent,
-    DataTableChange,
-    validate_data_table_model,
-    data_table_render_nodes,
-    default_data_table_model,
-    [
-        Root => "DataTable",
-        Toolbar => "DataTableToolbar",
-        Header => "DataTableHeader",
-        Row => "DataTableRow",
-        Cell => "DataTableCell",
-        Pagination => "DataTablePagination",
-    ]
-);
-
-define_catalog_component!(
     date_picker,
     DatePicker,
     DatePickerModel,
@@ -1412,10 +1390,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Collapsible
         | UiComponentId::Combobox
         | UiComponentId::Command
-        | UiComponentId::ContextMenu => None,
-        UiComponentId::DataTable => Some(any_nodes(data_table_render_nodes(
-            &default_data_table_model(),
-        ))),
+        | UiComponentId::ContextMenu
+        | UiComponentId::DataTable => None,
         UiComponentId::DatePicker => Some(any_nodes(date_picker_render_nodes(
             &default_date_picker_model(),
         ))),
@@ -1540,6 +1516,7 @@ mod tests {
                     | UiComponentId::Combobox
                     | UiComponentId::Command
                     | UiComponentId::ContextMenu
+                    | UiComponentId::DataTable
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1556,17 +1533,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_data_table_model().state();
-        assert!(!state.is_active(DataTablePart::Root));
+        let mut state = default_date_picker_model().state();
+        assert!(!state.is_active(DatePickerPart::Root));
         assert_eq!(
-            state.apply(DataTableIntent::Toggle(DataTablePart::Root)),
-            DataTableChange::Opened(DataTablePart::Root)
+            state.apply(DatePickerIntent::Toggle(DatePickerPart::Root)),
+            DatePickerChange::Opened(DatePickerPart::Root)
         );
-        assert!(state.is_active(DataTablePart::Root));
+        assert!(state.is_active(DatePickerPart::Root));
         assert_eq!(
-            state.apply(DataTableIntent::Toggle(DataTablePart::Root)),
-            DataTableChange::Closed(DataTablePart::Root)
+            state.apply(DatePickerIntent::Toggle(DatePickerPart::Root)),
+            DatePickerChange::Closed(DatePickerPart::Root)
         );
-        assert!(!state.is_active(DataTablePart::Root));
+        assert!(!state.is_active(DatePickerPart::Root));
     }
 }

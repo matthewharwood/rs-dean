@@ -289,22 +289,22 @@ pub mod bevy_adapter {
         BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
         ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
         CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, RenderContract, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, RenderContract,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
-        default_accordion_items, default_alert_dialog_model, default_alert_model,
-        default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-        default_badge_model, default_breadcrumb_model, default_bubble_model,
+        data_table_render_nodes, default_accordion_items, default_alert_dialog_model,
+        default_alert_model, default_aspect_ratio_model, default_attachment_model,
+        default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
         default_button_group_model, default_button_model, default_calendar_model,
         default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
         default_collapsible_model, default_combobox_model, default_command_model,
-        default_context_menu_model, scale,
+        default_context_menu_model, default_data_table_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -429,6 +429,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::ContextMenu {
             return bevy_primitives_for_context_menu(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
+        }
+        if id == UiComponentId::DataTable {
+            return bevy_primitives_for_data_table(
                 theme,
                 implementation.render,
                 implementation.state,
@@ -626,6 +633,39 @@ pub mod bevy_adapter {
                     state,
                     intent: context_menu_intent_for_part(node.part),
                     selected: node.selected || node.active || node.submenu_open,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_data_table(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_data_table_model();
+        let data_table_state = model.state();
+        data_table_render_nodes(&model, &data_table_state)
+            .into_iter()
+            .map(|node| {
+                let role = data_table_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: data_table_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: data_table_size_for_part(node.part),
+                    fill: fill_for_tone(
+                        data_table_tone_for_part(node.part, node.selected, node.disabled),
+                        theme,
+                    ),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: data_table_intent_for_part(node.part),
+                    selected: node.selected,
                     disabled: node.disabled,
                 }
             })
@@ -1950,6 +1990,66 @@ pub mod bevy_adapter {
             ContextMenuPart::Item => Vec2::new(scale::space::XL3, scale::space::L),
             ContextMenuPart::Separator => Vec2::new(scale::space::XL3, scale::space::XS),
             ContextMenuPart::Submenu => Vec2::new(scale::space::XL3, scale::space::L),
+        }
+    }
+
+    const fn data_table_kind_for_part(part: DataTablePart) -> UiWidgetSlotKind {
+        match part {
+            DataTablePart::Root => UiWidgetSlotKind::Table,
+            DataTablePart::Toolbar => UiWidgetSlotKind::Input,
+            DataTablePart::Header => UiWidgetSlotKind::Header,
+            DataTablePart::Row => UiWidgetSlotKind::Row,
+            DataTablePart::Cell => UiWidgetSlotKind::Cell,
+            DataTablePart::Pagination => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn data_table_role_for_part(part: DataTablePart) -> UiBlockRole {
+        match part {
+            DataTablePart::Root => UiBlockRole::Root,
+            DataTablePart::Toolbar => UiBlockRole::Control,
+            DataTablePart::Header => UiBlockRole::Header,
+            DataTablePart::Row | DataTablePart::Cell => UiBlockRole::Data,
+            DataTablePart::Pagination => UiBlockRole::Navigation,
+        }
+    }
+
+    const fn data_table_tone_for_part(
+        part: DataTablePart,
+        selected: bool,
+        disabled: bool,
+    ) -> UiBlockTone {
+        if disabled {
+            return UiBlockTone::Muted;
+        }
+        match part {
+            DataTablePart::Header | DataTablePart::Row if selected => UiBlockTone::Brand,
+            DataTablePart::Toolbar => UiBlockTone::Brand,
+            DataTablePart::Pagination => UiBlockTone::Surface,
+            DataTablePart::Root
+            | DataTablePart::Header
+            | DataTablePart::Row
+            | DataTablePart::Cell => UiBlockTone::Surface,
+        }
+    }
+
+    const fn data_table_intent_for_part(part: DataTablePart) -> UiWidgetIntent {
+        match part {
+            DataTablePart::Toolbar => UiWidgetIntent::Input,
+            DataTablePart::Header | DataTablePart::Row => UiWidgetIntent::Select,
+            DataTablePart::Pagination => UiWidgetIntent::Navigate,
+            DataTablePart::Root | DataTablePart::Cell => UiWidgetIntent::None,
+        }
+    }
+
+    fn data_table_size_for_part(part: DataTablePart) -> Vec2 {
+        match part {
+            DataTablePart::Root => Vec2::new(scale::space::XL3, scale::space::XL3),
+            DataTablePart::Toolbar => Vec2::new(scale::space::XL3, scale::space::L),
+            DataTablePart::Header => Vec2::new(scale::space::XL, scale::space::M),
+            DataTablePart::Row => Vec2::new(scale::space::XL3, scale::space::L),
+            DataTablePart::Cell => Vec2::new(scale::space::XL, scale::space::M),
+            DataTablePart::Pagination => Vec2::new(scale::space::XL3, scale::space::L),
         }
     }
 

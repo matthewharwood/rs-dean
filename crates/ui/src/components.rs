@@ -17,26 +17,29 @@ use crate::{
     CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
     ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
     ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
-    ContextMenuPart, ContextMenuState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
+    DataTablePart, DataTableState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
     UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
     aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
     breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
     calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
-    component_implementation, component_spec, context_menu_render_nodes, default_accordion_items,
-    default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
-    default_attachment_model, default_avatar_model, default_badge_model, default_breadcrumb_model,
-    default_bubble_model, default_button_group_model, default_button_model, default_calendar_model,
-    default_card_model, default_carousel_model, default_chart_model, default_checkbox_model,
-    default_collapsible_model, default_combobox_model, default_command_model,
-    default_context_menu_model, month_name, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model,
+    component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
+    default_accordion_items, default_alert_dialog_model, default_alert_model,
+    default_aspect_ratio_model, default_attachment_model, default_avatar_model,
+    default_badge_model, default_breadcrumb_model, default_bubble_model,
+    default_button_group_model, default_button_model, default_calendar_model, default_card_model,
+    default_carousel_model, default_chart_model, default_checkbox_model, default_collapsible_model,
+    default_combobox_model, default_command_model, default_context_menu_model,
+    default_data_table_model, max_data_table_page_index, month_name, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model,
 };
 
 const HEALTH_CARD: &str =
@@ -504,6 +507,34 @@ const CONTEXT_MENU_SUBMENU_OPEN: &str = "flex min-h-field w-full items-center ju
 const CONTEXT_MENU_SUBMENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-disabled";
 const CONTEXT_MENU_SUBMENU_MARKER: &str = "text-00 font-7 text-text-muted";
 const CONTEXT_MENU_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const DATA_TABLE_ROOT: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const DATA_TABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const DATA_TABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const DATA_TABLE_TOOLBAR: &str = "flex flex-wrap items-center justify-between gap-2xs";
+const DATA_TABLE_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const DATA_TABLE_FILTER: &str = "min-h-field min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATA_TABLE_FILTER_DENSE: &str = "min-h-s min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATA_TABLE_FRAME: &str =
+    "w-full overflow-hidden rounded-field border border-border-subtle bg-surface-1";
+const DATA_TABLE_TABLE: &str = "w-full border-collapse text-left text-0 text-text-1";
+const DATA_TABLE_HEADER: &str = "border-b border-border-subtle bg-surface-2 px-xs py-2xs text-left text-00 font-7 uppercase tracking-label text-text-muted";
+const DATA_TABLE_HEADER_SORTED: &str = "border-b border-brand bg-primary-soft px-xs py-2xs text-left text-00 font-7 uppercase tracking-label text-text-1";
+const DATA_TABLE_HEADER_BUTTON: &str = "flex w-full items-center justify-between gap-2xs rounded-field text-left text-00 font-7 uppercase tracking-label focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
+const DATA_TABLE_SORT_MARKER: &str = "text-00 font-7 text-text-muted";
+const DATA_TABLE_ROW: &str =
+    "border-b border-border-faint bg-surface-1 transition-colors hover:bg-hover-tint";
+const DATA_TABLE_ROW_SELECTED: &str =
+    "border-b border-brand bg-primary-soft transition-colors hover:bg-selected-tint";
+const DATA_TABLE_ROW_DISABLED: &str =
+    "border-b border-border-muted bg-surface-2 text-text-disabled";
+const DATA_TABLE_CELL: &str = "px-xs py-2xs text-0 leading-0 text-text-1";
+const DATA_TABLE_CELL_DENSE: &str = "px-2xs py-3xs text-00 leading-0 text-text-1";
+const DATA_TABLE_EMPTY: &str = "px-xs py-s text-center text-0 leading-0 text-text-muted";
+const DATA_TABLE_PAGINATION: &str = "flex flex-wrap items-center justify-between gap-2xs";
+const DATA_TABLE_PAGE_LABEL: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
+const DATA_TABLE_PAGE_BUTTON: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATA_TABLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -4680,11 +4711,340 @@ const fn context_menu_state_label(loading: bool, disabled: bool, open: bool) -> 
     }
 }
 
-catalog_component!(
-    DataTable,
-    crate::DataTableModel,
-    crate::default_data_table_model
-);
+#[component]
+pub fn DataTable(
+    #[prop(optional, default = default_data_table_model())] model: DataTableModel,
+) -> AnyView {
+    if let Err(report) = validate_data_table_model(&model) {
+        let message = format!("DataTable validation failed: {report}");
+        return view! {
+            <div class=DATA_TABLE_ERROR data-ui-component="data-table" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let input_nodes = data_table_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == DataTablePart::Root)
+        .expect("invariant: data table render nodes include root")
+        .clone();
+    let toolbar = input_nodes
+        .iter()
+        .find(|node| node.part == DataTablePart::Toolbar)
+        .expect("invariant: data table render nodes include toolbar")
+        .clone();
+    let header_model = model.clone();
+    let body_model = model.clone();
+    let pagination_label_model = model.clone();
+    let next_page_model = model.clone();
+    let next_disabled_model = model.clone();
+    let column_count = model.columns.len();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=data_table_root_class(density, disabled)
+            data-ui-component="data-table"
+            data-ui-part=DataTablePart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| data_table_state_label(loading, disabled, state.selected_row().is_some()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <div class=DATA_TABLE_TOOLBAR data-ui-part=DataTablePart::Toolbar.label()>
+                <h3 class=DATA_TABLE_TITLE>{root.label}</h3>
+                <input
+                    type="search"
+                    role="searchbox"
+                    class=data_table_filter_class(density)
+                    placeholder=toolbar.label
+                    disabled=blocked
+                    prop:value=move || state.with(|state| state.filter().to_owned())
+                    on:input=move |event| {
+                        if !blocked {
+                            let value = event_target_value(&event);
+                            set_state.update(|state| {
+                                let max_page = 0;
+                                let _ = state.apply(DataTableIntent::Filter(value), max_page);
+                            });
+                        }
+                    }
+                />
+            </div>
+            <div class=DATA_TABLE_FRAME>
+                <table class=DATA_TABLE_TABLE role="table">
+                    <thead>
+                        <tr>
+                            {move || {
+                                state.with(|state| {
+                                    data_table_render_nodes(&header_model, state)
+                                        .into_iter()
+                                        .filter(|node| node.part == DataTablePart::Header)
+                                        .map(|node| data_table_header_view(node, blocked, set_state))
+                                        .collect_view()
+                                })
+                            }}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {move || {
+                            state.with(|state| {
+                                let nodes = data_table_render_nodes(&body_model, state);
+                                let row_nodes = nodes
+                                    .iter()
+                                    .filter(|node| node.part == DataTablePart::Row)
+                                    .cloned()
+                                    .collect::<Vec<_>>();
+                                let cell_nodes = nodes
+                                    .iter()
+                                    .filter(|node| node.part == DataTablePart::Cell)
+                                    .cloned()
+                                    .collect::<Vec<_>>();
+                                if row_nodes.len() == 1 && row_nodes[0].value == "empty" {
+                                    let empty = row_nodes[0].clone();
+                                    view! {
+                                        <tr class=DATA_TABLE_ROW_DISABLED data-ui-part=DataTablePart::Row.label()>
+                                            <td class=DATA_TABLE_EMPTY colspan=column_count.to_string()>
+                                                {empty.label}
+                                            </td>
+                                        </tr>
+                                    }
+                                    .into_any()
+                                } else {
+                                    row_nodes
+                                        .into_iter()
+                                        .map(|row| {
+                                            let cells = cell_nodes
+                                                .iter()
+                                                .filter(|cell| cell.row_value == row.value)
+                                                .cloned()
+                                                .collect::<Vec<_>>();
+                                            data_table_row_view(row, cells, blocked, set_state)
+                                        })
+                                        .collect_view()
+                                        .into_any()
+                                }
+                            })
+                        }}
+                    </tbody>
+                </table>
+            </div>
+            <footer class=DATA_TABLE_PAGINATION data-ui-part=DataTablePart::Pagination.label()>
+                <button
+                    type="button"
+                    class=DATA_TABLE_PAGE_BUTTON
+                    disabled=move || state.with(|state| blocked || state.page_index() == 0)
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(DataTableIntent::PreviousPage, 0);
+                            });
+                        }
+                    }
+                >
+                    "Previous"
+                </button>
+                <p class=DATA_TABLE_PAGE_LABEL>
+                    {move || {
+                        state.with(|state| {
+                            data_table_render_nodes(&pagination_label_model, state)
+                                .into_iter()
+                                .find(|node| node.part == DataTablePart::Pagination)
+                                .map(|node| node.label)
+                                .unwrap_or_else(|| "Page 1 of 1".to_owned())
+                        })
+                    }}
+                </p>
+                <button
+                    type="button"
+                    class=DATA_TABLE_PAGE_BUTTON
+                    disabled=move || {
+                        state.with(|state| {
+                            blocked
+                                || state.page_index()
+                                    >= max_data_table_page_index(&next_disabled_model, state)
+                        })
+                    }
+                    on:click=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let max_page = max_data_table_page_index(&next_page_model, state);
+                                let _ = state.apply(DataTableIntent::NextPage, max_page);
+                            });
+                        }
+                    }
+                >
+                    "Next"
+                </button>
+            </footer>
+        </section>
+    }
+    .into_any()
+}
+
+fn data_table_header_view(
+    node: crate::DataTableRenderNode,
+    blocked: bool,
+    set_state: WriteSignal<DataTableState>,
+) -> AnyView {
+    let value_for_click = node.value.clone();
+    let disabled = node.disabled;
+    let sort_marker = data_table_sort_marker(node.sort_direction);
+    view! {
+        <th
+            scope="col"
+            class=data_table_header_class(node.selected, disabled)
+            data-ui-part=DataTablePart::Header.label()
+            data-ui-column=node.column_value
+            aria-sort=data_table_aria_sort(node.sort_direction)
+        >
+            <button
+                type="button"
+                class=DATA_TABLE_HEADER_BUTTON
+                disabled=disabled
+                on:click=move |_| {
+                    if !blocked && !disabled {
+                        let value = value_for_click.clone();
+                        set_state.update(|state| {
+                            let _ = state.apply(DataTableIntent::Sort(value), 0);
+                        });
+                    }
+                }
+            >
+                <span>{node.label}</span>
+                <span class=DATA_TABLE_SORT_MARKER>{sort_marker}</span>
+            </button>
+        </th>
+    }
+    .into_any()
+}
+
+fn data_table_row_view(
+    row: crate::DataTableRenderNode,
+    cells: Vec<crate::DataTableRenderNode>,
+    blocked: bool,
+    set_state: WriteSignal<DataTableState>,
+) -> AnyView {
+    let row_value = row.value.clone();
+    let row_value_for_click = row.value.clone();
+    let disabled = row.disabled;
+    let density = row.density;
+    view! {
+        <tr
+            class=data_table_row_class(row.selected, disabled)
+            data-ui-part=DataTablePart::Row.label()
+            data-ui-row=row_value
+            aria-selected=row.selected.to_string()
+            aria-disabled=disabled.to_string()
+            on:click=move |_| {
+                if !blocked && !disabled {
+                    let value = row_value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(DataTableIntent::SelectRow(value), 0);
+                    });
+                }
+            }
+        >
+            {cells
+                .into_iter()
+                .map(|cell| {
+                    view! {
+                        <td
+                            class=data_table_cell_class(density)
+                            data-ui-part=DataTablePart::Cell.label()
+                            data-ui-row=cell.row_value
+                            data-ui-column=cell.column_value
+                        >
+                            {cell.label}
+                        </td>
+                    }
+                })
+                .collect_view()}
+        </tr>
+    }
+    .into_any()
+}
+
+const fn data_table_root_class(density: DataTableDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return DATA_TABLE_ROOT_DISABLED;
+    }
+    match density {
+        DataTableDensity::Standard => DATA_TABLE_ROOT,
+        DataTableDensity::Dense => DATA_TABLE_ROOT_DENSE,
+    }
+}
+
+const fn data_table_filter_class(density: DataTableDensity) -> &'static str {
+    match density {
+        DataTableDensity::Standard => DATA_TABLE_FILTER,
+        DataTableDensity::Dense => DATA_TABLE_FILTER_DENSE,
+    }
+}
+
+const fn data_table_header_class(selected: bool, disabled: bool) -> &'static str {
+    if selected && !disabled {
+        DATA_TABLE_HEADER_SORTED
+    } else {
+        DATA_TABLE_HEADER
+    }
+}
+
+const fn data_table_row_class(selected: bool, disabled: bool) -> &'static str {
+    if disabled {
+        DATA_TABLE_ROW_DISABLED
+    } else if selected {
+        DATA_TABLE_ROW_SELECTED
+    } else {
+        DATA_TABLE_ROW
+    }
+}
+
+const fn data_table_cell_class(density: DataTableDensity) -> &'static str {
+    match density {
+        DataTableDensity::Standard => DATA_TABLE_CELL,
+        DataTableDensity::Dense => DATA_TABLE_CELL_DENSE,
+    }
+}
+
+const fn data_table_sort_marker(direction: Option<crate::DataTableSortDirection>) -> &'static str {
+    match direction {
+        Some(crate::DataTableSortDirection::Ascending) => "asc",
+        Some(crate::DataTableSortDirection::Descending) => "desc",
+        None => "-",
+    }
+}
+
+const fn data_table_aria_sort(direction: Option<crate::DataTableSortDirection>) -> &'static str {
+    match direction {
+        Some(crate::DataTableSortDirection::Ascending) => "ascending",
+        Some(crate::DataTableSortDirection::Descending) => "descending",
+        None => "none",
+    }
+}
+
+const fn data_table_state_label(loading: bool, disabled: bool, selected: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if selected {
+        "selected"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     DatePicker,
     crate::DatePickerModel,

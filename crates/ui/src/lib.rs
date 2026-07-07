@@ -20,6 +20,7 @@ pub mod collapsible;
 pub mod combobox;
 pub mod command;
 pub mod context_menu;
+pub mod data_table;
 mod dom;
 pub mod kit;
 pub mod spec;
@@ -128,6 +129,12 @@ pub use context_menu::{
     ContextMenuAction, ContextMenuChange, ContextMenuDensity, ContextMenuEntry, ContextMenuIntent,
     ContextMenuModel, ContextMenuPart, ContextMenuRenderNode, ContextMenuState, ContextMenuSubmenu,
     context_menu_render_nodes, default_context_menu_model, validate_context_menu_model,
+};
+pub use data_table::{
+    DataTableChange, DataTableColumn, DataTableDensity, DataTableIntent, DataTableModel,
+    DataTablePart, DataTableRenderNode, DataTableRow, DataTableSortDirection, DataTableState,
+    data_table_render_nodes, default_data_table_model, max_data_table_page_index,
+    validate_data_table_model, visible_data_table_rows,
 };
 pub use kit::{
     ComponentImplementation, ImplementationMaturity, LayoutContract, RenderContract, StateContract,

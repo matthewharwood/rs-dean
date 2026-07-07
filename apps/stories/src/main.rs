@@ -13,8 +13,9 @@ use rs_dean_ui::{
     CheckboxDensity, CheckboxModel, Collapsible, CollapsibleDensity, CollapsibleModel, Combobox,
     ComboboxDensity, ComboboxModel, ComboboxOption, Command, CommandDensity, CommandGroup,
     CommandItem, CommandModel, ContextMenu, ContextMenuAction, ContextMenuDensity,
-    ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, HealthCard, ShadcnComponentGallery,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    ContextMenuEntry, ContextMenuModel, ContextMenuSubmenu, DataTable, DataTableColumn,
+    DataTableDensity, DataTableModel, DataTableRow, DataTableSortDirection, HealthCard,
+    ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -414,6 +415,24 @@ fn Stories() -> impl IntoView {
                             <ContextMenu model=invalid_context_menu_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <ContextMenu model=themed_context_menu_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-data-table" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Data Table"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 21 implemented as a filterable, sortable, paginated table backed by validated shared Rust columns/rows, renderer-local table state, repeatable cell anatomy, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <DataTable model=default_data_table_story_model() />
+                            <DataTable model=dense_data_table_story_model() />
+                            <DataTable model=loading_data_table_story_model() />
+                            <DataTable model=disabled_data_table_story_model() />
+                            <DataTable model=invalid_data_table_story_model() />
+                            <ThemeScope theme=ThemeId::Synthwave>
+                                <DataTable model=themed_data_table_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -1509,6 +1528,98 @@ fn themed_context_menu_story_model() -> ContextMenuModel {
     .with_selected_value("copy-class")
     .with_active_value("theme-scope")
     .with_open_submenu("theme-scope")
+}
+
+fn data_table_story_columns() -> Vec<DataTableColumn> {
+    vec![
+        DataTableColumn::new("Component", "component"),
+        DataTableColumn::new("Surface", "surface"),
+        DataTableColumn::new("Health", "health").numeric(),
+    ]
+}
+
+fn data_table_story_rows() -> Vec<DataTableRow> {
+    vec![
+        DataTableRow::new(
+            "accordion",
+            vec![
+                "Accordion".to_owned(),
+                "Disclosure".to_owned(),
+                "98".to_owned(),
+            ],
+        ),
+        DataTableRow::new(
+            "combobox",
+            vec!["Combobox".to_owned(), "Form".to_owned(), "95".to_owned()],
+        ),
+        DataTableRow::new(
+            "command",
+            vec!["Command".to_owned(), "Overlay".to_owned(), "93".to_owned()],
+        ),
+        DataTableRow::new(
+            "context-menu",
+            vec![
+                "Context Menu".to_owned(),
+                "Overlay".to_owned(),
+                "91".to_owned(),
+            ],
+        )
+        .disabled(),
+        DataTableRow::new(
+            "data-table",
+            vec!["Data Table".to_owned(), "Data".to_owned(), "89".to_owned()],
+        ),
+    ]
+}
+
+fn default_data_table_story_model() -> DataTableModel {
+    DataTableModel::new(data_table_story_columns(), data_table_story_rows())
+        .with_title("Component health")
+        .with_filter_placeholder("Filter components")
+        .with_sort("component", DataTableSortDirection::Ascending)
+        .with_selected_row("command")
+        .with_page_size(3)
+}
+
+fn dense_data_table_story_model() -> DataTableModel {
+    DataTableModel::new(data_table_story_columns(), data_table_story_rows())
+        .with_density(DataTableDensity::Dense)
+        .with_title("Dense health")
+        .with_filter_placeholder("Filter dense rows")
+        .with_sort("health", DataTableSortDirection::Descending)
+        .with_default_filter("co")
+        .with_page_size(2)
+}
+
+fn loading_data_table_story_model() -> DataTableModel {
+    default_data_table_story_model().loading()
+}
+
+fn disabled_data_table_story_model() -> DataTableModel {
+    DataTableModel::new(data_table_story_columns(), data_table_story_rows())
+        .with_title("Disabled table")
+        .with_selected_row("accordion")
+        .disabled()
+}
+
+fn invalid_data_table_story_model() -> DataTableModel {
+    DataTableModel::new(
+        data_table_story_columns(),
+        vec![DataTableRow::new(
+            "bad-row",
+            vec!["Missing cells".to_owned(), "Data".to_owned()],
+        )],
+    )
+    .with_title("Invalid table")
+}
+
+fn themed_data_table_story_model() -> DataTableModel {
+    DataTableModel::new(data_table_story_columns(), data_table_story_rows())
+        .with_title("Theme scoped table")
+        .with_filter_placeholder("Filter theme rows")
+        .with_sort("surface", DataTableSortDirection::Ascending)
+        .with_selected_row("data-table")
+        .with_page_size(4)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
