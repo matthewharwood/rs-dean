@@ -7,6 +7,7 @@ pub mod avatar;
 pub mod badge;
 pub mod breadcrumb;
 pub mod bubble;
+pub mod button;
 pub mod catalog;
 pub mod catalog_components;
 mod dom;
@@ -57,6 +58,10 @@ pub use breadcrumb::{
 pub use bubble::{
     BubbleAction, BubbleChange, BubbleIntent, BubbleModel, BubblePart, BubbleRenderNode,
     BubbleSide, BubbleState, bubble_render_nodes, default_bubble_model, validate_bubble_model,
+};
+pub use button::{
+    ButtonChange, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonRenderNode, ButtonSize,
+    ButtonState, ButtonVariant, button_render_nodes, default_button_model, validate_button_model,
 };
 pub use catalog::{
     ComponentDefinition, FrameworkMode, SHADCN_COMPONENT_COUNT, SHADCN_COMPONENTS,

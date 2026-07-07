@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    button,
-    Button,
-    ButtonModel,
-    ButtonPart,
-    ButtonRenderNode,
-    ButtonState,
-    ButtonIntent,
-    ButtonChange,
-    validate_button_model,
-    button_render_nodes,
-    default_button_model,
-    [Root => "Button", Icon => "ButtonIcon", Label => "ButtonLabel"]
-);
-
-define_catalog_component!(
     button_group,
     ButtonGroup,
     ButtonGroupModel,
@@ -1625,8 +1610,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Avatar
         | UiComponentId::Badge
         | UiComponentId::Breadcrumb
-        | UiComponentId::Bubble => None,
-        UiComponentId::Button => Some(any_nodes(button_render_nodes(&default_button_model()))),
+        | UiComponentId::Bubble
+        | UiComponentId::Button => None,
         UiComponentId::ButtonGroup => Some(any_nodes(button_group_render_nodes(
             &default_button_group_model(),
         ))),
@@ -1767,6 +1752,7 @@ mod tests {
                     | UiComponentId::Badge
                     | UiComponentId::Breadcrumb
                     | UiComponentId::Bubble
+                    | UiComponentId::Button
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -1783,17 +1769,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_button_model().state();
-        assert!(!state.is_active(ButtonPart::Root));
+        let mut state = default_button_group_model().state();
+        assert!(!state.is_active(ButtonGroupPart::Root));
         assert_eq!(
-            state.apply(ButtonIntent::Toggle(ButtonPart::Root)),
-            ButtonChange::Opened(ButtonPart::Root)
+            state.apply(ButtonGroupIntent::Toggle(ButtonGroupPart::Root)),
+            ButtonGroupChange::Opened(ButtonGroupPart::Root)
         );
-        assert!(state.is_active(ButtonPart::Root));
+        assert!(state.is_active(ButtonGroupPart::Root));
         assert_eq!(
-            state.apply(ButtonIntent::Toggle(ButtonPart::Root)),
-            ButtonChange::Closed(ButtonPart::Root)
+            state.apply(ButtonGroupIntent::Toggle(ButtonGroupPart::Root)),
+            ButtonGroupChange::Closed(ButtonGroupPart::Root)
         );
-        assert!(!state.is_active(ButtonPart::Root));
+        assert!(!state.is_active(ButtonGroupPart::Root));
     }
 }

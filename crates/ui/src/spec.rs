@@ -286,15 +286,16 @@ pub mod bevy_adapter {
     use crate::{
         AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
         AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
-        BreadcrumbPart, BubblePart, BubbleSide, RenderContract, StateContract, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, catalog_component_any_render_nodes_for_component,
+        BreadcrumbPart, BubblePart, BubbleSide, ButtonKind, ButtonPart, ButtonSize, ButtonVariant,
+        RenderContract, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_render_nodes, catalog_component_any_render_nodes_for_component,
         component_implementation, default_accordion_items, default_alert_dialog_model,
         default_alert_model, default_aspect_ratio_model, default_attachment_model,
         default_avatar_model, default_badge_model, default_breadcrumb_model, default_bubble_model,
-        scale,
+        default_button_model, scale,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -363,6 +364,9 @@ pub mod bevy_adapter {
         if id == UiComponentId::Bubble {
             return bevy_primitives_for_bubble(theme, implementation.render, implementation.state);
         }
+        if id == UiComponentId::Button {
+            return bevy_primitives_for_button(theme, implementation.render, implementation.state);
+        }
         catalog_component_any_render_nodes_for_component(id)
             .expect("invariant: non-bespoke component has generated concrete render nodes")
             .into_iter()
@@ -380,6 +384,35 @@ pub mod bevy_adapter {
                 intent: node.intent,
                 selected: node.selected,
                 disabled: node.disabled,
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_button(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_button_model();
+        button_render_nodes(&model, model.state())
+            .into_iter()
+            .map(|node| {
+                let role = button_role_for_part(node.part);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: button_kind_for_part(node.part, node.kind),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: button_size_for_part(node.part, node.size),
+                    fill: fill_for_tone(button_tone_for_part(node.part, node.variant), theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: button_intent_for_part(node.part, node.kind),
+                    selected: node.pressed,
+                    disabled: node.disabled,
+                }
             })
             .collect()
     }
@@ -898,6 +931,65 @@ pub mod bevy_adapter {
             BubblePart::Root | BubblePart::Content => Vec2::new(scale::space::XL, scale::space::L),
             BubblePart::Avatar => Vec2::new(scale::space::L, scale::space::L),
             BubblePart::Meta | BubblePart::Actions => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    const fn button_kind_for_part(part: ButtonPart, kind: ButtonKind) -> UiWidgetSlotKind {
+        match part {
+            ButtonPart::Root => UiWidgetSlotKind::Section,
+            ButtonPart::Icon => UiWidgetSlotKind::Marker,
+            ButtonPart::Label => match kind {
+                ButtonKind::Link => UiWidgetSlotKind::Link,
+                ButtonKind::Button | ButtonKind::Submit | ButtonKind::Reset => {
+                    UiWidgetSlotKind::Button
+                }
+            },
+        }
+    }
+
+    const fn button_role_for_part(part: ButtonPart) -> UiBlockRole {
+        match part {
+            ButtonPart::Root => UiBlockRole::Root,
+            ButtonPart::Icon => UiBlockRole::Indicator,
+            ButtonPart::Label => UiBlockRole::Action,
+        }
+    }
+
+    const fn button_tone_for_part(part: ButtonPart, variant: ButtonVariant) -> UiBlockTone {
+        match part {
+            ButtonPart::Icon => UiBlockTone::Accent,
+            ButtonPart::Root | ButtonPart::Label => match variant {
+                ButtonVariant::Primary | ButtonVariant::Link => UiBlockTone::Brand,
+                ButtonVariant::Secondary | ButtonVariant::Outline | ButtonVariant::Ghost => {
+                    UiBlockTone::Surface
+                }
+                ButtonVariant::Destructive => UiBlockTone::Danger,
+            },
+        }
+    }
+
+    const fn button_intent_for_part(part: ButtonPart, kind: ButtonKind) -> UiWidgetIntent {
+        match part {
+            ButtonPart::Root | ButtonPart::Label => match kind {
+                ButtonKind::Link => UiWidgetIntent::Navigate,
+                ButtonKind::Button | ButtonKind::Submit | ButtonKind::Reset => {
+                    UiWidgetIntent::Activate
+                }
+            },
+            ButtonPart::Icon => UiWidgetIntent::None,
+        }
+    }
+
+    fn button_size_for_part(part: ButtonPart, size: ButtonSize) -> Vec2 {
+        match part {
+            ButtonPart::Root => match size {
+                ButtonSize::Small => Vec2::new(scale::space::XL, scale::space::S),
+                ButtonSize::Medium => Vec2::new(scale::space::XL2, scale::space::L),
+                ButtonSize::Large => Vec2::new(scale::space::XL3, scale::space::XL),
+                ButtonSize::Icon => Vec2::new(scale::space::L, scale::space::L),
+            },
+            ButtonPart::Icon => Vec2::new(scale::space::S, scale::space::S),
+            ButtonPart::Label => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

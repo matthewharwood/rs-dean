@@ -7,18 +7,19 @@ use crate::{
     AttachmentPart, AvatarIntent, AvatarModel, AvatarPart, AvatarSize, AvatarVisual, BadgeIntent,
     BadgeModel, BadgePart, BadgeSize, BadgeTone, BadgeVariant, BreadcrumbDensity, BreadcrumbEntry,
     BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
-    BubblePart, BubbleSide, CatalogComponentModel, CatalogComponentPart,
-    CatalogComponentRenderNode, ComponentImplementation, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    BubblePart, BubbleSide, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize,
+    ButtonVariant, CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode,
+    ComponentImplementation, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_render_nodes,
     catalog_component_render_nodes, component_implementation, component_spec,
     default_accordion_items, default_alert_dialog_model, default_alert_model,
     default_aspect_ratio_model, default_attachment_model, default_avatar_model,
-    default_badge_model, default_breadcrumb_model, default_bubble_model, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model,
+    default_badge_model, default_breadcrumb_model, default_bubble_model, default_button_model,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model, validate_button_model,
 };
 
 const HEALTH_CARD: &str =
@@ -262,6 +263,24 @@ const BUBBLE_ACTIONS: &str = "flex flex-wrap items-center gap-2xs pt-2xs";
 const BUBBLE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const BUBBLE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const BUBBLE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const BUTTON_BASE: &str = "inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-field border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const BUTTON_SIZE_SMALL: &str = "min-h-s gap-2xs px-2xs py-3xs text-00 font-7 leading-0";
+const BUTTON_SIZE_MEDIUM: &str = "min-h-field gap-2xs px-xs py-2xs text-0 font-7 leading-0";
+const BUTTON_SIZE_LARGE: &str = "min-h-field gap-xs px-s py-xs text-1 font-7 leading-2";
+const BUTTON_SIZE_ICON: &str = "size-l gap-0 p-0 text-0 font-7 leading-0";
+const BUTTON_PRIMARY: &str = "border-brand bg-brand text-text-on-brand hover:bg-selected-tint";
+const BUTTON_SECONDARY: &str = "border-border-strong bg-surface-2 text-text-1 hover:bg-hover-tint";
+const BUTTON_DESTRUCTIVE: &str = "border-danger bg-danger text-text-on-brand hover:bg-press-tint";
+const BUTTON_OUTLINE: &str = "border-border-strong bg-surface-1 text-text-1 hover:bg-hover-tint";
+const BUTTON_GHOST: &str = "border-border-faint bg-surface-1 text-text-1 hover:bg-hover-tint";
+const BUTTON_LINK: &str = "border-border-faint bg-surface-1 text-link hover:bg-hover-tint";
+const BUTTON_PRESSED: &str = "shadow-1";
+const BUTTON_BLOCKED: &str = "opacity-disabled";
+const BUTTON_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
+const BUTTON_LABEL: &str = "truncate";
+const BUTTON_LABEL_ICON: &str = "sr-only";
+const BUTTON_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
 #[derive(Clone)]
@@ -2171,7 +2190,248 @@ const fn bubble_state_label(loading: bool, disabled: bool) -> &'static str {
     }
 }
 
-catalog_component!(Button, crate::ButtonModel, crate::default_button_model);
+#[component]
+pub fn Button(#[prop(optional, default = default_button_model())] model: ButtonModel) -> AnyView {
+    if let Err(report) = validate_button_model(&model) {
+        let message = format!("Button validation failed: {report}");
+        return view! {
+            <div class=BUTTON_ERROR data-ui-component="button" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let initial_state = model.state();
+    let nodes = button_render_nodes(&model, initial_state);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == ButtonPart::Root)
+        .expect("invariant: button render nodes include root");
+    let icon = nodes
+        .iter()
+        .find(|node| node.part == ButtonPart::Icon)
+        .expect("invariant: button render nodes include icon");
+    let label = nodes
+        .iter()
+        .find(|node| node.part == ButtonPart::Label)
+        .expect("invariant: button render nodes include label");
+    let kind = model.kind;
+    let variant = model.variant;
+    let size = model.size;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let root_value = root.value.clone();
+    let label_value = if loading {
+        "Loading".to_owned()
+    } else {
+        label.value.clone()
+    };
+    let icon_value = if loading {
+        Some("...".to_owned())
+    } else if model.icon.is_some() {
+        Some(icon.value.clone())
+    } else {
+        None
+    };
+    let has_visible_icon = icon_value.is_some();
+    let icon_label = icon.label.clone();
+    let href = model.href.clone().unwrap_or_else(|| "#".to_owned());
+    let href = if blocked { "#".to_owned() } else { href };
+    let button_type = kind.button_type();
+    let state_label = button_state_label(loading, disabled);
+    let (state, set_state) = signal(initial_state);
+    let pressed = Memo::new(move |_| state.with(|state| state.is_pressed()));
+
+    if kind == ButtonKind::Link {
+        let value_for_data = root_value.clone();
+        let value_for_activate = root_value.clone();
+        view! {
+            <a
+                class=move || button_root_class(size, variant, pressed.get(), blocked)
+                href=href
+                data-ui-component="button"
+                data-ui-part=ButtonPart::Root.label()
+                data-ui-kind=kind.label()
+                data-ui-variant=variant.label()
+                data-ui-size=size.label()
+                data-ui-state=state_label
+                data-ui-value=value_for_data
+                aria-disabled=blocked.to_string()
+                aria-busy=loading.to_string()
+                aria-pressed=move || pressed.get().to_string()
+                on:mousedown=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Press);
+                        });
+                    }
+                }
+                on:mouseup=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Activate(value_for_activate.clone()));
+                        });
+                    }
+                }
+            >
+                {button_icon_view(icon_value.clone(), icon_label.clone())}
+                <span class=button_label_class(size, has_visible_icon) data-ui-part=ButtonPart::Label.label()>
+                    {label_value.clone()}
+                </span>
+            </a>
+        }
+        .into_any()
+    } else {
+        let value_for_data = root_value.clone();
+        let value_for_activate = root_value.clone();
+        view! {
+            <button
+                type=button_type
+                class=move || button_root_class(size, variant, pressed.get(), blocked)
+                data-ui-component="button"
+                data-ui-part=ButtonPart::Root.label()
+                data-ui-kind=kind.label()
+                data-ui-variant=variant.label()
+                data-ui-size=size.label()
+                data-ui-state=state_label
+                data-ui-value=value_for_data
+                aria-busy=loading.to_string()
+                aria-pressed=move || pressed.get().to_string()
+                disabled=blocked
+                on:mousedown=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Press);
+                        });
+                    }
+                }
+                on:mouseup=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Release);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(ButtonIntent::Activate(value_for_activate.clone()));
+                        });
+                    }
+                }
+            >
+                {button_icon_view(icon_value.clone(), icon_label.clone())}
+                <span class=button_label_class(size, has_visible_icon) data-ui-part=ButtonPart::Label.label()>
+                    {label_value.clone()}
+                </span>
+            </button>
+        }
+        .into_any()
+    }
+}
+
+fn button_icon_view(icon: Option<String>, label: String) -> AnyView {
+    icon.map(|icon| {
+        view! {
+            <span class=BUTTON_ICON data-ui-part=ButtonPart::Icon.label() aria-label=label>
+                {icon}
+            </span>
+        }
+        .into_any()
+    })
+    .unwrap_or_else(|| ().into_any())
+}
+
+fn button_root_class(
+    size: ButtonSize,
+    variant: ButtonVariant,
+    pressed: bool,
+    blocked: bool,
+) -> String {
+    format!(
+        "{BUTTON_BASE} {} {} {} {}",
+        button_size_class(size),
+        button_variant_class(variant),
+        if pressed { BUTTON_PRESSED } else { "" },
+        if blocked { BUTTON_BLOCKED } else { "" },
+    )
+}
+
+const fn button_size_class(size: ButtonSize) -> &'static str {
+    match size {
+        ButtonSize::Small => BUTTON_SIZE_SMALL,
+        ButtonSize::Medium => BUTTON_SIZE_MEDIUM,
+        ButtonSize::Large => BUTTON_SIZE_LARGE,
+        ButtonSize::Icon => BUTTON_SIZE_ICON,
+    }
+}
+
+const fn button_variant_class(variant: ButtonVariant) -> &'static str {
+    match variant {
+        ButtonVariant::Primary => BUTTON_PRIMARY,
+        ButtonVariant::Secondary => BUTTON_SECONDARY,
+        ButtonVariant::Destructive => BUTTON_DESTRUCTIVE,
+        ButtonVariant::Outline => BUTTON_OUTLINE,
+        ButtonVariant::Ghost => BUTTON_GHOST,
+        ButtonVariant::Link => BUTTON_LINK,
+    }
+}
+
+const fn button_label_class(size: ButtonSize, has_visible_icon: bool) -> &'static str {
+    if matches!(size, ButtonSize::Icon) && has_visible_icon {
+        BUTTON_LABEL_ICON
+    } else {
+        BUTTON_LABEL
+    }
+}
+
+const fn button_state_label(loading: bool, disabled: bool) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(
     ButtonGroup,
     crate::ButtonGroupModel,

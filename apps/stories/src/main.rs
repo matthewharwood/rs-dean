@@ -5,8 +5,8 @@ use rs_dean_ui::{
     AspectRatioFit, AspectRatioModel, Attachment, AttachmentAction, AttachmentKind,
     AttachmentModel, Avatar, AvatarModel, AvatarSize, Badge, BadgeModel, BadgeSize, BadgeTone,
     BadgeVariant, Breadcrumb, BreadcrumbDensity, BreadcrumbEntry, BreadcrumbModel, Bubble,
-    BubbleAction, BubbleModel, BubbleSide, HealthCard, ShadcnComponentGallery, ThemeCycleButton,
-    ThemeId, ThemeScope,
+    BubbleAction, BubbleModel, BubbleSide, Button, ButtonKind, ButtonModel, ButtonSize,
+    ButtonVariant, HealthCard, ShadcnComponentGallery, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -207,6 +207,25 @@ fn Stories() -> impl IntoView {
                             <Bubble model=invalid_bubble_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Bubble model=themed_bubble_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-button" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Button"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 10 implemented as a primary action primitive backed by a validated shared Rust model, renderer-local press state, link/submit semantics, and Bevy-readable render nodes."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Button model=default_button_story_model() />
+                            <Button model=secondary_button_story_model() />
+                            <Button model=link_button_story_model() />
+                            <Button model=loading_button_story_model() />
+                            <Button model=disabled_button_story_model() />
+                            <Button model=invalid_button_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Button model=themed_button_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -604,6 +623,45 @@ fn themed_bubble_story_model() -> BubbleModel {
     BubbleModel::new("System", "SYS", "Theme-scoped audit note.", "Pinned")
         .with_side(BubbleSide::System)
         .with_actions(vec![BubbleAction::new("Resolve", "resolve-note")])
+}
+
+fn default_button_story_model() -> ButtonModel {
+    ButtonModel::new("Continue", "continue")
+}
+
+fn secondary_button_story_model() -> ButtonModel {
+    ButtonModel::new("Preview", "preview")
+        .with_variant(ButtonVariant::Secondary)
+        .with_size(ButtonSize::Small)
+        .without_icon()
+}
+
+fn link_button_story_model() -> ButtonModel {
+    ButtonModel::new("Open docs", "open-docs")
+        .with_variant(ButtonVariant::Link)
+        .as_link("#docs")
+}
+
+fn loading_button_story_model() -> ButtonModel {
+    ButtonModel::new("Saving", "save").loading()
+}
+
+fn disabled_button_story_model() -> ButtonModel {
+    ButtonModel::new("Locked", "locked")
+        .with_kind(ButtonKind::Submit)
+        .with_variant(ButtonVariant::Outline)
+        .disabled()
+}
+
+fn invalid_button_story_model() -> ButtonModel {
+    ButtonModel::new("", "invalid")
+}
+
+fn themed_button_story_model() -> ButtonModel {
+    ButtonModel::new("Delete", "delete")
+        .with_variant(ButtonVariant::Destructive)
+        .with_size(ButtonSize::Large)
+        .with_icon("Del")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
