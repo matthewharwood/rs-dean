@@ -36,8 +36,8 @@ use rs_dean_ui::{
     SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
     SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
     SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
-    SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
+    SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1059,6 +1059,25 @@ fn Stories() -> impl IntoView {
                             <Sonner model=invalid_sonner_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Sonner model=themed_sonner_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-spinner" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Spinner"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 55 implemented as a compact activity indicator backed by validated shared Rust motion state, renderer-local pause/focus state, and Bevy-readable spinner primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Spinner model=default_spinner_story_model() />
+                            <Spinner model=dense_spinner_story_model() />
+                            <Spinner model=large_spinner_story_model() />
+                            <Spinner model=ready_spinner_story_model() />
+                            <Spinner model=disabled_spinner_story_model() />
+                            <Spinner model=invalid_spinner_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Spinner model=themed_spinner_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4000,6 +4019,53 @@ fn themed_sonner_story_model() -> SonnerModel {
         .with_action(SonnerAction::new("Inspect", "inspect-theme-toast")),
     ])
     .with_position(SonnerPosition::TopRight)
+}
+
+fn default_spinner_story_model() -> SpinnerModel {
+    SpinnerModel::new("Loading components")
+        .with_detail("A compact busy indicator that keeps motion state renderer-local.")
+}
+
+fn dense_spinner_story_model() -> SpinnerModel {
+    default_spinner_story_model()
+        .with_density(SpinnerDensity::Dense)
+        .with_size(SpinnerSize::Small)
+        .with_tone(SpinnerTone::Info)
+        .with_detail("Dense spinners preserve the same shared anatomy in less space.")
+}
+
+fn large_spinner_story_model() -> SpinnerModel {
+    default_spinner_story_model()
+        .with_size(SpinnerSize::Large)
+        .with_tone(SpinnerTone::Warning)
+        .with_speed_ms(1_200)
+        .with_detail("Size and rotation speed are validated in the shared Rust model.")
+}
+
+fn ready_spinner_story_model() -> SpinnerModel {
+    default_spinner_story_model()
+        .with_tone(SpinnerTone::Success)
+        .with_detail("Ready state hides the active indicator while preserving label anatomy.")
+        .ready()
+}
+
+fn disabled_spinner_story_model() -> SpinnerModel {
+    default_spinner_story_model()
+        .with_tone(SpinnerTone::Destructive)
+        .with_detail("Disabled spinners pause all renderer-local motion controls.")
+        .disabled()
+}
+
+fn invalid_spinner_story_model() -> SpinnerModel {
+    default_spinner_story_model()
+        .with_error("Spinner metadata failed validation before the renderer accepted it.")
+}
+
+fn themed_spinner_story_model() -> SpinnerModel {
+    SpinnerModel::new("Theme scoped loading")
+        .with_size(SpinnerSize::Large)
+        .with_tone(SpinnerTone::Brand)
+        .with_detail("Spinner border colors resolve through the nested Luxury theme.")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

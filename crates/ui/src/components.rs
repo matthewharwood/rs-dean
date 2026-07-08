@@ -46,7 +46,8 @@ use crate::{
     SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, SkeletonDensity, SkeletonIntent,
     SkeletonModel, SkeletonPart, SkeletonState, SliderDensity, SliderIntent, SliderModel,
     SliderOrientation, SliderPart, SonnerDensity, SonnerIntent, SonnerModel, SonnerPart,
-    SonnerPosition, SonnerRenderNode, SonnerState, SonnerTone, ThemeChoice, ThemeId, UiBlock,
+    SonnerPosition, SonnerRenderNode, SonnerState, SonnerTone, SpinnerDensity, SpinnerIntent,
+    SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, ThemeChoice, ThemeId, UiBlock,
     UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
     accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
     avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -69,34 +70,34 @@ use crate::{
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
-    default_skeleton_model, default_slider_model, default_sonner_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
     selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
-    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
-    validate_popover_model, validate_progress_model, validate_radio_group_model,
-    validate_resizable_model, validate_scroll_area_model, validate_select_model,
-    validate_separator_model, validate_sheet_model, validate_sidebar_model,
-    validate_skeleton_model, validate_slider_model, validate_sonner_model,
+    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
+    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
 };
 
 const HEALTH_CARD: &str =
@@ -860,6 +861,32 @@ const SONNER_DISMISS: &str = "inline-flex size-m shrink-0 items-center justify-c
 const SONNER_DISMISS_ACTIVE: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-brand bg-primary-soft text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SONNER_DISMISS_DISABLED: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-disabled";
 const SONNER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const SPINNER_ROOT: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-text-1 shadow-1";
+const SPINNER_ROOT_DENSE: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-text-1 shadow-1";
+const SPINNER_ROOT_INVALID: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-text-1 shadow-1";
+const SPINNER_ROOT_DISABLED: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-text-disabled opacity-disabled";
+const SPINNER_TRACK_SMALL: &str = "relative inline-grid size-s shrink-0 place-items-center rounded-pill border border-border-muted";
+const SPINNER_TRACK_MEDIUM: &str = "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-border-muted";
+const SPINNER_TRACK_LARGE: &str = "relative inline-grid size-l shrink-0 place-items-center rounded-pill border border-border-muted";
+const SPINNER_TRACK_INVALID: &str =
+    "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-danger";
+const SPINNER_TRACK_DISABLED: &str = "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-border-muted opacity-disabled";
+const SPINNER_INDICATOR_BRAND: &str = "absolute inset-0 rounded-pill border border-transparent border-t-brand animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_DEFAULT: &str = "absolute inset-0 rounded-pill border border-transparent border-t-accent animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_INFO: &str = "absolute inset-0 rounded-pill border border-transparent border-t-info animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_SUCCESS: &str = "absolute inset-0 rounded-pill border border-transparent border-t-success animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_WARNING: &str = "absolute inset-0 rounded-pill border border-transparent border-t-warning animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_DESTRUCTIVE: &str = "absolute inset-0 rounded-pill border border-transparent border-t-danger animate-spin motion-reduce:animate-none";
+const SPINNER_INDICATOR_PAUSED: &str =
+    "absolute inset-0 rounded-pill border border-transparent border-t-accent";
+const SPINNER_INDICATOR_INVALID: &str =
+    "absolute inset-0 rounded-pill border border-transparent border-t-danger";
+const SPINNER_INDICATOR_DISABLED: &str =
+    "absolute inset-0 rounded-pill border border-transparent border-t-border-muted";
+const SPINNER_LABEL: &str = "m-0 text-0 font-6 leading-0 text-text-1";
+const SPINNER_LABEL_DENSE: &str = "m-0 text-00 font-6 leading-0 text-text-2";
+const SPINNER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -15698,7 +15725,245 @@ const fn sonner_toast_state_label(
     }
 }
 
-catalog_component!(Spinner, crate::SpinnerModel, crate::default_spinner_model);
+#[component]
+pub fn Spinner(
+    #[prop(optional, default = default_spinner_model())] model: SpinnerModel,
+) -> AnyView {
+    if let Err(report) = validate_spinner_model(&model) {
+        let message = format!("Spinner validation failed: {report}");
+        return view! {
+            <div class=SPINNER_ERROR data-ui-component="spinner" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let size = model.size;
+    let tone = model.tone;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let state_model = model.state();
+    let nodes = spinner_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SpinnerPart::Root)
+        .expect("invariant: spinner render nodes include root")
+        .clone();
+    let track = nodes
+        .iter()
+        .find(|node| node.part == SpinnerPart::Track)
+        .expect("invariant: spinner render nodes include track")
+        .clone();
+    let indicator = nodes
+        .iter()
+        .find(|node| node.part == SpinnerPart::Indicator)
+        .expect("invariant: spinner render nodes include indicator")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == SpinnerPart::Label)
+        .expect("invariant: spinner render nodes include label")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let track_value = track.value.clone();
+    let indicator_value = indicator.value.clone();
+    let label_value = label.value.clone();
+    let label_visible = label.visible;
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=spinner_root_class(density, invalid, disabled)
+            data-ui-component="spinner"
+            data-ui-part=SpinnerPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-size=size.label()
+            data-ui-tone=tone.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    spinner_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_paused(),
+                        state.is_active(SpinnerPart::Root),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-label=root_label
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+            tabindex=if disabled { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SpinnerIntent::Focus(SpinnerPart::Root));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SpinnerIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !disabled && loading {
+                    set_state.update(|state| {
+                        let _ = state.apply(SpinnerIntent::Pause);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled && loading {
+                    set_state.update(|state| {
+                        let _ = state.apply(SpinnerIntent::Resume);
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !disabled && loading {
+                    set_state.update(|state| {
+                        let _ = state.apply(SpinnerIntent::ToggleMotion);
+                    });
+                }
+            }
+        >
+            <span
+                class=spinner_track_class(size, invalid, disabled)
+                data-ui-part=SpinnerPart::Track.label()
+                data-ui-value=track_value
+                aria-hidden=(!loading).to_string()
+                hidden=!loading
+            >
+                <span
+                    class=move || {
+                        state.with(|state| {
+                            spinner_indicator_class(
+                                tone,
+                                state.is_paused(),
+                                invalid,
+                                disabled,
+                            )
+                        })
+                    }
+                    style=spinner_indicator_style(indicator.speed_ms)
+                    data-ui-part=SpinnerPart::Indicator.label()
+                    data-ui-value=indicator_value
+                    aria-hidden="true"
+                ></span>
+            </span>
+            <span
+                class=spinner_label_class(density)
+                data-ui-part=SpinnerPart::Label.label()
+                data-ui-value=label_value
+                hidden=!label_visible
+            >
+                {label.label}
+            </span>
+            <span class="sr-only">{root_detail}</span>
+            {invalid.then_some(view! { <p class=SPINNER_ERROR>{root.detail}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+const fn spinner_root_class(
+    density: SpinnerDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SPINNER_ROOT_DISABLED;
+    }
+    if invalid {
+        return SPINNER_ROOT_INVALID;
+    }
+    match density {
+        SpinnerDensity::Standard => SPINNER_ROOT,
+        SpinnerDensity::Dense => SPINNER_ROOT_DENSE,
+    }
+}
+
+const fn spinner_track_class(size: SpinnerSize, invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        return SPINNER_TRACK_DISABLED;
+    }
+    if invalid {
+        return SPINNER_TRACK_INVALID;
+    }
+    match size {
+        SpinnerSize::Small => SPINNER_TRACK_SMALL,
+        SpinnerSize::Medium => SPINNER_TRACK_MEDIUM,
+        SpinnerSize::Large => SPINNER_TRACK_LARGE,
+    }
+}
+
+const fn spinner_indicator_class(
+    tone: SpinnerTone,
+    paused: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SPINNER_INDICATOR_DISABLED;
+    }
+    if invalid {
+        return SPINNER_INDICATOR_INVALID;
+    }
+    if paused {
+        return SPINNER_INDICATOR_PAUSED;
+    }
+    match tone {
+        SpinnerTone::Default => SPINNER_INDICATOR_DEFAULT,
+        SpinnerTone::Brand => SPINNER_INDICATOR_BRAND,
+        SpinnerTone::Info => SPINNER_INDICATOR_INFO,
+        SpinnerTone::Success => SPINNER_INDICATOR_SUCCESS,
+        SpinnerTone::Warning => SPINNER_INDICATOR_WARNING,
+        SpinnerTone::Destructive => SPINNER_INDICATOR_DESTRUCTIVE,
+    }
+}
+
+const fn spinner_label_class(density: SpinnerDensity) -> &'static str {
+    match density {
+        SpinnerDensity::Standard => SPINNER_LABEL,
+        SpinnerDensity::Dense => SPINNER_LABEL_DENSE,
+    }
+}
+
+fn spinner_indicator_style(speed_ms: u16) -> String {
+    format!("animation-duration: {speed_ms}ms;")
+}
+
+const fn spinner_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    paused: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if invalid {
+        "invalid"
+    } else if !loading {
+        "ready"
+    } else if paused {
+        "paused"
+    } else if active {
+        "active"
+    } else {
+        "loading"
+    }
+}
+
 catalog_component!(Switch, crate::SwitchModel, crate::default_switch_model);
 catalog_component!(Table, crate::TableModel, crate::default_table_model);
 catalog_component!(Tabs, crate::TabsModel, crate::default_tabs_model);

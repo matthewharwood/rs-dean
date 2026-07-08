@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    spinner,
-    Spinner,
-    SpinnerModel,
-    SpinnerPart,
-    SpinnerRenderNode,
-    SpinnerState,
-    SpinnerIntent,
-    SpinnerChange,
-    validate_spinner_model,
-    spinner_render_nodes,
-    default_spinner_model,
-    [
-        Root => "Spinner",
-        Track => "SpinnerTrack",
-        Indicator => "SpinnerIndicator",
-        Label => "SpinnerLabel",
-    ]
-);
-
-define_catalog_component!(
     switch,
     Switch,
     SwitchModel,
@@ -751,8 +731,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Sidebar
         | UiComponentId::Skeleton
         | UiComponentId::Slider
-        | UiComponentId::Sonner => None,
-        UiComponentId::Spinner => Some(any_nodes(spinner_render_nodes(&default_spinner_model()))),
+        | UiComponentId::Sonner
+        | UiComponentId::Spinner => None,
         UiComponentId::Switch => Some(any_nodes(switch_render_nodes(&default_switch_model()))),
         UiComponentId::Table => Some(any_nodes(table_render_nodes(&default_table_model()))),
         UiComponentId::Tabs => Some(any_nodes(tabs_render_nodes(&default_tabs_model()))),
@@ -845,6 +825,7 @@ mod tests {
                     | UiComponentId::Skeleton
                     | UiComponentId::Slider
                     | UiComponentId::Sonner
+                    | UiComponentId::Spinner
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -861,17 +842,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_spinner_model().state();
-        assert!(!state.is_active(SpinnerPart::Root));
+        let mut state = default_switch_model().state();
+        assert!(!state.is_active(SwitchPart::Root));
         assert_eq!(
-            state.apply(SpinnerIntent::Toggle(SpinnerPart::Root)),
-            SpinnerChange::Opened(SpinnerPart::Root)
+            state.apply(SwitchIntent::Toggle(SwitchPart::Root)),
+            SwitchChange::Opened(SwitchPart::Root)
         );
-        assert!(state.is_active(SpinnerPart::Root));
+        assert!(state.is_active(SwitchPart::Root));
         assert_eq!(
-            state.apply(SpinnerIntent::Toggle(SpinnerPart::Root)),
-            SpinnerChange::Closed(SpinnerPart::Root)
+            state.apply(SwitchIntent::Toggle(SwitchPart::Root)),
+            SwitchChange::Closed(SwitchPart::Root)
         );
-        assert!(!state.is_active(SpinnerPart::Root));
+        assert!(!state.is_active(SwitchPart::Root));
     }
 }

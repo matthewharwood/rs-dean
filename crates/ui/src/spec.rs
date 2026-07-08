@@ -296,7 +296,7 @@ pub mod bevy_adapter {
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
-        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        SpinnerPart, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
         UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -321,16 +321,17 @@ pub mod bevy_adapter {
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
         default_separator_model, default_sheet_model, default_sidebar_model,
-        default_skeleton_model, default_slider_model, default_sonner_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-        skeleton_render_nodes, slider_render_nodes, sonner_render_nodes,
+        skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -602,6 +603,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Sonner {
             return bevy_primitives_for_sonner(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Spinner {
+            return bevy_primitives_for_spinner(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1783,6 +1787,37 @@ pub mod bevy_adapter {
                     state,
                     intent: sonner_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.actioned || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_spinner(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_spinner_model();
+        let spinner_state = model.state();
+        spinner_render_nodes(&model, &spinner_state)
+            .into_iter()
+            .map(|node| {
+                let role = spinner_role_for_part(node.part);
+                let tone = spinner_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: spinner_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: spinner_size_for_part(node.part, node.size),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: spinner_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.paused || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -5156,6 +5191,65 @@ pub mod bevy_adapter {
             }
             (SonnerPart::Action, _) => Vec2::new(scale::space::L, scale::space::S),
             (SonnerPart::Dismiss, _) => Vec2::new(scale::space::M, scale::space::M),
+        }
+    }
+
+    const fn spinner_kind_for_part(part: SpinnerPart) -> UiWidgetSlotKind {
+        match part {
+            SpinnerPart::Root => UiWidgetSlotKind::Section,
+            SpinnerPart::Track => UiWidgetSlotKind::Spinner,
+            SpinnerPart::Indicator => UiWidgetSlotKind::Marker,
+            SpinnerPart::Label => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn spinner_role_for_part(part: SpinnerPart) -> UiBlockRole {
+        match part {
+            SpinnerPart::Root => UiBlockRole::Root,
+            SpinnerPart::Track => UiBlockRole::Layout,
+            SpinnerPart::Indicator => UiBlockRole::Indicator,
+            SpinnerPart::Label => UiBlockRole::Text,
+        }
+    }
+
+    fn spinner_tone_for_node(node: &crate::SpinnerRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active || node.paused {
+            return UiBlockTone::Accent;
+        }
+        match (node.part, node.tone) {
+            (SpinnerPart::Indicator, crate::SpinnerTone::Brand) => UiBlockTone::Brand,
+            (SpinnerPart::Indicator, crate::SpinnerTone::Info) => UiBlockTone::Info,
+            (SpinnerPart::Indicator, crate::SpinnerTone::Success) => UiBlockTone::Success,
+            (SpinnerPart::Indicator, crate::SpinnerTone::Warning) => UiBlockTone::Warning,
+            (SpinnerPart::Indicator, crate::SpinnerTone::Destructive) => UiBlockTone::Danger,
+            (SpinnerPart::Indicator, crate::SpinnerTone::Default) => UiBlockTone::Accent,
+            _ => UiBlockTone::Surface,
+        }
+    }
+
+    const fn spinner_intent_for_part(part: SpinnerPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SpinnerPart::Root | SpinnerPart::Indicator, true) => UiWidgetIntent::Toggle,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn spinner_size_for_part(part: SpinnerPart, size: crate::SpinnerSize) -> Vec2 {
+        let edge = match size {
+            crate::SpinnerSize::Small => scale::space::S,
+            crate::SpinnerSize::Medium => scale::space::M,
+            crate::SpinnerSize::Large => scale::space::L,
+        };
+        match part {
+            SpinnerPart::Root => Vec2::new(scale::space::XL2, scale::space::L),
+            SpinnerPart::Track | SpinnerPart::Indicator => Vec2::new(edge, edge),
+            SpinnerPart::Label => Vec2::new(scale::space::XL, scale::space::S),
         }
     }
 

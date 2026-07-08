@@ -57,6 +57,7 @@ pub mod skeleton;
 pub mod slider;
 pub mod sonner;
 pub mod spec;
+pub mod spinner;
 pub mod theme;
 pub mod widgets;
 
@@ -339,6 +340,11 @@ pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};
 pub use spec::{
     UiBlock, UiBlockRole, UiBlockTone, UiComponentSpec, component_spec, detail_for_part,
     role_for_part, tone_for_category, tone_for_role,
+};
+pub use spinner::{
+    SpinnerChange, SpinnerDensity, SpinnerIntent, SpinnerModel, SpinnerPart, SpinnerRenderNode,
+    SpinnerSize, SpinnerState, SpinnerTone, default_spinner_model, spinner_render_nodes,
+    validate_spinner_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
 pub use widgets::{
