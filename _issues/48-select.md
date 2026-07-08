@@ -40,4 +40,7 @@ Ship a Rust-first `Select` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete component pass complete: typed groups/options, selected-value validation, renderer-local open/focus state, token-only Leptos trigger/listbox, story variants, and Bevy primitives now share the same Rust render nodes.

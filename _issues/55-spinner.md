@@ -40,4 +40,13 @@ Ship a Rust-first `Spinner` component that follows the shadcn composition model 
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog Spinner entry with a bespoke shared Rust activity-indicator model in `crates/ui`.
+- Added `garde` validation for label, detail, speed bounds, and optional error copy.
+- Added renderer-local focus and motion pause state so reduced-motion and hover behavior stay ephemeral.
+- Added a token-only Leptos `Spinner` renderer, story variants, and Bevy primitive derivation over the same render nodes.

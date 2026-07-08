@@ -40,4 +40,8 @@ Ship a Rust-first `Bubble` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete `Bubble` model, sender/side/avatar/content/meta/action contracts, repeatable action render nodes, validation, renderer-local action state, and named token-only Leptos component implemented.
+- [x] `garde` validation enforces sender, avatar, message content, metadata, and action contracts before rendering.
+- [x] Dedicated `apps/stories` Bubble proof covers incoming, outgoing, disabled, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.

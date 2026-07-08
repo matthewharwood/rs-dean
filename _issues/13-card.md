@@ -40,4 +40,6 @@ Ship a Rust-first `Card` component that follows the shadcn composition model whi
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, variant/density/action contracts, part enum, render nodes, validation, renderer-local footer action state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.

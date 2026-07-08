@@ -2,7 +2,10 @@
 
 Source inventory: https://ui.shadcn.com/docs/components
 
-Each task tracks the dual Leptos/Bevy component contract for rs-dean.
+Each task tracks the dual Leptos/Bevy component contract for rs-dean. The
+current sweep implements all 64 entries through shared recipes, literal widget
+constructors, concrete typed models, named Leptos exports, story coverage, Bevy
+primitive derivation, and `garde`-validated render-node contracts.
 
 - [Implementation Sweep Log](sweep-log.md)
 - [Accordion](01-accordion.md) - Disclosure, Ephemeral.

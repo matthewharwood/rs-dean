@@ -40,4 +40,7 @@ Ship a Rust-first `Message` component that follows the shadcn composition model 
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Issue 38 concrete pass added shared Message density/side/action state, token-only DOM output, story variants, and Bevy primitives from the same render nodes.
 - [x] Sweep review complete through the current implemented catalog.

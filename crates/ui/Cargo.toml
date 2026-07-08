@@ -13,7 +13,9 @@ leptos = ["dep:leptos", "dep:web-sys"]
 
 [dependencies]
 bevy = { workspace = true, optional = true }
+garde.workspace = true
 leptos = { workspace = true, optional = true }
+serde.workspace = true
 web-sys = { workspace = true, features = [
     "Document",
     "Element",

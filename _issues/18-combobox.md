@@ -40,4 +40,6 @@ Ship a Rust-first `Combobox` component that follows the shadcn composition model
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
-- [x] Sweep review complete through the current implemented catalog.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed option/filter model, part enum, render nodes, `garde` validation, local query/open/selected state, token-only Leptos component, and Bevy primitive mapping implemented.
+- [x] Sweep review complete through issues 01 through 18.

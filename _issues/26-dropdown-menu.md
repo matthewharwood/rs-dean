@@ -40,4 +40,6 @@ Ship a Rust-first `Dropdown Menu` component that follows the shadcn composition 
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed trigger-attached menu model, grouped entry contract, part enum, render nodes, `garde` validation, renderer-local open/focus/select state, token-only Leptos component, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

@@ -40,4 +40,6 @@ Ship a Rust-first `Command` component that follows the shadcn composition model 
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed group/item model, part enum, render nodes, `garde` validation, renderer-local query/open/highlight/selected state, shortcut handling, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.

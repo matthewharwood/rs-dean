@@ -40,4 +40,7 @@ Ship a Rust-first `Button` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local press state, link/submit/reset kind semantics, and named token-only Leptos component implemented.
+- [x] Dedicated story coverage includes default, size/variant, link, loading, disabled, invalid, and theme-scoped examples.
 - [x] Sweep review complete through the current implemented catalog.

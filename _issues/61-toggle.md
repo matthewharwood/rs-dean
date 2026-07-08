@@ -40,4 +40,12 @@ Ship a Rust-first `Toggle` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog contract with a concrete `ToggleModel` using `garde` validation, `TogglePressed` state, explicit density/variant options, and renderer-local focus/toggle transitions.
+- Added shared render nodes for `Toggle`, `ToggleIndicator`, and `ToggleLabel`; Leptos renders `aria-pressed` button semantics from the same nodes and Bevy derives primitives without depending on Leptos.
+- Added stories for default, dense, outline, loading, disabled, invalid, and themed Toggle states using only existing token utilities.

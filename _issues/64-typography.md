@@ -40,4 +40,18 @@ Ship a Rust-first `Typography` component that follows the shadcn composition mod
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+Issue 64 now has a bespoke Rust implementation instead of the generated
+catalog wrapper. `crates/ui/src/typography.rs` owns the validated
+`TypographyModel`, repeatable `TypographyListItem` data, `TypographyPart`
+anatomy, renderer-local active state, typed intents/changes, stable DOM IDs,
+and render nodes. The Leptos component renders semantic heading, paragraph,
+list, and blockquote elements using only shared token utilities, while the
+Bevy adapter derives typography primitives from the same render nodes. This
+final pass also removed Typography from the generated catalog-component path,
+so every current shadcn-inspired catalog entry is now concrete.

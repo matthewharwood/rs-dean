@@ -40,4 +40,6 @@ Ship a Rust-first `Field` component that follows the shadcn composition model wh
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed field model, input kind, label/control/description/error anatomy, render nodes, `garde` validation, renderer-local focus/input state, token-only Leptos component, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

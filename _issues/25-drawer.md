@@ -40,4 +40,6 @@ Ship a Rust-first `Drawer` component that follows the shadcn composition model w
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed side-aware overlay model, footer action contract, handle drag state, part enum, render nodes, `garde` validation, token-only Leptos component, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

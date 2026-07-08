@@ -40,4 +40,13 @@ Ship a Rust-first `Table` component that follows the shadcn composition model wh
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog Table entry with a bespoke shared Rust semantic-table model in `crates/ui`.
+- Added `garde` validation for column uniqueness, row uniqueness, row/cell shape, selected-row references, caption, and optional error copy.
+- Added renderer-local row selection and focus state while keeping durable table data owned by consumers.
+- Added a token-only Leptos `Table` renderer, story variants, and Bevy primitive derivation over the same indexed render nodes.

@@ -40,4 +40,8 @@ Ship a Rust-first `Badge` component that follows the shadcn composition model wh
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete `Badge` model, tone/variant/size contract, optional icon contract, render nodes, validation, renderer-local highlight state, and named token-only Leptos component implemented.
+- [x] `garde` validation enforces badge text and optional icon content before rendering.
+- [x] Dedicated `apps/stories` Badge proof covers default, no-icon, disabled, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.

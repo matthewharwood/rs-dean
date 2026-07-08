@@ -1,9 +1,13 @@
+use garde::Validate;
+use serde::{Deserialize, Serialize};
+
 use crate::{
     StateContract, UiBlockRole, UiBlockTone, UiComponentCategory, UiComponentId,
     component_implementation, detail_for_part, role_for_part, tone_for_category, tone_for_role,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetPattern {
     Action,
     Callout,
@@ -20,7 +24,8 @@ pub enum UiWidgetPattern {
     Utility,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetIntent {
     None,
     Activate,
@@ -35,7 +40,8 @@ pub enum UiWidgetIntent {
     Toggle,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiWidgetSlotKind {
     Avatar,
     Badge,
@@ -72,8 +78,44 @@ pub enum UiWidgetSlotKind {
     Title,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Validate)]
 pub struct UiWidgetSlot {
+    #[garde(length(min = 1, max = 128))]
+    pub part: &'static str,
+    #[garde(skip)]
+    pub kind: UiWidgetSlotKind,
+    #[garde(skip)]
+    pub role: UiBlockRole,
+    #[garde(skip)]
+    pub tone: UiBlockTone,
+    #[garde(length(min = 1, max = 160))]
+    pub label: &'static str,
+    #[garde(length(min = 1, max = 2_000))]
+    pub value: &'static str,
+    #[garde(length(min = 1, max = 240))]
+    pub detail: &'static str,
+    #[garde(skip)]
+    pub intent: UiWidgetIntent,
+    #[garde(skip)]
+    pub selected: bool,
+    #[garde(skip)]
+    pub disabled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Validate)]
+pub struct UiWidget {
+    #[garde(skip)]
+    pub id: UiComponentId,
+    #[garde(skip)]
+    pub pattern: UiWidgetPattern,
+    #[garde(skip)]
+    pub state: StateContract,
+    #[garde(length(min = 1), dive, custom(widget_slots_match_catalog(&self.id)))]
+    pub slots: Vec<UiWidgetSlot>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UiWidgetRenderNode {
     pub part: &'static str,
     pub kind: UiWidgetSlotKind,
     pub role: UiBlockRole,
@@ -84,14 +126,6 @@ pub struct UiWidgetSlot {
     pub intent: UiWidgetIntent,
     pub selected: bool,
     pub disabled: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UiWidget {
-    pub id: UiComponentId,
-    pub pattern: UiWidgetPattern,
-    pub state: StateContract,
-    pub slots: Vec<UiWidgetSlot>,
 }
 
 pub type UiWidgetConstructor = fn() -> UiWidget;
@@ -173,6 +207,56 @@ pub fn implemented_widgets() -> impl Iterator<Item = UiWidget> + use<> {
     UI_WIDGET_CONSTRUCTORS
         .into_iter()
         .map(|constructor| constructor())
+}
+
+pub fn validate_widget(widget: &UiWidget) -> Result<(), garde::Report> {
+    widget.validate()
+}
+
+pub fn widget_render_nodes(widget: &UiWidget) -> Result<Vec<UiWidgetRenderNode>, garde::Report> {
+    validate_widget(widget)?;
+    Ok(widget
+        .slots
+        .iter()
+        .map(|slot| UiWidgetRenderNode {
+            part: slot.part,
+            kind: slot.kind,
+            role: slot.role,
+            tone: slot.tone,
+            label: slot.label,
+            value: slot.value,
+            detail: slot.detail,
+            intent: slot.intent,
+            selected: slot.selected,
+            disabled: slot.disabled,
+        })
+        .collect())
+}
+
+fn widget_slots_match_catalog<'a>(
+    id: &'a UiComponentId,
+) -> impl FnOnce(&[UiWidgetSlot], &()) -> garde::Result + 'a {
+    move |slots, _context| {
+        let anatomy = id.anatomy_parts();
+        for slot in slots {
+            if !anatomy.contains(&slot.part) {
+                return Err(garde::Error::new(format!(
+                    "{id:?} widget has unknown anatomy part `{}`",
+                    slot.part
+                )));
+            }
+        }
+
+        for part in anatomy {
+            if !slots.iter().any(|slot| slot.part == *part) {
+                return Err(garde::Error::new(format!(
+                    "{id:?} widget is missing anatomy part `{part}`"
+                )));
+            }
+        }
+
+        Ok(())
+    }
 }
 
 pub fn accordion_widget() -> UiWidget {
@@ -1127,6 +1211,14 @@ pub fn direction_widget() -> UiWidget {
         id,
         UiWidgetPattern::Utility,
         vec![
+            slot(
+                id,
+                "DirectionProvider",
+                UiWidgetSlotKind::Panel,
+                "dir=ltr",
+                "Application direction provider",
+                UiWidgetIntent::Toggle,
+            ),
             slot(
                 id,
                 "DirectionScope",
@@ -2960,6 +3052,25 @@ mod tests {
                 !widget.slots.is_empty(),
                 "{:?} should expose concrete render slots",
                 widget.id
+            );
+        }
+    }
+
+    #[test]
+    fn literal_widgets_validate_with_garde() {
+        for widget in implemented_widgets() {
+            validate_widget(&widget).expect("literal widget should validate");
+        }
+    }
+
+    #[test]
+    fn render_nodes_cover_every_literal_widget() {
+        for widget in implemented_widgets() {
+            let nodes = widget_render_nodes(&widget).expect("literal widget should validate");
+            assert_eq!(nodes.len(), widget.slots.len());
+            assert_eq!(
+                nodes.first().map(|node| node.part),
+                widget.id.anatomy_parts().first().copied()
             );
         }
     }

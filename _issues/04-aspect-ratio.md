@@ -40,4 +40,8 @@ Ship a Rust-first `Aspect Ratio` component that follows the shadcn composition m
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete `Aspect Ratio` model, fit/ratio contract, render nodes, validation, and named token-only Leptos component implemented.
+- [x] `garde` validation enforces non-empty media copy and ratio sides between 1 and 64 before rendering.
+- [x] Dedicated `apps/stories` Aspect Ratio proof covers default, contain, disabled, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.

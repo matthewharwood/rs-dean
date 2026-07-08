@@ -40,4 +40,13 @@ Ship a Rust-first `Toast` component that follows the shadcn composition model wh
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Added `crates/ui/src/toast.rs` with typed density, position, tone, action, duration, error validation, renderer-local open/focus/pause/action state, stable DOM id helpers, and concrete provider/viewport/toast/title/description/action render nodes.
+- Replaced the generated Leptos catalog component with a token-only `Toast` component that renders the shadcn toast anatomy from shared render nodes and keeps transient notification state local to the renderer.
+- Added direct Bevy primitive derivation for Toast so notification cards, copy, viewport, and action state share the same Rust model without depending on Leptos.
+- Added story-harness coverage for default, dense, centered, loading, disabled, invalid, and themed Toast variants.

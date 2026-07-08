@@ -40,4 +40,8 @@ Ship a Rust-first `Breadcrumb` component that follows the shadcn composition mod
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete `Breadcrumb` model, entry contract, density/separator contract, repeatable render nodes, validation, renderer-local navigation focus state, and named token-only Leptos component implemented.
+- [x] `garde` validation enforces trail entries, labels, hrefs, and separator content before rendering.
+- [x] Dedicated `apps/stories` Breadcrumb proof covers default, dense, disabled, invalid, loading, and themed variants.
 - [x] Sweep review complete through the current implemented catalog.

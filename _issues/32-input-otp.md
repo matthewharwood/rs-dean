@@ -40,4 +40,7 @@ Ship a Rust-first `Input OTP` component that follows the shadcn composition mode
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
+- [x] Repeatable fixed-length slot/group/separator model, renderer-local focus/input/paste state, token-only renderer, story proof, and Bevy primitive derivation implemented.
 - [x] Sweep review complete through the current implemented catalog.

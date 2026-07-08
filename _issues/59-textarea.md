@@ -40,4 +40,13 @@ Ship a Rust-first `Textarea` component that follows the shadcn composition model
 - [x] Literal Rust widget constructor exported from `rs-dean-ui`.
 - [x] Named token-only Leptos component exported for consumer code.
 - [x] Bevy primitive derivation path consumes the same widget slots and typed intents.
+- [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
+- [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Added `crates/ui/src/textarea.rs` with typed density, rows, optional max-length validation, renderer-local draft/focus state, stable DOM id helpers, and concrete root/control/counter/hint render nodes.
+- Replaced the generated Leptos catalog component with a token-only `Textarea` component that renders label, textarea control, live counter, and hint/error copy from the shared render nodes.
+- Added direct Bevy primitive derivation for Textarea so text-entry control, counter, and hint primitives share the same Rust model without depending on Leptos.
+- Added story-harness coverage for default, dense, no-limit, loading, disabled, invalid, and themed Textarea variants.
