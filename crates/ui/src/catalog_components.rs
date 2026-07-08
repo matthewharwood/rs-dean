@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    switch,
-    Switch,
-    SwitchModel,
-    SwitchPart,
-    SwitchRenderNode,
-    SwitchState,
-    SwitchIntent,
-    SwitchChange,
-    validate_switch_model,
-    switch_render_nodes,
-    default_switch_model,
-    [Root => "Switch", Track => "SwitchTrack", Thumb => "SwitchThumb", Label => "SwitchLabel"]
-);
-
-define_catalog_component!(
     table,
     Table,
     TableModel,
@@ -732,8 +717,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Skeleton
         | UiComponentId::Slider
         | UiComponentId::Sonner
-        | UiComponentId::Spinner => None,
-        UiComponentId::Switch => Some(any_nodes(switch_render_nodes(&default_switch_model()))),
+        | UiComponentId::Spinner
+        | UiComponentId::Switch => None,
         UiComponentId::Table => Some(any_nodes(table_render_nodes(&default_table_model()))),
         UiComponentId::Tabs => Some(any_nodes(tabs_render_nodes(&default_tabs_model()))),
         UiComponentId::Textarea => {
@@ -826,6 +811,7 @@ mod tests {
                     | UiComponentId::Slider
                     | UiComponentId::Sonner
                     | UiComponentId::Spinner
+                    | UiComponentId::Switch
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -842,17 +828,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_switch_model().state();
-        assert!(!state.is_active(SwitchPart::Root));
+        let mut state = default_table_model().state();
+        assert!(!state.is_active(TablePart::Root));
         assert_eq!(
-            state.apply(SwitchIntent::Toggle(SwitchPart::Root)),
-            SwitchChange::Opened(SwitchPart::Root)
+            state.apply(TableIntent::Toggle(TablePart::Root)),
+            TableChange::Opened(TablePart::Root)
         );
-        assert!(state.is_active(SwitchPart::Root));
+        assert!(state.is_active(TablePart::Root));
         assert_eq!(
-            state.apply(SwitchIntent::Toggle(SwitchPart::Root)),
-            SwitchChange::Closed(SwitchPart::Root)
+            state.apply(TableIntent::Toggle(TablePart::Root)),
+            TableChange::Closed(TablePart::Root)
         );
-        assert!(!state.is_active(SwitchPart::Root));
+        assert!(!state.is_active(TablePart::Root));
     }
 }

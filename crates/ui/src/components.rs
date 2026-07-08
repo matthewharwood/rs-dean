@@ -47,13 +47,14 @@ use crate::{
     SkeletonModel, SkeletonPart, SkeletonState, SliderDensity, SliderIntent, SliderModel,
     SliderOrientation, SliderPart, SonnerDensity, SonnerIntent, SonnerModel, SonnerPart,
     SonnerPosition, SonnerRenderNode, SonnerState, SonnerTone, SpinnerDensity, SpinnerIntent,
-    SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, SwitchChecked, SwitchDensity,
+    SwitchIntent, SwitchModel, SwitchPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
+    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
+    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
+    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -71,33 +72,35 @@ use crate::{
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
-    validate_button_group_model, validate_button_model, validate_calendar_model,
-    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
-    validate_collapsible_model, validate_combobox_model, validate_command_model,
-    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
-    validate_dialog_model, validate_direction_model, validate_drawer_model,
-    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
-    validate_hover_card_model, validate_input_group_model, validate_input_model,
-    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
-    validate_marker_model, validate_menubar_model, validate_message_model,
-    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
-    validate_pagination_model, validate_popover_model, validate_progress_model,
-    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
-    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    default_switch_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
+    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
+    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, slider_render_nodes,
+    sonner_render_nodes, spinner_render_nodes, switch_render_nodes, validate_accordion_model,
+    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
+    validate_attachment_model, validate_avatar_model, validate_badge_model,
+    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
+    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
+    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
+    validate_combobox_model, validate_command_model, validate_context_menu_model,
+    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
+    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
+    validate_empty_model, validate_field_model, validate_hover_card_model,
+    validate_input_group_model, validate_input_model, validate_input_otp_model,
+    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
+    validate_menubar_model, validate_message_model, validate_message_scroller_model,
+    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
+    validate_popover_model, validate_progress_model, validate_radio_group_model,
+    validate_resizable_model, validate_scroll_area_model, validate_select_model,
+    validate_separator_model, validate_sheet_model, validate_sidebar_model,
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
+    validate_switch_model,
 };
 
 const HEALTH_CARD: &str =
@@ -887,6 +890,47 @@ const SPINNER_INDICATOR_DISABLED: &str =
 const SPINNER_LABEL: &str = "m-0 text-0 font-6 leading-0 text-text-1";
 const SPINNER_LABEL_DENSE: &str = "m-0 text-00 font-6 leading-0 text-text-2";
 const SPINNER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const SWITCH_ROOT: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SWITCH_ROOT_DENSE: &str = "flex w-full max-w-md items-center justify-between gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SWITCH_ROOT_INVALID: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SWITCH_ROOT_DISABLED: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SWITCH_COPY: &str = "grid min-w-0 gap-3xs";
+const SWITCH_LABEL_ROW: &str = "flex min-w-0 flex-wrap items-center gap-2xs";
+const SWITCH_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SWITCH_LABEL_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
+const SWITCH_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
+const SWITCH_DETAIL_INVALID: &str = "m-0 text-0 leading-0 text-danger";
+const SWITCH_DETAIL_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
+const SWITCH_REQUIRED: &str = "text-danger";
+const SWITCH_STATUS: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-muted";
+const SWITCH_STATUS_ON: &str = "rounded-pill border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-1";
+const SWITCH_STATUS_INVALID: &str = "rounded-pill border border-danger bg-error-soft px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-1";
+const SWITCH_STATUS_DISABLED: &str = "rounded-pill border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-disabled";
+const SWITCH_TRACK: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SWITCH_TRACK_DENSE: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SWITCH_TRACK_ON: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SWITCH_TRACK_DENSE_ON: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SWITCH_TRACK_ACTIVE: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SWITCH_TRACK_ACTIVE_ON: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-end rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SWITCH_TRACK_DENSE_ACTIVE: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-start rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SWITCH_TRACK_DENSE_ACTIVE_ON: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-end rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SWITCH_TRACK_INVALID: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-danger bg-error-soft p-3xs shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SWITCH_TRACK_DISABLED: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-muted bg-surface-2 p-3xs opacity-disabled";
+const SWITCH_THUMB: &str =
+    "size-s rounded-pill border border-border-subtle bg-surface-1 shadow-2 transition-colors";
+const SWITCH_THUMB_DENSE: &str =
+    "size-xs rounded-pill border border-border-subtle bg-surface-1 shadow-1 transition-colors";
+const SWITCH_THUMB_ON: &str =
+    "size-s rounded-pill border border-surface-1 bg-surface-1 shadow-2 transition-colors";
+const SWITCH_THUMB_ACTIVE: &str =
+    "size-s rounded-pill border border-brand bg-surface-1 shadow-2 transition-colors";
+const SWITCH_THUMB_DENSE_ACTIVE: &str =
+    "size-xs rounded-pill border border-brand bg-surface-1 shadow-1 transition-colors";
+const SWITCH_THUMB_INVALID: &str = "size-s rounded-pill border border-danger bg-surface-1 shadow-1";
+const SWITCH_THUMB_DISABLED: &str =
+    "size-s rounded-pill border border-border-muted bg-surface-2 shadow-1";
+const SWITCH_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -15964,7 +16008,303 @@ const fn spinner_state_label(
     }
 }
 
-catalog_component!(Switch, crate::SwitchModel, crate::default_switch_model);
+#[component]
+pub fn Switch(#[prop(optional, default = default_switch_model())] model: SwitchModel) -> AnyView {
+    if let Err(report) = validate_switch_model(&model) {
+        let message = format!("Switch validation failed: {report}");
+        return view! {
+            <div class=SWITCH_ERROR data-ui-component="switch" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let nodes = switch_render_nodes(&model, &model.state());
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SwitchPart::Root)
+        .expect("invariant: switch render nodes include root")
+        .clone();
+    let track = nodes
+        .iter()
+        .find(|node| node.part == SwitchPart::Track)
+        .expect("invariant: switch render nodes include track")
+        .clone();
+    let thumb = nodes
+        .iter()
+        .find(|node| node.part == SwitchPart::Thumb)
+        .expect("invariant: switch render nodes include thumb")
+        .clone();
+    let label = nodes
+        .iter()
+        .find(|node| node.part == SwitchPart::Label)
+        .expect("invariant: switch render nodes include label")
+        .clone();
+    let required = root.required;
+    let root_value = root.value.clone();
+    let track_value = track.value.clone();
+    let thumb_value = thumb.value.clone();
+    let label_value = label.value.clone();
+    let root_label = root.label.clone();
+    let label_copy = label.label.clone();
+    let label_detail = label.detail.clone();
+    let error_detail = label.detail.clone();
+    let on_status_for_data = model.on_label.clone();
+    let off_status_for_data = model.off_label.clone();
+    let on_status_for_text = model.on_label.clone();
+    let off_status_for_text = model.off_label.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <div
+            class=switch_root_class(density, disabled, invalid)
+            data-ui-component="switch"
+            data-ui-part=SwitchPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    switch_state_label(loading, disabled, invalid, state.checked()).to_owned()
+                })
+            }
+            data-ui-checked=move || state.with(|state| state.checked().label().to_owned())
+            data-ui-value=root_value
+            data-ui-status=move || {
+                state.with(|state| {
+                    switch_status_copy(
+                        state.checked(),
+                        on_status_for_data.as_str(),
+                        off_status_for_data.as_str(),
+                    )
+                })
+            }
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <div class=SWITCH_COPY>
+                <div class=SWITCH_LABEL_ROW data-ui-part=SwitchPart::Label.label() data-ui-value=label_value>
+                    <p class=switch_label_class(disabled)>
+                        {label_copy}
+                        {required.then_some(view! { <span class=SWITCH_REQUIRED>" *"</span> })}
+                    </p>
+                    <span
+                        class=move || {
+                            state.with(|state| {
+                                switch_status_class(state.checked(), disabled, invalid).to_owned()
+                            })
+                        }
+                    >
+                        {move || {
+                            state.with(|state| {
+                                switch_status_copy(
+                                    state.checked(),
+                                    on_status_for_text.as_str(),
+                                    off_status_for_text.as_str(),
+                                )
+                            })
+                        }}
+                    </span>
+                </div>
+                <p class=switch_detail_class(disabled, invalid)>{label_detail}</p>
+                {invalid.then_some(view! { <p class=SWITCH_ERROR>{error_detail}</p> })}
+            </div>
+            <button
+                type="button"
+                role="switch"
+                class=move || {
+                    state.with(|state| {
+                        switch_track_class(
+                            density,
+                            state.checked(),
+                            state.is_active(SwitchPart::Track),
+                            blocked,
+                            invalid,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=SwitchPart::Track.label()
+                data-ui-value=track_value
+                aria-label=root_label
+                aria-checked=move || state.with(|state| state.checked().aria_checked().to_owned())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SwitchIntent::Focus(SwitchPart::Track));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SwitchIntent::Blur);
+                        });
+                    }
+                }
+                on:click=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(SwitchIntent::Toggle);
+                        });
+                    }
+                }
+            >
+                <span
+                    class=move || {
+                        state.with(|state| {
+                            switch_thumb_class(
+                                density,
+                                state.checked(),
+                                state.is_active(SwitchPart::Track),
+                                blocked,
+                                invalid,
+                            )
+                            .to_owned()
+                        })
+                    }
+                    data-ui-part=SwitchPart::Thumb.label()
+                    data-ui-value=thumb_value
+                    aria-hidden="true"
+                ></span>
+            </button>
+        </div>
+    }
+    .into_any()
+}
+
+const fn switch_root_class(density: SwitchDensity, disabled: bool, invalid: bool) -> &'static str {
+    if disabled {
+        return SWITCH_ROOT_DISABLED;
+    }
+    if invalid {
+        return SWITCH_ROOT_INVALID;
+    }
+    match density {
+        SwitchDensity::Standard => SWITCH_ROOT,
+        SwitchDensity::Dense => SWITCH_ROOT_DENSE,
+    }
+}
+
+const fn switch_track_class(
+    density: SwitchDensity,
+    checked: SwitchChecked,
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return SWITCH_TRACK_DISABLED;
+    }
+    if invalid {
+        return SWITCH_TRACK_INVALID;
+    }
+    if active {
+        return match (density, checked) {
+            (SwitchDensity::Dense, SwitchChecked::On) => SWITCH_TRACK_DENSE_ACTIVE_ON,
+            (SwitchDensity::Dense, SwitchChecked::Off) => SWITCH_TRACK_DENSE_ACTIVE,
+            (SwitchDensity::Standard, SwitchChecked::On) => SWITCH_TRACK_ACTIVE_ON,
+            (SwitchDensity::Standard, SwitchChecked::Off) => SWITCH_TRACK_ACTIVE,
+        };
+    }
+    match (density, checked) {
+        (SwitchDensity::Dense, SwitchChecked::On) => SWITCH_TRACK_DENSE_ON,
+        (SwitchDensity::Dense, SwitchChecked::Off) => SWITCH_TRACK_DENSE,
+        (SwitchDensity::Standard, SwitchChecked::On) => SWITCH_TRACK_ON,
+        (SwitchDensity::Standard, SwitchChecked::Off) => SWITCH_TRACK,
+    }
+}
+
+const fn switch_thumb_class(
+    density: SwitchDensity,
+    checked: SwitchChecked,
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return SWITCH_THUMB_DISABLED;
+    }
+    if invalid {
+        return SWITCH_THUMB_INVALID;
+    }
+    if active {
+        return match density {
+            SwitchDensity::Standard => SWITCH_THUMB_ACTIVE,
+            SwitchDensity::Dense => SWITCH_THUMB_DENSE_ACTIVE,
+        };
+    }
+    match (density, checked) {
+        (SwitchDensity::Dense, SwitchChecked::Off | SwitchChecked::On) => SWITCH_THUMB_DENSE,
+        (SwitchDensity::Standard, SwitchChecked::On) => SWITCH_THUMB_ON,
+        (SwitchDensity::Standard, SwitchChecked::Off) => SWITCH_THUMB,
+    }
+}
+
+const fn switch_label_class(disabled: bool) -> &'static str {
+    if disabled {
+        SWITCH_LABEL_DISABLED
+    } else {
+        SWITCH_LABEL
+    }
+}
+
+const fn switch_detail_class(disabled: bool, invalid: bool) -> &'static str {
+    if disabled {
+        SWITCH_DETAIL_DISABLED
+    } else if invalid {
+        SWITCH_DETAIL_INVALID
+    } else {
+        SWITCH_DETAIL
+    }
+}
+
+const fn switch_status_class(
+    checked: SwitchChecked,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        SWITCH_STATUS_DISABLED
+    } else if invalid {
+        SWITCH_STATUS_INVALID
+    } else if checked.is_on() {
+        SWITCH_STATUS_ON
+    } else {
+        SWITCH_STATUS
+    }
+}
+
+fn switch_status_copy(checked: SwitchChecked, on_label: &str, off_label: &str) -> String {
+    match checked {
+        SwitchChecked::Off => off_label.to_owned(),
+        SwitchChecked::On => on_label.to_owned(),
+    }
+}
+
+const fn switch_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    checked: SwitchChecked,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else {
+        checked.label()
+    }
+}
+
 catalog_component!(Table, crate::TableModel, crate::default_table_model);
 catalog_component!(Tabs, crate::TabsModel, crate::default_tabs_model);
 catalog_component!(

@@ -58,6 +58,7 @@ pub mod slider;
 pub mod sonner;
 pub mod spec;
 pub mod spinner;
+pub mod switch;
 pub mod theme;
 pub mod widgets;
 
@@ -345,6 +346,11 @@ pub use spinner::{
     SpinnerChange, SpinnerDensity, SpinnerIntent, SpinnerModel, SpinnerPart, SpinnerRenderNode,
     SpinnerSize, SpinnerState, SpinnerTone, default_spinner_model, spinner_render_nodes,
     validate_spinner_model,
+};
+pub use switch::{
+    SwitchChange, SwitchChecked, SwitchDensity, SwitchIntent, SwitchModel, SwitchPart,
+    SwitchRenderNode, SwitchState, default_switch_model, switch_render_nodes,
+    validate_switch_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
 pub use widgets::{

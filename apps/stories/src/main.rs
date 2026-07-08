@@ -37,7 +37,8 @@ use rs_dean_ui::{
     SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
     SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
     SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
-    SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, ThemeCycleButton, ThemeId, ThemeScope,
+    SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1078,6 +1079,25 @@ fn Stories() -> impl IntoView {
                             <Spinner model=invalid_spinner_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Spinner model=themed_spinner_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-switch" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Switch"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 56 implemented as a binary setting control backed by validated shared Rust state, renderer-local focus/toggle state, and Bevy-readable switch primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Switch model=default_switch_story_model() />
+                            <Switch model=dense_switch_story_model() />
+                            <Switch model=off_switch_story_model() />
+                            <Switch model=loading_switch_story_model() />
+                            <Switch model=disabled_switch_story_model() />
+                            <Switch model=invalid_switch_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Switch model=themed_switch_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4066,6 +4086,52 @@ fn themed_spinner_story_model() -> SpinnerModel {
         .with_size(SpinnerSize::Large)
         .with_tone(SpinnerTone::Brand)
         .with_detail("Spinner border colors resolve through the nested Luxury theme.")
+}
+
+fn default_switch_story_model() -> SwitchModel {
+    SwitchModel::new("Persist theme preference", "theme-preference")
+        .with_detail("The renderer can toggle locally; consumers persist the accepted setting.")
+        .with_on_label("Synced")
+        .with_off_label("Local")
+        .checked()
+}
+
+fn dense_switch_story_model() -> SwitchModel {
+    default_switch_story_model()
+        .with_density(SwitchDensity::Dense)
+        .with_detail("Dense switches keep the same track, thumb, and label anatomy.")
+}
+
+fn off_switch_story_model() -> SwitchModel {
+    SwitchModel::new("Use local motion setting", "motion-setting")
+        .with_detail("Unchecked switches keep the same Bevy primitive contract.")
+        .with_on_label("Motion")
+        .with_off_label("Static")
+        .unchecked()
+}
+
+fn loading_switch_story_model() -> SwitchModel {
+    default_switch_story_model()
+        .with_detail("Loading switches block interaction while the app reconciles durable state.")
+        .loading()
+}
+
+fn disabled_switch_story_model() -> SwitchModel {
+    default_switch_story_model()
+        .with_detail("Disabled switches expose a stable read-only state to every renderer.")
+        .disabled()
+}
+
+fn invalid_switch_story_model() -> SwitchModel {
+    default_switch_story_model().with_error("Persisted setting failed validation at the edge.")
+}
+
+fn themed_switch_story_model() -> SwitchModel {
+    SwitchModel::new("Theme scoped switch", "theme-scoped-switch")
+        .with_detail("Switch track and status colors resolve through the nested Dracula theme.")
+        .with_on_label("Dracula")
+        .with_off_label("Default")
+        .checked()
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

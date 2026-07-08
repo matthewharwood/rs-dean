@@ -589,7 +589,18 @@ without implying durable user progress. Skeleton, Progress, Button, and Sonner
 were re-audited against that learning; no earlier changes were required because
 they already keep transient visual state out of persistent app records.
 
-All-issue sweep pass: Switch through Typography complete. The shared
+Concrete component pass: Switch complete. The component now has a typed Rust
+binary setting model, status-label validation, renderer-local focus and draft
+toggle state, token-only Leptos switch rendering, dedicated story proof, and
+Bevy primitive derivation from the same render nodes. The sweep found that
+binary controls need a clear split between renderer draft toggles and durable
+accepted settings, so consumers route persisted preferences through
+`crates/state` / `rs-dean-idb`. Checkbox, Slider, Field, and Radio Group were
+re-audited against that learning; no earlier changes were required because
+they already keep durable user choices app-owned or validate renderer-local
+draft state before handoff.
+
+All-issue sweep pass: Table through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -597,7 +608,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Switch through Typography now have
+Concrete all-issue sweep pass: Table through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

@@ -43,3 +43,10 @@ Ship a Rust-first `Switch` component that follows the shadcn composition model w
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog Switch entry with a bespoke shared Rust binary-control model in `crates/ui`.
+- Added `garde` validation for label, value, detail, status labels, and optional error copy.
+- Added renderer-local focus and draft toggle state while leaving durable accepted settings app-owned through `crates/state` / `rs-dean-idb`.
+- Added a token-only Leptos `Switch` renderer, story variants, and Bevy primitive derivation over the same render nodes.

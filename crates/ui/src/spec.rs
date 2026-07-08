@@ -296,12 +296,12 @@ pub mod bevy_adapter {
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
-        SpinnerPart, StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        SpinnerPart, StateContract, SwitchChecked, SwitchPart, Theme, UiBlockRole, UiBlockTone,
+        UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
+        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
+        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -322,7 +322,7 @@ pub mod bevy_adapter {
         default_resizable_model, default_scroll_area_model, default_select_model,
         default_separator_model, default_sheet_model, default_sidebar_model,
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_switch_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
@@ -332,6 +332,7 @@ pub mod bevy_adapter {
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
+        switch_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -606,6 +607,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Spinner {
             return bevy_primitives_for_spinner(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Switch {
+            return bevy_primitives_for_switch(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1819,6 +1823,37 @@ pub mod bevy_adapter {
                     intent: spinner_intent_for_part(node.part, node.actionable),
                     selected: node.active || node.paused || node.invalid,
                     disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_switch(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_switch_model();
+        let switch_state = model.state();
+        switch_render_nodes(&model, &switch_state)
+            .into_iter()
+            .map(|node| {
+                let role = switch_role_for_part(node.part);
+                let tone = switch_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: switch_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: switch_size_for_part(node.part, node.density),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: switch_intent_for_part(node.part, node.actionable),
+                    selected: node.checked.is_on() || node.active || node.invalid,
+                    disabled: node.disabled,
                 }
             })
             .collect()
@@ -5250,6 +5285,62 @@ pub mod bevy_adapter {
             SpinnerPart::Root => Vec2::new(scale::space::XL2, scale::space::L),
             SpinnerPart::Track | SpinnerPart::Indicator => Vec2::new(edge, edge),
             SpinnerPart::Label => Vec2::new(scale::space::XL, scale::space::S),
+        }
+    }
+
+    const fn switch_kind_for_part(part: SwitchPart) -> UiWidgetSlotKind {
+        match part {
+            SwitchPart::Root => UiWidgetSlotKind::Section,
+            SwitchPart::Track => UiWidgetSlotKind::Switch,
+            SwitchPart::Thumb => UiWidgetSlotKind::Marker,
+            SwitchPart::Label => UiWidgetSlotKind::Text,
+        }
+    }
+
+    const fn switch_role_for_part(part: SwitchPart) -> UiBlockRole {
+        match part {
+            SwitchPart::Root => UiBlockRole::Root,
+            SwitchPart::Track => UiBlockRole::Control,
+            SwitchPart::Thumb => UiBlockRole::Indicator,
+            SwitchPart::Label => UiBlockRole::Text,
+        }
+    }
+
+    fn switch_tone_for_node(node: &crate::SwitchRenderNode) -> UiBlockTone {
+        if node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        match (node.part, node.checked) {
+            (SwitchPart::Track | SwitchPart::Thumb, SwitchChecked::On) => UiBlockTone::Brand,
+            (SwitchPart::Track | SwitchPart::Thumb, SwitchChecked::Off) => UiBlockTone::Surface,
+            (SwitchPart::Root | SwitchPart::Label, _) => UiBlockTone::Surface,
+        }
+    }
+
+    const fn switch_intent_for_part(part: SwitchPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SwitchPart::Track, true) => UiWidgetIntent::Toggle,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn switch_size_for_part(part: SwitchPart, density: crate::SwitchDensity) -> Vec2 {
+        let control = match density {
+            crate::SwitchDensity::Standard => Vec2::new(scale::space::XL, scale::space::M),
+            crate::SwitchDensity::Dense => Vec2::new(scale::space::L, scale::space::S),
+        };
+        let thumb_edge = match density {
+            crate::SwitchDensity::Standard => scale::space::S,
+            crate::SwitchDensity::Dense => scale::space::XS,
+        };
+        match part {
+            SwitchPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            SwitchPart::Track => control,
+            SwitchPart::Thumb => Vec2::new(thumb_edge, thumb_edge),
+            SwitchPart::Label => Vec2::new(scale::space::XL2, scale::space::S),
         }
     }
 
