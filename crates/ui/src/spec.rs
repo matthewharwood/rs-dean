@@ -295,8 +295,8 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, StateContract, Theme,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, StateContract,
+        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
         accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -321,8 +321,8 @@ pub mod bevy_adapter {
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
         default_separator_model, default_sheet_model, default_sidebar_model,
-        default_skeleton_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        default_skeleton_model, default_slider_model, dialog_render_nodes, direction_render_nodes,
+        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
         marker_render_nodes, menubar_render_nodes, message_render_nodes,
@@ -330,7 +330,7 @@ pub mod bevy_adapter {
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-        skeleton_render_nodes,
+        skeleton_render_nodes, slider_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -596,6 +596,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Slider {
+            return bevy_primitives_for_slider(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1715,6 +1718,37 @@ pub mod bevy_adapter {
                     state,
                     intent: skeleton_intent_for_part(node.part, node.loading, node.disabled),
                     selected: node.active || node.animation_paused || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_slider(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_slider_model();
+        let slider_state = model.state();
+        slider_render_nodes(&model, &slider_state)
+            .into_iter()
+            .map(|node| {
+                let role = slider_role_for_part(node.part);
+                let tone = slider_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: slider_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: slider_size_for_part(node.part, node.orientation, node.percent),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: slider_intent_for_part(node.part, node.actionable),
+                    selected: node.focused || node.dragging || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -4932,6 +4966,76 @@ pub mod bevy_adapter {
                 scale::space::XS * f32::from(text_lines.max(1)),
             ),
             SkeletonPart::Media => Vec2::new(scale::space::XL2, scale::space::XL),
+        }
+    }
+
+    const fn slider_kind_for_part(part: SliderPart) -> UiWidgetSlotKind {
+        match part {
+            SliderPart::Root => UiWidgetSlotKind::Section,
+            SliderPart::Track | SliderPart::Range | SliderPart::Thumb => UiWidgetSlotKind::Slider,
+            SliderPart::Value => UiWidgetSlotKind::Badge,
+        }
+    }
+
+    const fn slider_role_for_part(part: SliderPart) -> UiBlockRole {
+        match part {
+            SliderPart::Root => UiBlockRole::Root,
+            SliderPart::Track | SliderPart::Range => UiBlockRole::Layout,
+            SliderPart::Thumb => UiBlockRole::Control,
+            SliderPart::Value => UiBlockRole::Text,
+        }
+    }
+
+    fn slider_tone_for_node(node: &crate::SliderRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.dragging || node.focused {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            SliderPart::Range | SliderPart::Thumb => UiBlockTone::Brand,
+            SliderPart::Root | SliderPart::Track | SliderPart::Value => UiBlockTone::Surface,
+        }
+    }
+
+    const fn slider_intent_for_part(part: SliderPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SliderPart::Thumb, true) => UiWidgetIntent::Input,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn slider_size_for_part(
+        part: SliderPart,
+        orientation: crate::SliderOrientation,
+        percent: u8,
+    ) -> Vec2 {
+        let range_factor = f32::from(percent.max(1)) / 100.0;
+        match (part, orientation) {
+            (SliderPart::Root, crate::SliderOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL3, scale::space::L)
+            }
+            (SliderPart::Root, crate::SliderOrientation::Vertical) => {
+                Vec2::new(scale::space::L, scale::space::XL3)
+            }
+            (SliderPart::Track, crate::SliderOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL2, scale::space::XS)
+            }
+            (SliderPart::Track, crate::SliderOrientation::Vertical) => {
+                Vec2::new(scale::space::XS, scale::space::XL2)
+            }
+            (SliderPart::Range, crate::SliderOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL2 * range_factor, scale::space::XS)
+            }
+            (SliderPart::Range, crate::SliderOrientation::Vertical) => {
+                Vec2::new(scale::space::XS, scale::space::XL2 * range_factor)
+            }
+            (SliderPart::Thumb, _) => Vec2::new(scale::space::M, scale::space::M),
+            (SliderPart::Value, _) => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

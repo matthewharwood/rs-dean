@@ -44,11 +44,12 @@ use crate::{
     SelectPart, SeparatorDensity, SeparatorIntent, SeparatorModel, SeparatorOrientation,
     SeparatorPart, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetSide, SheetState,
     SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, SkeletonDensity, SkeletonIntent,
-    SkeletonModel, SkeletonPart, SkeletonState, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    SkeletonModel, SkeletonPart, SkeletonState, SliderDensity, SliderIntent, SliderModel,
+    SliderOrientation, SliderPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
+    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -67,16 +68,17 @@ use crate::{
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
-    default_skeleton_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
-    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
-    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
-    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
-    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
-    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, validate_accordion_model,
+    default_skeleton_model, default_slider_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
+    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
+    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
+    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
+    skeleton_render_nodes, slider_render_nodes, validate_accordion_model,
     validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
     validate_attachment_model, validate_avatar_model, validate_badge_model,
     validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
@@ -93,7 +95,7 @@ use crate::{
     validate_popover_model, validate_progress_model, validate_radio_group_model,
     validate_resizable_model, validate_scroll_area_model, validate_select_model,
     validate_separator_model, validate_sheet_model, validate_sidebar_model,
-    validate_skeleton_model,
+    validate_skeleton_model, validate_slider_model,
 };
 
 const HEALTH_CARD: &str =
@@ -778,6 +780,39 @@ const SKELETON_MEDIA_DISABLED: &str = "min-h-xl rounded-field bg-surface-2 opaci
 const SKELETON_MEDIA_DENSE_DISABLED: &str = "min-h-l rounded-field bg-surface-2 opacity-disabled";
 const SKELETON_STATUS: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const SKELETON_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const SLIDER_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SLIDER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SLIDER_ROOT_VERTICAL: &str = "grid w-fit gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SLIDER_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SLIDER_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SLIDER_HEADER: &str = "flex min-w-0 items-center justify-between gap-xs";
+const SLIDER_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SLIDER_VALUE: &str = "rounded-pill border border-border-subtle bg-surface-2 px-xs py-3xs text-00 font-7 text-text-muted";
+const SLIDER_TRACK_WRAP: &str = "relative grid min-h-field items-center";
+const SLIDER_TRACK_WRAP_VERTICAL: &str = "relative grid min-h-xl w-l justify-items-center";
+const SLIDER_TRACK: &str = "h-xs w-full overflow-hidden rounded-pill bg-surface-3";
+const SLIDER_TRACK_DENSE: &str = "h-2xs w-full overflow-hidden rounded-pill bg-surface-3";
+const SLIDER_TRACK_INVALID: &str =
+    "h-xs w-full overflow-hidden rounded-pill border border-danger bg-error-soft";
+const SLIDER_TRACK_DISABLED: &str =
+    "h-xs w-full overflow-hidden rounded-pill bg-surface-2 opacity-disabled";
+const SLIDER_TRACK_VERTICAL: &str = "h-xl w-xs overflow-hidden rounded-pill bg-surface-3";
+const SLIDER_RANGE: &str = "block h-full rounded-pill bg-brand";
+const SLIDER_RANGE_DRAGGING: &str = "block h-full rounded-pill bg-accent";
+const SLIDER_RANGE_INVALID: &str = "block h-full rounded-pill bg-danger";
+const SLIDER_RANGE_DISABLED: &str = "block h-full rounded-pill bg-border-muted";
+const SLIDER_INPUT: &str =
+    "absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed";
+const SLIDER_THUMB: &str =
+    "absolute top-1/2 size-s rounded-pill border border-brand bg-surface-1 shadow-2";
+const SLIDER_THUMB_DENSE: &str =
+    "absolute top-1/2 size-xs rounded-pill border border-brand bg-surface-1 shadow-1";
+const SLIDER_THUMB_FOCUSED: &str =
+    "absolute top-1/2 size-s rounded-pill border border-brand bg-primary-soft shadow-2";
+const SLIDER_THUMB_DISABLED: &str =
+    "absolute top-1/2 size-s rounded-pill border border-border-muted bg-surface-2 opacity-disabled";
+const SLIDER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -14945,7 +14980,289 @@ const fn skeleton_state_label(
     }
 }
 
-catalog_component!(Slider, crate::SliderModel, crate::default_slider_model);
+#[component]
+pub fn Slider(#[prop(optional, default = default_slider_model())] model: SliderModel) -> AnyView {
+    if let Err(report) = validate_slider_model(&model) {
+        let message = format!("Slider validation failed: {report}");
+        return view! {
+            <div class=SLIDER_ERROR data-ui-component="slider" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let orientation = model.orientation;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = slider_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == SliderPart::Root)
+        .expect("invariant: slider render nodes include root")
+        .clone();
+    let track = nodes
+        .iter()
+        .find(|node| node.part == SliderPart::Track)
+        .expect("invariant: slider render nodes include track")
+        .clone();
+    let range = nodes
+        .iter()
+        .find(|node| node.part == SliderPart::Range)
+        .expect("invariant: slider render nodes include range")
+        .clone();
+    let thumb = nodes
+        .iter()
+        .find(|node| node.part == SliderPart::Thumb)
+        .expect("invariant: slider render nodes include thumb")
+        .clone();
+    let value = nodes
+        .iter()
+        .find(|node| node.part == SliderPart::Value)
+        .expect("invariant: slider render nodes include value")
+        .clone();
+    let root_value = root.value.clone();
+    let root_label = root.label.clone();
+    let root_detail = root.detail.clone();
+    let min = model.min;
+    let max = model.max;
+    let step = model.step;
+    let unit = model.unit.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=slider_root_class(density, orientation, invalid, disabled)
+            data-ui-component="slider"
+            data-ui-part=SliderPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-orientation=orientation.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    slider_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_focused(),
+                        state.is_dragging(),
+                    )
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+        >
+            <header class=SLIDER_HEADER>
+                <p class=SLIDER_LABEL>{root_label}</p>
+                <output
+                    class=SLIDER_VALUE
+                    data-ui-part=SliderPart::Value.label()
+                    data-ui-value=value.value
+                >
+                    {move || state.with(|state| crate::slider_value_label(state.value(), &unit))}
+                </output>
+            </header>
+            <div
+                class=slider_track_wrap_class(orientation)
+                data-ui-part=SliderPart::Track.label()
+                data-ui-value=track.value
+                aria-label=track.label
+            >
+                <span class=slider_track_class(density, orientation, invalid, blocked) aria-hidden="true">
+                    <span
+                        class=move || {
+                            state.with(|state| {
+                                slider_range_class(state.is_dragging(), invalid, blocked).to_owned()
+                            })
+                        }
+                        style=move || state.with(|state| slider_range_style(orientation, state.percent()))
+                        data-ui-part=SliderPart::Range.label()
+                        data-ui-value=range.value.clone()
+                    ></span>
+                </span>
+                <span
+                    class=move || {
+                        state.with(|state| {
+                            slider_thumb_class(density, state.is_focused(), blocked).to_owned()
+                        })
+                    }
+                    style=move || state.with(|state| slider_thumb_style(orientation, state.percent()))
+                    data-ui-part=SliderPart::Thumb.label()
+                    data-ui-value=thumb.value.clone()
+                    aria-hidden="true"
+                ></span>
+                <input
+                    type="range"
+                    class=SLIDER_INPUT
+                    min=min.to_string()
+                    max=max.to_string()
+                    step=step.to_string()
+                    prop:value=move || state.with(|state| state.value().to_string())
+                    aria-label=thumb.label
+                    aria-orientation=orientation.label()
+                    disabled=blocked
+                    on:focus=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(SliderIntent::Focus);
+                            });
+                        }
+                    }
+                    on:blur=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(SliderIntent::Blur);
+                                let _ = state.apply(SliderIntent::StopDrag);
+                            });
+                        }
+                    }
+                    on:mousedown=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(SliderIntent::StartDrag);
+                            });
+                        }
+                    }
+                    on:mouseup=move |_| {
+                        if !blocked {
+                            set_state.update(|state| {
+                                let _ = state.apply(SliderIntent::StopDrag);
+                            });
+                        }
+                    }
+                    on:input=move |event| {
+                        if !blocked && let Ok(value) = event_target_value(&event).parse::<i32>() {
+                            set_state.update(|state| {
+                                let _ = state.apply(SliderIntent::SetValue(value));
+                            });
+                        }
+                    }
+                />
+            </div>
+            <p class=BLOCK_DETAIL>{root_detail}</p>
+            {invalid.then_some(view! { <p class=SLIDER_ERROR>{root.detail}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+const fn slider_root_class(
+    density: SliderDensity,
+    orientation: SliderOrientation,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SLIDER_ROOT_DISABLED;
+    }
+    if invalid {
+        return SLIDER_ROOT_INVALID;
+    }
+    match (density, orientation) {
+        (_, SliderOrientation::Vertical) => SLIDER_ROOT_VERTICAL,
+        (SliderDensity::Standard, SliderOrientation::Horizontal) => SLIDER_ROOT,
+        (SliderDensity::Dense, SliderOrientation::Horizontal) => SLIDER_ROOT_DENSE,
+    }
+}
+
+const fn slider_track_wrap_class(orientation: SliderOrientation) -> &'static str {
+    match orientation {
+        SliderOrientation::Horizontal => SLIDER_TRACK_WRAP,
+        SliderOrientation::Vertical => SLIDER_TRACK_WRAP_VERTICAL,
+    }
+}
+
+const fn slider_track_class(
+    density: SliderDensity,
+    orientation: SliderOrientation,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SLIDER_TRACK_DISABLED;
+    }
+    if invalid {
+        return SLIDER_TRACK_INVALID;
+    }
+    match (density, orientation) {
+        (_, SliderOrientation::Vertical) => SLIDER_TRACK_VERTICAL,
+        (SliderDensity::Standard, SliderOrientation::Horizontal) => SLIDER_TRACK,
+        (SliderDensity::Dense, SliderOrientation::Horizontal) => SLIDER_TRACK_DENSE,
+    }
+}
+
+const fn slider_range_class(dragging: bool, invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SLIDER_RANGE_DISABLED
+    } else if invalid {
+        SLIDER_RANGE_INVALID
+    } else if dragging {
+        SLIDER_RANGE_DRAGGING
+    } else {
+        SLIDER_RANGE
+    }
+}
+
+const fn slider_thumb_class(density: SliderDensity, focused: bool, disabled: bool) -> &'static str {
+    if disabled {
+        return SLIDER_THUMB_DISABLED;
+    }
+    if focused {
+        return SLIDER_THUMB_FOCUSED;
+    }
+    match density {
+        SliderDensity::Standard => SLIDER_THUMB,
+        SliderDensity::Dense => SLIDER_THUMB_DENSE,
+    }
+}
+
+fn slider_range_style(orientation: SliderOrientation, percent: u8) -> String {
+    match orientation {
+        SliderOrientation::Horizontal => format!("width: {percent}%;"),
+        SliderOrientation::Vertical => {
+            format!("height: {percent}%; width: 100%; margin-top: auto;")
+        }
+    }
+}
+
+fn slider_thumb_style(orientation: SliderOrientation, percent: u8) -> String {
+    match orientation {
+        SliderOrientation::Horizontal => {
+            format!("left: {percent}%; transform: translate(-50%, -50%);")
+        }
+        SliderOrientation::Vertical => {
+            let top = 100u8.saturating_sub(percent);
+            format!("left: 50%; top: {top}%; transform: translate(-50%, -50%);")
+        }
+    }
+}
+
+const fn slider_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+    dragging: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if dragging {
+        "dragging"
+    } else if focused {
+        "focused"
+    } else {
+        "ready"
+    }
+}
+
 catalog_component!(Sonner, crate::SonnerModel, crate::default_sonner_model);
 catalog_component!(Spinner, crate::SpinnerModel, crate::default_spinner_model);
 catalog_component!(Switch, crate::SwitchModel, crate::default_switch_model);

@@ -54,6 +54,7 @@ pub mod separator;
 pub mod sheet;
 pub mod sidebar;
 pub mod skeleton;
+pub mod slider;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -321,6 +322,11 @@ pub use skeleton::{
     SkeletonChange, SkeletonDensity, SkeletonIntent, SkeletonModel, SkeletonPart,
     SkeletonRenderNode, SkeletonState, default_skeleton_model, skeleton_render_nodes,
     validate_skeleton_model,
+};
+pub use slider::{
+    SliderChange, SliderDensity, SliderIntent, SliderModel, SliderOrientation, SliderPart,
+    SliderRenderNode, SliderState, default_slider_model, slider_percent, slider_render_nodes,
+    slider_value_label, validate_slider_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

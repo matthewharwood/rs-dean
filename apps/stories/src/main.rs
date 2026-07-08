@@ -35,7 +35,8 @@ use rs_dean_ui::{
     SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
     SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
     SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
-    SkeletonDensity, SkeletonModel, ThemeCycleButton, ThemeId, ThemeScope,
+    SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation,
+    ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1019,6 +1020,25 @@ fn Stories() -> impl IntoView {
                             <Skeleton model=invalid_skeleton_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Skeleton model=themed_skeleton_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-slider" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Slider"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 53 implemented as a numeric range control backed by validated shared Rust min/max/step state, renderer-local focus/drag/value state, and Bevy-readable range primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Slider model=default_slider_story_model() />
+                            <Slider model=dense_slider_story_model() />
+                            <Slider model=vertical_slider_story_model() />
+                            <Slider model=loading_slider_story_model() />
+                            <Slider model=disabled_slider_story_model() />
+                            <Slider model=invalid_slider_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Slider model=themed_slider_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3839,6 +3859,53 @@ fn themed_skeleton_story_model() -> SkeletonModel {
         .with_density(SkeletonDensity::Dense)
         .with_text_lines(3)
         .with_detail("Semantic placeholder colors resolve through the nested theme.")
+}
+
+fn default_slider_story_model() -> SliderModel {
+    SliderModel::new(0, 100, 64)
+        .with_label("Completion")
+        .with_step(4)
+        .with_detail("Adjust a local value while the app decides whether to persist it.")
+}
+
+fn dense_slider_story_model() -> SliderModel {
+    default_slider_story_model()
+        .with_density(SliderDensity::Dense)
+        .with_value(40)
+}
+
+fn vertical_slider_story_model() -> SliderModel {
+    SliderModel::new(0, 12, 8)
+        .with_label("Columns")
+        .with_unit(" columns")
+        .with_step(1)
+        .with_orientation(SliderOrientation::Vertical)
+        .with_detail("Vertical orientation remains part of the shared Rust model.")
+}
+
+fn loading_slider_story_model() -> SliderModel {
+    default_slider_story_model()
+        .with_label("Hydrating value")
+        .loading()
+}
+
+fn disabled_slider_story_model() -> SliderModel {
+    default_slider_story_model()
+        .with_label("Locked threshold")
+        .with_value(32)
+        .disabled()
+}
+
+fn invalid_slider_story_model() -> SliderModel {
+    default_slider_story_model()
+        .with_error("Slider value cannot be persisted until the range is reconciled.")
+}
+
+fn themed_slider_story_model() -> SliderModel {
+    SliderModel::new(0, 100, 80)
+        .with_label("Theme scoped range")
+        .with_step(5)
+        .with_detail("Slider colors resolve from the active theme tokens.")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

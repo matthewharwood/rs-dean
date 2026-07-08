@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    slider,
-    Slider,
-    SliderModel,
-    SliderPart,
-    SliderRenderNode,
-    SliderState,
-    SliderIntent,
-    SliderChange,
-    validate_slider_model,
-    slider_render_nodes,
-    default_slider_model,
-    [
-        Root => "Slider",
-        Track => "SliderTrack",
-        Range => "SliderRange",
-        Thumb => "SliderThumb",
-        Value => "SliderValue",
-    ]
-);
-
-define_catalog_component!(
     sonner,
     Sonner,
     SonnerModel,
@@ -791,8 +770,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Separator
         | UiComponentId::Sheet
         | UiComponentId::Sidebar
-        | UiComponentId::Skeleton => None,
-        UiComponentId::Slider => Some(any_nodes(slider_render_nodes(&default_slider_model()))),
+        | UiComponentId::Skeleton
+        | UiComponentId::Slider => None,
         UiComponentId::Sonner => Some(any_nodes(sonner_render_nodes(&default_sonner_model()))),
         UiComponentId::Spinner => Some(any_nodes(spinner_render_nodes(&default_spinner_model()))),
         UiComponentId::Switch => Some(any_nodes(switch_render_nodes(&default_switch_model()))),
@@ -885,6 +864,7 @@ mod tests {
                     | UiComponentId::Sheet
                     | UiComponentId::Sidebar
                     | UiComponentId::Skeleton
+                    | UiComponentId::Slider
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -901,17 +881,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_slider_model().state();
-        assert!(!state.is_active(SliderPart::Root));
+        let mut state = default_sonner_model().state();
+        assert!(!state.is_active(SonnerPart::Provider));
         assert_eq!(
-            state.apply(SliderIntent::Toggle(SliderPart::Root)),
-            SliderChange::Opened(SliderPart::Root)
+            state.apply(SonnerIntent::Toggle(SonnerPart::Provider)),
+            SonnerChange::Opened(SonnerPart::Provider)
         );
-        assert!(state.is_active(SliderPart::Root));
+        assert!(state.is_active(SonnerPart::Provider));
         assert_eq!(
-            state.apply(SliderIntent::Toggle(SliderPart::Root)),
-            SliderChange::Closed(SliderPart::Root)
+            state.apply(SonnerIntent::Toggle(SonnerPart::Provider)),
+            SonnerChange::Closed(SonnerPart::Provider)
         );
-        assert!(!state.is_active(SliderPart::Root));
+        assert!(!state.is_active(SonnerPart::Provider));
     }
 }

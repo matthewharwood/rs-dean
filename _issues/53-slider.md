@@ -43,3 +43,4 @@ Ship a Rust-first `Slider` component that follows the shadcn composition model w
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+- [x] Concrete component pass complete: typed numeric range model, min/max/step/value validation, renderer-local focus/drag/value state, token-only Leptos range input, story variants, and Bevy primitives now share the same Rust render nodes.

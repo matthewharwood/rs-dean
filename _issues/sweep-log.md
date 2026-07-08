@@ -560,7 +560,17 @@ Progress, Separator, Aspect Ratio, Avatar, and Empty were re-audited against
 that learning; no earlier changes were required because each already separates
 ephemeral renderer state from durable app state.
 
-All-issue sweep pass: Slider through Typography complete. The shared
+Concrete component pass: Slider complete. The component now has a typed Rust
+numeric range model, min/max/step/value validation, renderer-local focus,
+drag, and value state, token-only Leptos range rendering, dedicated story
+proof, and Bevy primitive derivation from the same render nodes. The sweep
+found that numeric controls need range and step alignment validated at the Rust
+edge so generated DOM input values, Bevy primitives, and durable app handoff
+cannot disagree. Progress, Input, Field, Resizable, and Pagination were
+re-audited against that learning; no earlier changes were required because
+each already validates numeric or user-entered boundaries before rendering.
+
+All-issue sweep pass: Sonner through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -568,7 +578,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Slider through Typography now have
+Concrete all-issue sweep pass: Sonner through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
