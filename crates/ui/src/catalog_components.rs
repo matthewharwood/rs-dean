@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    tooltip,
-    Tooltip,
-    TooltipModel,
-    TooltipPart,
-    TooltipRenderNode,
-    TooltipState,
-    TooltipIntent,
-    TooltipChange,
-    validate_tooltip_model,
-    tooltip_render_nodes,
-    default_tooltip_model,
-    [
-        Root => "Tooltip",
-        Trigger => "TooltipTrigger",
-        Content => "TooltipContent",
-        Arrow => "TooltipArrow",
-    ]
-);
-
-define_catalog_component!(
     typography,
     Typography,
     TypographyModel,
@@ -610,8 +590,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Textarea
         | UiComponentId::Toast
         | UiComponentId::Toggle
-        | UiComponentId::ToggleGroup => None,
-        UiComponentId::Tooltip => Some(any_nodes(tooltip_render_nodes(&default_tooltip_model()))),
+        | UiComponentId::ToggleGroup
+        | UiComponentId::Tooltip => None,
         UiComponentId::Typography => Some(any_nodes(typography_render_nodes(
             &default_typography_model(),
         ))),
@@ -700,6 +680,7 @@ mod tests {
                     | UiComponentId::Toast
                     | UiComponentId::Toggle
                     | UiComponentId::ToggleGroup
+                    | UiComponentId::Tooltip
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -716,17 +697,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_tooltip_model().state();
-        assert!(!state.is_active(TooltipPart::Root));
+        let mut state = default_typography_model().state();
+        assert!(!state.is_active(TypographyPart::Root));
         assert_eq!(
-            state.apply(TooltipIntent::Toggle(TooltipPart::Root)),
-            TooltipChange::Opened(TooltipPart::Root)
+            state.apply(TypographyIntent::Toggle(TypographyPart::Root)),
+            TypographyChange::Opened(TypographyPart::Root)
         );
-        assert!(state.is_active(TooltipPart::Root));
+        assert!(state.is_active(TypographyPart::Root));
         assert_eq!(
-            state.apply(TooltipIntent::Toggle(TooltipPart::Root)),
-            TooltipChange::Closed(TooltipPart::Root)
+            state.apply(TypographyIntent::Toggle(TypographyPart::Root)),
+            TypographyChange::Closed(TypographyPart::Root)
         );
-        assert!(!state.is_active(TooltipPart::Root));
+        assert!(!state.is_active(TypographyPart::Root));
     }
 }

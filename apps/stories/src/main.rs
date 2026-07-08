@@ -42,7 +42,8 @@ use rs_dean_ui::{
     TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
     ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone, Toggle,
     ToggleDensity, ToggleGroup, ToggleGroupItem, ToggleGroupModel, ToggleGroupOrientation,
-    ToggleGroupSelectionMode, ToggleModel, TogglePressed, ToggleVariant,
+    ToggleGroupSelectionMode, ToggleModel, TogglePressed, ToggleVariant, Tooltip, TooltipDensity,
+    TooltipModel, TooltipPlacement,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1141,6 +1142,26 @@ fn Stories() -> impl IntoView {
                             <ToggleGroup model=invalid_toggle_group_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <ToggleGroup model=themed_toggle_group_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-tooltip" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Tooltip"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 63 implemented as a focus and hover popup backed by validated shared Rust state, renderer-local open transitions, and Bevy-readable tooltip primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Tooltip model=default_tooltip_story_model() />
+                            <Tooltip model=dense_tooltip_story_model() />
+                            <Tooltip model=placement_tooltip_story_model() />
+                            <Tooltip model=loading_tooltip_story_model() />
+                            <Tooltip model=disabled_tooltip_story_model() />
+                            <Tooltip model=invalid_tooltip_story_model() />
+                            <Tooltip model=hidden_arrow_tooltip_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Tooltip model=themed_tooltip_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4362,6 +4383,67 @@ fn themed_toggle_group_story_model() -> ToggleGroupModel {
     .with_label("Theme scoped group")
     .with_variant(ToggleVariant::Outline)
     .with_selected_value("roomy")
+}
+
+fn default_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Save",
+        "save-command",
+        "Writes the current draft to durable state once the consumer accepts the action.",
+    )
+}
+
+fn dense_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Preview",
+        "preview-command",
+        "Opens a renderer-local preview without changing persisted state.",
+    )
+    .with_density(TooltipDensity::Dense)
+}
+
+fn placement_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Sync",
+        "sync-command",
+        "Tooltip placement is part of the shared model and renders through token classes.",
+    )
+    .with_placement(TooltipPlacement::Right)
+}
+
+fn loading_tooltip_story_model() -> TooltipModel {
+    default_tooltip_story_model().loading()
+}
+
+fn disabled_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Locked",
+        "locked-command",
+        "Disabled tooltips keep the trigger readable but block hover and focus transitions.",
+    )
+    .disabled()
+}
+
+fn invalid_tooltip_story_model() -> TooltipModel {
+    default_tooltip_story_model().with_error("Tooltip content failed validation upstream.")
+}
+
+fn hidden_arrow_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Compact hint",
+        "compact-hint",
+        "The arrow node stays in the render contract even when a renderer hides it.",
+    )
+    .without_arrow()
+}
+
+fn themed_tooltip_story_model() -> TooltipModel {
+    TooltipModel::new(
+        "Theme hint",
+        "theme-hint",
+        "The same Tooltip model resolves semantic tokens through the nested Dracula theme.",
+    )
+    .with_placement(TooltipPlacement::Bottom)
 }
 
 fn table_story_columns() -> Vec<TableColumn> {

@@ -662,7 +662,19 @@ Button Group, Radio Group, and the earlier control components were re-audited
 against that learning; no changes were required because each still owns a
 distinct accessibility role and selection model.
 
-All-issue sweep pass: Tooltip through Typography complete. The shared
+Concrete component pass: Tooltip complete. The component now has a typed Rust
+tooltip model, placement and density validation, renderer-local focus/hover
+open state, stable tooltip content IDs, token-only Leptos `role="tooltip"`
+rendering, dedicated story proof, and Bevy primitive derivation from the same
+root/trigger/content/arrow render nodes. The sweep found that Tooltip can
+reuse Popover's overlay anatomy vocabulary while keeping distinct semantics:
+Tooltip is descriptive, opens from focus or hover, and does not expose an
+interactive overlay contract. Popover, Hover Card, Toggle Group, Toggle,
+Button, and the earlier overlay/action components were re-audited against that
+learning; no changes were required because their state and role contracts
+remain distinct.
+
+All-issue sweep pass: Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -670,7 +682,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Tooltip through Typography now have
+Concrete all-issue sweep pass: Typography now has
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

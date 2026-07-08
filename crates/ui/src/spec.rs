@@ -298,7 +298,7 @@ pub mod bevy_adapter {
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
         SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
         Theme, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart, TogglePressed,
-        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        TooltipPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
         accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
@@ -325,18 +325,19 @@ pub mod bevy_adapter {
         default_separator_model, default_sheet_model, default_sidebar_model,
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
         default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-        default_toast_model, default_toggle_group_model, default_toggle_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_toast_model, default_toggle_group_model, default_toggle_model,
+        default_tooltip_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
         switch_render_nodes, table_render_nodes, tabs_render_nodes, textarea_render_nodes,
-        toast_render_nodes, toggle_group_render_nodes, toggle_render_nodes,
+        toast_render_nodes, toggle_group_render_nodes, toggle_render_nodes, tooltip_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -624,6 +625,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Tooltip {
+            return bevy_primitives_for_tooltip(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::Table {
             return bevy_primitives_for_table(theme, implementation.render, implementation.state);
@@ -1946,6 +1950,37 @@ pub mod bevy_adapter {
                     intent: toggle_group_intent_for_part(node.part, node.actionable),
                     selected: node.pressed.is_pressed() || node.focused || node.invalid,
                     disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_tooltip(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_tooltip_model();
+        let tooltip_state = model.state();
+        tooltip_render_nodes(&model, &tooltip_state)
+            .into_iter()
+            .map(|node| {
+                let role = tooltip_role_for_part(node.part);
+                let tone = tooltip_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: tooltip_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: tooltip_size_for_part(node.part, node.density),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: tooltip_intent_for_part(node.part, node.actionable),
+                    selected: node.open || node.active || node.invalid,
+                    disabled: node.disabled || !node.visible,
                 }
             })
             .collect()
@@ -5680,6 +5715,60 @@ pub mod bevy_adapter {
             ToggleGroupPart::Root => Vec2::new(scale::space::XL4, scale::space::XL),
             ToggleGroupPart::Item => item,
             ToggleGroupPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
+        }
+    }
+
+    const fn tooltip_kind_for_part(part: TooltipPart) -> UiWidgetSlotKind {
+        match part {
+            TooltipPart::Root => UiWidgetSlotKind::Section,
+            TooltipPart::Trigger => UiWidgetSlotKind::Button,
+            TooltipPart::Content => UiWidgetSlotKind::Overlay,
+            TooltipPart::Arrow => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn tooltip_role_for_part(part: TooltipPart) -> UiBlockRole {
+        match part {
+            TooltipPart::Root => UiBlockRole::Root,
+            TooltipPart::Trigger => UiBlockRole::Action,
+            TooltipPart::Content => UiBlockRole::Overlay,
+            TooltipPart::Arrow => UiBlockRole::Indicator,
+        }
+    }
+
+    fn tooltip_tone_for_node(node: &crate::TooltipRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        match node.part {
+            TooltipPart::Trigger if node.open || node.active => UiBlockTone::Brand,
+            TooltipPart::Trigger => UiBlockTone::Surface,
+            TooltipPart::Content => UiBlockTone::Surface,
+            TooltipPart::Arrow => UiBlockTone::Accent,
+            TooltipPart::Root => UiBlockTone::Surface,
+        }
+    }
+
+    const fn tooltip_intent_for_part(part: TooltipPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (TooltipPart::Trigger, true) => UiWidgetIntent::Open,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn tooltip_size_for_part(part: TooltipPart, density: crate::TooltipDensity) -> Vec2 {
+        let trigger = match density {
+            crate::TooltipDensity::Standard => Vec2::new(scale::space::XL, scale::space::M),
+            crate::TooltipDensity::Dense => Vec2::new(scale::space::L, scale::space::S),
+        };
+        match part {
+            TooltipPart::Root => Vec2::new(scale::space::XL3, scale::space::L),
+            TooltipPart::Trigger => trigger,
+            TooltipPart::Content => Vec2::new(scale::space::XL3, scale::space::S),
+            TooltipPart::Arrow => Vec2::new(scale::space::XS, scale::space::XS),
         }
     }
 

@@ -54,11 +54,12 @@ use crate::{
     ToastDensity, ToastIntent, ToastModel, ToastPart, ToastPosition, ToastRenderNode, ToastState,
     ToastTone, ToggleDensity, ToggleGroupIntent, ToggleGroupModel, ToggleGroupOrientation,
     ToggleGroupPart, ToggleGroupState, ToggleIntent, ToggleModel, TogglePart, TogglePressed,
-    ToggleVariant, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    ToggleVariant, TooltipDensity, TooltipIntent, TooltipModel, TooltipPart, TooltipPlacement,
+    UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -78,12 +79,12 @@ use crate::{
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
     default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-    default_toast_model, default_toggle_group_model, default_toggle_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    default_toast_model, default_toggle_group_model, default_toggle_model, default_tooltip_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
@@ -91,26 +92,27 @@ use crate::{
     skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
     switch_render_nodes, table_render_nodes, tabs_dom_id, tabs_render_nodes, textarea_dom_id,
     textarea_render_nodes, toast_dom_id, toast_render_nodes, toggle_group_render_nodes,
-    toggle_group_selected_values_label, toggle_render_nodes, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
-    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
-    validate_popover_model, validate_progress_model, validate_radio_group_model,
-    validate_resizable_model, validate_scroll_area_model, validate_select_model,
-    validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    toggle_group_selected_values_label, toggle_render_nodes, tooltip_dom_id, tooltip_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
+    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
     validate_switch_model, validate_table_model, validate_tabs_model, validate_textarea_model,
     validate_toast_model, validate_toggle_group_model, validate_toggle_model,
+    validate_tooltip_model,
 };
 
 const HEALTH_CARD: &str =
@@ -1115,6 +1117,36 @@ const TOGGLE_GROUP_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 const TOGGLE_GROUP_DETAIL_INVALID: &str = "m-0 text-0 leading-0 text-danger";
 const TOGGLE_GROUP_DETAIL_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
 const TOGGLE_GROUP_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const TOOLTIP_ROOT: &str = "relative inline-grid w-fit max-w-md gap-2xs text-text-1";
+const TOOLTIP_ROOT_DISABLED: &str =
+    "relative inline-grid w-fit max-w-md gap-2xs text-text-disabled";
+const TOOLTIP_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOOLTIP_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOOLTIP_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOOLTIP_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOOLTIP_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOOLTIP_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const TOOLTIP_CONTENT_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-md -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-md -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_DENSE_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-md -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-md -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-md -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_LOADING: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_INVALID: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DISABLED: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled shadow-1";
+const TOOLTIP_CONTENT_HIDDEN: &str = "hidden";
+const TOOLTIP_COPY: &str = "m-0 text-00 leading-0 text-text-1";
+const TOOLTIP_COPY_DENSE: &str = "m-0 text-00 leading-0 text-text-1";
+const TOOLTIP_COPY_INVALID: &str = "m-0 text-00 leading-0 text-danger";
+const TOOLTIP_COPY_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
+const TOOLTIP_ARROW: &str =
+    "grid size-xs place-items-center rounded-field bg-surface-elevated text-00 text-text-muted";
+const TOOLTIP_ARROW_HIDDEN: &str = "hidden";
+const TOOLTIP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -18249,7 +18281,297 @@ const fn toggle_group_state_label(
     }
 }
 
-catalog_component!(Tooltip, crate::TooltipModel, crate::default_tooltip_model);
+#[component]
+pub fn Tooltip(
+    #[prop(optional, default = default_tooltip_model())] model: TooltipModel,
+) -> AnyView {
+    if let Err(report) = validate_tooltip_model(&model) {
+        let message = format!("Tooltip validation failed: {report}");
+        return view! {
+            <div class=TOOLTIP_ERROR data-ui-component="tooltip" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let placement = model.placement;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = tooltip_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == TooltipPart::Root)
+        .expect("invariant: tooltip render nodes include root")
+        .clone();
+    let trigger = nodes
+        .iter()
+        .find(|node| node.part == TooltipPart::Trigger)
+        .expect("invariant: tooltip render nodes include trigger")
+        .clone();
+    let content = nodes
+        .iter()
+        .find(|node| node.part == TooltipPart::Content)
+        .expect("invariant: tooltip render nodes include content")
+        .clone();
+    let arrow = nodes
+        .iter()
+        .find(|node| node.part == TooltipPart::Arrow)
+        .expect("invariant: tooltip render nodes include arrow")
+        .clone();
+    let root_value = root.value.clone();
+    let trigger_value = trigger.value.clone();
+    let trigger_label = if loading {
+        "Loading".to_owned()
+    } else {
+        trigger.label.clone()
+    };
+    let content_id = tooltip_dom_id("tooltip-content", root.value.as_str());
+    let content_id_for_button = content_id.clone();
+    let content_id_for_article = content_id.clone();
+    let content_value = content.value.clone();
+    let content_copy = if loading {
+        "Loading tooltip content.".to_owned()
+    } else {
+        content.detail.clone()
+    };
+    let arrow_value = arrow.value.clone();
+    let arrow_detail = arrow.detail.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <span
+            class=tooltip_root_class(disabled)
+            data-ui-component="tooltip"
+            data-ui-part=TooltipPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-placement=placement.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    tooltip_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_open(),
+                        state.is_active(TooltipPart::Trigger),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        tooltip_trigger_class(density, state.is_open(), invalid, blocked)
+                            .to_owned()
+                    })
+                }
+                data-ui-part=TooltipPart::Trigger.label()
+                data-ui-value=trigger_value
+                aria-describedby=content_id_for_button
+                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                disabled=blocked
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Focus(TooltipPart::Trigger));
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Blur);
+                        });
+                    }
+                }
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Hover(TooltipPart::Trigger));
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Leave);
+                        });
+                    }
+                }
+            >
+                {trigger_label}
+            </button>
+            <span
+                id=content_id_for_article
+                role="tooltip"
+                class=move || {
+                    state.with(|state| {
+                        tooltip_content_class(
+                            density,
+                            placement,
+                            state.is_open(),
+                            loading,
+                            disabled,
+                            invalid,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=TooltipPart::Content.label()
+                data-ui-value=content_value
+                aria-hidden=move || state.with(|state| (!state.is_open()).to_string())
+                hidden=move || state.with(|state| !state.is_open())
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Hover(TooltipPart::Content));
+                        });
+                    }
+                }
+                on:mouseleave=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TooltipIntent::Leave);
+                        });
+                    }
+                }
+            >
+                <span
+                    class=move || {
+                        state.with(|state| {
+                            tooltip_arrow_class(state.is_open() && model.show_arrow).to_owned()
+                        })
+                    }
+                    data-ui-part=TooltipPart::Arrow.label()
+                    data-ui-value=arrow_value
+                    aria-label=arrow_detail
+                >
+                    ""
+                </span>
+                <span class=tooltip_copy_class(density, invalid, disabled)>{content_copy}</span>
+            </span>
+        </span>
+    }
+    .into_any()
+}
+
+const fn tooltip_root_class(disabled: bool) -> &'static str {
+    if disabled {
+        TOOLTIP_ROOT_DISABLED
+    } else {
+        TOOLTIP_ROOT
+    }
+}
+
+const fn tooltip_trigger_class(
+    density: TooltipDensity,
+    open: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TOOLTIP_TRIGGER_DISABLED;
+    }
+    if invalid {
+        return TOOLTIP_TRIGGER_INVALID;
+    }
+    match (density, open) {
+        (TooltipDensity::Standard, true) => TOOLTIP_TRIGGER_OPEN,
+        (TooltipDensity::Dense, true) => TOOLTIP_TRIGGER_DENSE_OPEN,
+        (TooltipDensity::Standard, false) => TOOLTIP_TRIGGER,
+        (TooltipDensity::Dense, false) => TOOLTIP_TRIGGER_DENSE,
+    }
+}
+
+const fn tooltip_content_class(
+    density: TooltipDensity,
+    placement: TooltipPlacement,
+    open: bool,
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if !open {
+        return TOOLTIP_CONTENT_HIDDEN;
+    }
+    if disabled {
+        return TOOLTIP_CONTENT_DISABLED;
+    }
+    if loading {
+        return TOOLTIP_CONTENT_LOADING;
+    }
+    if invalid {
+        return TOOLTIP_CONTENT_INVALID;
+    }
+    match (density, placement) {
+        (TooltipDensity::Standard, TooltipPlacement::Top) => TOOLTIP_CONTENT_TOP,
+        (TooltipDensity::Standard, TooltipPlacement::Right) => TOOLTIP_CONTENT_RIGHT,
+        (TooltipDensity::Standard, TooltipPlacement::Bottom) => TOOLTIP_CONTENT_BOTTOM,
+        (TooltipDensity::Standard, TooltipPlacement::Left) => TOOLTIP_CONTENT_LEFT,
+        (TooltipDensity::Dense, TooltipPlacement::Top) => TOOLTIP_CONTENT_DENSE_TOP,
+        (TooltipDensity::Dense, TooltipPlacement::Right) => TOOLTIP_CONTENT_DENSE_RIGHT,
+        (TooltipDensity::Dense, TooltipPlacement::Bottom) => TOOLTIP_CONTENT_DENSE_BOTTOM,
+        (TooltipDensity::Dense, TooltipPlacement::Left) => TOOLTIP_CONTENT_DENSE_LEFT,
+    }
+}
+
+const fn tooltip_copy_class(
+    density: TooltipDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TOOLTIP_COPY_DISABLED;
+    }
+    if invalid {
+        return TOOLTIP_COPY_INVALID;
+    }
+    match density {
+        TooltipDensity::Standard => TOOLTIP_COPY,
+        TooltipDensity::Dense => TOOLTIP_COPY_DENSE,
+    }
+}
+
+const fn tooltip_arrow_class(visible: bool) -> &'static str {
+    if visible {
+        TOOLTIP_ARROW
+    } else {
+        TOOLTIP_ARROW_HIDDEN
+    }
+}
+
+const fn tooltip_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    focused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
 catalog_component!(
     Typography,
     crate::TypographyModel,

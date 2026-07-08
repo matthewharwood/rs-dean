@@ -66,6 +66,7 @@ pub mod theme;
 pub mod toast;
 pub mod toggle;
 pub mod toggle_group;
+pub mod tooltip;
 pub mod widgets;
 
 #[cfg(feature = "leptos")]
@@ -389,6 +390,11 @@ pub use toggle_group::{
     ToggleGroupOrientation, ToggleGroupPart, ToggleGroupRenderNode, ToggleGroupSelectionMode,
     ToggleGroupState, default_toggle_group_items, default_toggle_group_model,
     toggle_group_render_nodes, toggle_group_selected_values_label, validate_toggle_group_model,
+};
+pub use tooltip::{
+    TooltipChange, TooltipDensity, TooltipIntent, TooltipModel, TooltipPart, TooltipPlacement,
+    TooltipRenderNode, TooltipState, default_tooltip_model, tooltip_dom_id, tooltip_render_nodes,
+    validate_tooltip_model,
 };
 pub use widgets::{
     UI_WIDGET_CONSTRUCTOR_COUNT, UI_WIDGET_CONSTRUCTORS, UiWidget, UiWidgetConstructor,

@@ -43,3 +43,9 @@ Ship a Rust-first `Tooltip` component that follows the shadcn composition model 
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog contract with a concrete `TooltipModel` using `garde` validation, typed density and placement, optional arrow visibility, loading/disabled/error states, and renderer-local focus/hover open transitions.
+- Added shared render nodes for `Tooltip`, `TooltipTrigger`, `TooltipContent`, and `TooltipArrow`; Leptos renders a stable `role="tooltip"` popup with token-only classes and Bevy derives primitives from the same nodes without depending on Leptos.
+- Added stories for default, dense, placement, loading, disabled, invalid, hidden-arrow, and themed Tooltip states.
