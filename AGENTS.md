@@ -34,7 +34,8 @@ with a Leptos marketing app plus a Bevy-only game app.
   browser canvas moments, but it owns the marketing DOM surface.
 - Leptos app and template styles use Tailwind through Trunk's
   `rel="tailwind-css"` asset type. Keep the standalone `tailwindcss` CLI on
-  `PATH`; `just bootstrap` installs it.
+  `PATH`; `just bootstrap` installs it. Keep `mdbook` on `PATH` for the
+  GitHub Pages crate books.
 - `crates/ui` owns shared design tokens, semantic colors, theme cycling, and
   all theme palettes. The Tailwind token stylesheet lives at
   `crates/ui/styles/theme.css`; Bevy callers use `rs-dean-ui` with
@@ -45,6 +46,11 @@ with a Leptos marketing app plus a Bevy-only game app.
   widget slots when scene rendering is appropriate, and a matching task in
   `_issues/`. `_issues/sweep-log.md` records the repeated first-to-current
   audit loop for component implementation work.
+- `docs/crates/ui` is generated from the `crates/ui` catalog by
+  `cargo xtask gen-ui-book`. It publishes one mdBook page per component and
+  embeds the matching `/stories/#ui-{component}` live fixture. Update the Rust
+  catalog and story fixture first, regenerate the book, then let the gate verify
+  the book has not drifted.
 - Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
   typography, spacing, radius, shadow, and motion scales, such as `text-0`,
   `gap-m`, `p-s`, `rounded-box`, `font-7`, `leading-0`, and `shadow-2`.
@@ -88,22 +94,23 @@ The pass runs, in order:
 3. required app persistent-state wiring check
 4. Leptos Tailwind asset wiring check for apps and generated templates
 5. Leptos/UI design-token class usage check
-6. native `cargo clippy` for workspace crates except browser-only Bevy crates
-7. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
+6. UI crate mdBook source and story-anchor drift check
+7. native `cargo clippy` for workspace crates except browser-only Bevy crates
+8. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-8. native `cargo nextest` for workspace crates except browser-only Bevy crates
-9. native `cargo test --doc` for workspace crates except browser-only Bevy
+9. native `cargo nextest` for workspace crates except browser-only Bevy crates
+10. native `cargo test --doc` for workspace crates except browser-only Bevy
    crates
-10. wasm `cargo check` for browser crates
-11. wasm compile of the browser refresh hydration regression
-12. strict rustdoc build
-13. `cargo deny check`
-14. `cargo machete`
-15. regenerate `apps/test-project` from `templates/app`
-16. assert the generated template keeps the shared schema/state contract
-17. build and verify generated template output
-18. build and verify `apps/marketing` static output, including Pages artifacts
-19. build and verify `apps/game` static output
+11. wasm `cargo check` for browser crates
+12. wasm compile of the browser refresh hydration regression
+13. strict rustdoc build
+14. `cargo deny check`
+15. `cargo machete`
+16. regenerate `apps/test-project` from `templates/app`
+17. assert the generated template keeps the shared schema/state contract
+18. build and verify generated template output
+19. build and verify `apps/marketing`, `apps/game`, `apps/stories`,
+    `/crates/`, and `/crates/ui/` static Pages artifacts
 20. build and verify `apps/stories` static output
 21. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
@@ -144,6 +151,7 @@ committed.
 | `just doctor` | Run the fast local environment preflight. |
 | `just build` | Build static marketing/game output and Pages artifacts. |
 | `just pages` | Build the aggregate GitHub Pages artifact under `target/pages`. |
+| `just ui-book` | Regenerate the UI crate mdBook source from the Rust catalog. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |
 | `just five-phase-pass` | Run the Rust five-phase pass. |

@@ -17,6 +17,7 @@ use anyhow::{Context, Result, bail};
 use base64::Engine as _;
 use command_fds::{CommandFdExt, FdMapping};
 use os_pipe::{PipeReader, PipeWriter};
+use rs_dean_ui::{ComponentDefinition, SHADCN_COMPONENTS, component_implementation};
 use serde_json::{Value, json};
 
 const MARKETING_APP: &str = "apps/marketing";
@@ -24,6 +25,8 @@ const GAME_APP: &str = "apps/game";
 const STORIES_APP: &str = "apps/stories";
 const TEST_PROJECT: &str = "apps/test-project";
 const CUBE_SMOKE_APP: &str = "apps/test-project/cube-smoke";
+const UI_BOOK: &str = "docs/crates/ui";
+const UI_BOOK_GENERATED: &str = "target/generated-ui-book";
 
 fn main() -> Result<()> {
     let mut args = env::args().skip(1);
@@ -37,6 +40,7 @@ fn main() -> Result<()> {
         Some("docs-sweep") => docs_sweep(),
         Some("five-phase-pass") => five_phase_pass(),
         Some("game") => game(),
+        Some("gen-ui-book") => gen_ui_book(),
         Some("install-tailwindcss") => install_tailwindcss(),
         Some("gen-app") => {
             let name = args.next().unwrap_or_else(|| "test-project".to_owned());
@@ -63,6 +67,7 @@ Commands:
   game             run the Bevy game app on :5174
   stories          run the Rust story harness on :6106
   preview          serve the release app on :3100
+  gen-ui-book      regenerate the UI crate mdBook source from the Rust catalog
   build            build static marketing/game output and GitHub Pages artifacts
   pages            build aggregate GitHub Pages artifact in target/pages
   gate             one-pass Rust gate
@@ -135,6 +140,7 @@ fn doctor() -> Result<()> {
     report.command("rustc", ["--version"]);
     report.command("rustup", ["--version"]);
     report.command("trunk", ["--version"]);
+    report.command("mdbook", ["--version"]);
     report.check("tailwindcss", check_tailwindcss_cli());
     report.command("cargo-nextest", ["--version"]);
     report.command("cargo-deny", ["--version"]);
@@ -171,6 +177,8 @@ fn doctor() -> Result<()> {
     for path in [
         ".cargo/config.toml",
         "AGENTS.md",
+        "docs/crates/ui/book.toml",
+        "docs/crates/ui/src/SUMMARY.md",
         "templates/app/Cargo.toml",
         "templates/app/cube-smoke/Cargo.toml",
         "apps/marketing/Trunk.toml",
@@ -404,6 +412,7 @@ fn git_check_ignore(path: &str) -> Result<bool> {
 
 fn gate() -> Result<()> {
     require_tool("trunk")?;
+    require_tool("mdbook")?;
     check_tailwindcss_cli()?;
     require_cargo_subcommand("cargo-nextest")?;
     require_cargo_subcommand("cargo-deny")?;
@@ -415,6 +424,7 @@ fn gate() -> Result<()> {
     check_required_app_persistence()?;
     check_leptos_tailwind_assets()?;
     check_ui_design_token_classes()?;
+    check_ui_book()?;
     run(
         "cargo",
         [
@@ -549,7 +559,10 @@ fn pages() -> Result<()> {
     let base = pages_base_path();
     build_pages_app(MARKETING_APP, target, "marketing", &base)?;
     build_pages_app(GAME_APP, target, "game", &base)?;
+    build_pages_app(STORIES_APP, target, "stories", &base)?;
+    build_ui_book(target)?;
     write_pages_index(target, &base)?;
+    write_crates_index(target, &base)?;
     write_pages_support_files(target, &base)?;
     verify_pages_site(target)
 }
@@ -594,6 +607,306 @@ fn build_pages_app(app: &str, target: &Path, route: &str, base: &str) -> Result<
     verify_trunk_dist(&dist)
 }
 
+fn build_ui_book(target: &Path) -> Result<()> {
+    check_ui_book()?;
+    let destination = env::current_dir()
+        .context("resolve repository root")?
+        .join(target)
+        .join("crates/ui");
+    fs::create_dir_all(&destination)
+        .with_context(|| format!("create {}", destination.display()))?;
+    run_in(
+        UI_BOOK,
+        "mdbook",
+        vec![
+            "build".to_owned(),
+            "--dest-dir".to_owned(),
+            destination.display().to_string(),
+        ],
+    )?;
+    verify_ui_book_dist(&destination)
+}
+
+fn gen_ui_book() -> Result<()> {
+    let root = Path::new(UI_BOOK);
+    if root.exists() {
+        fs::remove_dir_all(root).with_context(|| format!("remove old {}", root.display()))?;
+    }
+    write_ui_book_sources(root)?;
+    println!("generated {}", root.display());
+    Ok(())
+}
+
+fn check_ui_book() -> Result<()> {
+    let expected = Path::new(UI_BOOK_GENERATED);
+    if expected.exists() {
+        fs::remove_dir_all(expected)
+            .with_context(|| format!("remove old {}", expected.display()))?;
+    }
+    write_ui_book_sources(expected)?;
+    compare_generated_tree(expected, Path::new(UI_BOOK))?;
+    check_ui_book_story_anchors()
+}
+
+fn write_ui_book_sources(root: &Path) -> Result<()> {
+    let src = root.join("src");
+    let components = src.join("components");
+    fs::create_dir_all(&components).with_context(|| format!("create {}", components.display()))?;
+    fs::write(root.join("book.toml"), ui_book_toml())
+        .with_context(|| format!("write {}", root.join("book.toml").display()))?;
+    fs::write(src.join("index.md"), ui_book_index())
+        .with_context(|| format!("write {}", src.join("index.md").display()))?;
+    fs::write(src.join("SUMMARY.md"), ui_book_summary())
+        .with_context(|| format!("write {}", src.join("SUMMARY.md").display()))?;
+    for definition in SHADCN_COMPONENTS {
+        fs::write(
+            components.join(format!("{}.md", definition.slug)),
+            ui_component_book_page(definition),
+        )
+        .with_context(|| {
+            format!(
+                "write {}",
+                components.join(format!("{}.md", definition.slug)).display()
+            )
+        })?;
+    }
+    Ok(())
+}
+
+fn ui_book_toml() -> String {
+    r#"[book]
+title = "rs-dean-ui"
+authors = ["rs-dean"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../../../target/mdbook/ui"
+create-missing = false
+"#
+    .to_owned()
+}
+
+fn ui_book_index() -> String {
+    format!(
+        r#"# rs-dean-ui
+
+`rs-dean-ui` owns the shared design tokens, semantic themes, shadcn-inspired
+component catalog, Leptos renderers, and Bevy primitive adapters.
+
+This book is generated from the Rust catalog. The component pages link back to
+the live stories harness, so each page shows the same pre-filled fixtures used
+by local component development.
+
+## Pages Structure
+
+- [Marketing app](../../marketing/)
+- [Game app](../../game/)
+- [Stories app](../../stories/)
+- [Crate index](../)
+
+## Component Coverage
+
+- Components documented: {}
+- Source of truth: `crates/ui/src/catalog.rs`
+- Implementation contracts: `crates/ui/src/kit.rs`
+- Live fixtures: `apps/stories/src/main.rs`
+
+Run `cargo xtask gen-ui-book` after adding, removing, or renaming a component.
+`cargo xtask gate` verifies this book stays in sync with the catalog and stories.
+"#,
+        SHADCN_COMPONENTS.len()
+    )
+}
+
+fn ui_book_summary() -> String {
+    let mut summary = String::from("# Summary\n\n");
+    summary.push_str("- [Overview](index.md)\n\n");
+    summary.push_str("# Components\n\n");
+    for definition in SHADCN_COMPONENTS {
+        summary.push_str(&format!(
+            "- [{}](components/{}.md)\n",
+            definition.name, definition.slug
+        ));
+    }
+    summary
+}
+
+fn ui_component_book_page(definition: ComponentDefinition) -> String {
+    let implementation = component_implementation(definition.id);
+    format!(
+        r#"# {name}
+
+{summary}
+
+## Live Fixtures
+
+The embedded stories surface renders pre-filled fixtures for this component's
+variants, states, themed rendering, and validation paths.
+
+<iframe title="{name} live story fixtures" src="../../../stories/#ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+
+Open the [full stories page](../../../stories/#ui-{slug}) when a wider canvas is
+needed.
+
+## Contract
+
+| Field | Value |
+| --- | --- |
+| Category | {category} |
+| Framework | {framework} |
+| State | {state} |
+| Render contract | {render_contract} |
+| State contract | {state_contract} |
+| Layout contract | {layout_contract} |
+
+## Variants
+
+{variants}
+## States
+
+{states}
+## Anatomy
+
+{anatomy}
+## Accessibility
+
+{accessibility}
+## Consumer Implementation
+
+{consumer_contract}
+
+## End User Outcome
+
+{end_user_outcome}
+"#,
+        name = definition.name,
+        slug = definition.slug,
+        summary = definition.summary,
+        category = definition.category.label(),
+        framework = definition.framework.label(),
+        state = definition.state.label(),
+        render_contract = implementation.render.label(),
+        state_contract = implementation.state.label(),
+        layout_contract = implementation.layout.label(),
+        variants = markdown_list(implementation.variants),
+        states = markdown_list(implementation.states),
+        anatomy = markdown_list(implementation.anatomy),
+        accessibility = markdown_list(implementation.accessibility),
+        consumer_contract = implementation.consumer_contract,
+        end_user_outcome = implementation.end_user_outcome,
+    )
+}
+
+fn markdown_list(items: &[&str]) -> String {
+    let mut list = String::new();
+    for item in items {
+        list.push_str("- ");
+        list.push_str(item);
+        list.push('\n');
+    }
+    list
+}
+
+fn compare_generated_tree(expected: &Path, actual: &Path) -> Result<()> {
+    if !actual.exists() {
+        bail!(
+            "{} is missing; run `cargo xtask gen-ui-book`",
+            actual.display()
+        );
+    }
+    let expected_files = generated_source_files(expected)?;
+    let actual_files = generated_source_files(actual)?;
+    if expected_files != actual_files {
+        bail!(
+            "{} is out of sync with the UI catalog; run `cargo xtask gen-ui-book`",
+            actual.display()
+        );
+    }
+    for relative in expected_files {
+        let expected_contents =
+            fs::read_to_string(expected.join(&relative)).with_context(|| {
+                format!(
+                    "read generated expected {}",
+                    expected.join(&relative).display()
+                )
+            })?;
+        let actual_contents = fs::read_to_string(actual.join(&relative))
+            .with_context(|| format!("read {}", actual.join(&relative).display()))?;
+        if expected_contents != actual_contents {
+            bail!(
+                "{} is out of sync with the UI catalog; run `cargo xtask gen-ui-book`",
+                actual.join(relative).display()
+            );
+        }
+    }
+    Ok(())
+}
+
+fn generated_source_files(root: &Path) -> Result<Vec<PathBuf>> {
+    let mut files = Vec::new();
+    collect_generated_source_files(root, root, &mut files)?;
+    files.sort();
+    Ok(files)
+}
+
+fn collect_generated_source_files(
+    root: &Path,
+    current: &Path,
+    files: &mut Vec<PathBuf>,
+) -> Result<()> {
+    for entry in fs::read_dir(current).with_context(|| format!("read {}", current.display()))? {
+        let entry = entry?;
+        let path = entry.path();
+        if entry.file_type()?.is_dir() {
+            collect_generated_source_files(root, &path, files)?;
+            continue;
+        }
+        let extension = path.extension().and_then(OsStr::to_str);
+        if !matches!(extension, Some("md" | "toml")) {
+            continue;
+        }
+        files.push(
+            path.strip_prefix(root)
+                .with_context(|| format!("strip {} from {}", root.display(), path.display()))?
+                .to_owned(),
+        );
+    }
+    Ok(())
+}
+
+fn check_ui_book_story_anchors() -> Result<()> {
+    let stories =
+        fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
+    for definition in SHADCN_COMPONENTS {
+        let story_id = format!("ui-{}", definition.slug);
+        let id = format!("id=\"{story_id}\"");
+        let data_story_id = format!("data-story-id=\"{story_id}\"");
+        if !stories.contains(&id) {
+            bail!("stories missing `{id}` for {}", definition.name);
+        }
+        if !stories.contains(&data_story_id) {
+            bail!("stories missing `{data_story_id}` for {}", definition.name);
+        }
+    }
+    Ok(())
+}
+
+fn verify_ui_book_dist(dist: &Path) -> Result<()> {
+    if !dist.join("index.html").exists() {
+        bail!("missing {}", dist.join("index.html").display());
+    }
+    for definition in SHADCN_COMPONENTS {
+        let path = dist
+            .join("components")
+            .join(format!("{}.html", definition.slug));
+        if !path.exists() {
+            bail!("missing UI book component page {}", path.display());
+        }
+    }
+    Ok(())
+}
+
 fn write_pages_index(target: &Path, base: &str) -> Result<()> {
     fs::write(
         target.join("index.html"),
@@ -607,11 +920,23 @@ fn write_pages_index(target: &Path, base: &str) -> Result<()> {
   </head>
   <body>
     <main>
-      <h1>Hello world</h1>
-      <ul>
-        <li><a href="{base}marketing/">Marketing</a></li>
-        <li><a href="{base}game/">Game</a></li>
-      </ul>
+      <h1>rs-dean Pages</h1>
+      <p>Static app binaries and crate books for the workspace.</p>
+      <section>
+        <h2>Binaries</h2>
+        <ul>
+          <li><a href="{base}marketing/">Marketing</a></li>
+          <li><a href="{base}game/">Game</a></li>
+          <li><a href="{base}stories/">Stories</a></li>
+        </ul>
+      </section>
+      <section>
+        <h2>Crates</h2>
+        <ul>
+          <li><a href="{base}crates/">Crate docs</a></li>
+          <li><a href="{base}crates/ui/">rs-dean-ui book</a></li>
+        </ul>
+      </section>
     </main>
   </body>
 </html>
@@ -619,6 +944,43 @@ fn write_pages_index(target: &Path, base: &str) -> Result<()> {
         ),
     )
     .with_context(|| format!("write {}", target.join("index.html").display()))
+}
+
+fn write_crates_index(target: &Path, base: &str) -> Result<()> {
+    let crates = target.join("crates");
+    fs::create_dir_all(&crates).with_context(|| format!("create {}", crates.display()))?;
+    fs::write(
+        crates.join("index.html"),
+        format!(
+            r#"<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rs-dean crates</title>
+  </head>
+  <body>
+    <main>
+      <h1>rs-dean crates</h1>
+      <p>Workspace crates and crate-level books.</p>
+      <ul>
+        <li><a href="{base}crates/ui/">rs-dean-ui</a></li>
+        <li>rs-dean-state</li>
+        <li>rs-dean-idb</li>
+        <li>rs-dean-schema</li>
+        <li>rs-dean-srs</li>
+        <li>rs-dean-curriculum</li>
+        <li>rs-dean-bevy-scenes</li>
+        <li>rs-dean-cards</li>
+      </ul>
+      <p><a href="{base}">Back to rs-dean Pages</a></p>
+    </main>
+  </body>
+</html>
+"#
+        ),
+    )
+    .with_context(|| format!("write {}", crates.join("index.html").display()))
 }
 
 fn write_pages_support_files(target: &Path, base: &str) -> Result<()> {
@@ -634,6 +996,9 @@ fn write_pages_support_files(target: &Path, base: &str) -> Result<()> {
   <url><loc>{base}</loc></url>
   <url><loc>{base}marketing/</loc></url>
   <url><loc>{base}game/</loc></url>
+  <url><loc>{base}stories/</loc></url>
+  <url><loc>{base}crates/</loc></url>
+  <url><loc>{base}crates/ui/</loc></url>
 </urlset>
 "#
         ),
@@ -649,7 +1014,9 @@ fn verify_pages_site(target: &Path) -> Result<()> {
         }
     }
     verify_trunk_dist(&target.join("marketing"))?;
-    verify_trunk_dist(&target.join("game"))
+    verify_trunk_dist(&target.join("game"))?;
+    verify_trunk_dist(&target.join("stories"))?;
+    verify_ui_book_dist(&target.join("crates/ui"))
 }
 
 fn cube_smoke() -> Result<()> {

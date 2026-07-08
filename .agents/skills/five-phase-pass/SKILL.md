@@ -43,7 +43,8 @@ story, template, and shared component surfaces.
 The shadcn-inspired catalog lives in `crates/ui`. Keep its Rust definitions,
 implementation recipes, literal widget constructors, named token-only Leptos
 components, Bevy primitive adapters, `apps/stories` gallery, `_issues/`
-component task files, and sweep log in sync.
+component task files, generated `docs/crates/ui` mdBook pages, and sweep log in
+sync. Run `cargo xtask gen-ui-book` after catalog or story fixture changes.
 
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
@@ -102,6 +103,8 @@ remove the old wording from docs/skills.
 - The shadcn-inspired catalog has one `_issues/` task file per component, and
   every catalog component can build a shared implementation recipe, literal
   widget constructor, named Leptos component, and Bevy primitive spec.
+- `docs/crates/ui` has one generated mdBook page per catalog component, and
+  each page embeds the matching `/stories/#ui-{component}` live fixture.
 - Shared UI themes switch through Tailwind tokens in Leptos and through the
   same Rust palette in Bevy without adding Leptos to `rs-dean-game`.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.

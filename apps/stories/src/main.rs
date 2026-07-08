@@ -83,13 +83,13 @@ fn Stories() -> impl IntoView {
                     <ThemeCycleButton />
                 </header>
                 <div class=STORIES_GRID>
-                    <section data-story-id="ui-health-card" class=STORY_FRAME>
+                    <section id="ui-health-card" data-story-id="ui-health-card" class=STORY_FRAME>
                         <HealthCard
                             title="HealthCard"
                             body="A minimal shared component rendered through the same Leptos code path as the app."
                         />
                     </section>
-                    <section data-story-id="ui-accordion" class=STORY_SECTION>
+                    <section id="ui-accordion" data-story-id="ui-accordion" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Accordion"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -104,7 +104,7 @@ fn Stories() -> impl IntoView {
                             />
                         </div>
                     </section>
-                    <section data-story-id="ui-alert" class=STORY_SECTION>
+                    <section id="ui-alert" data-story-id="ui-alert" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Alert"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -122,7 +122,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-alert-dialog" class=STORY_SECTION>
+                    <section id="ui-alert-dialog" data-story-id="ui-alert-dialog" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Alert Dialog"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -140,7 +140,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-aspect-ratio" class=STORY_SECTION>
+                    <section id="ui-aspect-ratio" data-story-id="ui-aspect-ratio" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Aspect Ratio"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -158,7 +158,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-attachment" class=STORY_SECTION>
+                    <section id="ui-attachment" data-story-id="ui-attachment" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Attachment"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -176,7 +176,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-avatar" class=STORY_SECTION>
+                    <section id="ui-avatar" data-story-id="ui-avatar" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Avatar"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -194,7 +194,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-badge" class=STORY_SECTION>
+                    <section id="ui-badge" data-story-id="ui-badge" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Badge"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -212,7 +212,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-breadcrumb" class=STORY_SECTION>
+                    <section id="ui-breadcrumb" data-story-id="ui-breadcrumb" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Breadcrumb"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -230,7 +230,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-bubble" class=STORY_SECTION>
+                    <section id="ui-bubble" data-story-id="ui-bubble" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Bubble"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -248,7 +248,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-button" class=STORY_SECTION>
+                    <section id="ui-button" data-story-id="ui-button" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Button"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -267,7 +267,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-button-group" class=STORY_SECTION>
+                    <section id="ui-button-group" data-story-id="ui-button-group" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Button Group"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -285,7 +285,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-calendar" class=STORY_SECTION>
+                    <section id="ui-calendar" data-story-id="ui-calendar" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Calendar"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -303,7 +303,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-card" class=STORY_SECTION>
+                    <section id="ui-card" data-story-id="ui-card" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Card"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -321,7 +321,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-carousel" class=STORY_SECTION>
+                    <section id="ui-carousel" data-story-id="ui-carousel" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Carousel"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -339,7 +339,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-chart" class=STORY_SECTION>
+                    <section id="ui-chart" data-story-id="ui-chart" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Chart"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -357,7 +357,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-checkbox" class=STORY_SECTION>
+                    <section id="ui-checkbox" data-story-id="ui-checkbox" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Checkbox"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -375,7 +375,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-collapsible" class=STORY_SECTION>
+                    <section id="ui-collapsible" data-story-id="ui-collapsible" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Collapsible"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -393,7 +393,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-combobox" class=STORY_SECTION>
+                    <section id="ui-combobox" data-story-id="ui-combobox" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Combobox"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -411,7 +411,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-command" class=STORY_SECTION>
+                    <section id="ui-command" data-story-id="ui-command" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Command"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -429,7 +429,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-context-menu" class=STORY_SECTION>
+                    <section id="ui-context-menu" data-story-id="ui-context-menu" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Context Menu"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -447,7 +447,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-data-table" class=STORY_SECTION>
+                    <section id="ui-data-table" data-story-id="ui-data-table" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Data Table"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -465,7 +465,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-date-picker" class=STORY_SECTION>
+                    <section id="ui-date-picker" data-story-id="ui-date-picker" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Date Picker"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -483,7 +483,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-dialog" class=STORY_SECTION>
+                    <section id="ui-dialog" data-story-id="ui-dialog" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Dialog"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -501,7 +501,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-direction" class=STORY_SECTION>
+                    <section id="ui-direction" data-story-id="ui-direction" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Direction"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -520,7 +520,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-drawer" class=STORY_SECTION>
+                    <section id="ui-drawer" data-story-id="ui-drawer" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Drawer"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -538,7 +538,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-dropdown-menu" class=STORY_SECTION>
+                    <section id="ui-dropdown-menu" data-story-id="ui-dropdown-menu" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Dropdown Menu"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -556,7 +556,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-empty" class=STORY_SECTION>
+                    <section id="ui-empty" data-story-id="ui-empty" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Empty"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -574,7 +574,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-field" class=STORY_SECTION>
+                    <section id="ui-field" data-story-id="ui-field" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Field"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -592,7 +592,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-hover-card" class=STORY_SECTION>
+                    <section id="ui-hover-card" data-story-id="ui-hover-card" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Hover Card"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -610,7 +610,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-input" class=STORY_SECTION>
+                    <section id="ui-input" data-story-id="ui-input" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Input"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -628,7 +628,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-input-group" class=STORY_SECTION>
+                    <section id="ui-input-group" data-story-id="ui-input-group" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Input Group"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -646,7 +646,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-input-otp" class=STORY_SECTION>
+                    <section id="ui-input-otp" data-story-id="ui-input-otp" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Input OTP"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -664,7 +664,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-item" class=STORY_SECTION>
+                    <section id="ui-item" data-story-id="ui-item" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Item"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -682,7 +682,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-kbd" class=STORY_SECTION>
+                    <section id="ui-kbd" data-story-id="ui-kbd" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Kbd"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -700,7 +700,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-label" class=STORY_SECTION>
+                    <section id="ui-label" data-story-id="ui-label" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Label"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -718,7 +718,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-marker" class=STORY_SECTION>
+                    <section id="ui-marker" data-story-id="ui-marker" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Marker"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -736,7 +736,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-menubar" class=STORY_SECTION>
+                    <section id="ui-menubar" data-story-id="ui-menubar" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Menubar"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -754,7 +754,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-message" class=STORY_SECTION>
+                    <section id="ui-message" data-story-id="ui-message" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Message"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -772,7 +772,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-message-scroller" class=STORY_SECTION>
+                    <section id="ui-message-scroller" data-story-id="ui-message-scroller" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Message Scroller"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -790,7 +790,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-native-select" class=STORY_SECTION>
+                    <section id="ui-native-select" data-story-id="ui-native-select" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Native Select"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -808,7 +808,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-navigation-menu" class=STORY_SECTION>
+                    <section id="ui-navigation-menu" data-story-id="ui-navigation-menu" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Navigation Menu"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -826,7 +826,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-pagination" class=STORY_SECTION>
+                    <section id="ui-pagination" data-story-id="ui-pagination" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Pagination"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -844,7 +844,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-popover" class=STORY_SECTION>
+                    <section id="ui-popover" data-story-id="ui-popover" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Popover"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -862,7 +862,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-progress" class=STORY_SECTION>
+                    <section id="ui-progress" data-story-id="ui-progress" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Progress"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -881,7 +881,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-radio-group" class=STORY_SECTION>
+                    <section id="ui-radio-group" data-story-id="ui-radio-group" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Radio Group"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -899,7 +899,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-resizable" class=STORY_SECTION>
+                    <section id="ui-resizable" data-story-id="ui-resizable" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Resizable"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -918,7 +918,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-scroll-area" class=STORY_SECTION>
+                    <section id="ui-scroll-area" data-story-id="ui-scroll-area" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Scroll Area"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -937,7 +937,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-select" class=STORY_SECTION>
+                    <section id="ui-select" data-story-id="ui-select" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Select"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -955,7 +955,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-separator" class=STORY_SECTION>
+                    <section id="ui-separator" data-story-id="ui-separator" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Separator"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -974,7 +974,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-sheet" class=STORY_SECTION>
+                    <section id="ui-sheet" data-story-id="ui-sheet" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Sheet"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -993,7 +993,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-sidebar" class=STORY_SECTION>
+                    <section id="ui-sidebar" data-story-id="ui-sidebar" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Sidebar"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1012,7 +1012,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-skeleton" class=STORY_SECTION>
+                    <section id="ui-skeleton" data-story-id="ui-skeleton" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Skeleton"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1031,7 +1031,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-slider" class=STORY_SECTION>
+                    <section id="ui-slider" data-story-id="ui-slider" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Slider"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1050,7 +1050,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-sonner" class=STORY_SECTION>
+                    <section id="ui-sonner" data-story-id="ui-sonner" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Sonner"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1069,7 +1069,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-spinner" class=STORY_SECTION>
+                    <section id="ui-spinner" data-story-id="ui-spinner" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Spinner"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1088,7 +1088,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-switch" class=STORY_SECTION>
+                    <section id="ui-switch" data-story-id="ui-switch" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Switch"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1107,7 +1107,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-toggle" class=STORY_SECTION>
+                    <section id="ui-toggle" data-story-id="ui-toggle" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Toggle"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1126,7 +1126,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-toggle-group" class=STORY_SECTION>
+                    <section id="ui-toggle-group" data-story-id="ui-toggle-group" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Toggle Group"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1146,7 +1146,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-tooltip" class=STORY_SECTION>
+                    <section id="ui-tooltip" data-story-id="ui-tooltip" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Tooltip"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1166,7 +1166,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-table" class=STORY_SECTION>
+                    <section id="ui-table" data-story-id="ui-table" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Table"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1185,7 +1185,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-tabs" class=STORY_SECTION>
+                    <section id="ui-tabs" data-story-id="ui-tabs" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Tabs"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1204,7 +1204,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-textarea" class=STORY_SECTION>
+                    <section id="ui-textarea" data-story-id="ui-textarea" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Textarea"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1223,7 +1223,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-toast" class=STORY_SECTION>
+                    <section id="ui-toast" data-story-id="ui-toast" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Toast"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1242,7 +1242,7 @@ fn Stories() -> impl IntoView {
                             </ThemeScope>
                         </div>
                     </section>
-                    <section data-story-id="ui-typography" class=STORY_SECTION>
+                    <section id="ui-typography" data-story-id="ui-typography" class=STORY_SECTION>
                         <header class=STORY_SECTION_HEADER>
                             <h2 class=STORY_SECTION_TITLE>"Typography"</h2>
                             <p class=STORY_SECTION_BODY>
@@ -1269,7 +1269,7 @@ fn Stories() -> impl IntoView {
                         </header>
                         <ShadcnComponentGallery />
                     </section>
-                    <section data-story-id="ui-theme-gallery" class=THEME_GALLERY>
+                    <section id="ui-theme-gallery" data-story-id="ui-theme-gallery" class=THEME_GALLERY>
                         {ThemeId::ALL.into_iter().map(theme_card).collect_view()}
                     </section>
                 </div>

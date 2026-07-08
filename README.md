@@ -70,6 +70,9 @@ recipe, a literal Rust widget constructor, a named token-only Leptos component,
 and Bevy primitive derivation from the same widget slots for scene consumers.
 `_issues/` mirrors the catalog with one technical-program-management task per
 component plus a sweep log for the repeated first-to-current audit.
+`cargo xtask gen-ui-book` regenerates the UI crate mdBook from that Rust
+catalog. The book has one page per component and embeds the matching live story
+fixture so variant and state samples stay tied to the component harness.
 
 ## Doctor
 
@@ -106,10 +109,13 @@ confirmed.
 
 ## GitHub Pages
 
-`cargo xtask pages` builds an aggregate static artifact under `target/pages`
-with a root hello-world index, `/marketing/` for the Leptos marketing app, and
-`/game/` for the Bevy game app. The deploy workflow sets
-`RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits project-page-safe asset URLs.
+`cargo xtask pages` builds an aggregate static artifact under `target/pages`.
+The root index links binaries at `/marketing/`, `/game/`, and `/stories/`.
+It also links `/crates/`, the workspace crate index. The crate index lists each
+workspace crate and links `rs-dean-ui` to its book at `/crates/ui/`. The UI
+crate book embeds `/stories/#ui-{component}` for live component fixtures. The
+deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits
+project-page-safe asset URLs.
 
 ## Skill Docs
 

@@ -42,7 +42,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-nextest,cargo-deny,cargo-machete,trunk
+          tool: cargo-nextest,cargo-deny,cargo-machete,trunk,mdbook
 
       - run: cargo xtask install-tailwindcss
 
