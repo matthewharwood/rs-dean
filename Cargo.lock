@@ -6225,6 +6225,7 @@ dependencies = [
  "command-fds",
  "os_pipe",
  "png",
+ "rs-dean-ui",
  "serde_json",
 ]
 

@@ -39,6 +39,9 @@ build:
 pages:
     cargo xtask pages
 
+ui-book:
+    cargo xtask gen-ui-book
+
 gate:
     cargo xtask gate
 
@@ -55,5 +58,6 @@ bootstrap:
     cargo install --locked cargo-nextest
     cargo install --locked cargo-deny
     cargo install --locked cargo-machete
+    cargo install --locked mdbook
     cargo install --locked trunk
     cargo xtask install-tailwindcss
