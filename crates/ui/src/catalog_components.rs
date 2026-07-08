@@ -394,137 +394,6 @@ fn component_slots_match_part<P: CatalogComponentPart>(
     Ok(())
 }
 
-macro_rules! define_catalog_component {
-    (
-        $module:ident,
-        $id:ident,
-        $model:ident,
-        $part:ident,
-        $render_node:ident,
-        $state:ident,
-        $intent:ident,
-        $change:ident,
-        $validate_fn:ident,
-        $render_nodes_fn:ident,
-        $default_fn:ident,
-        [$( $variant:ident => $label:literal ),+ $(,)?]
-    ) => {
-        pub mod $module {
-            use super::*;
-
-            #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
-            #[serde(rename_all = "kebab-case")]
-            pub enum $part {
-                $( $variant, )+
-            }
-
-            impl $part {
-                pub const fn label(self) -> &'static str {
-                    match self {
-                        $( Self::$variant => $label, )+
-                    }
-                }
-            }
-
-            impl CatalogComponentPart for $part {
-                const ID: UiComponentId = UiComponentId::$id;
-                const ALL: &'static [Self] = &[
-                    $( Self::$variant, )+
-                ];
-
-                fn label(self) -> &'static str {
-                    self.label()
-                }
-
-                fn from_label(label: &str) -> Option<Self> {
-                    match label {
-                        $( $label => Some(Self::$variant), )+
-                        _ => None,
-                    }
-                }
-            }
-
-            pub type $model = CatalogComponentModel<$part>;
-            pub type $render_node = CatalogComponentRenderNode<$part>;
-            pub type $state = CatalogComponentState<$part>;
-            pub type $intent = CatalogComponentIntent<$part>;
-            pub type $change = CatalogComponentChange<$part>;
-
-            pub fn $default_fn() -> $model {
-                default_catalog_component_model::<$part>()
-            }
-
-            pub fn $validate_fn(model: &$model) -> Result<(), garde::Report> {
-                validate_catalog_component_model(model)
-            }
-
-            pub fn $render_nodes_fn(
-                model: &$model,
-            ) -> Result<Vec<$render_node>, garde::Report> {
-                catalog_component_render_nodes(model)
-            }
-
-            #[cfg(test)]
-            mod tests {
-                use super::*;
-
-                #[test]
-                fn default_model_validates_with_garde() {
-                    assert!($validate_fn(&$default_fn()).is_ok());
-                }
-
-                #[test]
-                fn render_nodes_cover_shadcn_anatomy() {
-                    let model = $default_fn();
-                    let nodes = $render_nodes_fn(&model).expect("default model should validate");
-                    assert_eq!(nodes.first().map(|node| node.part), Some($part::ALL[0]));
-                    for part in $part::ALL {
-                        assert!(
-                            nodes.iter().any(|node| node.part == *part),
-                            "missing {}",
-                            part.label()
-                        );
-                    }
-                }
-
-                #[test]
-                fn garde_rejects_unknown_parts() {
-                    let mut model = $default_fn();
-                    model.slots[0].part = "UnknownPart".to_owned();
-                    assert!($validate_fn(&model).is_err());
-                }
-            }
-        }
-
-        pub use $module::{
-            $change, $default_fn, $intent, $model, $part, $render_node, $render_nodes_fn, $state,
-            $validate_fn,
-        };
-    };
-}
-
-define_catalog_component!(
-    typography,
-    Typography,
-    TypographyModel,
-    TypographyPart,
-    TypographyRenderNode,
-    TypographyState,
-    TypographyIntent,
-    TypographyChange,
-    validate_typography_model,
-    typography_render_nodes,
-    default_typography_model,
-    [
-        Root => "Typography",
-        H1 => "TypographyH1",
-        H2 => "TypographyH2",
-        P => "TypographyP",
-        List => "TypographyList",
-        Blockquote => "TypographyBlockquote",
-    ]
-);
-
 pub fn catalog_component_any_render_nodes_for_component(
     id: UiComponentId,
 ) -> Option<Vec<CatalogAnyRenderNode>> {
@@ -591,21 +460,9 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Toast
         | UiComponentId::Toggle
         | UiComponentId::ToggleGroup
-        | UiComponentId::Tooltip => None,
-        UiComponentId::Typography => Some(any_nodes(typography_render_nodes(
-            &default_typography_model(),
-        ))),
+        | UiComponentId::Tooltip
+        | UiComponentId::Typography => None,
     }
-}
-
-fn any_nodes<P: CatalogComponentPart>(
-    result: Result<Vec<CatalogComponentRenderNode<P>>, garde::Report>,
-) -> Vec<CatalogAnyRenderNode> {
-    result
-        .expect("invariant: generated default catalog model validates")
-        .into_iter()
-        .map(CatalogAnyRenderNode::from)
-        .collect()
 }
 
 #[cfg(test)]
@@ -613,101 +470,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn concrete_catalog_covers_all_non_bespoke_components() {
+    fn all_catalog_components_are_bespoke() {
         for id in UiComponentId::ALL {
             let nodes = catalog_component_any_render_nodes_for_component(id);
-            if matches!(
-                id,
-                UiComponentId::Accordion
-                    | UiComponentId::Alert
-                    | UiComponentId::AlertDialog
-                    | UiComponentId::AspectRatio
-                    | UiComponentId::Attachment
-                    | UiComponentId::Avatar
-                    | UiComponentId::Badge
-                    | UiComponentId::Breadcrumb
-                    | UiComponentId::Bubble
-                    | UiComponentId::Button
-                    | UiComponentId::ButtonGroup
-                    | UiComponentId::Calendar
-                    | UiComponentId::Card
-                    | UiComponentId::Carousel
-                    | UiComponentId::Chart
-                    | UiComponentId::Checkbox
-                    | UiComponentId::Collapsible
-                    | UiComponentId::Combobox
-                    | UiComponentId::Command
-                    | UiComponentId::ContextMenu
-                    | UiComponentId::DataTable
-                    | UiComponentId::DatePicker
-                    | UiComponentId::Dialog
-                    | UiComponentId::Direction
-                    | UiComponentId::Drawer
-                    | UiComponentId::DropdownMenu
-                    | UiComponentId::Empty
-                    | UiComponentId::Field
-                    | UiComponentId::HoverCard
-                    | UiComponentId::Input
-                    | UiComponentId::InputGroup
-                    | UiComponentId::InputOtp
-                    | UiComponentId::Item
-                    | UiComponentId::Kbd
-                    | UiComponentId::Label
-                    | UiComponentId::Marker
-                    | UiComponentId::Menubar
-                    | UiComponentId::Message
-                    | UiComponentId::MessageScroller
-                    | UiComponentId::NativeSelect
-                    | UiComponentId::NavigationMenu
-                    | UiComponentId::Pagination
-                    | UiComponentId::Popover
-                    | UiComponentId::Progress
-                    | UiComponentId::RadioGroup
-                    | UiComponentId::Resizable
-                    | UiComponentId::ScrollArea
-                    | UiComponentId::Select
-                    | UiComponentId::Separator
-                    | UiComponentId::Sheet
-                    | UiComponentId::Sidebar
-                    | UiComponentId::Skeleton
-                    | UiComponentId::Slider
-                    | UiComponentId::Sonner
-                    | UiComponentId::Spinner
-                    | UiComponentId::Switch
-                    | UiComponentId::Table
-                    | UiComponentId::Tabs
-                    | UiComponentId::Textarea
-                    | UiComponentId::Toast
-                    | UiComponentId::Toggle
-                    | UiComponentId::ToggleGroup
-                    | UiComponentId::Tooltip
-            ) {
-                assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
-            } else {
-                let nodes = nodes.unwrap_or_else(|| panic!("{id:?} should have concrete nodes"));
-                for part in id.anatomy_parts() {
-                    assert!(
-                        nodes.iter().any(|node| node.part == *part),
-                        "{id:?} is missing {part}",
-                    );
-                }
-            }
+            assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
         }
-    }
-
-    #[test]
-    fn shared_state_toggles_parts_locally() {
-        let mut state = default_typography_model().state();
-        assert!(!state.is_active(TypographyPart::Root));
-        assert_eq!(
-            state.apply(TypographyIntent::Toggle(TypographyPart::Root)),
-            TypographyChange::Opened(TypographyPart::Root)
-        );
-        assert!(state.is_active(TypographyPart::Root));
-        assert_eq!(
-            state.apply(TypographyIntent::Toggle(TypographyPart::Root)),
-            TypographyChange::Closed(TypographyPart::Root)
-        );
-        assert!(!state.is_active(TypographyPart::Root));
     }
 }

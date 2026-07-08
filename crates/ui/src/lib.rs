@@ -67,6 +67,7 @@ pub mod toast;
 pub mod toggle;
 pub mod toggle_group;
 pub mod tooltip;
+pub mod typography;
 pub mod widgets;
 
 #[cfg(feature = "leptos")]
@@ -395,6 +396,12 @@ pub use tooltip::{
     TooltipChange, TooltipDensity, TooltipIntent, TooltipModel, TooltipPart, TooltipPlacement,
     TooltipRenderNode, TooltipState, default_tooltip_model, tooltip_dom_id, tooltip_render_nodes,
     validate_tooltip_model,
+};
+pub use typography::{
+    TypographyChange, TypographyDensity, TypographyIntent, TypographyListItem, TypographyModel,
+    TypographyPart, TypographyRenderNode, TypographyState, default_typography_items,
+    default_typography_model, typography_dom_id, typography_render_nodes,
+    validate_typography_model,
 };
 pub use widgets::{
     UI_WIDGET_CONSTRUCTOR_COUNT, UI_WIDGET_CONSTRUCTORS, UiWidget, UiWidgetConstructor,

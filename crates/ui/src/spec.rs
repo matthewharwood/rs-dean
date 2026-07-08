@@ -298,8 +298,8 @@ pub mod bevy_adapter {
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
         SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
         Theme, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart, TogglePressed,
-        TooltipPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        TooltipPart, TypographyPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -326,11 +326,11 @@ pub mod bevy_adapter {
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
         default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
         default_toast_model, default_toggle_group_model, default_toggle_model,
-        default_tooltip_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_tooltip_model, default_typography_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
@@ -338,6 +338,7 @@ pub mod bevy_adapter {
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
         switch_render_nodes, table_render_nodes, tabs_render_nodes, textarea_render_nodes,
         toast_render_nodes, toggle_group_render_nodes, toggle_render_nodes, tooltip_render_nodes,
+        typography_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -628,6 +629,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Tooltip {
             return bevy_primitives_for_tooltip(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Typography {
+            return bevy_primitives_for_typography(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::Table {
             return bevy_primitives_for_table(theme, implementation.render, implementation.state);
@@ -1980,6 +1988,37 @@ pub mod bevy_adapter {
                     state,
                     intent: tooltip_intent_for_part(node.part, node.actionable),
                     selected: node.open || node.active || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_typography(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_typography_model();
+        let typography_state = model.state();
+        typography_render_nodes(&model, &typography_state)
+            .into_iter()
+            .map(|node| {
+                let role = typography_role_for_part(node.part);
+                let tone = typography_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: typography_primitive_part(&node),
+                    kind: typography_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: typography_size_for_part(node.part, node.density, node.index.is_some()),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: typography_intent_for_part(node.part, node.disabled),
+                    selected: node.active || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -5769,6 +5808,87 @@ pub mod bevy_adapter {
             TooltipPart::Trigger => trigger,
             TooltipPart::Content => Vec2::new(scale::space::XL3, scale::space::S),
             TooltipPart::Arrow => Vec2::new(scale::space::XS, scale::space::XS),
+        }
+    }
+
+    fn typography_primitive_part(node: &crate::TypographyRenderNode) -> String {
+        match (node.part, node.index) {
+            (TypographyPart::List, Some(index)) => format!("{}:{index}", node.part.label()),
+            _ => node.part.label().to_owned(),
+        }
+    }
+
+    const fn typography_kind_for_part(part: TypographyPart) -> UiWidgetSlotKind {
+        match part {
+            TypographyPart::Root => UiWidgetSlotKind::Section,
+            TypographyPart::H1 => UiWidgetSlotKind::Title,
+            TypographyPart::H2 => UiWidgetSlotKind::Header,
+            TypographyPart::P | TypographyPart::Blockquote => UiWidgetSlotKind::Text,
+            TypographyPart::List => UiWidgetSlotKind::List,
+        }
+    }
+
+    const fn typography_role_for_part(part: TypographyPart) -> UiBlockRole {
+        match part {
+            TypographyPart::Root => UiBlockRole::Root,
+            TypographyPart::H1 | TypographyPart::H2 => UiBlockRole::Header,
+            TypographyPart::P | TypographyPart::List | TypographyPart::Blockquote => {
+                UiBlockRole::Text
+            }
+        }
+    }
+
+    fn typography_tone_for_node(node: &crate::TypographyRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active {
+            return UiBlockTone::Brand;
+        }
+        match node.part {
+            TypographyPart::H1 | TypographyPart::H2 | TypographyPart::Blockquote => {
+                UiBlockTone::Surface
+            }
+            TypographyPart::Root | TypographyPart::P | TypographyPart::List => UiBlockTone::Muted,
+        }
+    }
+
+    const fn typography_intent_for_part(part: TypographyPart, disabled: bool) -> UiWidgetIntent {
+        match (part, disabled) {
+            (_, true) => UiWidgetIntent::None,
+            (TypographyPart::Root | TypographyPart::H1 | TypographyPart::H2, false) => {
+                UiWidgetIntent::Select
+            }
+            (TypographyPart::P | TypographyPart::List | TypographyPart::Blockquote, false) => {
+                UiWidgetIntent::Select
+            }
+        }
+    }
+
+    fn typography_size_for_part(
+        part: TypographyPart,
+        density: crate::TypographyDensity,
+        list_item: bool,
+    ) -> Vec2 {
+        let dense = matches!(density, crate::TypographyDensity::Dense);
+        match (part, dense, list_item) {
+            (TypographyPart::Root, true, _) => Vec2::new(scale::space::XL3, scale::space::XL2),
+            (TypographyPart::Root, false, _) => Vec2::new(scale::space::XL4, scale::space::XL3),
+            (TypographyPart::H1, true, _) => Vec2::new(scale::space::XL3, scale::space::M),
+            (TypographyPart::H1, false, _) => Vec2::new(scale::space::XL3, scale::space::L),
+            (TypographyPart::H2, true, _) => Vec2::new(scale::space::XL2, scale::space::S),
+            (TypographyPart::H2, false, _) => Vec2::new(scale::space::XL3, scale::space::M),
+            (TypographyPart::P, true, _) => Vec2::new(scale::space::XL3, scale::space::M),
+            (TypographyPart::P, false, _) => Vec2::new(scale::space::XL3, scale::space::L),
+            (TypographyPart::List, true, true) => Vec2::new(scale::space::XL2, scale::space::S),
+            (TypographyPart::List, false, true) => Vec2::new(scale::space::XL2, scale::space::M),
+            (TypographyPart::List, true, false) => Vec2::new(scale::space::XL3, scale::space::L),
+            (TypographyPart::List, false, false) => Vec2::new(scale::space::XL3, scale::space::XL),
+            (TypographyPart::Blockquote, true, _) => Vec2::new(scale::space::XL2, scale::space::M),
+            (TypographyPart::Blockquote, false, _) => Vec2::new(scale::space::XL3, scale::space::L),
         }
     }
 

@@ -692,6 +692,18 @@ render-node layer. This sweep found that consumer-provided models need owned
 render node copy instead of static literals, so the Leptos slot renderer now
 uses a renderer-neutral owned view node.
 
+Concrete component pass: Typography complete. Typography now owns a bespoke
+validated Rust model, repeatable list item data, local active/focus state,
+stable heading DOM IDs, token-only Leptos semantic text rendering, a dedicated
+story proof, and Bevy primitive derivation from the same heading, paragraph,
+list, and blockquote render nodes. The final sweep removed Typography from the
+generated catalog-component path, so all 64 current shadcn-inspired issues now
+use component-specific Rust APIs and concrete framework adapters. Tooltip,
+Toast, Toggle Group, Toggle, Table, Tabs, Textarea, and the earlier
+typography-adjacent display components were re-audited against this learning;
+no changes were required because their API shape already uses typed
+component-owned state instead of generated slots.
+
 ## Consolidated Learnings
 
 - Bespoke one-off APIs would drift across Leptos and Bevy, so the implementation source of truth is the combination of `ComponentImplementation` in `crates/ui/src/kit.rs` and literal `UiWidget` constructors in `crates/ui/src/widgets.rs`.
@@ -714,6 +726,7 @@ uses a renderer-neutral owned view node.
 - Repeatable fixed-length controls expose stable indexed primitive names to Bevy while keeping canonical shadcn anatomy labels in Leptos data attributes.
 - Display rows expose repeatable action nodes through one canonical anatomy part, with stable Bevy primitive indexes and renderer-local activation state.
 - Typography tokens can own repeatable domain data and local focus styling without becoming durable app state.
+- The generated catalog-component path is now infrastructure only; every current catalog ID has a bespoke typed component, Leptos renderer, and Bevy primitive adapter.
 - Message and media display components can own renderer-local ephemeral state for activation feedback while keeping durable file selections and uploads in `crates/state` / `rs-dean-idb`.
 - Messaging components can own renderer-local action feedback and side-aware layout while durable transcript/message updates stay app-owned.
 - Identity media components can own renderer-local load/error fallback state while keeping durable profile identity in app/state models.

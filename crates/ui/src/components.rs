@@ -11,8 +11,7 @@ use crate::{
     ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
     CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CardDensity, CardIntent,
     CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
-    CatalogComponentModel, CatalogComponentPart, CatalogComponentRenderNode, ChartDensity,
-    ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
+    ChartDensity, ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
     CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
     CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
     ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
@@ -55,12 +54,12 @@ use crate::{
     ToastTone, ToggleDensity, ToggleGroupIntent, ToggleGroupModel, ToggleGroupOrientation,
     ToggleGroupPart, ToggleGroupState, ToggleIntent, ToggleModel, TogglePart, TogglePressed,
     ToggleVariant, TooltipDensity, TooltipIntent, TooltipModel, TooltipPart, TooltipPlacement,
-    UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
-    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    TypographyDensity, TypographyIntent, TypographyModel, TypographyPart, TypographyState, UiBlock,
+    UiBlockTone, UiComponentId, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, chart_render_nodes, checkbox_render_nodes,
+    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -80,22 +79,23 @@ use crate::{
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
     default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
     default_toast_model, default_toggle_group_model, default_toggle_model, default_tooltip_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
-    switch_render_nodes, table_render_nodes, tabs_dom_id, tabs_render_nodes, textarea_dom_id,
-    textarea_render_nodes, toast_dom_id, toast_render_nodes, toggle_group_render_nodes,
-    toggle_group_selected_values_label, toggle_render_nodes, tooltip_dom_id, tooltip_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    default_typography_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
+    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
+    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, slider_render_nodes,
+    sonner_render_nodes, spinner_render_nodes, switch_render_nodes, table_render_nodes,
+    tabs_dom_id, tabs_render_nodes, textarea_dom_id, textarea_render_nodes, toast_dom_id,
+    toast_render_nodes, toggle_group_render_nodes, toggle_group_selected_values_label,
+    toggle_render_nodes, tooltip_dom_id, tooltip_render_nodes, typography_dom_id,
+    typography_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -112,7 +112,7 @@ use crate::{
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
     validate_switch_model, validate_table_model, validate_tabs_model, validate_textarea_model,
     validate_toast_model, validate_toggle_group_model, validate_toggle_model,
-    validate_tooltip_model,
+    validate_tooltip_model, validate_typography_model,
 };
 
 const HEALTH_CARD: &str =
@@ -138,38 +138,6 @@ const COMPONENT_TAG: &str = "rounded-pill border border-border-subtle bg-surface
 const COMPONENT_DEMO: &str = "grid gap-2xs border-t border-border-subtle pt-s";
 const BLOCK_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const BLOCK_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
-const WIDGET_SHELL: &str = "grid min-w-0 gap-s rounded-field bg-surface-1 p-s text-text-1";
-const WIDGET_HEADER: &str = "grid gap-2xs";
-const WIDGET_EYEBROW: &str = "m-0 text-00 font-7 uppercase tracking-label text-brand";
-const WIDGET_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
-const WIDGET_SUMMARY: &str = "m-0 text-0 leading-0 text-text-2";
-const WIDGET_CONTENT: &str = "grid gap-2xs";
-const WIDGET_CONTENT_INLINE: &str = "flex flex-wrap items-center gap-2xs";
-const WIDGET_SLOT: &str =
-    "grid gap-3xs rounded-field border border-border-subtle bg-surface-2 p-xs text-text-1";
-const WIDGET_SLOT_ACTIVE: &str =
-    "grid gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-text-1";
-const WIDGET_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
-const WIDGET_VALUE: &str = "m-0 text-0 leading-0 text-text-2";
-const WIDGET_BUTTON: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const WIDGET_BUTTON_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const WIDGET_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 text-text-1 outline-none focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const WIDGET_TEXTAREA: &str = "min-h-2xl w-full resize-y rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const WIDGET_BADGE: &str = "inline-flex items-center gap-2xs rounded-pill border border-border-subtle bg-surface-2 px-xs py-3xs text-00 font-7 text-text-1";
-const WIDGET_MEDIA: &str = "grid min-h-xl place-items-center rounded-field border border-border-subtle bg-surface-2 p-s text-0 font-7 text-text-2";
-const WIDGET_AVATAR: &str = "grid size-l place-items-center rounded-pill border border-border-subtle bg-primary-soft text-0 font-7 text-text-1";
-const WIDGET_MARKER: &str = "inline-flex size-s items-center justify-center rounded-pill bg-brand text-00 font-7 text-text-on-brand";
-const WIDGET_KEY: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs font-mono text-00 text-text-1 shadow-1";
-const WIDGET_SEPARATOR: &str = "min-h-selector rounded-pill bg-border-subtle";
-const WIDGET_TABLE: &str =
-    "w-full overflow-hidden rounded-field border border-border-subtle text-left text-0 text-text-1";
-const WIDGET_TABLE_CELL: &str = "border-t border-border-subtle px-xs py-2xs";
-const WIDGET_PROGRESS: &str = "h-xs w-full rounded-pill accent-brand";
-const WIDGET_RANGE: &str = "w-full accent-brand";
-const WIDGET_SKELETON: &str = "h-s rounded-field bg-surface-3";
-const WIDGET_SPINNER: &str = "size-s rounded-pill border border-border-muted border-t-brand";
-const WIDGET_ERROR: &str =
-    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const ACCORDION_ROOT: &str =
     "grid w-full gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1";
 const ACCORDION_ITEM: &str = "grid gap-0 rounded-field border border-border-faint bg-surface-1";
@@ -1148,6 +1116,50 @@ const TOOLTIP_ARROW: &str =
 const TOOLTIP_ARROW_HIDDEN: &str = "hidden";
 const TOOLTIP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const TYPOGRAPHY_ROOT: &str = "grid w-full max-w-2xl gap-s text-text-1";
+const TYPOGRAPHY_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-xs text-text-1";
+const TYPOGRAPHY_ROOT_ACTIVE: &str =
+    "grid w-full max-w-2xl gap-s rounded-box bg-selected-tint p-s text-text-1";
+const TYPOGRAPHY_ROOT_INVALID: &str =
+    "grid w-full max-w-2xl gap-s rounded-box border border-danger bg-error-soft p-s text-text-1";
+const TYPOGRAPHY_ROOT_LOADING: &str =
+    "grid w-full max-w-2xl gap-s rounded-box border border-info bg-info-soft p-s text-text-1";
+const TYPOGRAPHY_ROOT_DISABLED: &str =
+    "grid w-full max-w-2xl gap-s text-text-disabled opacity-disabled";
+const TYPOGRAPHY_H1: &str = "m-0 text-4 font-8 leading-3 text-text-1";
+const TYPOGRAPHY_H1_DENSE: &str = "m-0 text-3 font-8 leading-3 text-text-1";
+const TYPOGRAPHY_H1_ACTIVE: &str = "m-0 text-4 font-8 leading-3 text-brand";
+const TYPOGRAPHY_H1_DISABLED: &str = "m-0 text-4 font-8 leading-3 text-text-disabled";
+const TYPOGRAPHY_H2: &str = "m-0 text-2 font-7 leading-2 text-text-1";
+const TYPOGRAPHY_H2_DENSE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
+const TYPOGRAPHY_H2_ACTIVE: &str = "m-0 text-2 font-7 leading-2 text-brand";
+const TYPOGRAPHY_H2_DISABLED: &str = "m-0 text-2 font-7 leading-2 text-text-disabled";
+const TYPOGRAPHY_P: &str = "m-0 text-0 leading-2 text-text-2";
+const TYPOGRAPHY_P_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
+const TYPOGRAPHY_P_ACTIVE: &str = "m-0 text-0 leading-2 text-text-1";
+const TYPOGRAPHY_P_INVALID: &str = "m-0 text-0 leading-2 text-danger";
+const TYPOGRAPHY_P_DISABLED: &str = "m-0 text-0 leading-2 text-text-disabled";
+const TYPOGRAPHY_LIST: &str = "m-0 grid list-disc gap-2xs ps-s text-0 leading-2 text-text-2";
+const TYPOGRAPHY_LIST_DENSE: &str =
+    "m-0 grid list-disc gap-3xs ps-xs text-00 leading-0 text-text-2";
+const TYPOGRAPHY_LIST_DISABLED: &str =
+    "m-0 grid list-disc gap-2xs ps-s text-0 leading-2 text-text-disabled";
+const TYPOGRAPHY_LIST_ITEM: &str = "pl-2xs transition-colors hover:text-text-1";
+const TYPOGRAPHY_LIST_ITEM_ACTIVE: &str = "pl-2xs font-7 text-brand";
+const TYPOGRAPHY_LIST_ITEM_INVALID: &str = "pl-2xs font-7 text-danger";
+const TYPOGRAPHY_LIST_ITEM_DISABLED: &str = "pl-2xs text-text-disabled";
+const TYPOGRAPHY_BLOCKQUOTE: &str =
+    "m-0 border-l border-brand pl-s text-1 font-6 leading-2 text-text-1";
+const TYPOGRAPHY_BLOCKQUOTE_DENSE: &str =
+    "m-0 border-l border-brand pl-xs text-0 font-6 leading-0 text-text-1";
+const TYPOGRAPHY_BLOCKQUOTE_ACTIVE: &str =
+    "m-0 border-l border-brand bg-primary-soft pl-s text-1 font-7 leading-2 text-text-1";
+const TYPOGRAPHY_BLOCKQUOTE_INVALID: &str =
+    "m-0 border-l border-danger pl-s text-1 font-7 leading-2 text-danger";
+const TYPOGRAPHY_BLOCKQUOTE_DISABLED: &str =
+    "m-0 border-l border-border-muted pl-s text-1 font-6 leading-2 text-text-disabled";
+const TYPOGRAPHY_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
 const DROPDOWN_MENU_ROOT_DISABLED: &str =
@@ -1731,31 +1743,6 @@ const MESSAGE_SCROLLER_JUMP_HIDDEN: &str = "hidden";
 const MESSAGE_SCROLLER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 
-#[derive(Clone)]
-struct WidgetViewNode {
-    part: String,
-    kind: UiWidgetSlotKind,
-    label: String,
-    value: String,
-    intent: UiWidgetIntent,
-    selected: bool,
-    disabled: bool,
-}
-
-impl<P: CatalogComponentPart> From<CatalogComponentRenderNode<P>> for WidgetViewNode {
-    fn from(node: CatalogComponentRenderNode<P>) -> Self {
-        Self {
-            part: node.part.label().to_owned(),
-            kind: node.kind,
-            label: node.label,
-            value: node.value,
-            intent: node.intent,
-            selected: node.selected,
-            disabled: node.disabled,
-        }
-    }
-}
-
 #[component]
 pub fn HealthCard(title: &'static str, body: &'static str) -> impl IntoView {
     view! {
@@ -1954,284 +1941,6 @@ pub fn ComponentDemo(id: UiComponentId) -> AnyView {
         UiComponentId::Tooltip => view! { <Tooltip /> }.into_any(),
         UiComponentId::Typography => view! { <Typography /> }.into_any(),
     }
-}
-
-fn render_catalog_component<P: CatalogComponentPart>(model: CatalogComponentModel<P>) -> AnyView {
-    let id = P::ID;
-    let slug = id.definition().slug;
-    let pattern = model.pattern.label();
-    let nodes = match catalog_component_render_nodes(&model) {
-        Ok(nodes) => nodes,
-        Err(report) => {
-            let message = format!("{} validation failed: {report}", id.definition().name);
-            return view! {
-                <section class=WIDGET_SHELL data-ui-widget=slug data-ui-state="invalid">
-                    <p class=WIDGET_ERROR role="alert">{message}</p>
-                </section>
-            }
-            .into_any();
-        }
-    };
-    let root = nodes
-        .first()
-        .cloned()
-        .map(WidgetViewNode::from)
-        .expect("invariant: validated catalog components always include a root node");
-    let content_class = content_class(model.pattern);
-    let slots = nodes
-        .into_iter()
-        .skip(1)
-        .map(WidgetViewNode::from)
-        .collect::<Vec<_>>();
-
-    view! {
-        <section class=widget_class(model.pattern) data-ui-widget=slug data-ui-pattern=pattern>
-            <header class=WIDGET_HEADER>
-                <p class=WIDGET_EYEBROW>{pattern}</p>
-                <h3 class=WIDGET_TITLE>{root.label}</h3>
-                <p class=WIDGET_SUMMARY>{root.value}</p>
-            </header>
-            <div class=content_class>
-                {slots.into_iter().map(slot_view).collect_view()}
-            </div>
-        </section>
-    }
-    .into_any()
-}
-
-fn slot_view(slot: WidgetViewNode) -> AnyView {
-    let part = slot.part.clone();
-    let kind = slot.kind.label();
-    let intent = slot.intent.label();
-    let selected = slot.selected.to_string();
-    let disabled = slot.disabled;
-    let slot_class = slot_class(&slot);
-
-    match slot.kind {
-        UiWidgetSlotKind::Avatar => view! {
-            <div class=WIDGET_SLOT data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_AVATAR aria-hidden="true">{slot.label.clone()}</span>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Badge => view! {
-            <span class=WIDGET_BADGE data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                {slot.label.clone()}
-            </span>
-        }.into_any(),
-        UiWidgetSlotKind::Button | UiWidgetSlotKind::IconButton => view! {
-            <button type="button" class=button_class(&slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-pressed=selected disabled=disabled>
-                {slot.label.clone()}
-            </button>
-        }.into_any(),
-        UiWidgetSlotKind::Cell => view! {
-            <div role="cell" class=WIDGET_TABLE_CELL data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                {slot.label.clone()}
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Chart => view! {
-            <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
-                <div class="flex items-end gap-2xs" aria-hidden="true">
-                    <span class="h-xs w-s rounded-field bg-brand"></span>
-                    <span class="h-m w-s rounded-field bg-success"></span>
-                    <span class="h-l w-s rounded-field bg-accent"></span>
-                </div>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Checkbox => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <input type="checkbox" class="size-s rounded-selector border border-border-strong accent-brand" checked=slot.selected disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Description | UiWidgetSlotKind::Text => view! {
-            <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Header | UiWidgetSlotKind::Title => view! {
-            <div class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <h4 class=WIDGET_TITLE>{slot.label.clone()}</h4>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Input => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <input class=WIDGET_INPUT value=slot.value.clone() aria-label=slot.label.clone() disabled=disabled />
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Key => view! {
-            <kbd class=WIDGET_KEY data-ui-part=part data-ui-kind=kind data-ui-intent=intent>{slot.label.clone()}</kbd>
-        }.into_any(),
-        UiWidgetSlotKind::Link => view! {
-            <a class=button_class(&slot) href="#" data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-current=selected>
-                {slot.label.clone()}
-            </a>
-        }.into_any(),
-        UiWidgetSlotKind::List => view! {
-            <div role="list" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::ListItem | UiWidgetSlotKind::Option => view! {
-            <div role="option" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Marker => view! {
-            <span class=WIDGET_MARKER data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                {slot.label.clone()}
-            </span>
-        }.into_any(),
-        UiWidgetSlotKind::Media => view! {
-            <figure class=WIDGET_MEDIA data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span>{slot.label.clone()}</span>
-                <figcaption class=WIDGET_VALUE>{slot.value.clone()}</figcaption>
-            </figure>
-        }.into_any(),
-        UiWidgetSlotKind::Overlay | UiWidgetSlotKind::Panel | UiWidgetSlotKind::Section => view! {
-            <section class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <p class=WIDGET_LABEL>{slot.label.clone()}</p>
-                <p class=WIDGET_VALUE>{slot.value.clone()}</p>
-            </section>
-        }.into_any(),
-        UiWidgetSlotKind::Progress => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <progress class=WIDGET_PROGRESS value="64" max="100">{slot.value.clone()}</progress>
-                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Radio => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <input type="radio" class="size-s border border-border-strong accent-brand" checked=slot.selected disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Row => view! {
-            <div role="row" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-selected=selected>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Select => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <select class=WIDGET_INPUT aria-label=slot.label.clone() disabled=disabled>
-                    <option selected=slot.selected>{slot.value.clone()}</option>
-                    <option>"Light"</option>
-                    <option>"Dark"</option>
-                </select>
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Separator => view! {
-            <div class="grid gap-2xs" data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_SEPARATOR role="separator" aria-label=slot.value.clone()></span>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Skeleton => view! {
-            <div class="grid gap-2xs" data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-busy="true">
-                <span class=WIDGET_SKELETON></span>
-                <span class="h-xs rounded-field bg-surface-3"></span>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Slider => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <input type="range" class=WIDGET_RANGE min="0" max="100" value="72" aria-label=slot.label.clone() disabled=disabled />
-                <span class=WIDGET_VALUE>{slot.value.clone()}</span>
-            </label>
-        }.into_any(),
-        UiWidgetSlotKind::Spinner => view! {
-            <div role="status" class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_SPINNER aria-hidden="true"></span>
-                <span class=WIDGET_VALUE>{slot.label.clone()}</span>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Switch => view! {
-            <button type="button" role="switch" class=button_class(&slot) data-ui-part=part data-ui-kind=kind data-ui-intent=intent aria-checked=selected disabled=disabled>
-                {slot.label.clone()}
-            </button>
-        }.into_any(),
-        UiWidgetSlotKind::Table => view! {
-            <div role="table" class=WIDGET_TABLE data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <div role="row" class="grid grid-cols-2">
-                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.label.clone()}</span>
-                    <span role="cell" class=WIDGET_TABLE_CELL>{slot.value.clone()}</span>
-                </div>
-            </div>
-        }.into_any(),
-        UiWidgetSlotKind::Textarea => view! {
-            <label class=slot_class data-ui-part=part data-ui-kind=kind data-ui-intent=intent>
-                <span class=WIDGET_LABEL>{slot.label.clone()}</span>
-                <textarea class=WIDGET_TEXTAREA aria-label=slot.label.clone() disabled=disabled>{slot.value.clone()}</textarea>
-            </label>
-        }.into_any(),
-    }
-}
-
-fn widget_class(pattern: UiWidgetPattern) -> &'static str {
-    match pattern {
-        UiWidgetPattern::Action | UiWidgetPattern::Navigation => {
-            "grid min-w-0 gap-s rounded-field bg-surface-1 p-s text-text-1"
-        }
-        UiWidgetPattern::Overlay => {
-            "grid min-w-0 gap-s rounded-field bg-surface-elevated p-s text-text-1 shadow-2"
-        }
-        UiWidgetPattern::Callout | UiWidgetPattern::Feedback => {
-            "grid min-w-0 gap-s rounded-field bg-warning-soft p-s text-text-1"
-        }
-        UiWidgetPattern::Data
-        | UiWidgetPattern::Disclosure
-        | UiWidgetPattern::Display
-        | UiWidgetPattern::Form
-        | UiWidgetPattern::Layout
-        | UiWidgetPattern::Messaging
-        | UiWidgetPattern::Typography
-        | UiWidgetPattern::Utility => WIDGET_SHELL,
-    }
-}
-
-fn content_class(pattern: UiWidgetPattern) -> &'static str {
-    match pattern {
-        UiWidgetPattern::Action | UiWidgetPattern::Navigation => WIDGET_CONTENT_INLINE,
-        UiWidgetPattern::Data => "grid gap-2xs overflow-hidden",
-        _ => WIDGET_CONTENT,
-    }
-}
-
-fn slot_class(slot: &WidgetViewNode) -> &'static str {
-    if slot.selected {
-        WIDGET_SLOT_ACTIVE
-    } else {
-        WIDGET_SLOT
-    }
-}
-
-fn button_class(slot: &WidgetViewNode) -> &'static str {
-    if slot.selected {
-        WIDGET_BUTTON_ACTIVE
-    } else {
-        WIDGET_BUTTON
-    }
-}
-
-macro_rules! catalog_component {
-    ($name:ident, $model:ty, $default:path) => {
-        #[component]
-        pub fn $name(#[prop(optional, default = $default())] model: $model) -> AnyView {
-            render_catalog_component(model)
-        }
-    };
 }
 
 #[component]
@@ -18572,11 +18281,464 @@ const fn tooltip_state_label(
     }
 }
 
-catalog_component!(
-    Typography,
-    crate::TypographyModel,
-    crate::default_typography_model
-);
+#[component]
+pub fn Typography(
+    #[prop(optional, default = default_typography_model())] model: TypographyModel,
+) -> AnyView {
+    if let Err(report) = validate_typography_model(&model) {
+        let message = format!("Typography validation failed: {report}");
+        return view! {
+            <div class=TYPOGRAPHY_ERROR data-ui-component="typography" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let blocked = loading || disabled;
+    let state_model = model.state();
+    let nodes = typography_render_nodes(&model, &state_model);
+    let root = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::Root)
+        .expect("invariant: typography render nodes include root")
+        .clone();
+    let h1 = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::H1)
+        .expect("invariant: typography render nodes include h1")
+        .clone();
+    let h2 = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::H2)
+        .expect("invariant: typography render nodes include h2")
+        .clone();
+    let paragraph = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::P)
+        .expect("invariant: typography render nodes include paragraph")
+        .clone();
+    let list = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::List && node.index.is_none())
+        .expect("invariant: typography render nodes include list")
+        .clone();
+    let list_items = nodes
+        .iter()
+        .filter(|node| node.part == TypographyPart::List && node.index.is_some())
+        .cloned()
+        .collect::<Vec<_>>();
+    let blockquote = nodes
+        .iter()
+        .find(|node| node.part == TypographyPart::Blockquote)
+        .expect("invariant: typography render nodes include blockquote")
+        .clone();
+    let invalid = root.invalid;
+    let root_value = root.value;
+    let heading_id = typography_dom_id("typography-heading", &h1.value);
+    let heading_id_for_root = heading_id.clone();
+    let paragraph_id = typography_dom_id("typography-copy", &paragraph.value);
+    let paragraph_id_for_root = paragraph_id.clone();
+    let h1_label = h1.label;
+    let h1_value = h1.value;
+    let h2_label = h2.label;
+    let h2_value = h2.value;
+    let paragraph_detail = paragraph.detail;
+    let paragraph_value = paragraph.value;
+    let list_label = list.label;
+    let list_value = list.value;
+    let blockquote_detail = blockquote.detail;
+    let blockquote_value = blockquote.value;
+    let (state, set_state) = signal(state_model);
+    let context = TypographyViewContext {
+        density,
+        invalid,
+        loading,
+        blocked,
+        state,
+        set_state,
+    };
+
+    view! {
+        <article
+            class=move || {
+                state.with(|state| {
+                    typography_root_class(
+                        density,
+                        state.is_active(TypographyPart::Root),
+                        invalid,
+                        loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-component="typography"
+            data-ui-part=TypographyPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    typography_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.active_part().is_some(),
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-value=root_value
+            aria-labelledby=heading_id_for_root
+            aria-describedby=paragraph_id_for_root
+            aria-invalid=invalid.to_string()
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            tabindex=if blocked { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(TypographyIntent::Focus(TypographyPart::Root));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(TypographyIntent::Blur);
+                    });
+                }
+            }
+            on:mouseenter=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(TypographyIntent::Hover(TypographyPart::Root));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blocked {
+                    set_state.update(|state| {
+                        let _ = state.apply(TypographyIntent::Leave);
+                    });
+                }
+            }
+        >
+            <h1
+                id=heading_id
+                class=move || {
+                    state.with(|state| {
+                        typography_h1_class(
+                            density,
+                            state.is_active(TypographyPart::H1),
+                            disabled,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=TypographyPart::H1.label()
+                data-ui-value=h1_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TypographyIntent::Hover(TypographyPart::H1));
+                        });
+                    }
+                }
+            >
+                {h1_label}
+            </h1>
+            <h2
+                class=move || {
+                    state.with(|state| {
+                        typography_h2_class(
+                            density,
+                            state.is_active(TypographyPart::H2),
+                            disabled,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=TypographyPart::H2.label()
+                data-ui-value=h2_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TypographyIntent::Hover(TypographyPart::H2));
+                        });
+                    }
+                }
+            >
+                {h2_label}
+            </h2>
+            <p
+                id=paragraph_id
+                class=move || {
+                    state.with(|state| {
+                        typography_p_class(
+                            density,
+                            state.is_active(TypographyPart::P),
+                            invalid,
+                            disabled,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=TypographyPart::P.label()
+                data-ui-value=paragraph_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TypographyIntent::Hover(TypographyPart::P));
+                        });
+                    }
+                }
+            >
+                {paragraph_detail}
+            </p>
+            <ul
+                class=typography_list_class(density, disabled)
+                data-ui-part=TypographyPart::List.label()
+                data-ui-value=list_value
+                aria-label=list_label
+            >
+                {list_items
+                    .into_iter()
+                    .map(|node| typography_list_item_view(node, context))
+                    .collect_view()}
+            </ul>
+            <blockquote
+                class=move || {
+                    state.with(|state| {
+                        typography_blockquote_class(
+                            density,
+                            state.is_active(TypographyPart::Blockquote),
+                            invalid,
+                            disabled,
+                        )
+                        .to_owned()
+                    })
+                }
+                data-ui-part=TypographyPart::Blockquote.label()
+                data-ui-value=blockquote_value
+                on:mouseenter=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TypographyIntent::Hover(TypographyPart::Blockquote));
+                        });
+                    }
+                }
+            >
+                {blockquote_detail}
+            </blockquote>
+        </article>
+    }
+    .into_any()
+}
+
+#[derive(Clone, Copy)]
+struct TypographyViewContext {
+    density: TypographyDensity,
+    invalid: bool,
+    loading: bool,
+    blocked: bool,
+    state: ReadSignal<TypographyState>,
+    set_state: WriteSignal<TypographyState>,
+}
+
+fn typography_list_item_view(
+    node: crate::TypographyRenderNode,
+    context: TypographyViewContext,
+) -> AnyView {
+    let index = node
+        .index
+        .expect("invariant: typography list item render node includes index");
+    let label = node.label;
+    let detail = node.detail;
+    let value = node.value;
+    let disabled = node.disabled || context.blocked;
+    view! {
+        <li
+            class=move || {
+                context.state.with(|state| {
+                    typography_list_item_class(
+                        state.is_list_item_active(index),
+                        context.invalid,
+                        context.loading,
+                        disabled,
+                    )
+                    .to_owned()
+                })
+            }
+            data-ui-part=TypographyPart::List.label()
+            data-ui-index=index.to_string()
+            data-ui-density=context.density.label()
+            data-ui-value=value
+            title=detail
+            aria-disabled=disabled.to_string()
+            on:mouseenter=move |_| {
+                if !disabled {
+                    context.set_state.update(|state| {
+                        let _ = state.apply(TypographyIntent::HoverListItem(index));
+                    });
+                }
+            }
+        >
+            {label}
+        </li>
+    }
+    .into_any()
+}
+
+const fn typography_root_class(
+    density: TypographyDensity,
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_ROOT_DISABLED;
+    }
+    if loading {
+        return TYPOGRAPHY_ROOT_LOADING;
+    }
+    if invalid {
+        return TYPOGRAPHY_ROOT_INVALID;
+    }
+    if active {
+        return TYPOGRAPHY_ROOT_ACTIVE;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_ROOT,
+        TypographyDensity::Dense => TYPOGRAPHY_ROOT_DENSE,
+    }
+}
+
+const fn typography_h1_class(
+    density: TypographyDensity,
+    active: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_H1_DISABLED;
+    }
+    if active {
+        return TYPOGRAPHY_H1_ACTIVE;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_H1,
+        TypographyDensity::Dense => TYPOGRAPHY_H1_DENSE,
+    }
+}
+
+const fn typography_h2_class(
+    density: TypographyDensity,
+    active: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_H2_DISABLED;
+    }
+    if active {
+        return TYPOGRAPHY_H2_ACTIVE;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_H2,
+        TypographyDensity::Dense => TYPOGRAPHY_H2_DENSE,
+    }
+}
+
+const fn typography_p_class(
+    density: TypographyDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_P_DISABLED;
+    }
+    if invalid {
+        return TYPOGRAPHY_P_INVALID;
+    }
+    if active {
+        return TYPOGRAPHY_P_ACTIVE;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_P,
+        TypographyDensity::Dense => TYPOGRAPHY_P_DENSE,
+    }
+}
+
+const fn typography_list_class(density: TypographyDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_LIST_DISABLED;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_LIST,
+        TypographyDensity::Dense => TYPOGRAPHY_LIST_DENSE,
+    }
+}
+
+const fn typography_list_item_class(
+    active: bool,
+    invalid: bool,
+    loading: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_LIST_ITEM_DISABLED;
+    }
+    if invalid {
+        return TYPOGRAPHY_LIST_ITEM_INVALID;
+    }
+    if loading || active {
+        return TYPOGRAPHY_LIST_ITEM_ACTIVE;
+    }
+    TYPOGRAPHY_LIST_ITEM
+}
+
+const fn typography_blockquote_class(
+    density: TypographyDensity,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TYPOGRAPHY_BLOCKQUOTE_DISABLED;
+    }
+    if invalid {
+        return TYPOGRAPHY_BLOCKQUOTE_INVALID;
+    }
+    if active {
+        return TYPOGRAPHY_BLOCKQUOTE_ACTIVE;
+    }
+    match density {
+        TypographyDensity::Standard => TYPOGRAPHY_BLOCKQUOTE,
+        TypographyDensity::Dense => TYPOGRAPHY_BLOCKQUOTE_DENSE,
+    }
+}
+
+const fn typography_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if active {
+        "active"
+    } else {
+        "ready"
+    }
+}
 
 #[component]
 pub fn ThemeCycleButton(

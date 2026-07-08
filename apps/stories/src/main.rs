@@ -43,7 +43,8 @@ use rs_dean_ui::{
     ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone, Toggle,
     ToggleDensity, ToggleGroup, ToggleGroupItem, ToggleGroupModel, ToggleGroupOrientation,
     ToggleGroupSelectionMode, ToggleModel, TogglePressed, ToggleVariant, Tooltip, TooltipDensity,
-    TooltipModel, TooltipPlacement,
+    TooltipModel, TooltipPlacement, Typography, TypographyDensity, TypographyListItem,
+    TypographyModel,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1238,6 +1239,24 @@ fn Stories() -> impl IntoView {
                             <Toast model=invalid_toast_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Toast model=themed_toast_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-typography" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Typography"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 64 implemented as a token-scale content flow backed by validated shared Rust copy/list state, renderer-local active transitions, and Bevy-readable typography primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Typography model=default_typography_story_model() />
+                            <Typography model=dense_typography_story_model() />
+                            <Typography model=loading_typography_story_model() />
+                            <Typography model=disabled_typography_story_model() />
+                            <Typography model=invalid_typography_story_model() />
+                            <ThemeScope theme=ThemeId::Catppuccin>
+                                <Typography model=themed_typography_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4688,6 +4707,68 @@ fn themed_toast_story_model() -> ToastModel {
     .with_density(ToastDensity::Dense)
     .with_tone(ToastTone::Info)
     .with_action(ToastAction::new("Inspect", "inspect-toast-theme"))
+}
+
+fn typography_story_items() -> Vec<TypographyListItem> {
+    vec![
+        TypographyListItem::new("Shared type scale", "shared-type-scale")
+            .with_detail("Headings, body copy, and list rhythm use rs-dean-ui tokens."),
+        TypographyListItem::new("Renderer local active state", "renderer-local-active")
+            .with_detail("Hover and focus styling stay local to the renderer."),
+        TypographyListItem::new("Bevy primitive proof", "bevy-primitive-proof")
+            .with_detail("Scene primitives consume the same render nodes without Leptos."),
+    ]
+}
+
+fn default_typography_story_model() -> TypographyModel {
+    TypographyModel::new(
+        "Readable systems",
+        "Token scales",
+        "Typography uses shared text, leading, spacing, and color tokens without custom class names.",
+        typography_story_items(),
+        "Update the token once and every renderer receives the same typographic contract.",
+    )
+    .with_list_label("Typography contract")
+    .with_cite("rs-dean-ui")
+}
+
+fn dense_typography_story_model() -> TypographyModel {
+    default_typography_story_model()
+        .with_density(TypographyDensity::Dense)
+        .with_heading("Dense type flow")
+        .with_subheading("Compact reading")
+        .with_paragraph("Dense typography keeps the same anatomy with tighter token spacing.")
+}
+
+fn loading_typography_story_model() -> TypographyModel {
+    default_typography_story_model()
+        .with_heading("Loading copy")
+        .with_paragraph("Loading typography keeps the layout stable while content hydrates.")
+        .loading()
+}
+
+fn disabled_typography_story_model() -> TypographyModel {
+    default_typography_story_model()
+        .with_heading("Locked copy")
+        .with_paragraph("Disabled typography exposes a read-only content flow to every renderer.")
+        .disabled()
+}
+
+fn invalid_typography_story_model() -> TypographyModel {
+    default_typography_story_model().with_error("Typography copy failed validation at the edge.")
+}
+
+fn themed_typography_story_model() -> TypographyModel {
+    TypographyModel::new(
+        "Theme scoped typography",
+        "Catppuccin text rhythm",
+        "The same heading, body, list, and blockquote nodes resolve through the nested theme.",
+        typography_story_items(),
+        "Semantic colors and text scales come from the shared token contract.",
+    )
+    .with_density(TypographyDensity::Dense)
+    .with_list_label("Themed typography contract")
+    .with_cite("ThemeScope")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
