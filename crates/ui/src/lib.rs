@@ -60,6 +60,7 @@ pub mod spec;
 pub mod spinner;
 pub mod switch;
 pub mod table;
+pub mod tabs;
 pub mod theme;
 pub mod widgets;
 
@@ -357,6 +358,11 @@ pub use table::{
     TableChange, TableColumn, TableDensity, TableIntent, TableModel, TablePart, TableRenderNode,
     TableRow, TableState, default_table_columns, default_table_model, default_table_rows,
     table_render_nodes, validate_table_model,
+};
+pub use tabs::{
+    TabsChange, TabsDensity, TabsIntent, TabsItem, TabsModel, TabsOrientation, TabsPart,
+    TabsRenderNode, TabsState, default_tabs_items, default_tabs_model, tabs_dom_id,
+    tabs_render_nodes, validate_tabs_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
 pub use widgets::{

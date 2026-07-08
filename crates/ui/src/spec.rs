@@ -296,12 +296,13 @@ pub mod bevy_adapter {
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
-        SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, Theme, UiBlockRole,
-        UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes,
-        alert_dialog_render_nodes, alert_render_nodes, aspect_ratio_render_nodes,
-        attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-        bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-        card_render_nodes, carousel_render_nodes, catalog_component_any_render_nodes_for_component,
+        SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, Theme,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
         command_render_nodes, component_implementation, context_menu_render_nodes,
         data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
@@ -322,17 +323,17 @@ pub mod bevy_adapter {
         default_resizable_model, default_scroll_area_model, default_select_model,
         default_separator_model, default_sheet_model, default_sidebar_model,
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-        default_switch_model, default_table_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_switch_model, default_table_model, default_tabs_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
-        switch_render_nodes, table_render_nodes,
+        switch_render_nodes, table_render_nodes, tabs_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -613,6 +614,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Table {
             return bevy_primitives_for_table(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Tabs {
+            return bevy_primitives_for_tabs(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1887,6 +1891,37 @@ pub mod bevy_adapter {
                     state,
                     intent: table_intent_for_part(node.part, node.actionable),
                     selected: node.selected || node.active || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_tabs(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_tabs_model();
+        let tabs_state = model.state();
+        tabs_render_nodes(&model, &tabs_state)
+            .into_iter()
+            .map(|node| {
+                let role = tabs_role_for_part(node.part);
+                let tone = tabs_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: tabs_primitive_part(&node),
+                    kind: tabs_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: tabs_size_for_part(node.part, node.density, node.orientation),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: tabs_intent_for_part(node.part, node.actionable),
+                    selected: node.selected || node.focused || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -5448,6 +5483,89 @@ pub mod bevy_adapter {
             TablePart::Row => Vec2::new(scale::space::XL3, row_height),
             TablePart::Head | TablePart::Cell => Vec2::new(scale::space::XL, row_height),
             TablePart::Caption => Vec2::new(scale::space::XL3, scale::space::S),
+        }
+    }
+
+    fn tabs_primitive_part(node: &crate::TabsRenderNode) -> String {
+        match node.part {
+            TabsPart::Trigger | TabsPart::Content => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            TabsPart::Root | TabsPart::List => node.part.label().to_owned(),
+        }
+    }
+
+    const fn tabs_kind_for_part(part: TabsPart) -> UiWidgetSlotKind {
+        match part {
+            TabsPart::Root => UiWidgetSlotKind::Section,
+            TabsPart::List => UiWidgetSlotKind::List,
+            TabsPart::Trigger => UiWidgetSlotKind::Button,
+            TabsPart::Content => UiWidgetSlotKind::Panel,
+        }
+    }
+
+    const fn tabs_role_for_part(part: TabsPart) -> UiBlockRole {
+        match part {
+            TabsPart::Root => UiBlockRole::Root,
+            TabsPart::List => UiBlockRole::Navigation,
+            TabsPart::Trigger => UiBlockRole::Action,
+            TabsPart::Content => UiBlockRole::Content,
+        }
+    }
+
+    fn tabs_tone_for_node(node: &crate::TabsRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.focused {
+            return UiBlockTone::Accent;
+        }
+        match node.part {
+            TabsPart::Trigger if node.selected => UiBlockTone::Brand,
+            TabsPart::List => UiBlockTone::Muted,
+            TabsPart::Root | TabsPart::Trigger | TabsPart::Content => UiBlockTone::Surface,
+        }
+    }
+
+    const fn tabs_intent_for_part(part: TabsPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (TabsPart::Trigger, true) => UiWidgetIntent::Select,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn tabs_size_for_part(
+        part: TabsPart,
+        density: crate::TabsDensity,
+        orientation: crate::TabsOrientation,
+    ) -> Vec2 {
+        let trigger_height = match density {
+            crate::TabsDensity::Standard => scale::space::M,
+            crate::TabsDensity::Dense => scale::space::S,
+        };
+        match (part, orientation) {
+            (TabsPart::Root, crate::TabsOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL3, scale::space::XL2)
+            }
+            (TabsPart::Root, crate::TabsOrientation::Vertical) => {
+                Vec2::new(scale::space::XL3, scale::space::XL3)
+            }
+            (TabsPart::List, crate::TabsOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL3, trigger_height)
+            }
+            (TabsPart::List, crate::TabsOrientation::Vertical) => {
+                Vec2::new(scale::space::L, scale::space::XL2)
+            }
+            (TabsPart::Trigger, crate::TabsOrientation::Horizontal) => {
+                Vec2::new(scale::space::XL, trigger_height)
+            }
+            (TabsPart::Trigger, crate::TabsOrientation::Vertical) => {
+                Vec2::new(scale::space::L, trigger_height)
+            }
+            (TabsPart::Content, _) => Vec2::new(scale::space::XL3, scale::space::XL),
         }
     }
 

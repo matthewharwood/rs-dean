@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    tabs,
-    Tabs,
-    TabsModel,
-    TabsPart,
-    TabsRenderNode,
-    TabsState,
-    TabsIntent,
-    TabsChange,
-    validate_tabs_model,
-    tabs_render_nodes,
-    default_tabs_model,
-    [Root => "Tabs", List => "TabsList", Trigger => "TabsTrigger", Content => "TabsContent"]
-);
-
-define_catalog_component!(
     textarea,
     Textarea,
     TextareaModel,
@@ -696,8 +681,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Sonner
         | UiComponentId::Spinner
         | UiComponentId::Switch
-        | UiComponentId::Table => None,
-        UiComponentId::Tabs => Some(any_nodes(tabs_render_nodes(&default_tabs_model()))),
+        | UiComponentId::Table
+        | UiComponentId::Tabs => None,
         UiComponentId::Textarea => {
             Some(any_nodes(textarea_render_nodes(&default_textarea_model())))
         }
@@ -790,6 +775,7 @@ mod tests {
                     | UiComponentId::Spinner
                     | UiComponentId::Switch
                     | UiComponentId::Table
+                    | UiComponentId::Tabs
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -806,17 +792,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_tabs_model().state();
-        assert!(!state.is_active(TabsPart::Root));
+        let mut state = default_textarea_model().state();
+        assert!(!state.is_active(TextareaPart::Root));
         assert_eq!(
-            state.apply(TabsIntent::Toggle(TabsPart::Root)),
-            TabsChange::Opened(TabsPart::Root)
+            state.apply(TextareaIntent::Toggle(TextareaPart::Root)),
+            TextareaChange::Opened(TextareaPart::Root)
         );
-        assert!(state.is_active(TabsPart::Root));
+        assert!(state.is_active(TextareaPart::Root));
         assert_eq!(
-            state.apply(TabsIntent::Toggle(TabsPart::Root)),
-            TabsChange::Closed(TabsPart::Root)
+            state.apply(TextareaIntent::Toggle(TextareaPart::Root)),
+            TextareaChange::Closed(TextareaPart::Root)
         );
-        assert!(!state.is_active(TabsPart::Root));
+        assert!(!state.is_active(TextareaPart::Root));
     }
 }

@@ -38,7 +38,8 @@ use rs_dean_ui::{
     SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
     SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
     SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
-    Table, TableColumn, TableDensity, TableModel, TableRow, ThemeCycleButton, ThemeId, ThemeScope,
+    Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
+    TabsOrientation, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1117,6 +1118,25 @@ fn Stories() -> impl IntoView {
                             <Table model=invalid_table_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Table model=themed_table_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-tabs" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Tabs"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 58 implemented as a tabbed panel contract backed by validated shared Rust items, renderer-local selected/focus state, and Bevy-readable tab primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Tabs model=default_tabs_story_model() />
+                            <Tabs model=dense_tabs_story_model() />
+                            <Tabs model=vertical_tabs_story_model() />
+                            <Tabs model=loading_tabs_story_model() />
+                            <Tabs model=disabled_tabs_story_model() />
+                            <Tabs model=invalid_tabs_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Tabs model=themed_tabs_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4229,6 +4249,67 @@ fn themed_table_story_model() -> TableModel {
     TableModel::new(table_story_columns(), table_story_rows())
         .with_caption("Table surfaces resolve through the nested Luxury theme.")
         .with_selected_row("spinner")
+}
+
+fn tabs_story_items() -> Vec<TabsItem> {
+    vec![
+        TabsItem::new(
+            "Tokens",
+            "tokens",
+            "Trigger, panel, focus, and selected states all resolve through shared Tailwind tokens.",
+        ),
+        TabsItem::new(
+            "Leptos",
+            "leptos",
+            "The DOM renderer owns selected and focused state locally unless the app persists a preference.",
+        ),
+        TabsItem::new(
+            "Bevy",
+            "bevy",
+            "Scene primitives consume the same trigger and content render nodes without a Leptos dependency.",
+        ),
+    ]
+}
+
+fn default_tabs_story_model() -> TabsModel {
+    TabsModel::new(tabs_story_items())
+        .with_label("Framework surfaces")
+        .with_selected_value("tokens")
+}
+
+fn dense_tabs_story_model() -> TabsModel {
+    default_tabs_story_model()
+        .with_density(TabsDensity::Dense)
+        .with_selected_value("leptos")
+}
+
+fn vertical_tabs_story_model() -> TabsModel {
+    default_tabs_story_model()
+        .with_orientation(TabsOrientation::Vertical)
+        .with_selected_value("bevy")
+}
+
+fn loading_tabs_story_model() -> TabsModel {
+    default_tabs_story_model()
+        .with_label("Hydrating tabs")
+        .loading()
+}
+
+fn disabled_tabs_story_model() -> TabsModel {
+    default_tabs_story_model()
+        .with_label("Locked tabs")
+        .disabled()
+}
+
+fn invalid_tabs_story_model() -> TabsModel {
+    default_tabs_story_model().with_error("Selected tab failed validation before render.")
+}
+
+fn themed_tabs_story_model() -> TabsModel {
+    TabsModel::new(tabs_story_items())
+        .with_label("Theme scoped tabs")
+        .with_density(TabsDensity::Dense)
+        .with_selected_value("bevy")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

@@ -43,3 +43,10 @@ Ship a Rust-first `Tabs` component that follows the shadcn composition model whi
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Added `crates/ui/src/tabs.rs` with typed tab items, density/orientation variants, renderer-local selected/focus state, `garde` validation, stable DOM id helpers, and repeatable trigger/content render nodes.
+- Replaced the generated Leptos catalog component with a token-only `Tabs` component that renders ARIA tablist/tabpanel semantics from the shared render nodes.
+- Added direct Bevy primitive derivation for Tabs so triggers and panels keep stable repeatable primitive names without depending on Leptos.
+- Added story-harness coverage for default, dense, vertical, loading, disabled, invalid, and themed Tabs variants.

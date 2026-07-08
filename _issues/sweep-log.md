@@ -610,7 +610,17 @@ pagination, or sorting state. Data Table, Pagination, and Scroll Area were
 re-audited against that learning; no earlier changes were required because
 they already keep collection workflow state in their owning models.
 
-All-issue sweep pass: Tabs through Typography complete. The shared
+Concrete component pass: Tabs complete. The component now has a typed Rust tab
+item model, density/orientation variants, renderer-local selected and focused
+state, token-only ARIA tablist rendering, dedicated story proof, and Bevy
+primitive derivation from the same repeatable trigger/content render nodes. The
+sweep found that Tabs should share stable repeatable primitive names with
+Table, Navigation Menu, and Select, but should not inherit router navigation or
+collection sorting/filtering state. Those earlier components were re-audited
+against that learning; no changes were required because they already keep their
+workflow-specific state in their own models.
+
+All-issue sweep pass: Textarea through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -618,7 +628,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Tabs through Typography now have
+Concrete all-issue sweep pass: Textarea through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render
