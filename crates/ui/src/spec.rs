@@ -295,9 +295,9 @@ pub mod bevy_adapter {
         KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
         MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, StateContract,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
+        StateContract, Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -321,16 +321,16 @@ pub mod bevy_adapter {
         default_popover_model, default_progress_model, default_radio_group_model,
         default_resizable_model, default_scroll_area_model, default_select_model,
         default_separator_model, default_sheet_model, default_sidebar_model,
-        default_skeleton_model, default_slider_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_skeleton_model, default_slider_model, default_sonner_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-        skeleton_render_nodes, slider_render_nodes,
+        skeleton_render_nodes, slider_render_nodes, sonner_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -599,6 +599,9 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Slider {
             return bevy_primitives_for_slider(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::Sonner {
+            return bevy_primitives_for_sonner(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1749,6 +1752,37 @@ pub mod bevy_adapter {
                     state,
                     intent: slider_intent_for_part(node.part, node.actionable),
                     selected: node.focused || node.dragging || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_sonner(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_sonner_model();
+        let sonner_state = model.state();
+        sonner_render_nodes(&model, &sonner_state)
+            .into_iter()
+            .map(|node| {
+                let role = sonner_role_for_part(node.part);
+                let tone = sonner_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: sonner_primitive_part(&node),
+                    kind: sonner_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: sonner_size_for_part(node.part, node.density),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: sonner_intent_for_part(node.part, node.actionable),
+                    selected: node.active || node.actioned || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -5036,6 +5070,92 @@ pub mod bevy_adapter {
             }
             (SliderPart::Thumb, _) => Vec2::new(scale::space::M, scale::space::M),
             (SliderPart::Value, _) => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    fn sonner_primitive_part(node: &crate::SonnerRenderNode) -> String {
+        match node.part {
+            SonnerPart::Toast | SonnerPart::Action | SonnerPart::Dismiss => {
+                format!("{}:{}", node.part.label(), node.toast_value)
+            }
+            SonnerPart::Provider | SonnerPart::Viewport => node.part.label().to_owned(),
+        }
+    }
+
+    const fn sonner_kind_for_part(part: SonnerPart) -> UiWidgetSlotKind {
+        match part {
+            SonnerPart::Provider => UiWidgetSlotKind::Section,
+            SonnerPart::Viewport => UiWidgetSlotKind::Panel,
+            SonnerPart::Toast => UiWidgetSlotKind::Overlay,
+            SonnerPart::Action => UiWidgetSlotKind::Button,
+            SonnerPart::Dismiss => UiWidgetSlotKind::IconButton,
+        }
+    }
+
+    const fn sonner_role_for_part(part: SonnerPart) -> UiBlockRole {
+        match part {
+            SonnerPart::Provider => UiBlockRole::Root,
+            SonnerPart::Viewport => UiBlockRole::Layout,
+            SonnerPart::Toast => UiBlockRole::Feedback,
+            SonnerPart::Action | SonnerPart::Dismiss => UiBlockRole::Action,
+        }
+    }
+
+    fn sonner_tone_for_node(node: &crate::SonnerRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.active || node.actioned {
+            return UiBlockTone::Accent;
+        }
+        match (node.part, node.tone) {
+            (
+                SonnerPart::Toast | SonnerPart::Action | SonnerPart::Dismiss,
+                crate::SonnerTone::Info,
+            ) => UiBlockTone::Info,
+            (
+                SonnerPart::Toast | SonnerPart::Action | SonnerPart::Dismiss,
+                crate::SonnerTone::Success,
+            ) => UiBlockTone::Success,
+            (
+                SonnerPart::Toast | SonnerPart::Action | SonnerPart::Dismiss,
+                crate::SonnerTone::Warning,
+            ) => UiBlockTone::Warning,
+            (
+                SonnerPart::Toast | SonnerPart::Action | SonnerPart::Dismiss,
+                crate::SonnerTone::Destructive,
+            ) => UiBlockTone::Danger,
+            _ => UiBlockTone::Surface,
+        }
+    }
+
+    const fn sonner_intent_for_part(part: SonnerPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (SonnerPart::Action, true) => UiWidgetIntent::Activate,
+            (SonnerPart::Dismiss, true) => UiWidgetIntent::Dismiss,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn sonner_size_for_part(part: SonnerPart, density: crate::SonnerDensity) -> Vec2 {
+        match (part, density) {
+            (SonnerPart::Provider | SonnerPart::Viewport, crate::SonnerDensity::Standard) => {
+                Vec2::new(scale::space::XL3, scale::space::XL2)
+            }
+            (SonnerPart::Provider | SonnerPart::Viewport, crate::SonnerDensity::Dense) => {
+                Vec2::new(scale::space::XL2, scale::space::XL)
+            }
+            (SonnerPart::Toast, crate::SonnerDensity::Standard) => {
+                Vec2::new(scale::space::XL2, scale::space::L)
+            }
+            (SonnerPart::Toast, crate::SonnerDensity::Dense) => {
+                Vec2::new(scale::space::XL2, scale::space::M)
+            }
+            (SonnerPart::Action, _) => Vec2::new(scale::space::L, scale::space::S),
+            (SonnerPart::Dismiss, _) => Vec2::new(scale::space::M, scale::space::M),
         }
     }
 

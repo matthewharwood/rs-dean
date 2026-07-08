@@ -592,7 +592,7 @@ pub const SHADCN_COMPONENTS: [ComponentDefinition; SHADCN_COMPONENT_COUNT] = [
         name: "Sonner",
         summary: "A toast notification viewport modeled after Sonner semantics.",
         category: UiComponentCategory::Feedback,
-        framework: FrameworkMode::LeptosOnly,
+        framework: FrameworkMode::SharedSpec,
         state: UiStateModel::Ephemeral,
     },
     ComponentDefinition {

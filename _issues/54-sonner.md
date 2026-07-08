@@ -43,3 +43,10 @@ Ship a Rust-first `Sonner` component that follows the shadcn composition model w
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog Sonner entry with a bespoke shared Rust toast stack model in `crates/ui`.
+- Added `garde` validation for toast count, unique toast values, action contracts, duration bounds, and optional error copy.
+- Added renderer-local pause, focus, action, and dismiss state so transient notification behavior does not become durable app state unless a consumer explicitly persists it.
+- Added a token-only Leptos `Sonner` renderer, story variants, and Bevy primitive derivation over the same render nodes.

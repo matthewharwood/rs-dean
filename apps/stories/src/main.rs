@@ -35,7 +35,8 @@ use rs_dean_ui::{
     SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
     SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
     SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
-    SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation,
+    SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
+    SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone,
     ThemeCycleButton, ThemeId, ThemeScope,
 };
 
@@ -1039,6 +1040,25 @@ fn Stories() -> impl IntoView {
                             <Slider model=invalid_slider_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Slider model=themed_slider_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-sonner" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Sonner"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 54 implemented as a toast viewport backed by validated shared Rust notification state, renderer-local pause/action/dismiss state, and Bevy-readable toast primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Sonner model=default_sonner_story_model() />
+                            <Sonner model=dense_sonner_story_model() />
+                            <Sonner model=centered_sonner_story_model() />
+                            <Sonner model=loading_sonner_story_model() />
+                            <Sonner model=disabled_sonner_story_model() />
+                            <Sonner model=invalid_sonner_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Sonner model=themed_sonner_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -3906,6 +3926,80 @@ fn themed_slider_story_model() -> SliderModel {
         .with_label("Theme scoped range")
         .with_step(5)
         .with_detail("Slider colors resolve from the active theme tokens.")
+}
+
+fn default_sonner_story_model() -> SonnerModel {
+    SonnerModel::new(vec![
+        SonnerToast::new(
+            "saved",
+            "Project saved",
+            "The local draft is ready for the next gate run.",
+        )
+        .with_tone(SonnerTone::Success)
+        .with_action(SonnerAction::new("Undo", "undo-save")),
+        SonnerToast::new(
+            "queued",
+            "Gate queued",
+            "The branch is waiting on the full validation pass.",
+        )
+        .with_tone(SonnerTone::Info),
+    ])
+}
+
+fn dense_sonner_story_model() -> SonnerModel {
+    default_sonner_story_model()
+        .with_density(SonnerDensity::Dense)
+        .with_label("Dense notifications")
+}
+
+fn centered_sonner_story_model() -> SonnerModel {
+    SonnerModel::new(vec![
+        SonnerToast::new(
+            "centered",
+            "Centered viewport",
+            "Position is shared state, while actual placement belongs to the renderer.",
+        )
+        .with_tone(SonnerTone::Warning)
+        .with_action(SonnerAction::new("Review", "review-position")),
+    ])
+    .with_position(SonnerPosition::BottomCenter)
+}
+
+fn loading_sonner_story_model() -> SonnerModel {
+    default_sonner_story_model()
+        .with_label("Publishing notifications")
+        .loading()
+}
+
+fn disabled_sonner_story_model() -> SonnerModel {
+    SonnerModel::new(vec![
+        SonnerToast::new(
+            "locked",
+            "Notifications locked",
+            "Actions are disabled while durable app state is reconciling.",
+        )
+        .with_tone(SonnerTone::Destructive)
+        .with_action(SonnerAction::new("Retry", "retry-locked").disabled()),
+    ])
+    .disabled()
+}
+
+fn invalid_sonner_story_model() -> SonnerModel {
+    default_sonner_story_model()
+        .with_error("Toast delivery failed validation before the renderer accepted it.")
+}
+
+fn themed_sonner_story_model() -> SonnerModel {
+    SonnerModel::new(vec![
+        SonnerToast::new(
+            "theme",
+            "Theme scoped toast",
+            "Toast severity colors resolve through the nested Dracula theme.",
+        )
+        .with_tone(SonnerTone::Success)
+        .with_action(SonnerAction::new("Inspect", "inspect-theme-toast")),
+    ])
+    .with_position(SonnerPosition::TopRight)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

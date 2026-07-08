@@ -504,27 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    sonner,
-    Sonner,
-    SonnerModel,
-    SonnerPart,
-    SonnerRenderNode,
-    SonnerState,
-    SonnerIntent,
-    SonnerChange,
-    validate_sonner_model,
-    sonner_render_nodes,
-    default_sonner_model,
-    [
-        Provider => "SonnerProvider",
-        Viewport => "SonnerViewport",
-        Toast => "SonnerToast",
-        Action => "SonnerAction",
-        Dismiss => "SonnerDismiss",
-    ]
-);
-
-define_catalog_component!(
     spinner,
     Spinner,
     SpinnerModel,
@@ -771,8 +750,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Sheet
         | UiComponentId::Sidebar
         | UiComponentId::Skeleton
-        | UiComponentId::Slider => None,
-        UiComponentId::Sonner => Some(any_nodes(sonner_render_nodes(&default_sonner_model()))),
+        | UiComponentId::Slider
+        | UiComponentId::Sonner => None,
         UiComponentId::Spinner => Some(any_nodes(spinner_render_nodes(&default_spinner_model()))),
         UiComponentId::Switch => Some(any_nodes(switch_render_nodes(&default_switch_model()))),
         UiComponentId::Table => Some(any_nodes(table_render_nodes(&default_table_model()))),
@@ -865,6 +844,7 @@ mod tests {
                     | UiComponentId::Sidebar
                     | UiComponentId::Skeleton
                     | UiComponentId::Slider
+                    | UiComponentId::Sonner
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -881,17 +861,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_sonner_model().state();
-        assert!(!state.is_active(SonnerPart::Provider));
+        let mut state = default_spinner_model().state();
+        assert!(!state.is_active(SpinnerPart::Root));
         assert_eq!(
-            state.apply(SonnerIntent::Toggle(SonnerPart::Provider)),
-            SonnerChange::Opened(SonnerPart::Provider)
+            state.apply(SpinnerIntent::Toggle(SpinnerPart::Root)),
+            SpinnerChange::Opened(SpinnerPart::Root)
         );
-        assert!(state.is_active(SonnerPart::Provider));
+        assert!(state.is_active(SpinnerPart::Root));
         assert_eq!(
-            state.apply(SonnerIntent::Toggle(SonnerPart::Provider)),
-            SonnerChange::Closed(SonnerPart::Provider)
+            state.apply(SpinnerIntent::Toggle(SpinnerPart::Root)),
+            SpinnerChange::Closed(SpinnerPart::Root)
         );
-        assert!(!state.is_active(SonnerPart::Provider));
+        assert!(!state.is_active(SpinnerPart::Root));
     }
 }

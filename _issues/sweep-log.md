@@ -570,7 +570,17 @@ cannot disagree. Progress, Input, Field, Resizable, and Pagination were
 re-audited against that learning; no earlier changes were required because
 each already validates numeric or user-entered boundaries before rendering.
 
-All-issue sweep pass: Sonner through Typography complete. The shared
+Concrete component pass: Sonner complete. The component now has a typed Rust
+toast stack model, unique toast value validation, renderer-local pause,
+focus, action, and dismiss state, token-only Leptos toast viewport rendering,
+dedicated story proof, and Bevy primitive derivation from the same notification
+render nodes. The sweep found that transient notification dismissal belongs in
+renderer-local state unless the consuming app chooses to persist delivery or
+read receipts. Toast, Alert, Message, Message Scroller, and Popover were
+re-audited against that learning; no earlier changes were required because
+they already separate ephemeral renderer state from durable app-owned records.
+
+All-issue sweep pass: Spinner through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -578,7 +588,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Sonner through Typography now have
+Concrete all-issue sweep pass: Spinner through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

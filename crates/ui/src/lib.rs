@@ -55,6 +55,7 @@ pub mod sheet;
 pub mod sidebar;
 pub mod skeleton;
 pub mod slider;
+pub mod sonner;
 pub mod spec;
 pub mod theme;
 pub mod widgets;
@@ -327,6 +328,11 @@ pub use slider::{
     SliderChange, SliderDensity, SliderIntent, SliderModel, SliderOrientation, SliderPart,
     SliderRenderNode, SliderState, default_slider_model, slider_percent, slider_render_nodes,
     slider_value_label, validate_slider_model,
+};
+pub use sonner::{
+    SonnerAction, SonnerChange, SonnerDensity, SonnerIntent, SonnerModel, SonnerPart,
+    SonnerPosition, SonnerRenderNode, SonnerState, SonnerToast, SonnerTone, default_sonner_model,
+    sonner_render_nodes, validate_sonner_model,
 };
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};

@@ -45,13 +45,14 @@ use crate::{
     SeparatorPart, SheetDensity, SheetIntent, SheetModel, SheetPart, SheetSide, SheetState,
     SidebarDensity, SidebarIntent, SidebarModel, SidebarPart, SkeletonDensity, SkeletonIntent,
     SkeletonModel, SkeletonPart, SkeletonState, SliderDensity, SliderIntent, SliderModel,
-    SliderOrientation, SliderPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId,
-    UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
-    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
-    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
-    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
-    catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    SliderOrientation, SliderPart, SonnerDensity, SonnerIntent, SonnerModel, SonnerPart,
+    SonnerPosition, SonnerRenderNode, SonnerState, SonnerTone, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -68,17 +69,17 @@ use crate::{
     default_pagination_model, default_popover_model, default_progress_model,
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
-    default_skeleton_model, default_slider_model, dialog_render_nodes, direction_render_nodes,
-    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
-    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
-    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    default_skeleton_model, default_slider_model, default_sonner_model, dialog_render_nodes,
+    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
+    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
     message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
     selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    skeleton_render_nodes, slider_render_nodes, validate_accordion_model,
+    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, validate_accordion_model,
     validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
     validate_attachment_model, validate_avatar_model, validate_badge_model,
     validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
@@ -95,7 +96,7 @@ use crate::{
     validate_popover_model, validate_progress_model, validate_radio_group_model,
     validate_resizable_model, validate_scroll_area_model, validate_select_model,
     validate_separator_model, validate_sheet_model, validate_sidebar_model,
-    validate_skeleton_model, validate_slider_model,
+    validate_skeleton_model, validate_slider_model, validate_sonner_model,
 };
 
 const HEALTH_CARD: &str =
@@ -813,6 +814,52 @@ const SLIDER_THUMB_FOCUSED: &str =
 const SLIDER_THUMB_DISABLED: &str =
     "absolute top-1/2 size-s rounded-pill border border-border-muted bg-surface-2 opacity-disabled";
 const SLIDER_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
+const SONNER_PROVIDER: &str = "grid w-full max-w-md gap-xs text-text-1";
+const SONNER_PROVIDER_DENSE: &str = "grid w-full max-w-md gap-2xs text-text-1";
+const SONNER_PROVIDER_INVALID: &str =
+    "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1";
+const SONNER_PROVIDER_DISABLED: &str = "grid w-full max-w-md gap-xs text-text-disabled";
+const SONNER_VIEWPORT_CENTER: &str = "grid justify-items-center gap-xs";
+const SONNER_VIEWPORT_END: &str = "grid justify-items-end gap-xs";
+const SONNER_VIEWPORT_DENSE_CENTER: &str = "grid justify-items-center gap-2xs";
+const SONNER_VIEWPORT_DENSE_END: &str = "grid justify-items-end gap-2xs";
+const SONNER_TOAST: &str = "grid gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
+const SONNER_TOAST_DENSE: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-1";
+const SONNER_TOAST_INFO: &str =
+    "grid gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
+const SONNER_TOAST_INFO_DENSE: &str =
+    "grid gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const SONNER_TOAST_SUCCESS: &str =
+    "grid gap-xs rounded-box border border-success bg-success-soft p-s text-text-1 shadow-2";
+const SONNER_TOAST_SUCCESS_DENSE: &str =
+    "grid gap-2xs rounded-field border border-success bg-success-soft p-xs text-text-1 shadow-1";
+const SONNER_TOAST_WARNING: &str =
+    "grid gap-xs rounded-box border border-warning bg-warning-soft p-s text-text-1 shadow-2";
+const SONNER_TOAST_WARNING_DENSE: &str =
+    "grid gap-2xs rounded-field border border-warning bg-warning-soft p-xs text-text-1 shadow-1";
+const SONNER_TOAST_DESTRUCTIVE: &str =
+    "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-2";
+const SONNER_TOAST_DESTRUCTIVE_DENSE: &str =
+    "grid gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1";
+const SONNER_TOAST_ACTIVE: &str =
+    "grid gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-2";
+const SONNER_TOAST_INVALID: &str =
+    "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SONNER_TOAST_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SONNER_HEADER: &str = "flex min-w-0 items-start justify-between gap-xs";
+const SONNER_COPY: &str = "grid min-w-0 gap-3xs";
+const SONNER_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const SONNER_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const SONNER_META: &str = "m-0 text-00 uppercase tracking-label text-text-muted";
+const SONNER_ACTION_ROW: &str = "flex flex-wrap items-center gap-2xs";
+const SONNER_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SONNER_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-3xs text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SONNER_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
+const SONNER_DISMISS: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-strong bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SONNER_DISMISS_ACTIVE: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-brand bg-primary-soft text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SONNER_DISMISS_DISABLED: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-disabled";
+const SONNER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
 const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
@@ -15263,7 +15310,394 @@ const fn slider_state_label(
     }
 }
 
-catalog_component!(Sonner, crate::SonnerModel, crate::default_sonner_model);
+#[component]
+pub fn Sonner(#[prop(optional, default = default_sonner_model())] model: SonnerModel) -> AnyView {
+    if let Err(report) = validate_sonner_model(&model) {
+        let message = format!("Sonner validation failed: {report}");
+        return view! {
+            <div class=SONNER_ERROR data-ui-component="sonner" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let position = model.position;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let state_model = model.state();
+    let nodes = sonner_render_nodes(&model, &state_model);
+    let provider = nodes
+        .iter()
+        .find(|node| node.part == SonnerPart::Provider)
+        .expect("invariant: sonner render nodes include provider")
+        .clone();
+    let viewport = nodes
+        .iter()
+        .find(|node| node.part == SonnerPart::Viewport)
+        .expect("invariant: sonner render nodes include viewport")
+        .clone();
+    let toast_nodes: Vec<SonnerRenderNode> = nodes
+        .iter()
+        .filter(|node| node.part == SonnerPart::Toast)
+        .cloned()
+        .collect();
+    let action_nodes: Vec<SonnerRenderNode> = nodes
+        .iter()
+        .filter(|node| node.part == SonnerPart::Action)
+        .cloned()
+        .collect();
+    let dismiss_nodes: Vec<SonnerRenderNode> = nodes
+        .iter()
+        .filter(|node| node.part == SonnerPart::Dismiss)
+        .cloned()
+        .collect();
+    let provider_value = provider.value.clone();
+    let provider_label = provider.label.clone();
+    let provider_detail = provider.detail.clone();
+    let viewport_value = viewport.value.clone();
+    let viewport_label = viewport.label.clone();
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=sonner_provider_class(density, invalid, disabled)
+            data-ui-component="sonner"
+            data-ui-part=SonnerPart::Provider.label()
+            data-ui-density=density.label()
+            data-ui-position=position.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    sonner_provider_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_paused(),
+                        state.active_value(),
+                    )
+                })
+            }
+            data-ui-value=provider_value
+            aria-label=provider_label
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SonnerIntent::Pause);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SonnerIntent::Resume);
+                    });
+                }
+            }
+        >
+            <p class=SONNER_META>{provider_detail}</p>
+            <div
+                class=sonner_viewport_class(density, position)
+                data-ui-part=SonnerPart::Viewport.label()
+                data-ui-value=viewport_value
+                aria-label=viewport_label
+                aria-live="polite"
+                aria-relevant="additions removals"
+            >
+                {toast_nodes
+                    .into_iter()
+                    .map(|toast| {
+                        let action = action_nodes
+                            .iter()
+                            .find(|node| node.index == toast.index)
+                            .cloned();
+                        let dismiss = dismiss_nodes
+                            .iter()
+                            .find(|node| node.index == toast.index)
+                            .cloned()
+                            .expect("invariant: sonner toast render nodes include dismiss");
+                        sonner_toast_view(toast, action, dismiss, state, set_state)
+                    })
+                    .collect_view()}
+            </div>
+            {invalid.then_some(view! { <p class=SONNER_ERROR>{provider.detail}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+fn sonner_toast_view(
+    toast: SonnerRenderNode,
+    action: Option<SonnerRenderNode>,
+    dismiss: SonnerRenderNode,
+    state: ReadSignal<SonnerState>,
+    set_state: WriteSignal<SonnerState>,
+) -> AnyView {
+    let toast_value = toast.toast_value.clone();
+    let active_value = toast_value.clone();
+    let hidden_value = toast_value.clone();
+    let state_value = toast_value.clone();
+    let focus_value = toast_value.clone();
+    let blur_disabled = toast.disabled;
+    let toast_disabled = toast.disabled;
+    let toast_invalid = toast.invalid;
+    let toast_tone = toast.tone;
+    let toast_density = toast.density;
+    let toast_label = toast.label.clone();
+    let toast_detail = toast.detail.clone();
+    let toast_data_value = toast.value.clone();
+    let toast_position = toast.position;
+    let action_view = action.map(|action| {
+        let action_label = action.label.clone();
+        let action_value = action.value.clone();
+        let action_toast_value = action.toast_value.clone();
+        let action_state_value = action.toast_value.clone();
+        let action_disabled = action.disabled;
+        let actioned = action.actioned;
+        view! {
+            <button
+                type="button"
+                class=move || {
+                    state.with(|state| {
+                        sonner_action_class(
+                            actioned || state.is_actioned(&action_state_value),
+                            action_disabled,
+                        )
+                    })
+                }
+                data-ui-part=SonnerPart::Action.label()
+                data-ui-value=action_value
+                disabled=action_disabled
+                on:click=move |_| {
+                    if !action_disabled {
+                        set_state.update(|state| {
+                            let _ = state.apply(SonnerIntent::Activate(action_toast_value.clone()));
+                        });
+                    }
+                }
+            >
+                {action_label}
+            </button>
+        }
+    });
+    let dismiss_label = dismiss.label.clone();
+    let dismiss_value = dismiss.value.clone();
+    let dismiss_toast_value = dismiss.toast_value.clone();
+    let dismiss_state_value = dismiss.toast_value.clone();
+    let dismiss_disabled = dismiss.disabled;
+
+    view! {
+        <article
+            class=move || {
+                state.with(|state| {
+                    sonner_toast_class(
+                        toast_density,
+                        toast_tone,
+                        state.is_active(&active_value),
+                        toast_invalid,
+                        toast_disabled,
+                    )
+                })
+            }
+            data-ui-part=SonnerPart::Toast.label()
+            data-ui-tone=toast_tone.label()
+            data-ui-position=toast_position.label()
+            data-ui-value=toast_data_value
+            data-ui-state=move || {
+                state.with(|state| {
+                    sonner_toast_state_label(
+                        toast_disabled,
+                        toast_invalid,
+                        state.is_dismissed(&state_value),
+                        state.is_actioned(&state_value),
+                        state.is_active(&state_value),
+                    )
+                })
+            }
+            role="status"
+            aria-atomic="true"
+            aria-disabled=toast_disabled.to_string()
+            hidden=move || state.with(|state| state.is_dismissed(&hidden_value))
+            on:mouseenter=move |_| {
+                if !toast_disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SonnerIntent::Focus(focus_value.clone()));
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blur_disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(SonnerIntent::Blur);
+                    });
+                }
+            }
+        >
+            <div class=SONNER_HEADER>
+                <div class=SONNER_COPY>
+                    <h3 class=SONNER_TITLE>{toast_label}</h3>
+                    <p class=SONNER_DESCRIPTION>{toast_detail}</p>
+                </div>
+                <button
+                    type="button"
+                    class=move || {
+                        state.with(|state| {
+                            sonner_dismiss_class(
+                                state.is_active(&dismiss_state_value),
+                                dismiss_disabled,
+                            )
+                        })
+                    }
+                    data-ui-part=SonnerPart::Dismiss.label()
+                    data-ui-value=dismiss_value
+                    aria-label=dismiss_label
+                    disabled=dismiss_disabled
+                    on:click=move |_| {
+                        if !dismiss_disabled {
+                            set_state.update(|state| {
+                                let _ = state.apply(SonnerIntent::Dismiss(
+                                    dismiss_toast_value.clone(),
+                                ));
+                            });
+                        }
+                    }
+                >
+                    "x"
+                </button>
+            </div>
+            {action_view.map(|view| view! { <div class=SONNER_ACTION_ROW>{view}</div> })}
+        </article>
+    }
+    .into_any()
+}
+
+const fn sonner_provider_class(
+    density: SonnerDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SONNER_PROVIDER_DISABLED;
+    }
+    if invalid {
+        return SONNER_PROVIDER_INVALID;
+    }
+    match density {
+        SonnerDensity::Standard => SONNER_PROVIDER,
+        SonnerDensity::Dense => SONNER_PROVIDER_DENSE,
+    }
+}
+
+const fn sonner_viewport_class(density: SonnerDensity, position: SonnerPosition) -> &'static str {
+    match (density, position) {
+        (SonnerDensity::Dense, SonnerPosition::BottomCenter) => SONNER_VIEWPORT_DENSE_CENTER,
+        (SonnerDensity::Dense, SonnerPosition::TopRight | SonnerPosition::BottomRight) => {
+            SONNER_VIEWPORT_DENSE_END
+        }
+        (SonnerDensity::Standard, SonnerPosition::BottomCenter) => SONNER_VIEWPORT_CENTER,
+        (SonnerDensity::Standard, SonnerPosition::TopRight | SonnerPosition::BottomRight) => {
+            SONNER_VIEWPORT_END
+        }
+    }
+}
+
+const fn sonner_toast_class(
+    density: SonnerDensity,
+    tone: SonnerTone,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return SONNER_TOAST_DISABLED;
+    }
+    if invalid {
+        return SONNER_TOAST_INVALID;
+    }
+    if active {
+        return SONNER_TOAST_ACTIVE;
+    }
+    match (density, tone) {
+        (SonnerDensity::Dense, SonnerTone::Info) => SONNER_TOAST_INFO_DENSE,
+        (SonnerDensity::Dense, SonnerTone::Success) => SONNER_TOAST_SUCCESS_DENSE,
+        (SonnerDensity::Dense, SonnerTone::Warning) => SONNER_TOAST_WARNING_DENSE,
+        (SonnerDensity::Dense, SonnerTone::Destructive) => SONNER_TOAST_DESTRUCTIVE_DENSE,
+        (SonnerDensity::Dense, SonnerTone::Default) => SONNER_TOAST_DENSE,
+        (SonnerDensity::Standard, SonnerTone::Info) => SONNER_TOAST_INFO,
+        (SonnerDensity::Standard, SonnerTone::Success) => SONNER_TOAST_SUCCESS,
+        (SonnerDensity::Standard, SonnerTone::Warning) => SONNER_TOAST_WARNING,
+        (SonnerDensity::Standard, SonnerTone::Destructive) => SONNER_TOAST_DESTRUCTIVE,
+        (SonnerDensity::Standard, SonnerTone::Default) => SONNER_TOAST,
+    }
+}
+
+const fn sonner_action_class(active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SONNER_ACTION_DISABLED
+    } else if active {
+        SONNER_ACTION_ACTIVE
+    } else {
+        SONNER_ACTION
+    }
+}
+
+const fn sonner_dismiss_class(active: bool, disabled: bool) -> &'static str {
+    if disabled {
+        SONNER_DISMISS_DISABLED
+    } else if active {
+        SONNER_DISMISS_ACTIVE
+    } else {
+        SONNER_DISMISS
+    }
+}
+
+fn sonner_provider_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    paused: bool,
+    active_value: Option<&str>,
+) -> String {
+    if disabled {
+        "disabled".to_owned()
+    } else if loading {
+        "loading".to_owned()
+    } else if invalid {
+        "invalid".to_owned()
+    } else if paused {
+        "paused".to_owned()
+    } else if let Some(value) = active_value {
+        format!("active-{value}")
+    } else {
+        "ready".to_owned()
+    }
+}
+
+const fn sonner_toast_state_label(
+    disabled: bool,
+    invalid: bool,
+    dismissed: bool,
+    actioned: bool,
+    active: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if invalid {
+        "invalid"
+    } else if dismissed {
+        "dismissed"
+    } else if actioned {
+        "actioned"
+    } else if active {
+        "active"
+    } else {
+        "visible"
+    }
+}
+
 catalog_component!(Spinner, crate::SpinnerModel, crate::default_spinner_model);
 catalog_component!(Switch, crate::SwitchModel, crate::default_switch_model);
 catalog_component!(Table, crate::TableModel, crate::default_table_model);
