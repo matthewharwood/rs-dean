@@ -41,7 +41,8 @@ use rs_dean_ui::{
     Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
     TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
     ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone, Toggle,
-    ToggleDensity, ToggleModel, TogglePressed, ToggleVariant,
+    ToggleDensity, ToggleGroup, ToggleGroupItem, ToggleGroupModel, ToggleGroupOrientation,
+    ToggleGroupSelectionMode, ToggleModel, TogglePressed, ToggleVariant,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1120,6 +1121,26 @@ fn Stories() -> impl IntoView {
                             <Toggle model=invalid_toggle_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Toggle model=themed_toggle_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-toggle-group" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Toggle Group"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 62 implemented as grouped pressed buttons backed by validated shared Rust selection state, renderer-local focus/toggle transitions, and Bevy-readable toggle group primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <ToggleGroup model=default_toggle_group_story_model() />
+                            <ToggleGroup model=multiple_toggle_group_story_model() />
+                            <ToggleGroup model=dense_toggle_group_story_model() />
+                            <ToggleGroup model=vertical_toggle_group_story_model() />
+                            <ToggleGroup model=loading_toggle_group_story_model() />
+                            <ToggleGroup model=disabled_toggle_group_story_model() />
+                            <ToggleGroup model=invalid_toggle_group_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <ToggleGroup model=themed_toggle_group_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4284,6 +4305,63 @@ fn themed_toggle_story_model() -> ToggleModel {
         .with_pressed_indicator("on")
         .with_unpressed_indicator("off")
         .pressed()
+}
+
+fn default_toggle_group_story_model() -> ToggleGroupModel {
+    ToggleGroupModel::new(vec![
+        ToggleGroupItem::new("Left", "left").with_detail("Align content to the left edge."),
+        ToggleGroupItem::new("Center", "center").with_detail("Center content in the container."),
+        ToggleGroupItem::new("Right", "right").with_detail("Align content to the right edge."),
+    ])
+    .with_label("Text alignment")
+    .with_selected_value("left")
+}
+
+fn multiple_toggle_group_story_model() -> ToggleGroupModel {
+    ToggleGroupModel::new(vec![
+        ToggleGroupItem::new("Bold", "bold").with_detail("Apply bold text weight."),
+        ToggleGroupItem::new("Italic", "italic").with_detail("Apply italic text style."),
+        ToggleGroupItem::new("Underline", "underline").with_detail("Apply underline decoration."),
+    ])
+    .with_label("Text style")
+    .with_selection_mode(ToggleGroupSelectionMode::Multiple)
+    .with_selected_values(vec!["bold".to_owned(), "italic".to_owned()])
+}
+
+fn dense_toggle_group_story_model() -> ToggleGroupModel {
+    default_toggle_group_story_model()
+        .with_density(ToggleDensity::Dense)
+        .with_variant(ToggleVariant::Outline)
+}
+
+fn vertical_toggle_group_story_model() -> ToggleGroupModel {
+    default_toggle_group_story_model()
+        .with_label("Panel alignment")
+        .with_orientation(ToggleGroupOrientation::Vertical)
+        .with_selected_value("center")
+}
+
+fn loading_toggle_group_story_model() -> ToggleGroupModel {
+    default_toggle_group_story_model().loading()
+}
+
+fn disabled_toggle_group_story_model() -> ToggleGroupModel {
+    default_toggle_group_story_model().disabled()
+}
+
+fn invalid_toggle_group_story_model() -> ToggleGroupModel {
+    default_toggle_group_story_model().with_error("Selected alignment is not available.")
+}
+
+fn themed_toggle_group_story_model() -> ToggleGroupModel {
+    ToggleGroupModel::new(vec![
+        ToggleGroupItem::new("Compact", "compact").with_detail("Compact density preset."),
+        ToggleGroupItem::new("Roomy", "roomy").with_detail("Roomy density preset."),
+        ToggleGroupItem::new("Focus", "focus").with_detail("Focus density preset."),
+    ])
+    .with_label("Theme scoped group")
+    .with_variant(ToggleVariant::Outline)
+    .with_selected_value("roomy")
 }
 
 fn table_story_columns() -> Vec<TableColumn> {

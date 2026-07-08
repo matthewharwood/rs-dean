@@ -65,6 +65,7 @@ pub mod textarea;
 pub mod theme;
 pub mod toast;
 pub mod toggle;
+pub mod toggle_group;
 pub mod widgets;
 
 #[cfg(feature = "leptos")]
@@ -382,6 +383,12 @@ pub use toggle::{
     ToggleChange, ToggleDensity, ToggleIntent, ToggleModel, TogglePart, TogglePressed,
     ToggleRenderNode, ToggleState, ToggleVariant, default_toggle_model, toggle_render_nodes,
     validate_toggle_model,
+};
+pub use toggle_group::{
+    ToggleGroupChange, ToggleGroupIntent, ToggleGroupItem, ToggleGroupModel,
+    ToggleGroupOrientation, ToggleGroupPart, ToggleGroupRenderNode, ToggleGroupSelectionMode,
+    ToggleGroupState, default_toggle_group_items, default_toggle_group_model,
+    toggle_group_render_nodes, toggle_group_selected_values_label, validate_toggle_group_model,
 };
 pub use widgets::{
     UI_WIDGET_CONSTRUCTOR_COUNT, UI_WIDGET_CONSTRUCTORS, UiWidget, UiWidgetConstructor,

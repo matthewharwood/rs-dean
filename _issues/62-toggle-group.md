@@ -43,3 +43,9 @@ Ship a Rust-first `Toggle Group` component that follows the shadcn composition m
 - [x] Shared widget validation/render-node contract covers the catalog entry, with concrete renderers kept in sync where specialized.
 - [x] Concrete typed model, part enum, render nodes, validation, local state, and named token-only Leptos component implemented.
 - [x] Sweep review complete through the current implemented catalog.
+
+## Concrete Pass Notes
+
+- Replaced the generated catalog contract with a concrete `ToggleGroupModel` using `garde` validation, single/multiple selection modes, orientation, item validation, and renderer-local focus/toggle transitions.
+- Added shared render nodes for `ToggleGroup`, repeated `ToggleGroupItem`, and repeated `ToggleGroupIndicator`; Leptos renders grouped `aria-pressed` buttons from the same nodes and Bevy derives primitives without depending on Leptos.
+- Added stories for single, multiple, dense, vertical, loading, disabled, invalid, and themed Toggle Group states using only existing token utilities.

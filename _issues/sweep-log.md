@@ -651,7 +651,18 @@ Spinner, Toast, and the earlier action/control components were re-audited
 against that learning; no changes were required because their role-specific
 semantics remain distinct.
 
-All-issue sweep pass: Toggle Group through Typography complete. The shared
+Concrete component pass: Toggle Group complete. The component now has a typed
+Rust grouped-toggle model, single/multiple selection validation, renderer-local
+focus/toggle state, token-only Leptos grouped `aria-pressed` rendering,
+dedicated story proof, and Bevy primitive derivation from the same
+group/item/indicator render nodes. The sweep found that Toggle Group should
+reuse Toggle's density, variant, and pressed vocabulary while owning the
+group-specific selection mode and repeated item contract. Toggle, Switch,
+Button Group, Radio Group, and the earlier control components were re-audited
+against that learning; no changes were required because each still owns a
+distinct accessibility role and selection model.
+
+All-issue sweep pass: Tooltip through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -659,7 +670,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Toggle Group through Typography now have
+Concrete all-issue sweep pass: Tooltip through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

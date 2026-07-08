@@ -297,10 +297,11 @@ pub mod bevy_adapter {
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
         SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
-        Theme, ToastPart, TogglePart, TogglePressed, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        Theme, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart, TogglePressed,
+        UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
+        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -324,18 +325,18 @@ pub mod bevy_adapter {
         default_separator_model, default_sheet_model, default_sidebar_model,
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
         default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-        default_toast_model, default_toggle_model, dialog_render_nodes, direction_render_nodes,
-        drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
-        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-        marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        default_toast_model, default_toggle_group_model, default_toggle_model, dialog_render_nodes,
+        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
         switch_render_nodes, table_render_nodes, tabs_render_nodes, textarea_render_nodes,
-        toast_render_nodes, toggle_render_nodes,
+        toast_render_nodes, toggle_group_render_nodes, toggle_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -616,6 +617,13 @@ pub mod bevy_adapter {
         }
         if id == UiComponentId::Toggle {
             return bevy_primitives_for_toggle(theme, implementation.render, implementation.state);
+        }
+        if id == UiComponentId::ToggleGroup {
+            return bevy_primitives_for_toggle_group(
+                theme,
+                implementation.render,
+                implementation.state,
+            );
         }
         if id == UiComponentId::Table {
             return bevy_primitives_for_table(theme, implementation.render, implementation.state);
@@ -1906,6 +1914,37 @@ pub mod bevy_adapter {
                     state,
                     intent: toggle_intent_for_part(node.part, node.actionable),
                     selected: node.pressed.is_pressed() || node.active || node.invalid,
+                    disabled: node.disabled,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_toggle_group(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_toggle_group_model();
+        let toggle_group_state = model.state();
+        toggle_group_render_nodes(&model, &toggle_group_state)
+            .into_iter()
+            .map(|node| {
+                let role = toggle_group_role_for_part(node.part);
+                let tone = toggle_group_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: toggle_group_primitive_part(&node),
+                    kind: toggle_group_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: toggle_group_size_for_part(node.part, node.density),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: toggle_group_intent_for_part(node.part, node.actionable),
+                    selected: node.pressed.is_pressed() || node.focused || node.invalid,
                     disabled: node.disabled,
                 }
             })
@@ -5571,6 +5610,76 @@ pub mod bevy_adapter {
             TogglePart::Root => root,
             TogglePart::Indicator => Vec2::new(scale::space::S, scale::space::S),
             TogglePart::Label => Vec2::new(scale::space::L, scale::space::S),
+        }
+    }
+
+    fn toggle_group_primitive_part(node: &crate::ToggleGroupRenderNode) -> String {
+        match node.part {
+            ToggleGroupPart::Item | ToggleGroupPart::Indicator => {
+                format!("{}:{}", node.part.label(), node.value)
+            }
+            ToggleGroupPart::Root => node.part.label().to_owned(),
+        }
+    }
+
+    const fn toggle_group_kind_for_part(part: ToggleGroupPart) -> UiWidgetSlotKind {
+        match part {
+            ToggleGroupPart::Root => UiWidgetSlotKind::Section,
+            ToggleGroupPart::Item => UiWidgetSlotKind::Button,
+            ToggleGroupPart::Indicator => UiWidgetSlotKind::Marker,
+        }
+    }
+
+    const fn toggle_group_role_for_part(part: ToggleGroupPart) -> UiBlockRole {
+        match part {
+            ToggleGroupPart::Root => UiBlockRole::Root,
+            ToggleGroupPart::Item => UiBlockRole::Action,
+            ToggleGroupPart::Indicator => UiBlockRole::Indicator,
+        }
+    }
+
+    fn toggle_group_tone_for_node(node: &crate::ToggleGroupRenderNode) -> UiBlockTone {
+        if node.disabled {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        match (node.part, node.pressed, node.selection_mode) {
+            (
+                ToggleGroupPart::Item | ToggleGroupPart::Indicator,
+                TogglePressed::Pressed,
+                ToggleGroupSelectionMode::Single,
+            ) => UiBlockTone::Brand,
+            (
+                ToggleGroupPart::Item | ToggleGroupPart::Indicator,
+                TogglePressed::Pressed,
+                ToggleGroupSelectionMode::Multiple,
+            ) => UiBlockTone::Accent,
+            (ToggleGroupPart::Root, TogglePressed::Pressed, _) => UiBlockTone::Brand,
+            _ => UiBlockTone::Surface,
+        }
+    }
+
+    const fn toggle_group_intent_for_part(
+        part: ToggleGroupPart,
+        actionable: bool,
+    ) -> UiWidgetIntent {
+        match (part, actionable) {
+            (ToggleGroupPart::Item, true) => UiWidgetIntent::Toggle,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn toggle_group_size_for_part(part: ToggleGroupPart, density: crate::ToggleDensity) -> Vec2 {
+        let item = match density {
+            crate::ToggleDensity::Standard => Vec2::new(scale::space::XL2, scale::space::M),
+            crate::ToggleDensity::Dense => Vec2::new(scale::space::XL, scale::space::S),
+        };
+        match part {
+            ToggleGroupPart::Root => Vec2::new(scale::space::XL4, scale::space::XL),
+            ToggleGroupPart::Item => item,
+            ToggleGroupPart::Indicator => Vec2::new(scale::space::S, scale::space::S),
         }
     }
 

@@ -504,25 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    toggle_group,
-    ToggleGroup,
-    ToggleGroupModel,
-    ToggleGroupPart,
-    ToggleGroupRenderNode,
-    ToggleGroupState,
-    ToggleGroupIntent,
-    ToggleGroupChange,
-    validate_toggle_group_model,
-    toggle_group_render_nodes,
-    default_toggle_group_model,
-    [
-        Root => "ToggleGroup",
-        Item => "ToggleGroupItem",
-        Indicator => "ToggleGroupIndicator",
-    ]
-);
-
-define_catalog_component!(
     tooltip,
     Tooltip,
     TooltipModel,
@@ -628,10 +609,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Tabs
         | UiComponentId::Textarea
         | UiComponentId::Toast
-        | UiComponentId::Toggle => None,
-        UiComponentId::ToggleGroup => Some(any_nodes(toggle_group_render_nodes(
-            &default_toggle_group_model(),
-        ))),
+        | UiComponentId::Toggle
+        | UiComponentId::ToggleGroup => None,
         UiComponentId::Tooltip => Some(any_nodes(tooltip_render_nodes(&default_tooltip_model()))),
         UiComponentId::Typography => Some(any_nodes(typography_render_nodes(
             &default_typography_model(),
@@ -720,6 +699,7 @@ mod tests {
                     | UiComponentId::Textarea
                     | UiComponentId::Toast
                     | UiComponentId::Toggle
+                    | UiComponentId::ToggleGroup
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -736,17 +716,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_toggle_group_model().state();
-        assert!(!state.is_active(ToggleGroupPart::Root));
+        let mut state = default_tooltip_model().state();
+        assert!(!state.is_active(TooltipPart::Root));
         assert_eq!(
-            state.apply(ToggleGroupIntent::Toggle(ToggleGroupPart::Root)),
-            ToggleGroupChange::Opened(ToggleGroupPart::Root)
+            state.apply(TooltipIntent::Toggle(TooltipPart::Root)),
+            TooltipChange::Opened(TooltipPart::Root)
         );
-        assert!(state.is_active(ToggleGroupPart::Root));
+        assert!(state.is_active(TooltipPart::Root));
         assert_eq!(
-            state.apply(ToggleGroupIntent::Toggle(ToggleGroupPart::Root)),
-            ToggleGroupChange::Closed(ToggleGroupPart::Root)
+            state.apply(TooltipIntent::Toggle(TooltipPart::Root)),
+            TooltipChange::Closed(TooltipPart::Root)
         );
-        assert!(!state.is_active(ToggleGroupPart::Root));
+        assert!(!state.is_active(TooltipPart::Root));
     }
 }
