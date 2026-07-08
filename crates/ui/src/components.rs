@@ -50,11 +50,12 @@ use crate::{
     SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, SwitchChecked, SwitchDensity,
     SwitchIntent, SwitchModel, SwitchPart, TableDensity, TableIntent, TableModel, TablePart,
     TableState, TabsDensity, TabsIntent, TabsModel, TabsOrientation, TabsPart, TabsState,
-    ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
-    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    TextareaDensity, TextareaIntent, TextareaModel, TextareaPart, ThemeChoice, ThemeId, UiBlock,
+    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
+    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
+    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
+    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -73,21 +74,21 @@ use crate::{
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-    default_switch_model, default_table_model, default_tabs_model, dialog_render_nodes,
-    direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes,
-    field_render_nodes, hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
-    input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
-    marker_render_nodes, max_data_table_page_index, menubar_render_nodes, message_render_nodes,
-    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
+    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
+    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
+    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
+    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
+    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
     navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
     progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
     resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
     selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
     skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
-    switch_render_nodes, table_render_nodes, tabs_dom_id, tabs_render_nodes,
-    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
-    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
-    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    switch_render_nodes, table_render_nodes, tabs_dom_id, tabs_render_nodes, textarea_dom_id,
+    textarea_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -102,7 +103,7 @@ use crate::{
     validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
     validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
-    validate_switch_model, validate_table_model, validate_tabs_model,
+    validate_switch_model, validate_table_model, validate_tabs_model, validate_textarea_model,
 };
 
 const HEALTH_CARD: &str =
@@ -649,6 +650,38 @@ const TABS_CONTENT_INVALID: &str = "grid gap-2xs rounded-field border border-dan
 const TABS_CONTENT_DISABLED: &str = "grid gap-2xs rounded-field border border-border-muted bg-surface-2 p-s text-0 leading-0 text-text-disabled opacity-disabled";
 const TABS_CONTENT_COPY: &str = "m-0";
 const TABS_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const TEXTAREA_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TEXTAREA_ROOT_LOADING: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TEXTAREA_LABEL: &str =
+    "flex min-w-0 items-center gap-2xs text-0 font-7 leading-0 text-text-1";
+const TEXTAREA_LABEL_DENSE: &str =
+    "flex min-w-0 items-center gap-2xs text-00 font-7 leading-0 text-text-1";
+const TEXTAREA_LABEL_DISABLED: &str =
+    "flex min-w-0 items-center gap-2xs text-0 font-7 leading-0 text-text-disabled";
+const TEXTAREA_REQUIRED: &str = "text-danger";
+const TEXTAREA_CONTROL: &str = "min-h-xl w-full resize-y rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TEXTAREA_CONTROL_DENSE: &str = "min-h-l w-full resize-y rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TEXTAREA_CONTROL_FOCUSED: &str = "min-h-xl w-full resize-y rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TEXTAREA_CONTROL_DENSE_FOCUSED: &str = "min-h-l w-full resize-y rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TEXTAREA_CONTROL_INVALID: &str = "min-h-xl w-full resize-y rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 leading-0 text-text-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TEXTAREA_CONTROL_DENSE_INVALID: &str = "min-h-l w-full resize-y rounded-field border border-danger bg-error-soft px-2xs py-3xs text-00 leading-0 text-text-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TEXTAREA_CONTROL_DISABLED: &str = "min-h-xl w-full resize-y rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-disabled";
+const TEXTAREA_CONTROL_DENSE_DISABLED: &str = "min-h-l w-full resize-y rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 leading-0 text-text-disabled opacity-disabled";
+const TEXTAREA_META: &str = "flex flex-wrap items-start justify-between gap-2xs";
+const TEXTAREA_HINT: &str = "m-0 min-w-0 flex-1 text-00 leading-0 text-text-2";
+const TEXTAREA_HINT_INVALID: &str = "m-0 min-w-0 flex-1 text-00 leading-0 text-danger";
+const TEXTAREA_HINT_DISABLED: &str = "m-0 min-w-0 flex-1 text-00 leading-0 text-text-disabled";
+const TEXTAREA_COUNTER: &str =
+    "shrink-0 rounded-pill bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-muted";
+const TEXTAREA_COUNTER_LIMIT: &str =
+    "shrink-0 rounded-pill bg-warning-soft px-2xs py-3xs text-00 font-7 text-text-1";
+const TEXTAREA_COUNTER_DISABLED: &str =
+    "shrink-0 rounded-pill bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled";
+const TEXTAREA_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DATE_PICKER_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
 const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
@@ -6580,6 +6613,249 @@ fn tabs_state_label(loading: bool, disabled: bool, invalid: bool, selected_value
         "invalid".to_owned()
     } else {
         format!("selected-{selected_value}")
+    }
+}
+
+#[component]
+pub fn Textarea(
+    #[prop(optional, default = default_textarea_model())] model: TextareaModel,
+) -> AnyView {
+    if let Err(report) = validate_textarea_model(&model) {
+        let message = format!("Textarea validation failed: {report}");
+        return view! {
+            <div class=TEXTAREA_ERROR data-ui-component="textarea" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let required = model.required;
+    let rows = model.rows;
+    let max_length = model.max_length;
+    let blocked = loading || disabled;
+    let input_nodes = textarea_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == TextareaPart::Root)
+        .expect("invariant: textarea render nodes include root")
+        .clone();
+    let control = input_nodes
+        .iter()
+        .find(|node| node.part == TextareaPart::Control)
+        .expect("invariant: textarea render nodes include control")
+        .clone();
+    let hint = input_nodes
+        .iter()
+        .find(|node| node.part == TextareaPart::Hint)
+        .expect("invariant: textarea render nodes include hint")
+        .clone();
+    let counter_model = model.clone();
+    let control_id = textarea_dom_id("textarea-control", root.value.as_str());
+    let hint_id = textarea_dom_id("textarea-hint", root.value.as_str());
+    let counter_id = textarea_dom_id("textarea-counter", root.value.as_str());
+    let described_by = format!("{hint_id} {counter_id}");
+    let placeholder = if loading {
+        "Loading draft".to_owned()
+    } else {
+        control.label.clone()
+    };
+    let label_text = root.label.clone();
+    let root_detail = root.detail.clone();
+    let hint_detail = hint.detail.clone();
+    let max_length_attr = max_length.map(|value| value.to_string());
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=textarea_root_class(density, loading, disabled, invalid)
+            data-ui-component="textarea"
+            data-ui-part=TextareaPart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| textarea_state_label(loading, disabled, invalid, state.is_focused()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <label
+                class=textarea_label_class(density, disabled)
+                for=control_id.clone()
+            >
+                <span>{label_text.clone()}</span>
+                {required.then_some(view! { <span class=TEXTAREA_REQUIRED aria-hidden="true">"*"</span> })}
+            </label>
+            <textarea
+                id=control_id
+                class=move || {
+                    state.with(|state| {
+                        textarea_control_class(density, state.is_focused(), invalid, blocked).to_owned()
+                    })
+                }
+                data-ui-part=TextareaPart::Control.label()
+                placeholder=placeholder
+                aria-label=label_text
+                aria-describedby=described_by
+                aria-invalid=invalid.to_string()
+                required=required
+                disabled=blocked
+                rows=rows.to_string()
+                maxlength=max_length_attr
+                prop:value=move || state.with(|state| state.value().to_owned())
+                on:focus=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TextareaIntent::Focus);
+                        });
+                    }
+                }
+                on:blur=move |_| {
+                    if !blocked {
+                        set_state.update(|state| {
+                            let _ = state.apply(TextareaIntent::Blur);
+                        });
+                    }
+                }
+                on:input=move |event| {
+                    if !blocked {
+                        let value = event_target_value(&event);
+                        set_state.update(|state| {
+                            let _ = state.apply(TextareaIntent::Input(value));
+                        });
+                    }
+                }
+            ></textarea>
+            <div class=TEXTAREA_META>
+                <p
+                    id=hint_id
+                    class=textarea_hint_class(invalid, disabled)
+                    data-ui-part=TextareaPart::Hint.label()
+                >
+                    {if invalid { hint_detail } else { root_detail }}
+                </p>
+                <p
+                    id=counter_id
+                    class=move || {
+                        state.with(|state| {
+                            textarea_counter_class(state.current_length(), max_length, invalid, disabled).to_owned()
+                        })
+                    }
+                    data-ui-part=TextareaPart::Counter.label()
+                    aria-live="polite"
+                >
+                    {move || {
+                        state.with(|state| {
+                            textarea_render_nodes(&counter_model, state)
+                                .into_iter()
+                                .find(|node| node.part == TextareaPart::Counter)
+                                .map(|node| node.label)
+                                .unwrap_or_else(|| "0 chars".to_owned())
+                        })
+                    }}
+                </p>
+            </div>
+        </section>
+    }
+    .into_any()
+}
+
+const fn textarea_root_class(
+    density: TextareaDensity,
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+) -> &'static str {
+    if disabled {
+        return TEXTAREA_ROOT_DISABLED;
+    }
+    if invalid {
+        return TEXTAREA_ROOT_INVALID;
+    }
+    if loading {
+        return TEXTAREA_ROOT_LOADING;
+    }
+    match density {
+        TextareaDensity::Standard => TEXTAREA_ROOT,
+        TextareaDensity::Dense => TEXTAREA_ROOT_DENSE,
+    }
+}
+
+const fn textarea_label_class(density: TextareaDensity, disabled: bool) -> &'static str {
+    if disabled {
+        return TEXTAREA_LABEL_DISABLED;
+    }
+    match density {
+        TextareaDensity::Standard => TEXTAREA_LABEL,
+        TextareaDensity::Dense => TEXTAREA_LABEL_DENSE,
+    }
+}
+
+const fn textarea_control_class(
+    density: TextareaDensity,
+    focused: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    match (density, disabled, invalid, focused) {
+        (TextareaDensity::Standard, true, _, _) => TEXTAREA_CONTROL_DISABLED,
+        (TextareaDensity::Dense, true, _, _) => TEXTAREA_CONTROL_DENSE_DISABLED,
+        (TextareaDensity::Standard, false, true, _) => TEXTAREA_CONTROL_INVALID,
+        (TextareaDensity::Dense, false, true, _) => TEXTAREA_CONTROL_DENSE_INVALID,
+        (TextareaDensity::Standard, false, false, true) => TEXTAREA_CONTROL_FOCUSED,
+        (TextareaDensity::Dense, false, false, true) => TEXTAREA_CONTROL_DENSE_FOCUSED,
+        (TextareaDensity::Standard, false, false, false) => TEXTAREA_CONTROL,
+        (TextareaDensity::Dense, false, false, false) => TEXTAREA_CONTROL_DENSE,
+    }
+}
+
+const fn textarea_hint_class(invalid: bool, disabled: bool) -> &'static str {
+    if disabled {
+        TEXTAREA_HINT_DISABLED
+    } else if invalid {
+        TEXTAREA_HINT_INVALID
+    } else {
+        TEXTAREA_HINT
+    }
+}
+
+fn textarea_counter_class(
+    current_length: usize,
+    max_length: Option<u16>,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TEXTAREA_COUNTER_DISABLED;
+    }
+    if invalid || max_length.is_some_and(|max_length| current_length >= usize::from(max_length)) {
+        TEXTAREA_COUNTER_LIMIT
+    } else {
+        TEXTAREA_COUNTER
+    }
+}
+
+const fn textarea_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    focused: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if focused {
+        "focused"
+    } else {
+        "ready"
     }
 }
 
@@ -16865,11 +17141,6 @@ const fn switch_state_label(
     }
 }
 
-catalog_component!(
-    Textarea,
-    crate::TextareaModel,
-    crate::default_textarea_model
-);
 catalog_component!(Toast, crate::ToastModel, crate::default_toast_model);
 catalog_component!(Toggle, crate::ToggleModel, crate::default_toggle_model);
 catalog_component!(

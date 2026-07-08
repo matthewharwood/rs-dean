@@ -61,6 +61,7 @@ pub mod spinner;
 pub mod switch;
 pub mod table;
 pub mod tabs;
+pub mod textarea;
 pub mod theme;
 pub mod widgets;
 
@@ -363,6 +364,11 @@ pub use tabs::{
     TabsChange, TabsDensity, TabsIntent, TabsItem, TabsModel, TabsOrientation, TabsPart,
     TabsRenderNode, TabsState, default_tabs_items, default_tabs_model, tabs_dom_id,
     tabs_render_nodes, validate_tabs_model,
+};
+pub use textarea::{
+    TextareaChange, TextareaDensity, TextareaIntent, TextareaModel, TextareaPart,
+    TextareaRenderNode, TextareaState, default_textarea_model, textarea_dom_id,
+    textarea_render_nodes, validate_textarea_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
 pub use widgets::{

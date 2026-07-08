@@ -620,7 +620,17 @@ collection sorting/filtering state. Those earlier components were re-audited
 against that learning; no changes were required because they already keep their
 workflow-specific state in their own models.
 
-All-issue sweep pass: Textarea through Typography complete. The shared
+Concrete component pass: Textarea complete. The component now has a typed Rust
+multi-line draft model, row and optional max-length validation, renderer-local
+focus/input state, token-only Leptos textarea rendering with a live counter,
+dedicated story proof, and Bevy primitive derivation from the same
+root/control/counter/hint render nodes. The sweep found that Textarea should
+reuse Field and Input's renderer-local draft-state rule, while preserving its
+own counter and row-height contract. Field, Input, and Input Group were
+re-audited against that learning; no changes were required because they already
+keep durable submitted values app-owned.
+
+All-issue sweep pass: Toast through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -628,7 +638,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Textarea through Typography now have
+Concrete all-issue sweep pass: Toast through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

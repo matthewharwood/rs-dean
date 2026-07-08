@@ -504,26 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    textarea,
-    Textarea,
-    TextareaModel,
-    TextareaPart,
-    TextareaRenderNode,
-    TextareaState,
-    TextareaIntent,
-    TextareaChange,
-    validate_textarea_model,
-    textarea_render_nodes,
-    default_textarea_model,
-    [
-        Root => "Textarea",
-        Control => "TextareaControl",
-        Counter => "TextareaCounter",
-        Hint => "TextareaHint",
-    ]
-);
-
-define_catalog_component!(
     toast,
     Toast,
     ToastModel,
@@ -682,10 +662,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Spinner
         | UiComponentId::Switch
         | UiComponentId::Table
-        | UiComponentId::Tabs => None,
-        UiComponentId::Textarea => {
-            Some(any_nodes(textarea_render_nodes(&default_textarea_model())))
-        }
+        | UiComponentId::Tabs
+        | UiComponentId::Textarea => None,
         UiComponentId::Toast => Some(any_nodes(toast_render_nodes(&default_toast_model()))),
         UiComponentId::Toggle => Some(any_nodes(toggle_render_nodes(&default_toggle_model()))),
         UiComponentId::ToggleGroup => Some(any_nodes(toggle_group_render_nodes(
@@ -776,6 +754,7 @@ mod tests {
                     | UiComponentId::Switch
                     | UiComponentId::Table
                     | UiComponentId::Tabs
+                    | UiComponentId::Textarea
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -792,17 +771,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_textarea_model().state();
-        assert!(!state.is_active(TextareaPart::Root));
+        let mut state = default_toast_model().state();
+        assert!(!state.is_active(ToastPart::Provider));
         assert_eq!(
-            state.apply(TextareaIntent::Toggle(TextareaPart::Root)),
-            TextareaChange::Opened(TextareaPart::Root)
+            state.apply(ToastIntent::Toggle(ToastPart::Provider)),
+            ToastChange::Opened(ToastPart::Provider)
         );
-        assert!(state.is_active(TextareaPart::Root));
+        assert!(state.is_active(ToastPart::Provider));
         assert_eq!(
-            state.apply(TextareaIntent::Toggle(TextareaPart::Root)),
-            TextareaChange::Closed(TextareaPart::Root)
+            state.apply(ToastIntent::Toggle(ToastPart::Provider)),
+            ToastChange::Closed(ToastPart::Provider)
         );
-        assert!(!state.is_active(TextareaPart::Root));
+        assert!(!state.is_active(ToastPart::Provider));
     }
 }

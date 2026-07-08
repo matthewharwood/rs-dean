@@ -39,7 +39,8 @@ use rs_dean_ui::{
     SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
     SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
     Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
-    TabsOrientation, ThemeCycleButton, ThemeId, ThemeScope,
+    TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
+    ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1137,6 +1138,25 @@ fn Stories() -> impl IntoView {
                             <Tabs model=invalid_tabs_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Tabs model=themed_tabs_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-textarea" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Textarea"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 59 implemented as a multi-line text control backed by validated shared Rust copy limits, renderer-local draft/focus state, and Bevy-readable textarea primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Textarea model=default_textarea_story_model() />
+                            <Textarea model=dense_textarea_story_model() />
+                            <Textarea model=unlimited_textarea_story_model() />
+                            <Textarea model=loading_textarea_story_model() />
+                            <Textarea model=disabled_textarea_story_model() />
+                            <Textarea model=invalid_textarea_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Textarea model=themed_textarea_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4310,6 +4330,56 @@ fn themed_tabs_story_model() -> TabsModel {
         .with_label("Theme scoped tabs")
         .with_density(TabsDensity::Dense)
         .with_selected_value("bevy")
+}
+
+fn default_textarea_story_model() -> TextareaModel {
+    TextareaModel::new(
+        "Implementation notes",
+        "Draft locally, then persist the accepted text through app state.",
+    )
+    .with_value("Textarea state is local until the consumer accepts the draft.")
+    .with_placeholder("Add implementation notes")
+    .with_max_length(160)
+}
+
+fn dense_textarea_story_model() -> TextareaModel {
+    default_textarea_story_model()
+        .with_density(TextareaDensity::Dense)
+        .with_rows(3)
+        .with_value("Dense textareas use the same shared Rust contract.")
+}
+
+fn unlimited_textarea_story_model() -> TextareaModel {
+    default_textarea_story_model()
+        .with_hint("Counter remains present even when no consumer limit is configured.")
+        .without_max_length()
+}
+
+fn loading_textarea_story_model() -> TextareaModel {
+    default_textarea_story_model()
+        .with_hint("Loading textareas block draft updates while hydration completes.")
+        .loading()
+}
+
+fn disabled_textarea_story_model() -> TextareaModel {
+    default_textarea_story_model()
+        .with_hint("Disabled textareas expose a read-only draft across renderers.")
+        .disabled()
+}
+
+fn invalid_textarea_story_model() -> TextareaModel {
+    default_textarea_story_model()
+        .with_error("Textarea draft failed validation before the app accepted it.")
+}
+
+fn themed_textarea_story_model() -> TextareaModel {
+    TextareaModel::new(
+        "Theme scoped notes",
+        "Textarea borders, hints, and counters resolve through the nested theme.",
+    )
+    .with_density(TextareaDensity::Dense)
+    .with_value("The same model feeds DOM and Bevy primitive renderers.")
+    .with_max_length(120)
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
