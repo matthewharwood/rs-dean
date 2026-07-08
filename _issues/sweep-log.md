@@ -641,7 +641,17 @@ the earlier form/display components were re-audited against that learning; no
 changes were required because Sonner still owns multi-toast dismissal while
 Toast now owns the single shadcn toast contract.
 
-All-issue sweep pass: Toggle through Typography complete. The shared
+Concrete component pass: Toggle complete. The component now has a typed Rust
+pressed-button model, density/variant validation, renderer-local focus/toggle
+state, token-only Leptos `aria-pressed` rendering, dedicated story proof, and
+Bevy primitive derivation from the same toggle/indicator/label render nodes.
+The sweep found that Toggle should align with Switch's local binary transition
+shape while preserving button semantics instead of `role="switch"`. Switch,
+Spinner, Toast, and the earlier action/control components were re-audited
+against that learning; no changes were required because their role-specific
+semantics remain distinct.
+
+All-issue sweep pass: Toggle Group through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -649,7 +659,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Toggle through Typography now have
+Concrete all-issue sweep pass: Toggle Group through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

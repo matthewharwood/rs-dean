@@ -40,7 +40,8 @@ use rs_dean_ui::{
     SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
     Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
     TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
-    ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone,
+    ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone, Toggle,
+    ToggleDensity, ToggleModel, TogglePressed, ToggleVariant,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1100,6 +1101,25 @@ fn Stories() -> impl IntoView {
                             <Switch model=invalid_switch_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Switch model=themed_switch_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-toggle" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Toggle"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 61 implemented as a pressed button control backed by validated shared Rust state, renderer-local focus/toggle state, and Bevy-readable toggle primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Toggle model=default_toggle_story_model() />
+                            <Toggle model=dense_toggle_story_model() />
+                            <Toggle model=outline_toggle_story_model() />
+                            <Toggle model=loading_toggle_story_model() />
+                            <Toggle model=disabled_toggle_story_model() />
+                            <Toggle model=invalid_toggle_story_model() />
+                            <ThemeScope theme=ThemeId::Cyberpunk>
+                                <Toggle model=themed_toggle_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4210,6 +4230,60 @@ fn themed_switch_story_model() -> SwitchModel {
         .with_on_label("Dracula")
         .with_off_label("Default")
         .checked()
+}
+
+fn default_toggle_story_model() -> ToggleModel {
+    ToggleModel::new("Bold", "bold")
+        .with_detail("Renderer-local pressed state mirrors a toolbar command before persistence.")
+        .with_pressed_label("Active")
+        .with_unpressed_label("Inactive")
+        .with_pressed_indicator("on")
+        .with_unpressed_indicator("off")
+        .pressed()
+}
+
+fn dense_toggle_story_model() -> ToggleModel {
+    default_toggle_story_model()
+        .with_density(ToggleDensity::Dense)
+        .with_detail("Dense toggles preserve the same root, indicator, and label anatomy.")
+}
+
+fn outline_toggle_story_model() -> ToggleModel {
+    ToggleModel::new("Italic", "italic")
+        .with_variant(ToggleVariant::Outline)
+        .with_pressed(TogglePressed::Unpressed)
+        .with_detail("Outline toggles use the same state model with a quieter surface.")
+        .with_pressed_label("Enabled")
+        .with_unpressed_label("Disabled")
+        .with_pressed_indicator("on")
+        .with_unpressed_indicator("off")
+}
+
+fn loading_toggle_story_model() -> ToggleModel {
+    default_toggle_story_model()
+        .with_detail("Loading toggles block interaction while the editor reconciles durable state.")
+        .loading()
+}
+
+fn disabled_toggle_story_model() -> ToggleModel {
+    default_toggle_story_model()
+        .with_detail("Disabled toggles expose a read-only pressed state to every renderer.")
+        .disabled()
+}
+
+fn invalid_toggle_story_model() -> ToggleModel {
+    default_toggle_story_model().with_error("Toolbar state failed validation at the edge.")
+}
+
+fn themed_toggle_story_model() -> ToggleModel {
+    ToggleModel::new("Theme scoped toggle", "theme-scoped-toggle")
+        .with_variant(ToggleVariant::Outline)
+        .with_detail("Toggle colors resolve through the nested Cyberpunk theme.")
+        .with_pressed_label("Cyber")
+        .with_unpressed_label("Default")
+        .with_pressed_indicator("on")
+        .with_unpressed_indicator("off")
+        .pressed()
 }
 
 fn table_story_columns() -> Vec<TableColumn> {

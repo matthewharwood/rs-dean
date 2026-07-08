@@ -504,21 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    toggle,
-    Toggle,
-    ToggleModel,
-    TogglePart,
-    ToggleRenderNode,
-    ToggleState,
-    ToggleIntent,
-    ToggleChange,
-    validate_toggle_model,
-    toggle_render_nodes,
-    default_toggle_model,
-    [Root => "Toggle", Indicator => "ToggleIndicator", Label => "ToggleLabel"]
-);
-
-define_catalog_component!(
     toggle_group,
     ToggleGroup,
     ToggleGroupModel,
@@ -642,8 +627,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Table
         | UiComponentId::Tabs
         | UiComponentId::Textarea
-        | UiComponentId::Toast => None,
-        UiComponentId::Toggle => Some(any_nodes(toggle_render_nodes(&default_toggle_model()))),
+        | UiComponentId::Toast
+        | UiComponentId::Toggle => None,
         UiComponentId::ToggleGroup => Some(any_nodes(toggle_group_render_nodes(
             &default_toggle_group_model(),
         ))),
@@ -734,6 +719,7 @@ mod tests {
                     | UiComponentId::Tabs
                     | UiComponentId::Textarea
                     | UiComponentId::Toast
+                    | UiComponentId::Toggle
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -750,17 +736,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_toggle_model().state();
-        assert!(!state.is_active(TogglePart::Root));
+        let mut state = default_toggle_group_model().state();
+        assert!(!state.is_active(ToggleGroupPart::Root));
         assert_eq!(
-            state.apply(ToggleIntent::Toggle(TogglePart::Root)),
-            ToggleChange::Opened(TogglePart::Root)
+            state.apply(ToggleGroupIntent::Toggle(ToggleGroupPart::Root)),
+            ToggleGroupChange::Opened(ToggleGroupPart::Root)
         );
-        assert!(state.is_active(TogglePart::Root));
+        assert!(state.is_active(ToggleGroupPart::Root));
         assert_eq!(
-            state.apply(ToggleIntent::Toggle(TogglePart::Root)),
-            ToggleChange::Closed(TogglePart::Root)
+            state.apply(ToggleGroupIntent::Toggle(ToggleGroupPart::Root)),
+            ToggleGroupChange::Closed(ToggleGroupPart::Root)
         );
-        assert!(!state.is_active(TogglePart::Root));
+        assert!(!state.is_active(ToggleGroupPart::Root));
     }
 }

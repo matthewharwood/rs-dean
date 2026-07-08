@@ -64,6 +64,7 @@ pub mod tabs;
 pub mod textarea;
 pub mod theme;
 pub mod toast;
+pub mod toggle;
 pub mod widgets;
 
 #[cfg(feature = "leptos")]
@@ -376,6 +377,11 @@ pub use toast::{
     ToastAction, ToastChange, ToastDensity, ToastIntent, ToastModel, ToastPart, ToastPosition,
     ToastRenderNode, ToastState, ToastTone, default_toast_model, toast_dom_id, toast_render_nodes,
     validate_toast_model,
+};
+pub use toggle::{
+    ToggleChange, ToggleDensity, ToggleIntent, ToggleModel, TogglePart, TogglePressed,
+    ToggleRenderNode, ToggleState, ToggleVariant, default_toggle_model, toggle_render_nodes,
+    validate_toggle_model,
 };
 pub use widgets::{
     UI_WIDGET_CONSTRUCTOR_COUNT, UI_WIDGET_CONSTRUCTORS, UiWidget, UiWidgetConstructor,
