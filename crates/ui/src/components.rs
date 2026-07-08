@@ -48,11 +48,12 @@ use crate::{
     SliderOrientation, SliderPart, SonnerDensity, SonnerIntent, SonnerModel, SonnerPart,
     SonnerPosition, SonnerRenderNode, SonnerState, SonnerTone, SpinnerDensity, SpinnerIntent,
     SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, SwitchChecked, SwitchDensity,
-    SwitchIntent, SwitchModel, SwitchPart, ThemeChoice, ThemeId, UiBlock, UiBlockTone,
-    UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id,
-    alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-    badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes,
-    button_render_nodes, calendar_render_nodes, card_render_nodes, carousel_render_nodes,
+    SwitchIntent, SwitchModel, SwitchPart, TableDensity, TableIntent, TableModel, TablePart,
+    TableState, ThemeChoice, ThemeId, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent,
+    UiWidgetPattern, UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_render_nodes,
+    breadcrumb_render_nodes, bubble_render_nodes, button_group_render_nodes, button_render_nodes,
+    calendar_render_nodes, card_render_nodes, carousel_render_nodes,
     catalog_component_render_nodes, chart_render_nodes, checkbox_render_nodes,
     collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
@@ -72,35 +73,35 @@ use crate::{
     default_radio_group_model, default_resizable_model, default_scroll_area_model,
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-    default_switch_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
-    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
-    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
-    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
-    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
-    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
-    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
-    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
-    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
-    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, slider_render_nodes,
-    sonner_render_nodes, spinner_render_nodes, switch_render_nodes, validate_accordion_model,
-    validate_alert_dialog_model, validate_alert_model, validate_aspect_ratio_model,
-    validate_attachment_model, validate_avatar_model, validate_badge_model,
-    validate_breadcrumb_model, validate_bubble_model, validate_button_group_model,
-    validate_button_model, validate_calendar_model, validate_card_model, validate_carousel_model,
-    validate_chart_model, validate_checkbox_model, validate_collapsible_model,
-    validate_combobox_model, validate_command_model, validate_context_menu_model,
-    validate_data_table_model, validate_date_picker_model, validate_dialog_model,
-    validate_direction_model, validate_drawer_model, validate_dropdown_menu_model,
-    validate_empty_model, validate_field_model, validate_hover_card_model,
-    validate_input_group_model, validate_input_model, validate_input_otp_model,
-    validate_item_model, validate_kbd_model, validate_label_model, validate_marker_model,
-    validate_menubar_model, validate_message_model, validate_message_scroller_model,
-    validate_native_select_model, validate_navigation_menu_model, validate_pagination_model,
-    validate_popover_model, validate_progress_model, validate_radio_group_model,
-    validate_resizable_model, validate_scroll_area_model, validate_select_model,
-    validate_separator_model, validate_sheet_model, validate_sidebar_model,
+    default_switch_model, default_table_model, dialog_render_nodes, direction_render_nodes,
+    drawer_render_nodes, dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+    hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes, input_render_nodes,
+    item_render_nodes, kbd_render_nodes, label_render_nodes, marker_render_nodes,
+    max_data_table_page_index, menubar_render_nodes, message_render_nodes,
+    message_scroller_render_nodes, month_name, native_select_render_nodes,
+    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
+    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
+    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
+    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
+    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
+    switch_render_nodes, table_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
+    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    validate_button_group_model, validate_button_model, validate_calendar_model,
+    validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
+    validate_collapsible_model, validate_combobox_model, validate_command_model,
+    validate_context_menu_model, validate_data_table_model, validate_date_picker_model,
+    validate_dialog_model, validate_direction_model, validate_drawer_model,
+    validate_dropdown_menu_model, validate_empty_model, validate_field_model,
+    validate_hover_card_model, validate_input_group_model, validate_input_model,
+    validate_input_otp_model, validate_item_model, validate_kbd_model, validate_label_model,
+    validate_marker_model, validate_menubar_model, validate_message_model,
+    validate_message_scroller_model, validate_native_select_model, validate_navigation_menu_model,
+    validate_pagination_model, validate_popover_model, validate_progress_model,
+    validate_radio_group_model, validate_resizable_model, validate_scroll_area_model,
+    validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
-    validate_switch_model,
+    validate_switch_model, validate_table_model,
 };
 
 const HEALTH_CARD: &str =
@@ -596,6 +597,29 @@ const DATA_TABLE_PAGINATION: &str = "flex flex-wrap items-center justify-between
 const DATA_TABLE_PAGE_LABEL: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
 const DATA_TABLE_PAGE_BUTTON: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
 const DATA_TABLE_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const TABLE_ROOT: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TABLE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TABLE_FRAME: &str =
+    "overflow-hidden rounded-field border border-border-subtle bg-surface-elevated";
+const TABLE_TABLE: &str = "w-full border-collapse text-left text-0 text-text-1";
+const TABLE_CAPTION: &str = "caption-bottom px-xs py-2xs text-left text-0 leading-0 text-text-2";
+const TABLE_CAPTION_INVALID: &str =
+    "caption-bottom px-xs py-2xs text-left text-0 leading-0 text-danger";
+const TABLE_HEADER: &str = "bg-surface-2";
+const TABLE_BODY: &str = "divide-y divide-border-subtle";
+const TABLE_HEAD: &str = "border-b border-border-subtle px-xs py-2xs text-left text-00 font-7 uppercase tracking-label text-text-muted";
+const TABLE_HEAD_DENSE: &str = "border-b border-border-subtle px-2xs py-3xs text-left text-00 font-7 uppercase tracking-label text-text-muted";
+const TABLE_HEAD_NUMERIC: &str = "border-b border-border-subtle px-xs py-2xs text-right text-00 font-7 uppercase tracking-label text-text-muted";
+const TABLE_ROW: &str = "transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TABLE_ROW_SELECTED: &str = "bg-primary-soft transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TABLE_ROW_DISABLED: &str = "bg-surface-2 text-text-disabled opacity-disabled";
+const TABLE_CELL: &str = "px-xs py-2xs text-0 leading-0 text-text-1";
+const TABLE_CELL_DENSE: &str = "px-2xs py-3xs text-00 leading-0 text-text-1";
+const TABLE_CELL_NUMERIC: &str = "px-xs py-2xs text-right text-0 leading-0 text-text-1";
+const TABLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DATE_PICKER_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
 const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
@@ -6016,6 +6040,256 @@ const fn data_table_state_label(loading: bool, disabled: bool, selected: bool) -
         "disabled"
     } else if loading {
         "loading"
+    } else if selected {
+        "selected"
+    } else {
+        "ready"
+    }
+}
+
+#[component]
+pub fn Table(#[prop(optional, default = default_table_model())] model: TableModel) -> AnyView {
+    if let Err(report) = validate_table_model(&model) {
+        let message = format!("Table validation failed: {report}");
+        return view! {
+            <div class=TABLE_ERROR data-ui-component="table" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let blocked = loading || disabled;
+    let input_nodes = table_render_nodes(&model, &model.state());
+    let root = input_nodes
+        .iter()
+        .find(|node| node.part == TablePart::Root)
+        .expect("invariant: table render nodes include root")
+        .clone();
+    let caption = input_nodes
+        .iter()
+        .find(|node| node.part == TablePart::Caption)
+        .expect("invariant: table render nodes include caption")
+        .clone();
+    let header_model = model.clone();
+    let body_model = model.clone();
+    let caption_detail = caption.detail.clone();
+    let caption_error = caption.detail.clone();
+    let (state, set_state) = signal(model.state());
+
+    view! {
+        <section
+            class=table_root_class(density, disabled, invalid)
+            data-ui-component="table"
+            data-ui-part=TablePart::Root.label()
+            data-ui-density=density.label()
+            data-ui-state=move || {
+                state.with(|state| table_state_label(loading, disabled, invalid, state.selected_row().is_some()).to_owned())
+            }
+            data-ui-value=root.value
+            aria-disabled=blocked.to_string()
+            aria-busy=loading.to_string()
+            aria-invalid=invalid.to_string()
+        >
+            <div class=TABLE_FRAME>
+                <table class=TABLE_TABLE role="table">
+                    <caption
+                        class=table_caption_class(invalid)
+                        data-ui-part=TablePart::Caption.label()
+                    >
+                        {caption_detail}
+                    </caption>
+                    <thead class=TABLE_HEADER data-ui-part=TablePart::Header.label()>
+                        <tr>
+                            {move || {
+                                state.with(|state| {
+                                    table_render_nodes(&header_model, state)
+                                        .into_iter()
+                                        .filter(|node| node.part == TablePart::Head)
+                                        .map(table_head_view)
+                                        .collect_view()
+                                })
+                            }}
+                        </tr>
+                    </thead>
+                    <tbody class=TABLE_BODY data-ui-part=TablePart::Body.label()>
+                        {move || {
+                            state.with(|state| {
+                                let nodes = table_render_nodes(&body_model, state);
+                                let row_nodes = nodes
+                                    .iter()
+                                    .filter(|node| node.part == TablePart::Row)
+                                    .cloned()
+                                    .collect::<Vec<_>>();
+                                let cell_nodes = nodes
+                                    .iter()
+                                    .filter(|node| node.part == TablePart::Cell)
+                                    .cloned()
+                                    .collect::<Vec<_>>();
+                                row_nodes
+                                    .into_iter()
+                                    .map(|row| {
+                                        let cells = cell_nodes
+                                            .iter()
+                                            .filter(|cell| cell.row_value == row.value)
+                                            .cloned()
+                                            .collect::<Vec<_>>();
+                                        table_row_view(row, cells, blocked, set_state)
+                                    })
+                                    .collect_view()
+                            })
+                        }}
+                    </tbody>
+                </table>
+            </div>
+            {invalid.then_some(view! { <p class=TABLE_ERROR>{caption_error}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+fn table_head_view(node: crate::TableRenderNode) -> AnyView {
+    view! {
+        <th
+            scope="col"
+            class=table_head_class(node.density, node.numeric)
+            data-ui-part=TablePart::Head.label()
+            data-ui-column=node.column_value
+        >
+            {node.label}
+        </th>
+    }
+    .into_any()
+}
+
+fn table_row_view(
+    row: crate::TableRenderNode,
+    cells: Vec<crate::TableRenderNode>,
+    blocked: bool,
+    set_state: WriteSignal<TableState>,
+) -> AnyView {
+    let row_value = row.value.clone();
+    let row_value_for_click = row.value.clone();
+    let disabled = row.disabled;
+    let density = row.density;
+    view! {
+        <tr
+            class=table_row_class(row.selected, disabled)
+            data-ui-part=TablePart::Row.label()
+            data-ui-row=row_value
+            aria-selected=row.selected.to_string()
+            aria-disabled=disabled.to_string()
+            tabindex=if disabled { "-1" } else { "0" }
+            on:focus=move |_| {
+                if !blocked && !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(TableIntent::Focus(TablePart::Row));
+                    });
+                }
+            }
+            on:blur=move |_| {
+                if !blocked && !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(TableIntent::Blur);
+                    });
+                }
+            }
+            on:click=move |_| {
+                if !blocked && !disabled {
+                    let value = row_value_for_click.clone();
+                    set_state.update(|state| {
+                        let _ = state.apply(TableIntent::SelectRow(value));
+                    });
+                }
+            }
+        >
+            {cells
+                .into_iter()
+                .map(|cell| {
+                    view! {
+                        <td
+                            class=table_cell_class(density, cell.numeric)
+                            data-ui-part=TablePart::Cell.label()
+                            data-ui-row=cell.row_value
+                            data-ui-column=cell.column_value
+                        >
+                            {cell.label}
+                        </td>
+                    }
+                })
+                .collect_view()}
+        </tr>
+    }
+    .into_any()
+}
+
+const fn table_root_class(density: TableDensity, disabled: bool, invalid: bool) -> &'static str {
+    if disabled {
+        return TABLE_ROOT_DISABLED;
+    }
+    if invalid {
+        return TABLE_ROOT_INVALID;
+    }
+    match density {
+        TableDensity::Standard => TABLE_ROOT,
+        TableDensity::Dense => TABLE_ROOT_DENSE,
+    }
+}
+
+const fn table_caption_class(invalid: bool) -> &'static str {
+    if invalid {
+        TABLE_CAPTION_INVALID
+    } else {
+        TABLE_CAPTION
+    }
+}
+
+const fn table_head_class(density: TableDensity, numeric: bool) -> &'static str {
+    if numeric {
+        return TABLE_HEAD_NUMERIC;
+    }
+    match density {
+        TableDensity::Standard => TABLE_HEAD,
+        TableDensity::Dense => TABLE_HEAD_DENSE,
+    }
+}
+
+const fn table_row_class(selected: bool, disabled: bool) -> &'static str {
+    if disabled {
+        TABLE_ROW_DISABLED
+    } else if selected {
+        TABLE_ROW_SELECTED
+    } else {
+        TABLE_ROW
+    }
+}
+
+const fn table_cell_class(density: TableDensity, numeric: bool) -> &'static str {
+    if numeric {
+        return TABLE_CELL_NUMERIC;
+    }
+    match density {
+        TableDensity::Standard => TABLE_CELL,
+        TableDensity::Dense => TABLE_CELL_DENSE,
+    }
+}
+
+const fn table_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    selected: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
     } else if selected {
         "selected"
     } else {
@@ -16305,7 +16579,6 @@ const fn switch_state_label(
     }
 }
 
-catalog_component!(Table, crate::TableModel, crate::default_table_model);
 catalog_component!(Tabs, crate::TabsModel, crate::default_tabs_model);
 catalog_component!(
     Textarea,

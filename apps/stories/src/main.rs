@@ -38,7 +38,7 @@ use rs_dean_ui::{
     SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
     SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
     SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
-    ThemeCycleButton, ThemeId, ThemeScope,
+    Table, TableColumn, TableDensity, TableModel, TableRow, ThemeCycleButton, ThemeId, ThemeScope,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1098,6 +1098,25 @@ fn Stories() -> impl IntoView {
                             <Switch model=invalid_switch_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Switch model=themed_switch_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-table" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Table"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 57 implemented as a semantic table backed by validated shared Rust row and column data, renderer-local row selection, and Bevy-readable table primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Table model=default_table_story_model() />
+                            <Table model=dense_table_story_model() />
+                            <Table model=selected_table_story_model() />
+                            <Table model=loading_table_story_model() />
+                            <Table model=disabled_table_story_model() />
+                            <Table model=invalid_table_story_model() />
+                            <ThemeScope theme=ThemeId::Luxury>
+                                <Table model=themed_table_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4132,6 +4151,84 @@ fn themed_switch_story_model() -> SwitchModel {
         .with_on_label("Dracula")
         .with_off_label("Default")
         .checked()
+}
+
+fn table_story_columns() -> Vec<TableColumn> {
+    vec![
+        TableColumn::new("Component", "component"),
+        TableColumn::new("Surface", "surface"),
+        TableColumn::new("Score", "score").numeric(),
+    ]
+}
+
+fn table_story_rows() -> Vec<TableRow> {
+    vec![
+        TableRow::new(
+            "accordion",
+            vec![
+                "Accordion".to_owned(),
+                "Disclosure".to_owned(),
+                "100".to_owned(),
+            ],
+        ),
+        TableRow::new(
+            "spinner",
+            vec![
+                "Spinner".to_owned(),
+                "Feedback".to_owned(),
+                "100".to_owned(),
+            ],
+        ),
+        TableRow::new(
+            "switch",
+            vec!["Switch".to_owned(), "Control".to_owned(), "100".to_owned()],
+        ),
+        TableRow::new(
+            "table",
+            vec!["Table".to_owned(), "Data".to_owned(), "100".to_owned()],
+        ),
+    ]
+}
+
+fn default_table_story_model() -> TableModel {
+    TableModel::new(table_story_columns(), table_story_rows())
+        .with_caption("Semantic table rows render from shared Rust data.")
+}
+
+fn dense_table_story_model() -> TableModel {
+    default_table_story_model()
+        .with_density(TableDensity::Dense)
+        .with_caption(
+            "Dense tables preserve the same header, body, row, cell, and caption anatomy.",
+        )
+}
+
+fn selected_table_story_model() -> TableModel {
+    default_table_story_model()
+        .with_caption("Renderer-local row selection stays separate from durable collection state.")
+        .with_selected_row("switch")
+}
+
+fn loading_table_story_model() -> TableModel {
+    default_table_story_model()
+        .with_caption("Loading tables keep structure visible while blocking row interaction.")
+        .loading()
+}
+
+fn disabled_table_story_model() -> TableModel {
+    default_table_story_model()
+        .with_caption("Disabled tables expose read-only row and cell primitives.")
+        .disabled()
+}
+
+fn invalid_table_story_model() -> TableModel {
+    default_table_story_model().with_error("Table rows failed validation before persistence.")
+}
+
+fn themed_table_story_model() -> TableModel {
+    TableModel::new(table_story_columns(), table_story_rows())
+        .with_caption("Table surfaces resolve through the nested Luxury theme.")
+        .with_selected_row("spinner")
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {

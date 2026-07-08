@@ -600,7 +600,17 @@ re-audited against that learning; no earlier changes were required because
 they already keep durable user choices app-owned or validate renderer-local
 draft state before handoff.
 
-All-issue sweep pass: Table through Typography complete. The shared
+Concrete component pass: Table complete. The component now has a typed Rust
+semantic table model, column/row/cell-shape validation, renderer-local row
+selection and focus state, token-only Leptos table rendering, dedicated story
+proof, and Bevy primitive derivation from the same indexed render nodes. The
+sweep found that static table display and data-table workflows share row/cell
+shape validation, but Table should not inherit Data Table filtering,
+pagination, or sorting state. Data Table, Pagination, and Scroll Area were
+re-audited against that learning; no earlier changes were required because
+they already keep collection workflow state in their owning models.
+
+All-issue sweep pass: Tabs through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -608,7 +618,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Table through Typography now have
+Concrete all-issue sweep pass: Tabs through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

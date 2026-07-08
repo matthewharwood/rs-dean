@@ -504,29 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    table,
-    Table,
-    TableModel,
-    TablePart,
-    TableRenderNode,
-    TableState,
-    TableIntent,
-    TableChange,
-    validate_table_model,
-    table_render_nodes,
-    default_table_model,
-    [
-        Root => "Table",
-        Header => "TableHeader",
-        Body => "TableBody",
-        Row => "TableRow",
-        Head => "TableHead",
-        Cell => "TableCell",
-        Caption => "TableCaption",
-    ]
-);
-
-define_catalog_component!(
     tabs,
     Tabs,
     TabsModel,
@@ -718,8 +695,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Slider
         | UiComponentId::Sonner
         | UiComponentId::Spinner
-        | UiComponentId::Switch => None,
-        UiComponentId::Table => Some(any_nodes(table_render_nodes(&default_table_model()))),
+        | UiComponentId::Switch
+        | UiComponentId::Table => None,
         UiComponentId::Tabs => Some(any_nodes(tabs_render_nodes(&default_tabs_model()))),
         UiComponentId::Textarea => {
             Some(any_nodes(textarea_render_nodes(&default_textarea_model())))
@@ -812,6 +789,7 @@ mod tests {
                     | UiComponentId::Sonner
                     | UiComponentId::Spinner
                     | UiComponentId::Switch
+                    | UiComponentId::Table
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -828,17 +806,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_table_model().state();
-        assert!(!state.is_active(TablePart::Root));
+        let mut state = default_tabs_model().state();
+        assert!(!state.is_active(TabsPart::Root));
         assert_eq!(
-            state.apply(TableIntent::Toggle(TablePart::Root)),
-            TableChange::Opened(TablePart::Root)
+            state.apply(TabsIntent::Toggle(TabsPart::Root)),
+            TabsChange::Opened(TabsPart::Root)
         );
-        assert!(state.is_active(TablePart::Root));
+        assert!(state.is_active(TabsPart::Root));
         assert_eq!(
-            state.apply(TableIntent::Toggle(TablePart::Root)),
-            TableChange::Closed(TablePart::Root)
+            state.apply(TabsIntent::Toggle(TabsPart::Root)),
+            TabsChange::Closed(TabsPart::Root)
         );
-        assert!(!state.is_active(TablePart::Root));
+        assert!(!state.is_active(TabsPart::Root));
     }
 }

@@ -59,6 +59,7 @@ pub mod sonner;
 pub mod spec;
 pub mod spinner;
 pub mod switch;
+pub mod table;
 pub mod theme;
 pub mod widgets;
 
@@ -351,6 +352,11 @@ pub use switch::{
     SwitchChange, SwitchChecked, SwitchDensity, SwitchIntent, SwitchModel, SwitchPart,
     SwitchRenderNode, SwitchState, default_switch_model, switch_render_nodes,
     validate_switch_model,
+};
+pub use table::{
+    TableChange, TableColumn, TableDensity, TableIntent, TableModel, TablePart, TableRenderNode,
+    TableRow, TableState, default_table_columns, default_table_model, default_table_rows,
+    table_render_nodes, validate_table_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
 pub use widgets::{
