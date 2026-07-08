@@ -504,28 +504,6 @@ macro_rules! define_catalog_component {
 }
 
 define_catalog_component!(
-    toast,
-    Toast,
-    ToastModel,
-    ToastPart,
-    ToastRenderNode,
-    ToastState,
-    ToastIntent,
-    ToastChange,
-    validate_toast_model,
-    toast_render_nodes,
-    default_toast_model,
-    [
-        Provider => "ToastProvider",
-        Viewport => "ToastViewport",
-        Toast => "Toast",
-        Title => "ToastTitle",
-        Description => "ToastDescription",
-        Action => "ToastAction",
-    ]
-);
-
-define_catalog_component!(
     toggle,
     Toggle,
     ToggleModel,
@@ -663,8 +641,8 @@ pub fn catalog_component_any_render_nodes_for_component(
         | UiComponentId::Switch
         | UiComponentId::Table
         | UiComponentId::Tabs
-        | UiComponentId::Textarea => None,
-        UiComponentId::Toast => Some(any_nodes(toast_render_nodes(&default_toast_model()))),
+        | UiComponentId::Textarea
+        | UiComponentId::Toast => None,
         UiComponentId::Toggle => Some(any_nodes(toggle_render_nodes(&default_toggle_model()))),
         UiComponentId::ToggleGroup => Some(any_nodes(toggle_group_render_nodes(
             &default_toggle_group_model(),
@@ -755,6 +733,7 @@ mod tests {
                     | UiComponentId::Table
                     | UiComponentId::Tabs
                     | UiComponentId::Textarea
+                    | UiComponentId::Toast
             ) {
                 assert!(nodes.is_none(), "{id:?} has a bespoke implementation");
             } else {
@@ -771,17 +750,17 @@ mod tests {
 
     #[test]
     fn shared_state_toggles_parts_locally() {
-        let mut state = default_toast_model().state();
-        assert!(!state.is_active(ToastPart::Provider));
+        let mut state = default_toggle_model().state();
+        assert!(!state.is_active(TogglePart::Root));
         assert_eq!(
-            state.apply(ToastIntent::Toggle(ToastPart::Provider)),
-            ToastChange::Opened(ToastPart::Provider)
+            state.apply(ToggleIntent::Toggle(TogglePart::Root)),
+            ToggleChange::Opened(TogglePart::Root)
         );
-        assert!(state.is_active(ToastPart::Provider));
+        assert!(state.is_active(TogglePart::Root));
         assert_eq!(
-            state.apply(ToastIntent::Toggle(ToastPart::Provider)),
-            ToastChange::Closed(ToastPart::Provider)
+            state.apply(ToggleIntent::Toggle(TogglePart::Root)),
+            ToggleChange::Closed(TogglePart::Root)
         );
-        assert!(!state.is_active(ToastPart::Provider));
+        assert!(!state.is_active(TogglePart::Root));
     }
 }

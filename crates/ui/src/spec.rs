@@ -297,8 +297,8 @@ pub mod bevy_adapter {
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
         SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
-        Theme, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetSlotKind,
-        accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        Theme, ToastPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
         aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
         badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
@@ -324,7 +324,7 @@ pub mod bevy_adapter {
         default_separator_model, default_sheet_model, default_sidebar_model,
         default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
         default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        default_toast_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
         dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
         hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
         input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
@@ -335,6 +335,7 @@ pub mod bevy_adapter {
         select_render_nodes, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
         skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
         switch_render_nodes, table_render_nodes, tabs_render_nodes, textarea_render_nodes,
+        toast_render_nodes,
     };
 
     #[derive(Debug, Clone, PartialEq)]
@@ -625,6 +626,9 @@ pub mod bevy_adapter {
                 implementation.render,
                 implementation.state,
             );
+        }
+        if id == UiComponentId::Toast {
+            return bevy_primitives_for_toast(theme, implementation.render, implementation.state);
         }
         if id == UiComponentId::DataTable {
             return bevy_primitives_for_data_table(
@@ -1961,6 +1965,37 @@ pub mod bevy_adapter {
                     state,
                     intent: textarea_intent_for_part(node.part, node.actionable),
                     selected: node.focused || node.invalid,
+                    disabled: node.disabled || !node.visible,
+                }
+            })
+            .collect()
+    }
+
+    fn bevy_primitives_for_toast(
+        theme: &Theme,
+        render: RenderContract,
+        state: StateContract,
+    ) -> Vec<BevyUiPrimitive> {
+        let model = default_toast_model();
+        let toast_state = model.state();
+        toast_render_nodes(&model, &toast_state)
+            .into_iter()
+            .map(|node| {
+                let role = toast_role_for_part(node.part);
+                let tone = toast_tone_for_node(&node);
+                BevyUiPrimitive {
+                    part: node.part.label().to_owned(),
+                    kind: toast_kind_for_part(node.part),
+                    role,
+                    label: node.label,
+                    value: node.detail,
+                    size: toast_size_for_part(node.part, node.density),
+                    fill: fill_for_tone(tone, theme),
+                    text: theme.text_1().to_bevy(),
+                    render,
+                    state,
+                    intent: toast_intent_for_part(node.part, node.actionable),
+                    selected: node.focused || node.paused || node.actioned || node.invalid,
                     disabled: node.disabled || !node.visible,
                 }
             })
@@ -5675,6 +5710,87 @@ pub mod bevy_adapter {
             }
             TextareaPart::Counter => Vec2::new(scale::space::M, scale::space::S),
             TextareaPart::Hint => Vec2::new(scale::space::XL2, scale::space::S),
+        }
+    }
+
+    const fn toast_kind_for_part(part: ToastPart) -> UiWidgetSlotKind {
+        match part {
+            ToastPart::Provider => UiWidgetSlotKind::Section,
+            ToastPart::Viewport => UiWidgetSlotKind::Panel,
+            ToastPart::Toast => UiWidgetSlotKind::Overlay,
+            ToastPart::Title => UiWidgetSlotKind::Text,
+            ToastPart::Description => UiWidgetSlotKind::Description,
+            ToastPart::Action => UiWidgetSlotKind::Button,
+        }
+    }
+
+    const fn toast_role_for_part(part: ToastPart) -> UiBlockRole {
+        match part {
+            ToastPart::Provider => UiBlockRole::Root,
+            ToastPart::Viewport => UiBlockRole::Layout,
+            ToastPart::Toast => UiBlockRole::Feedback,
+            ToastPart::Title => UiBlockRole::Header,
+            ToastPart::Description => UiBlockRole::Text,
+            ToastPart::Action => UiBlockRole::Action,
+        }
+    }
+
+    fn toast_tone_for_node(node: &crate::ToastRenderNode) -> UiBlockTone {
+        if node.disabled || !node.visible {
+            return UiBlockTone::Muted;
+        }
+        if node.invalid {
+            return UiBlockTone::Danger;
+        }
+        if node.focused || node.paused || node.actioned {
+            return UiBlockTone::Accent;
+        }
+        match (node.part, node.tone) {
+            (
+                ToastPart::Toast | ToastPart::Title | ToastPart::Description | ToastPart::Action,
+                crate::ToastTone::Info,
+            ) => UiBlockTone::Info,
+            (
+                ToastPart::Toast | ToastPart::Title | ToastPart::Description | ToastPart::Action,
+                crate::ToastTone::Success,
+            ) => UiBlockTone::Success,
+            (
+                ToastPart::Toast | ToastPart::Title | ToastPart::Description | ToastPart::Action,
+                crate::ToastTone::Warning,
+            ) => UiBlockTone::Warning,
+            (
+                ToastPart::Toast | ToastPart::Title | ToastPart::Description | ToastPart::Action,
+                crate::ToastTone::Destructive,
+            ) => UiBlockTone::Danger,
+            _ => UiBlockTone::Surface,
+        }
+    }
+
+    const fn toast_intent_for_part(part: ToastPart, actionable: bool) -> UiWidgetIntent {
+        match (part, actionable) {
+            (ToastPart::Toast, true) => UiWidgetIntent::Open,
+            (ToastPart::Action, true) => UiWidgetIntent::Activate,
+            _ => UiWidgetIntent::None,
+        }
+    }
+
+    fn toast_size_for_part(part: ToastPart, density: crate::ToastDensity) -> Vec2 {
+        match (part, density) {
+            (ToastPart::Provider | ToastPart::Viewport, crate::ToastDensity::Standard) => {
+                Vec2::new(scale::space::XL3, scale::space::XL2)
+            }
+            (ToastPart::Provider | ToastPart::Viewport, crate::ToastDensity::Dense) => {
+                Vec2::new(scale::space::XL2, scale::space::XL)
+            }
+            (ToastPart::Toast, crate::ToastDensity::Standard) => {
+                Vec2::new(scale::space::XL2, scale::space::L)
+            }
+            (ToastPart::Toast, crate::ToastDensity::Dense) => {
+                Vec2::new(scale::space::XL2, scale::space::M)
+            }
+            (ToastPart::Title, _) => Vec2::new(scale::space::XL, scale::space::S),
+            (ToastPart::Description, _) => Vec2::new(scale::space::XL2, scale::space::S),
+            (ToastPart::Action, _) => Vec2::new(scale::space::L, scale::space::S),
         }
     }
 

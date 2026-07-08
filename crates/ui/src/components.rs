@@ -50,12 +50,13 @@ use crate::{
     SpinnerModel, SpinnerPart, SpinnerSize, SpinnerTone, SwitchChecked, SwitchDensity,
     SwitchIntent, SwitchModel, SwitchPart, TableDensity, TableIntent, TableModel, TablePart,
     TableState, TabsDensity, TabsIntent, TabsModel, TabsOrientation, TabsPart, TabsState,
-    TextareaDensity, TextareaIntent, TextareaModel, TextareaPart, ThemeChoice, ThemeId, UiBlock,
-    UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern, UiWidgetSlotKind,
-    accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes, attachment_render_nodes,
-    avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
-    button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-    carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
+    TextareaDensity, TextareaIntent, TextareaModel, TextareaPart, ThemeChoice, ThemeId,
+    ToastDensity, ToastIntent, ToastModel, ToastPart, ToastPosition, ToastRenderNode, ToastState,
+    ToastTone, UiBlock, UiBlockTone, UiComponentId, UiWidgetIntent, UiWidgetPattern,
+    UiWidgetSlotKind, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
+    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
+    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
+    card_render_nodes, carousel_render_nodes, catalog_component_render_nodes, chart_render_nodes,
     checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
@@ -75,18 +76,19 @@ use crate::{
     default_select_model, default_separator_model, default_sheet_model, default_sidebar_model,
     default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
     default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-    dialog_render_nodes, direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-    empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-    input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-    label_render_nodes, marker_render_nodes, max_data_table_page_index, menubar_render_nodes,
-    message_render_nodes, message_scroller_render_nodes, month_name, native_select_render_nodes,
-    navigation_menu_render_nodes, pagination_render_nodes, popover_render_nodes,
-    progress_render_nodes, radio_group_render_nodes, resizable_panel_flex_style,
-    resizable_render_nodes, resizable_sizes_label, scroll_area_render_nodes, select_render_nodes,
-    selected_select_label, separator_render_nodes, sheet_render_nodes, sidebar_render_nodes,
-    skeleton_render_nodes, slider_render_nodes, sonner_render_nodes, spinner_render_nodes,
-    switch_render_nodes, table_render_nodes, tabs_dom_id, tabs_render_nodes, textarea_dom_id,
-    textarea_render_nodes, validate_accordion_model, validate_alert_dialog_model,
+    default_toast_model, dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+    dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes, hover_card_render_nodes,
+    input_group_render_nodes, input_otp_render_nodes, input_render_nodes, item_render_nodes,
+    kbd_render_nodes, label_render_nodes, marker_render_nodes, max_data_table_page_index,
+    menubar_render_nodes, message_render_nodes, message_scroller_render_nodes, month_name,
+    native_select_render_nodes, navigation_menu_render_nodes, pagination_render_nodes,
+    popover_render_nodes, progress_render_nodes, radio_group_render_nodes,
+    resizable_panel_flex_style, resizable_render_nodes, resizable_sizes_label,
+    scroll_area_render_nodes, select_render_nodes, selected_select_label, separator_render_nodes,
+    sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, slider_render_nodes,
+    sonner_render_nodes, spinner_render_nodes, switch_render_nodes, table_render_nodes,
+    tabs_dom_id, tabs_render_nodes, textarea_dom_id, textarea_render_nodes, toast_dom_id,
+    toast_render_nodes, validate_accordion_model, validate_alert_dialog_model,
     validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
     validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
@@ -104,6 +106,7 @@ use crate::{
     validate_select_model, validate_separator_model, validate_sheet_model, validate_sidebar_model,
     validate_skeleton_model, validate_slider_model, validate_sonner_model, validate_spinner_model,
     validate_switch_model, validate_table_model, validate_tabs_model, validate_textarea_model,
+    validate_toast_model,
 };
 
 const HEALTH_CARD: &str =
@@ -682,6 +685,49 @@ const TEXTAREA_COUNTER_LIMIT: &str =
 const TEXTAREA_COUNTER_DISABLED: &str =
     "shrink-0 rounded-pill bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled";
 const TEXTAREA_ERROR: &str =
+    "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
+const TOAST_PROVIDER: &str = "grid w-full max-w-md gap-2xs text-text-1";
+const TOAST_PROVIDER_DENSE: &str = "grid w-full max-w-md gap-3xs text-text-1";
+const TOAST_PROVIDER_INVALID: &str =
+    "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1";
+const TOAST_PROVIDER_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const TOAST_VIEWPORT_CENTER: &str = "grid justify-items-center gap-2xs";
+const TOAST_VIEWPORT_END: &str = "grid justify-items-end gap-2xs";
+const TOAST_VIEWPORT_DENSE_CENTER: &str = "grid justify-items-center gap-3xs";
+const TOAST_VIEWPORT_DENSE_END: &str = "grid justify-items-end gap-3xs";
+const TOAST_CARD: &str = "grid gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
+const TOAST_CARD_DENSE: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-1";
+const TOAST_CARD_INFO: &str =
+    "grid gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_INFO_DENSE: &str =
+    "grid gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const TOAST_CARD_SUCCESS: &str =
+    "grid gap-xs rounded-box border border-success bg-success-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_SUCCESS_DENSE: &str =
+    "grid gap-2xs rounded-field border border-success bg-success-soft p-xs text-text-1 shadow-1";
+const TOAST_CARD_WARNING: &str =
+    "grid gap-xs rounded-box border border-warning bg-warning-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_WARNING_DENSE: &str =
+    "grid gap-2xs rounded-field border border-warning bg-warning-soft p-xs text-text-1 shadow-1";
+const TOAST_CARD_DESTRUCTIVE: &str =
+    "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_DESTRUCTIVE_DENSE: &str =
+    "grid gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1";
+const TOAST_CARD_ACTIVE: &str =
+    "grid gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_INVALID: &str =
+    "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-2";
+const TOAST_CARD_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TOAST_HEADER: &str = "flex min-w-0 items-start justify-between gap-xs";
+const TOAST_COPY: &str = "grid min-w-0 gap-3xs";
+const TOAST_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
+const TOAST_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
+const TOAST_META: &str = "m-0 text-00 uppercase tracking-label text-text-muted";
+const TOAST_ACTION_ROW: &str = "flex flex-wrap items-center gap-2xs";
+const TOAST_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOAST_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-3xs text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const TOAST_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
+const TOAST_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DATE_PICKER_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
 const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
@@ -6856,6 +6902,396 @@ const fn textarea_state_label(
         "focused"
     } else {
         "ready"
+    }
+}
+
+#[component]
+pub fn Toast(#[prop(optional, default = default_toast_model())] model: ToastModel) -> AnyView {
+    if let Err(report) = validate_toast_model(&model) {
+        let message = format!("Toast validation failed: {report}");
+        return view! {
+            <div class=TOAST_ERROR data-ui-component="toast" data-ui-state="invalid" role="alert">
+                {message}
+            </div>
+        }
+        .into_any();
+    }
+
+    let density = model.density;
+    let position = model.position;
+    let loading = model.loading;
+    let disabled = model.disabled;
+    let invalid = model.error.is_some();
+    let state_model = model.state();
+    let nodes = toast_render_nodes(&model, &state_model);
+    let provider = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Provider)
+        .expect("invariant: toast render nodes include provider")
+        .clone();
+    let viewport = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Viewport)
+        .expect("invariant: toast render nodes include viewport")
+        .clone();
+    let toast = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Toast)
+        .expect("invariant: toast render nodes include toast")
+        .clone();
+    let title = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Title)
+        .expect("invariant: toast render nodes include title")
+        .clone();
+    let description = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Description)
+        .expect("invariant: toast render nodes include description")
+        .clone();
+    let action = nodes
+        .iter()
+        .find(|node| node.part == ToastPart::Action)
+        .expect("invariant: toast render nodes include action")
+        .clone();
+    let provider_value = provider.value.clone();
+    let provider_label = provider.label.clone();
+    let provider_detail = provider.detail.clone();
+    let viewport_value = viewport.value.clone();
+    let viewport_label = viewport.label.clone();
+    let toast_id = toast_dom_id("toast", toast.label.as_str());
+    let title_id = toast_dom_id("toast-title", title.label.as_str());
+    let description_id = toast_dom_id("toast-description", toast.value.as_str());
+    let described_by = format!("{title_id} {description_id}");
+    let (state, set_state) = signal(state_model);
+
+    view! {
+        <section
+            class=toast_provider_class(density, invalid, disabled)
+            data-ui-component="toast"
+            data-ui-part=ToastPart::Provider.label()
+            data-ui-density=density.label()
+            data-ui-position=position.label()
+            data-ui-state=move || {
+                state.with(|state| {
+                    toast_provider_state_label(
+                        loading,
+                        disabled,
+                        invalid,
+                        state.is_open(),
+                        state.is_focused(),
+                        state.is_paused(),
+                        state.is_actioned(),
+                    )
+                })
+            }
+            data-ui-value=provider_value
+            aria-label=provider_label
+            aria-busy=loading.to_string()
+            aria-disabled=disabled.to_string()
+            on:mouseenter=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ToastIntent::Pause);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ToastIntent::Resume);
+                    });
+                }
+            }
+        >
+            <p class=TOAST_META>{provider_detail.clone()}</p>
+            <div
+                class=toast_viewport_class(density, position)
+                data-ui-part=ToastPart::Viewport.label()
+                data-ui-value=viewport_value
+                aria-label=viewport_label
+                aria-live="polite"
+                aria-relevant="additions removals"
+            >
+                {toast_article_view(
+                    ToastArticleView {
+                    toast,
+                    title,
+                    description,
+                    action,
+                    toast_id,
+                    title_id,
+                    description_id,
+                    described_by,
+                    },
+                    state,
+                    set_state,
+                )}
+            </div>
+            {invalid.then_some(view! { <p class=TOAST_ERROR>{provider.detail}</p> })}
+        </section>
+    }
+    .into_any()
+}
+
+struct ToastArticleView {
+    toast: ToastRenderNode,
+    title: ToastRenderNode,
+    description: ToastRenderNode,
+    action: ToastRenderNode,
+    toast_id: String,
+    title_id: String,
+    description_id: String,
+    described_by: String,
+}
+
+fn toast_article_view(
+    view_model: ToastArticleView,
+    state: ReadSignal<ToastState>,
+    set_state: WriteSignal<ToastState>,
+) -> AnyView {
+    let ToastArticleView {
+        toast,
+        title,
+        description,
+        action,
+        toast_id,
+        title_id,
+        description_id,
+        described_by,
+    } = view_model;
+    let toast_tone = toast.tone;
+    let toast_density = toast.density;
+    let toast_position = toast.position;
+    let toast_data_value = toast.value.clone();
+    let toast_disabled = toast.disabled;
+    let toast_invalid = toast.invalid;
+    let title_label = title.label.clone();
+    let description_detail = description.detail.clone();
+    let focus_disabled = toast.disabled;
+    let blur_disabled = toast.disabled;
+    let action_view = action.visible.then(|| {
+        let action_label = action.label.clone();
+        let action_value = action.value.clone();
+        let action_disabled = action.disabled;
+        let actioned = action.actioned;
+        let action_intent_value = action.value.clone();
+        view! {
+            <div class=TOAST_ACTION_ROW>
+                <button
+                    type="button"
+                    class=move || {
+                        state.with(|state| {
+                            toast_action_class(actioned || state.is_actioned(), action_disabled)
+                        })
+                    }
+                    data-ui-part=ToastPart::Action.label()
+                    data-ui-value=action_value
+                    disabled=action_disabled
+                    on:click=move |_| {
+                        if !action_disabled {
+                            set_state.update(|state| {
+                                let _ = state.apply(ToastIntent::Activate(action_intent_value.clone()));
+                            });
+                        }
+                    }
+                >
+                    {action_label}
+                </button>
+            </div>
+        }
+    });
+
+    view! {
+        <article
+            id=toast_id
+            class=move || {
+                state.with(|state| {
+                    toast_card_class(
+                        toast_density,
+                        toast_tone,
+                        state.is_focused(),
+                        toast_invalid,
+                        toast_disabled,
+                    )
+                })
+            }
+            data-ui-part=ToastPart::Toast.label()
+            data-ui-tone=toast_tone.label()
+            data-ui-position=toast_position.label()
+            data-ui-value=toast_data_value
+            data-ui-state=move || {
+                state.with(|state| {
+                    toast_state_label(
+                        toast_disabled,
+                        toast_invalid,
+                        state.is_open(),
+                        state.is_focused(),
+                        state.is_paused(),
+                        state.is_actioned(),
+                    )
+                })
+            }
+            role="status"
+            aria-atomic="true"
+            aria-describedby=described_by
+            aria-disabled=toast_disabled.to_string()
+            hidden=move || state.with(|state| !state.is_open())
+            on:mouseenter=move |_| {
+                if !focus_disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ToastIntent::Focus);
+                    });
+                }
+            }
+            on:mouseleave=move |_| {
+                if !blur_disabled {
+                    set_state.update(|state| {
+                        let _ = state.apply(ToastIntent::Blur);
+                    });
+                }
+            }
+        >
+            <div class=TOAST_HEADER>
+                <div class=TOAST_COPY>
+                    <h3 id=title_id class=TOAST_TITLE data-ui-part=ToastPart::Title.label()>
+                        {title_label}
+                    </h3>
+                    <p
+                        id=description_id
+                        class=TOAST_DESCRIPTION
+                        data-ui-part=ToastPart::Description.label()
+                    >
+                        {description_detail}
+                    </p>
+                </div>
+            </div>
+            {action_view}
+        </article>
+    }
+    .into_any()
+}
+
+const fn toast_provider_class(
+    density: ToastDensity,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TOAST_PROVIDER_DISABLED;
+    }
+    if invalid {
+        return TOAST_PROVIDER_INVALID;
+    }
+    match density {
+        ToastDensity::Standard => TOAST_PROVIDER,
+        ToastDensity::Dense => TOAST_PROVIDER_DENSE,
+    }
+}
+
+const fn toast_viewport_class(density: ToastDensity, position: ToastPosition) -> &'static str {
+    match (density, position) {
+        (ToastDensity::Dense, ToastPosition::BottomCenter) => TOAST_VIEWPORT_DENSE_CENTER,
+        (ToastDensity::Dense, ToastPosition::TopRight | ToastPosition::BottomRight) => {
+            TOAST_VIEWPORT_DENSE_END
+        }
+        (ToastDensity::Standard, ToastPosition::BottomCenter) => TOAST_VIEWPORT_CENTER,
+        (ToastDensity::Standard, ToastPosition::TopRight | ToastPosition::BottomRight) => {
+            TOAST_VIEWPORT_END
+        }
+    }
+}
+
+const fn toast_card_class(
+    density: ToastDensity,
+    tone: ToastTone,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> &'static str {
+    if disabled {
+        return TOAST_CARD_DISABLED;
+    }
+    if invalid {
+        return TOAST_CARD_INVALID;
+    }
+    if active {
+        return TOAST_CARD_ACTIVE;
+    }
+    match (density, tone) {
+        (ToastDensity::Dense, ToastTone::Info) => TOAST_CARD_INFO_DENSE,
+        (ToastDensity::Dense, ToastTone::Success) => TOAST_CARD_SUCCESS_DENSE,
+        (ToastDensity::Dense, ToastTone::Warning) => TOAST_CARD_WARNING_DENSE,
+        (ToastDensity::Dense, ToastTone::Destructive) => TOAST_CARD_DESTRUCTIVE_DENSE,
+        (ToastDensity::Dense, ToastTone::Default) => TOAST_CARD_DENSE,
+        (ToastDensity::Standard, ToastTone::Info) => TOAST_CARD_INFO,
+        (ToastDensity::Standard, ToastTone::Success) => TOAST_CARD_SUCCESS,
+        (ToastDensity::Standard, ToastTone::Warning) => TOAST_CARD_WARNING,
+        (ToastDensity::Standard, ToastTone::Destructive) => TOAST_CARD_DESTRUCTIVE,
+        (ToastDensity::Standard, ToastTone::Default) => TOAST_CARD,
+    }
+}
+
+const fn toast_action_class(actioned: bool, disabled: bool) -> &'static str {
+    if disabled {
+        TOAST_ACTION_DISABLED
+    } else if actioned {
+        TOAST_ACTION_ACTIVE
+    } else {
+        TOAST_ACTION
+    }
+}
+
+const fn toast_provider_state_label(
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    focused: bool,
+    paused: bool,
+    actioned: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if loading {
+        "loading"
+    } else if invalid {
+        "invalid"
+    } else if actioned {
+        "actioned"
+    } else if paused {
+        "paused"
+    } else if focused {
+        "focused"
+    } else if open {
+        "open"
+    } else {
+        "closed"
+    }
+}
+
+const fn toast_state_label(
+    disabled: bool,
+    invalid: bool,
+    open: bool,
+    focused: bool,
+    paused: bool,
+    actioned: bool,
+) -> &'static str {
+    if disabled {
+        "disabled"
+    } else if invalid {
+        "invalid"
+    } else if !open {
+        "closed"
+    } else if actioned {
+        "actioned"
+    } else if paused {
+        "paused"
+    } else if focused {
+        "focused"
+    } else {
+        "open"
     }
 }
 
@@ -17141,7 +17577,6 @@ const fn switch_state_label(
     }
 }
 
-catalog_component!(Toast, crate::ToastModel, crate::default_toast_model);
 catalog_component!(Toggle, crate::ToggleModel, crate::default_toggle_model);
 catalog_component!(
     ToggleGroup,

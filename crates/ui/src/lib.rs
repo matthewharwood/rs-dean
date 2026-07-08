@@ -63,6 +63,7 @@ pub mod table;
 pub mod tabs;
 pub mod textarea;
 pub mod theme;
+pub mod toast;
 pub mod widgets;
 
 #[cfg(feature = "leptos")]
@@ -371,6 +372,11 @@ pub use textarea::{
     textarea_render_nodes, validate_textarea_model,
 };
 pub use theme::{ActiveTheme, Oklch, Theme, ThemeChoice, ThemeId, Tone, scale};
+pub use toast::{
+    ToastAction, ToastChange, ToastDensity, ToastIntent, ToastModel, ToastPart, ToastPosition,
+    ToastRenderNode, ToastState, ToastTone, default_toast_model, toast_dom_id, toast_render_nodes,
+    validate_toast_model,
+};
 pub use widgets::{
     UI_WIDGET_CONSTRUCTOR_COUNT, UI_WIDGET_CONSTRUCTORS, UiWidget, UiWidgetConstructor,
     UiWidgetIntent, UiWidgetPattern, UiWidgetRenderNode, UiWidgetSlot, UiWidgetSlotKind,

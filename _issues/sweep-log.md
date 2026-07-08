@@ -630,7 +630,18 @@ own counter and row-height contract. Field, Input, and Input Group were
 re-audited against that learning; no changes were required because they already
 keep durable submitted values app-owned.
 
-All-issue sweep pass: Toast through Typography complete. The shared
+Concrete component pass: Toast complete. The component now has a typed Rust
+single-notification model, action and duration validation, renderer-local
+open/focus/pause/action state, token-only Leptos provider/viewport/toast
+rendering, dedicated story proof, and Bevy primitive derivation from the same
+provider/viewport/toast/title/description/action render nodes. The sweep found
+that Toast should share Sonner's transient notification vocabulary without
+inheriting Sonner's repeatable queue and dismiss anatomy. Sonner, Textarea, and
+the earlier form/display components were re-audited against that learning; no
+changes were required because Sonner still owns multi-toast dismissal while
+Toast now owns the single shadcn toast contract.
+
+All-issue sweep pass: Toggle through Typography complete. The shared
 literal widget path now validates every catalog entry with `garde`, then
 projects validated render nodes into the Leptos story/component renderer and
 the generic Bevy primitive adapter. The sweep found that shadcn anatomy can
@@ -638,7 +649,7 @@ intentionally repeat item-like parts, such as `ButtonGroupItem`, so the shared
 validator rejects unknown and missing anatomy while allowing repeated catalog
 parts.
 
-Concrete all-issue sweep pass: Toast through Typography now have
+Concrete all-issue sweep pass: Toggle through Typography now have
 component-specific public Rust APIs generated from one shared contract. Each
 non-bespoke component exposes its own model, part enum, local state type,
 intent/change aliases, render node alias, default model, validator, and render

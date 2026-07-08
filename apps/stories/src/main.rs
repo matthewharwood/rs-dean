@@ -40,7 +40,7 @@ use rs_dean_ui::{
     SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
     Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
     TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
-    ThemeScope,
+    ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -1157,6 +1157,25 @@ fn Stories() -> impl IntoView {
                             <Textarea model=invalid_textarea_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Textarea model=themed_textarea_story_model() />
+                            </ThemeScope>
+                        </div>
+                    </section>
+                    <section data-story-id="ui-toast" class=STORY_SECTION>
+                        <header class=STORY_SECTION_HEADER>
+                            <h2 class=STORY_SECTION_TITLE>"Toast"</h2>
+                            <p class=STORY_SECTION_BODY>
+                                "Issue 60 implemented as a transient notification backed by validated shared Rust action copy, renderer-local open/focus/pause/action state, and Bevy-readable toast primitives."
+                            </p>
+                        </header>
+                        <div class=ALERT_STORY_GRID>
+                            <Toast model=default_toast_story_model() />
+                            <Toast model=dense_toast_story_model() />
+                            <Toast model=centered_toast_story_model() />
+                            <Toast model=loading_toast_story_model() />
+                            <Toast model=disabled_toast_story_model() />
+                            <Toast model=invalid_toast_story_model() />
+                            <ThemeScope theme=ThemeId::Dracula>
+                                <Toast model=themed_toast_story_model() />
                             </ThemeScope>
                         </div>
                     </section>
@@ -4380,6 +4399,61 @@ fn themed_textarea_story_model() -> TextareaModel {
     .with_density(TextareaDensity::Dense)
     .with_value("The same model feeds DOM and Bevy primitive renderers.")
     .with_max_length(120)
+}
+
+fn default_toast_story_model() -> ToastModel {
+    ToastModel::new(
+        "Branch pushed",
+        "The UI sweep commit is on the PR branch and waiting for the gate.",
+    )
+    .with_tone(ToastTone::Success)
+    .with_action(ToastAction::new("Open checks", "open-checks"))
+}
+
+fn dense_toast_story_model() -> ToastModel {
+    default_toast_story_model()
+        .with_density(ToastDensity::Dense)
+        .with_title("Gate running")
+        .with_description("Dense toasts keep the same local open and action state.")
+        .with_tone(ToastTone::Info)
+}
+
+fn centered_toast_story_model() -> ToastModel {
+    default_toast_story_model()
+        .with_position(ToastPosition::BottomCenter)
+        .with_title("Queued locally")
+        .with_description("The viewport position is part of the shared Rust model.")
+        .without_action()
+}
+
+fn loading_toast_story_model() -> ToastModel {
+    default_toast_story_model()
+        .with_title("Publishing")
+        .with_description("Loading toasts keep copy visible while blocking action intent.")
+        .loading()
+}
+
+fn disabled_toast_story_model() -> ToastModel {
+    default_toast_story_model()
+        .with_title("Notifications paused")
+        .with_description("Disabled toasts preserve anatomy while muting action affordances.")
+        .disabled()
+}
+
+fn invalid_toast_story_model() -> ToastModel {
+    default_toast_story_model()
+        .with_tone(ToastTone::Warning)
+        .with_error("Toast delivery failed validation before the renderer accepted it.")
+}
+
+fn themed_toast_story_model() -> ToastModel {
+    ToastModel::new(
+        "Theme scoped toast",
+        "Toast severity colors resolve through the nested Dracula theme.",
+    )
+    .with_density(ToastDensity::Dense)
+    .with_tone(ToastTone::Info)
+    .with_action(ToastAction::new("Inspect", "inspect-toast-theme"))
 }
 
 fn theme_card(theme: ThemeId) -> impl IntoView {
