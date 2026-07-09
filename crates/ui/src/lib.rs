@@ -345,7 +345,10 @@ pub use sonner::{
     sonner_render_nodes, validate_sonner_model,
 };
 #[cfg(feature = "bevy")]
-pub use spec::bevy_adapter::{BevyUiPrimitive, bevy_primitives_for_component};
+pub use spec::bevy_adapter::{
+    BevyUiPrimitive, BevyUiStoryVariant, BevyUiStoryVariantKind, bevy_primitives_for_component,
+    bevy_story_variants_for_component,
+};
 pub use spec::{
     UiBlock, UiBlockRole, UiBlockTone, UiComponentSpec, component_spec, detail_for_part,
     role_for_part, tone_for_category, tone_for_role,

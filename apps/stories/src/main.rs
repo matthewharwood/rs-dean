@@ -131,7 +131,6 @@ fn Stories() -> impl IntoView {
                             <Alert model=dense_warning_alert_story_model() />
                             <Alert model=loading_alert_story_model() />
                             <Alert model=disabled_error_alert_story_model() />
-                            <Alert model=invalid_alert_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Alert model=themed_alert_story_model() />
                             </ThemeScope>
@@ -149,7 +148,6 @@ fn Stories() -> impl IntoView {
                             <AlertDialog model=open_destructive_alert_dialog_story_model() default_open=true />
                             <AlertDialog model=small_loading_alert_dialog_story_model() default_open=true />
                             <AlertDialog model=disabled_alert_dialog_story_model() />
-                            <AlertDialog model=invalid_alert_dialog_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <AlertDialog model=themed_alert_dialog_story_model() default_open=true />
                             </ThemeScope>
@@ -167,7 +165,6 @@ fn Stories() -> impl IntoView {
                             <AspectRatio model=contain_aspect_ratio_story_model() />
                             <AspectRatio model=loading_aspect_ratio_story_model() />
                             <AspectRatio model=disabled_aspect_ratio_story_model() />
-                            <AspectRatio model=invalid_aspect_ratio_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <AspectRatio model=themed_aspect_ratio_story_model() />
                             </ThemeScope>
@@ -185,7 +182,6 @@ fn Stories() -> impl IntoView {
                             <Attachment model=image_attachment_story_model() />
                             <Attachment model=loading_attachment_story_model() />
                             <Attachment model=disabled_attachment_story_model() />
-                            <Attachment model=invalid_attachment_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Attachment model=themed_attachment_story_model() />
                             </ThemeScope>
@@ -203,7 +199,6 @@ fn Stories() -> impl IntoView {
                             <Avatar model=fallback_avatar_story_model() />
                             <Avatar model=loading_avatar_story_model() />
                             <Avatar model=disabled_avatar_story_model() />
-                            <Avatar model=invalid_avatar_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Avatar model=themed_avatar_story_model() />
                             </ThemeScope>
@@ -221,7 +216,6 @@ fn Stories() -> impl IntoView {
                             <Badge model=no_icon_badge_story_model() />
                             <Badge model=loading_badge_story_model() />
                             <Badge model=disabled_badge_story_model() />
-                            <Badge model=invalid_badge_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Badge model=themed_badge_story_model() />
                             </ThemeScope>
@@ -239,7 +233,6 @@ fn Stories() -> impl IntoView {
                             <Breadcrumb model=dense_breadcrumb_story_model() />
                             <Breadcrumb model=loading_breadcrumb_story_model() />
                             <Breadcrumb model=disabled_breadcrumb_story_model() />
-                            <Breadcrumb model=invalid_breadcrumb_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Breadcrumb model=themed_breadcrumb_story_model() />
                             </ThemeScope>
@@ -257,7 +250,6 @@ fn Stories() -> impl IntoView {
                             <Bubble model=outgoing_bubble_story_model() />
                             <Bubble model=loading_bubble_story_model() />
                             <Bubble model=disabled_bubble_story_model() />
-                            <Bubble model=invalid_bubble_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Bubble model=themed_bubble_story_model() />
                             </ThemeScope>
@@ -276,7 +268,6 @@ fn Stories() -> impl IntoView {
                             <Button model=link_button_story_model() />
                             <Button model=loading_button_story_model() />
                             <Button model=disabled_button_story_model() />
-                            <Button model=invalid_button_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Button model=themed_button_story_model() />
                             </ThemeScope>
@@ -294,7 +285,6 @@ fn Stories() -> impl IntoView {
                             <ButtonGroup model=vertical_button_group_story_model() />
                             <ButtonGroup model=loading_button_group_story_model() />
                             <ButtonGroup model=disabled_button_group_story_model() />
-                            <ButtonGroup model=invalid_button_group_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <ButtonGroup model=themed_button_group_story_model() />
                             </ThemeScope>
@@ -312,7 +302,6 @@ fn Stories() -> impl IntoView {
                             <Calendar model=range_calendar_story_model() />
                             <Calendar model=loading_calendar_story_model() />
                             <Calendar model=disabled_calendar_story_model() />
-                            <Calendar model=invalid_calendar_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Calendar model=themed_calendar_story_model() />
                             </ThemeScope>
@@ -330,7 +319,6 @@ fn Stories() -> impl IntoView {
                             <Card model=dense_card_story_model() />
                             <Card model=loading_card_story_model() />
                             <Card model=disabled_card_story_model() />
-                            <Card model=invalid_card_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Card model=themed_card_story_model() />
                             </ThemeScope>
@@ -348,7 +336,6 @@ fn Stories() -> impl IntoView {
                             <Carousel model=dense_carousel_story_model() />
                             <Carousel model=loading_carousel_story_model() />
                             <Carousel model=disabled_carousel_story_model() />
-                            <Carousel model=invalid_carousel_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Carousel model=themed_carousel_story_model() />
                             </ThemeScope>
@@ -366,7 +353,6 @@ fn Stories() -> impl IntoView {
                             <Chart model=dense_chart_story_model() />
                             <Chart model=loading_chart_story_model() />
                             <Chart model=disabled_chart_story_model() />
-                            <Chart model=invalid_chart_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Chart model=themed_chart_story_model() />
                             </ThemeScope>
@@ -384,7 +370,6 @@ fn Stories() -> impl IntoView {
                             <Checkbox model=dense_checkbox_story_model() />
                             <Checkbox model=loading_checkbox_story_model() />
                             <Checkbox model=disabled_checkbox_story_model() />
-                            <Checkbox model=invalid_checkbox_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Checkbox model=themed_checkbox_story_model() />
                             </ThemeScope>
@@ -402,7 +387,6 @@ fn Stories() -> impl IntoView {
                             <Collapsible model=dense_collapsible_story_model() />
                             <Collapsible model=loading_collapsible_story_model() />
                             <Collapsible model=disabled_collapsible_story_model() />
-                            <Collapsible model=invalid_collapsible_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Collapsible model=themed_collapsible_story_model() />
                             </ThemeScope>
@@ -420,7 +404,6 @@ fn Stories() -> impl IntoView {
                             <Combobox model=dense_combobox_story_model() />
                             <Combobox model=loading_combobox_story_model() />
                             <Combobox model=disabled_combobox_story_model() />
-                            <Combobox model=invalid_combobox_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Combobox model=themed_combobox_story_model() />
                             </ThemeScope>
@@ -438,7 +421,6 @@ fn Stories() -> impl IntoView {
                             <Command model=dense_command_story_model() />
                             <Command model=loading_command_story_model() />
                             <Command model=disabled_command_story_model() />
-                            <Command model=invalid_command_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Command model=themed_command_story_model() />
                             </ThemeScope>
@@ -456,7 +438,6 @@ fn Stories() -> impl IntoView {
                             <ContextMenu model=dense_context_menu_story_model() />
                             <ContextMenu model=loading_context_menu_story_model() />
                             <ContextMenu model=disabled_context_menu_story_model() />
-                            <ContextMenu model=invalid_context_menu_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <ContextMenu model=themed_context_menu_story_model() />
                             </ThemeScope>
@@ -474,7 +455,6 @@ fn Stories() -> impl IntoView {
                             <DataTable model=dense_data_table_story_model() />
                             <DataTable model=loading_data_table_story_model() />
                             <DataTable model=disabled_data_table_story_model() />
-                            <DataTable model=invalid_data_table_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <DataTable model=themed_data_table_story_model() />
                             </ThemeScope>
@@ -492,7 +472,6 @@ fn Stories() -> impl IntoView {
                             <DatePicker model=dense_open_date_picker_story_model() />
                             <DatePicker model=loading_date_picker_story_model() />
                             <DatePicker model=disabled_date_picker_story_model() />
-                            <DatePicker model=invalid_date_picker_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <DatePicker model=themed_date_picker_story_model() />
                             </ThemeScope>
@@ -510,7 +489,6 @@ fn Stories() -> impl IntoView {
                             <Dialog model=open_small_dialog_story_model() />
                             <Dialog model=loading_dialog_story_model() />
                             <Dialog model=disabled_dialog_story_model() />
-                            <Dialog model=invalid_dialog_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Dialog model=themed_dialog_story_model() />
                             </ThemeScope>
@@ -529,7 +507,6 @@ fn Stories() -> impl IntoView {
                             <Direction model=scoped_direction_story_model() />
                             <Direction model=loading_direction_story_model() />
                             <Direction model=disabled_direction_story_model() />
-                            <Direction model=invalid_direction_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Direction model=themed_direction_story_model() />
                             </ThemeScope>
@@ -547,7 +524,6 @@ fn Stories() -> impl IntoView {
                             <Drawer model=right_drawer_story_model() />
                             <Drawer model=loading_drawer_story_model() />
                             <Drawer model=disabled_drawer_story_model() />
-                            <Drawer model=invalid_drawer_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Drawer model=themed_drawer_story_model() />
                             </ThemeScope>
@@ -565,7 +541,6 @@ fn Stories() -> impl IntoView {
                             <DropdownMenu model=dense_dropdown_menu_story_model() />
                             <DropdownMenu model=loading_dropdown_menu_story_model() />
                             <DropdownMenu model=disabled_dropdown_menu_story_model() />
-                            <DropdownMenu model=invalid_dropdown_menu_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <DropdownMenu model=themed_dropdown_menu_story_model() />
                             </ThemeScope>
@@ -583,7 +558,6 @@ fn Stories() -> impl IntoView {
                             <Empty model=dense_empty_story_model() />
                             <Empty model=loading_empty_story_model() />
                             <Empty model=disabled_empty_story_model() />
-                            <Empty model=invalid_empty_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Empty model=themed_empty_story_model() />
                             </ThemeScope>
@@ -601,7 +575,6 @@ fn Stories() -> impl IntoView {
                             <Field model=dense_field_story_model() />
                             <Field model=loading_field_story_model() />
                             <Field model=disabled_field_story_model() />
-                            <Field model=invalid_field_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Field model=themed_field_story_model() />
                             </ThemeScope>
@@ -619,7 +592,6 @@ fn Stories() -> impl IntoView {
                             <HoverCard model=dense_hover_card_story_model() />
                             <HoverCard model=loading_hover_card_story_model() />
                             <HoverCard model=disabled_hover_card_story_model() />
-                            <HoverCard model=invalid_hover_card_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <HoverCard model=themed_hover_card_story_model() />
                             </ThemeScope>
@@ -637,7 +609,6 @@ fn Stories() -> impl IntoView {
                             <Input model=dense_input_story_model() />
                             <Input model=loading_input_story_model() />
                             <Input model=disabled_input_story_model() />
-                            <Input model=invalid_input_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <Input model=themed_input_story_model() />
                             </ThemeScope>
@@ -655,7 +626,6 @@ fn Stories() -> impl IntoView {
                             <InputGroup model=dense_input_group_story_model() />
                             <InputGroup model=loading_input_group_story_model() />
                             <InputGroup model=disabled_input_group_story_model() />
-                            <InputGroup model=invalid_input_group_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <InputGroup model=themed_input_group_story_model() />
                             </ThemeScope>
@@ -673,7 +643,6 @@ fn Stories() -> impl IntoView {
                             <InputOtp model=dense_input_otp_story_model() />
                             <InputOtp model=loading_input_otp_story_model() />
                             <InputOtp model=disabled_input_otp_story_model() />
-                            <InputOtp model=invalid_input_otp_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <InputOtp model=themed_input_otp_story_model() />
                             </ThemeScope>
@@ -691,7 +660,6 @@ fn Stories() -> impl IntoView {
                             <Item model=dense_item_story_model() />
                             <Item model=loading_item_story_model() />
                             <Item model=disabled_item_story_model() />
-                            <Item model=invalid_item_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Item model=themed_item_story_model() />
                             </ThemeScope>
@@ -709,7 +677,6 @@ fn Stories() -> impl IntoView {
                             <Kbd model=dense_kbd_story_model() />
                             <Kbd model=loading_kbd_story_model() />
                             <Kbd model=disabled_kbd_story_model() />
-                            <Kbd model=invalid_kbd_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Kbd model=themed_kbd_story_model() />
                             </ThemeScope>
@@ -727,7 +694,6 @@ fn Stories() -> impl IntoView {
                             <Label model=dense_label_story_model() />
                             <Label model=loading_label_story_model() />
                             <Label model=disabled_label_story_model() />
-                            <Label model=invalid_label_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Label model=themed_label_story_model() />
                             </ThemeScope>
@@ -745,7 +711,6 @@ fn Stories() -> impl IntoView {
                             <Marker model=dense_marker_story_model() />
                             <Marker model=loading_marker_story_model() />
                             <Marker model=disabled_marker_story_model() />
-                            <Marker model=invalid_marker_story_model() />
                             <ThemeScope theme=ThemeId::Forest>
                                 <Marker model=themed_marker_story_model() />
                             </ThemeScope>
@@ -763,7 +728,6 @@ fn Stories() -> impl IntoView {
                             <Menubar model=dense_menubar_story_model() />
                             <Menubar model=loading_menubar_story_model() />
                             <Menubar model=disabled_menubar_story_model() />
-                            <Menubar model=invalid_menubar_story_model() />
                             <ThemeScope theme=ThemeId::Synthwave>
                                 <Menubar model=themed_menubar_story_model() />
                             </ThemeScope>
@@ -781,7 +745,6 @@ fn Stories() -> impl IntoView {
                             <Message model=dense_outgoing_message_story_model() />
                             <Message model=loading_message_story_model() />
                             <Message model=disabled_message_story_model() />
-                            <Message model=invalid_message_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Message model=themed_message_story_model() />
                             </ThemeScope>
@@ -799,7 +762,6 @@ fn Stories() -> impl IntoView {
                             <MessageScroller model=dense_latest_message_scroller_story_model() />
                             <MessageScroller model=loading_message_scroller_story_model() />
                             <MessageScroller model=disabled_message_scroller_story_model() />
-                            <MessageScroller model=invalid_message_scroller_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <MessageScroller model=themed_message_scroller_story_model() />
                             </ThemeScope>
@@ -817,7 +779,6 @@ fn Stories() -> impl IntoView {
                             <NativeSelect model=dense_native_select_story_model() />
                             <NativeSelect model=loading_native_select_story_model() />
                             <NativeSelect model=disabled_native_select_story_model() />
-                            <NativeSelect model=invalid_native_select_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <NativeSelect model=themed_native_select_story_model() />
                             </ThemeScope>
@@ -835,7 +796,6 @@ fn Stories() -> impl IntoView {
                             <NavigationMenu model=dense_navigation_menu_story_model() />
                             <NavigationMenu model=loading_navigation_menu_story_model() />
                             <NavigationMenu model=disabled_navigation_menu_story_model() />
-                            <NavigationMenu model=invalid_navigation_menu_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <NavigationMenu model=themed_navigation_menu_story_model() />
                             </ThemeScope>
@@ -853,7 +813,6 @@ fn Stories() -> impl IntoView {
                             <Pagination model=dense_pagination_story_model() />
                             <Pagination model=loading_pagination_story_model() />
                             <Pagination model=disabled_pagination_story_model() />
-                            <Pagination model=invalid_pagination_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Pagination model=themed_pagination_story_model() />
                             </ThemeScope>
@@ -871,7 +830,6 @@ fn Stories() -> impl IntoView {
                             <Popover model=dense_popover_story_model() />
                             <Popover model=loading_popover_story_model() />
                             <Popover model=disabled_popover_story_model() />
-                            <Popover model=invalid_popover_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Popover model=themed_popover_story_model() />
                             </ThemeScope>
@@ -889,7 +847,6 @@ fn Stories() -> impl IntoView {
                             <Progress model=dense_progress_story_model() />
                             <Progress model=loading_progress_story_model() />
                             <Progress model=disabled_progress_story_model() />
-                            <Progress model=invalid_progress_story_model() />
                             <Progress model=indeterminate_progress_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Progress model=themed_progress_story_model() />
@@ -908,7 +865,6 @@ fn Stories() -> impl IntoView {
                             <RadioGroup model=dense_radio_group_story_model() />
                             <RadioGroup model=loading_radio_group_story_model() />
                             <RadioGroup model=disabled_radio_group_story_model() />
-                            <RadioGroup model=invalid_radio_group_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <RadioGroup model=themed_radio_group_story_model() />
                             </ThemeScope>
@@ -927,7 +883,6 @@ fn Stories() -> impl IntoView {
                             <Resizable model=vertical_resizable_story_model() />
                             <Resizable model=loading_resizable_story_model() />
                             <Resizable model=disabled_resizable_story_model() />
-                            <Resizable model=invalid_resizable_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Resizable model=themed_resizable_story_model() />
                             </ThemeScope>
@@ -946,7 +901,6 @@ fn Stories() -> impl IntoView {
                             <ScrollArea model=horizontal_scroll_area_story_model() />
                             <ScrollArea model=loading_scroll_area_story_model() />
                             <ScrollArea model=disabled_scroll_area_story_model() />
-                            <ScrollArea model=invalid_scroll_area_story_model() />
                             <ThemeScope theme=ThemeId::Lofi>
                                 <ScrollArea model=themed_scroll_area_story_model() />
                             </ThemeScope>
@@ -964,7 +918,6 @@ fn Stories() -> impl IntoView {
                             <Select model=dense_select_story_model() />
                             <Select model=loading_select_story_model() />
                             <Select model=disabled_select_story_model() />
-                            <Select model=invalid_select_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Select model=themed_select_story_model() />
                             </ThemeScope>
@@ -983,7 +936,6 @@ fn Stories() -> impl IntoView {
                             <Separator model=vertical_separator_story_model() />
                             <Separator model=loading_separator_story_model() />
                             <Separator model=disabled_separator_story_model() />
-                            <Separator model=invalid_separator_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Separator model=themed_separator_story_model() />
                             </ThemeScope>
@@ -1002,7 +954,6 @@ fn Stories() -> impl IntoView {
                             <Sheet model=left_sheet_story_model() />
                             <Sheet model=loading_sheet_story_model() />
                             <Sheet model=disabled_sheet_story_model() />
-                            <Sheet model=invalid_sheet_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Sheet model=themed_sheet_story_model() />
                             </ThemeScope>
@@ -1021,7 +972,6 @@ fn Stories() -> impl IntoView {
                             <Sidebar model=collapsed_sidebar_story_model() />
                             <Sidebar model=loading_sidebar_story_model() />
                             <Sidebar model=disabled_sidebar_story_model() />
-                            <Sidebar model=invalid_sidebar_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Sidebar model=themed_sidebar_story_model() />
                             </ThemeScope>
@@ -1040,7 +990,6 @@ fn Stories() -> impl IntoView {
                             <Skeleton model=ready_skeleton_story_model() />
                             <Skeleton model=static_skeleton_story_model() />
                             <Skeleton model=disabled_skeleton_story_model() />
-                            <Skeleton model=invalid_skeleton_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Skeleton model=themed_skeleton_story_model() />
                             </ThemeScope>
@@ -1059,7 +1008,6 @@ fn Stories() -> impl IntoView {
                             <Slider model=vertical_slider_story_model() />
                             <Slider model=loading_slider_story_model() />
                             <Slider model=disabled_slider_story_model() />
-                            <Slider model=invalid_slider_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Slider model=themed_slider_story_model() />
                             </ThemeScope>
@@ -1078,7 +1026,6 @@ fn Stories() -> impl IntoView {
                             <Sonner model=centered_sonner_story_model() />
                             <Sonner model=loading_sonner_story_model() />
                             <Sonner model=disabled_sonner_story_model() />
-                            <Sonner model=invalid_sonner_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Sonner model=themed_sonner_story_model() />
                             </ThemeScope>
@@ -1097,7 +1044,6 @@ fn Stories() -> impl IntoView {
                             <Spinner model=large_spinner_story_model() />
                             <Spinner model=ready_spinner_story_model() />
                             <Spinner model=disabled_spinner_story_model() />
-                            <Spinner model=invalid_spinner_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Spinner model=themed_spinner_story_model() />
                             </ThemeScope>
@@ -1116,7 +1062,6 @@ fn Stories() -> impl IntoView {
                             <Switch model=off_switch_story_model() />
                             <Switch model=loading_switch_story_model() />
                             <Switch model=disabled_switch_story_model() />
-                            <Switch model=invalid_switch_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Switch model=themed_switch_story_model() />
                             </ThemeScope>
@@ -1135,7 +1080,6 @@ fn Stories() -> impl IntoView {
                             <Toggle model=outline_toggle_story_model() />
                             <Toggle model=loading_toggle_story_model() />
                             <Toggle model=disabled_toggle_story_model() />
-                            <Toggle model=invalid_toggle_story_model() />
                             <ThemeScope theme=ThemeId::Cyberpunk>
                                 <Toggle model=themed_toggle_story_model() />
                             </ThemeScope>
@@ -1155,7 +1099,6 @@ fn Stories() -> impl IntoView {
                             <ToggleGroup model=vertical_toggle_group_story_model() />
                             <ToggleGroup model=loading_toggle_group_story_model() />
                             <ToggleGroup model=disabled_toggle_group_story_model() />
-                            <ToggleGroup model=invalid_toggle_group_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <ToggleGroup model=themed_toggle_group_story_model() />
                             </ThemeScope>
@@ -1174,7 +1117,6 @@ fn Stories() -> impl IntoView {
                             <Tooltip model=placement_tooltip_story_model() />
                             <Tooltip model=loading_tooltip_story_model() />
                             <Tooltip model=disabled_tooltip_story_model() />
-                            <Tooltip model=invalid_tooltip_story_model() />
                             <Tooltip model=hidden_arrow_tooltip_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Tooltip model=themed_tooltip_story_model() />
@@ -1194,7 +1136,6 @@ fn Stories() -> impl IntoView {
                             <Table model=selected_table_story_model() />
                             <Table model=loading_table_story_model() />
                             <Table model=disabled_table_story_model() />
-                            <Table model=invalid_table_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Table model=themed_table_story_model() />
                             </ThemeScope>
@@ -1213,7 +1154,6 @@ fn Stories() -> impl IntoView {
                             <Tabs model=vertical_tabs_story_model() />
                             <Tabs model=loading_tabs_story_model() />
                             <Tabs model=disabled_tabs_story_model() />
-                            <Tabs model=invalid_tabs_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Tabs model=themed_tabs_story_model() />
                             </ThemeScope>
@@ -1232,7 +1172,6 @@ fn Stories() -> impl IntoView {
                             <Textarea model=unlimited_textarea_story_model() />
                             <Textarea model=loading_textarea_story_model() />
                             <Textarea model=disabled_textarea_story_model() />
-                            <Textarea model=invalid_textarea_story_model() />
                             <ThemeScope theme=ThemeId::Luxury>
                                 <Textarea model=themed_textarea_story_model() />
                             </ThemeScope>
@@ -1251,7 +1190,6 @@ fn Stories() -> impl IntoView {
                             <Toast model=centered_toast_story_model() />
                             <Toast model=loading_toast_story_model() />
                             <Toast model=disabled_toast_story_model() />
-                            <Toast model=invalid_toast_story_model() />
                             <ThemeScope theme=ThemeId::Dracula>
                                 <Toast model=themed_toast_story_model() />
                             </ThemeScope>
@@ -1269,7 +1207,6 @@ fn Stories() -> impl IntoView {
                             <Typography model=dense_typography_story_model() />
                             <Typography model=loading_typography_story_model() />
                             <Typography model=disabled_typography_story_model() />
-                            <Typography model=invalid_typography_story_model() />
                             <ThemeScope theme=ThemeId::Catppuccin>
                                 <Typography model=themed_typography_story_model() />
                             </ThemeScope>
@@ -1406,13 +1343,6 @@ fn disabled_error_alert_story_model() -> AlertModel {
     .disabled()
 }
 
-fn invalid_alert_story_model() -> AlertModel {
-    AlertModel::new(
-        "",
-        "The validation boundary renders an invalid state instead of accepting empty title copy.",
-    )
-}
-
 fn themed_alert_story_model() -> AlertModel {
     AlertModel::new(
         "Theme scoped alert",
@@ -1467,16 +1397,6 @@ fn disabled_alert_dialog_story_model() -> AlertDialogModel {
     .disabled()
 }
 
-fn invalid_alert_dialog_story_model() -> AlertDialogModel {
-    AlertDialogModel::new(
-        "",
-        "Missing title",
-        "The validation boundary renders an invalid state instead of accepting an empty trigger label.",
-        AlertDialogButton::new("Confirm", "confirm-invalid"),
-        AlertDialogButton::new("Cancel", "cancel-invalid"),
-    )
-}
-
 fn themed_alert_dialog_story_model() -> AlertDialogModel {
     AlertDialogModel::new(
         "Share project",
@@ -1522,14 +1442,6 @@ fn disabled_aspect_ratio_story_model() -> AspectRatioModel {
     .disabled()
 }
 
-fn invalid_aspect_ratio_story_model() -> AspectRatioModel {
-    AspectRatioModel::new(
-        "Invalid media",
-        "The validation boundary renders an invalid state instead of accepting a zero ratio side.",
-    )
-    .with_ratio(0, 9)
-}
-
 fn themed_aspect_ratio_story_model() -> AspectRatioModel {
     AspectRatioModel::new(
         "Theme scoped media",
@@ -1564,10 +1476,6 @@ fn disabled_attachment_story_model() -> AttachmentModel {
         .disabled()
 }
 
-fn invalid_attachment_story_model() -> AttachmentModel {
-    AttachmentModel::new("", "The validation boundary rejects empty filenames.")
-}
-
 fn themed_attachment_story_model() -> AttachmentModel {
     AttachmentModel::new("theme-audit.csv", "18 rows")
         .with_kind(AttachmentKind::Data)
@@ -1591,10 +1499,6 @@ fn loading_avatar_story_model() -> AvatarModel {
 
 fn disabled_avatar_story_model() -> AvatarModel {
     AvatarModel::new("Locked User", "LU").disabled()
-}
-
-fn invalid_avatar_story_model() -> AvatarModel {
-    AvatarModel::new("", "??")
 }
 
 fn themed_avatar_story_model() -> AvatarModel {
@@ -1623,10 +1527,6 @@ fn disabled_badge_story_model() -> BadgeModel {
         .with_tone(BadgeTone::Muted)
         .with_variant(BadgeVariant::Outline)
         .disabled()
-}
-
-fn invalid_badge_story_model() -> BadgeModel {
-    BadgeModel::new("")
 }
 
 fn themed_badge_story_model() -> BadgeModel {
@@ -1664,10 +1564,6 @@ fn disabled_breadcrumb_story_model() -> BreadcrumbModel {
         BreadcrumbEntry::page("Locked route"),
     ])
     .disabled()
-}
-
-fn invalid_breadcrumb_story_model() -> BreadcrumbModel {
-    BreadcrumbModel::new(Vec::new())
 }
 
 fn themed_breadcrumb_story_model() -> BreadcrumbModel {
@@ -1714,10 +1610,6 @@ fn disabled_bubble_story_model() -> BubbleModel {
     .disabled()
 }
 
-fn invalid_bubble_story_model() -> BubbleModel {
-    BubbleModel::new("", "AI", "Missing sender", "Invalid")
-}
-
 fn themed_bubble_story_model() -> BubbleModel {
     BubbleModel::new("System", "SYS", "Theme-scoped audit note.", "Pinned")
         .with_side(BubbleSide::System)
@@ -1750,10 +1642,6 @@ fn disabled_button_story_model() -> ButtonModel {
         .with_kind(ButtonKind::Submit)
         .with_variant(ButtonVariant::Outline)
         .disabled()
-}
-
-fn invalid_button_story_model() -> ButtonModel {
-    ButtonModel::new("", "invalid")
 }
 
 fn themed_button_story_model() -> ButtonModel {
@@ -1798,10 +1686,6 @@ fn disabled_button_group_story_model() -> ButtonGroupModel {
     .disabled()
 }
 
-fn invalid_button_group_story_model() -> ButtonGroupModel {
-    ButtonGroupModel::new(Vec::new())
-}
-
 fn themed_button_group_story_model() -> ButtonGroupModel {
     ButtonGroupModel::new(vec![
         ButtonGroupItem::new("Left", "left").with_icon("L"),
@@ -1836,10 +1720,6 @@ fn disabled_calendar_story_model() -> CalendarModel {
     CalendarModel::new(2026, 9)
         .with_selected(CalendarDate::new(2026, 9, 21))
         .disabled()
-}
-
-fn invalid_calendar_story_model() -> CalendarModel {
-    CalendarModel::new(2026, 13)
 }
 
 fn themed_calendar_story_model() -> CalendarModel {
@@ -1894,15 +1774,6 @@ fn disabled_card_story_model() -> CardModel {
     .with_variant(CardVariant::Ghost)
     .with_action(CardAction::new("Open", "open-locked").disabled())
     .disabled()
-}
-
-fn invalid_card_story_model() -> CardModel {
-    CardModel::new(
-        "",
-        "The validation boundary renders an invalid state instead of accepting an empty title.",
-        "Invalid card content remains outside the typed render-node path.",
-        "Invalid",
-    )
 }
 
 fn themed_card_story_model() -> CardModel {
@@ -1975,10 +1846,6 @@ fn disabled_carousel_story_model() -> CarouselModel {
     .disabled()
 }
 
-fn invalid_carousel_story_model() -> CarouselModel {
-    CarouselModel::new(Vec::new())
-}
-
 fn themed_carousel_story_model() -> CarouselModel {
     CarouselModel::new(vec![
         CarouselSlide::new(
@@ -2049,10 +1916,6 @@ fn disabled_chart_story_model() -> ChartModel {
     .disabled()
 }
 
-fn invalid_chart_story_model() -> ChartModel {
-    ChartModel::new("Invalid chart", "Axis", "%", Vec::new())
-}
-
 fn themed_chart_story_model() -> ChartModel {
     ChartModel::new(
         "Theme scoped chart",
@@ -2091,13 +1954,6 @@ fn disabled_checkbox_story_model() -> CheckboxModel {
         .with_description("Disabled checkboxes preserve the shared checked value.")
         .with_checked(CheckboxChecked::Indeterminate)
         .disabled()
-}
-
-fn invalid_checkbox_story_model() -> CheckboxModel {
-    CheckboxModel::new("Accept the state contract", "accept-state-contract")
-        .with_description("The consumer owns durable choices through rs-dean-state.")
-        .required()
-        .with_error("This required option has not been accepted.")
 }
 
 fn themed_checkbox_story_model() -> CheckboxModel {
@@ -2143,14 +1999,6 @@ fn disabled_collapsible_story_model() -> CollapsibleModel {
     .disabled()
 }
 
-fn invalid_collapsible_story_model() -> CollapsibleModel {
-    CollapsibleModel::new(
-        "invalid-disclosure",
-        "",
-        "Missing title should fail validation.",
-    )
-}
-
 fn themed_collapsible_story_model() -> CollapsibleModel {
     CollapsibleModel::new(
         "theme-disclosure",
@@ -2192,13 +2040,6 @@ fn disabled_combobox_story_model() -> ComboboxModel {
     ])
     .with_selected_value("stable")
     .disabled()
-}
-
-fn invalid_combobox_story_model() -> ComboboxModel {
-    ComboboxModel::new(vec![
-        ComboboxOption::new("Duplicate", "same"),
-        ComboboxOption::new("Duplicate again", "same"),
-    ])
 }
 
 fn themed_combobox_story_model() -> ComboboxModel {
@@ -2277,17 +2118,6 @@ fn disabled_command_story_model() -> CommandModel {
     )])
     .with_selected_value("available")
     .disabled()
-}
-
-fn invalid_command_story_model() -> CommandModel {
-    CommandModel::new(vec![CommandGroup::new(
-        "Duplicate",
-        "duplicate",
-        vec![
-            CommandItem::new("First", "same").with_shortcut("1"),
-            CommandItem::new("Second", "same").with_shortcut("2"),
-        ],
-    )])
 }
 
 fn themed_command_story_model() -> CommandModel {
@@ -2391,17 +2221,6 @@ fn disabled_context_menu_story_model() -> ContextMenuModel {
     .disabled()
 }
 
-fn invalid_context_menu_story_model() -> ContextMenuModel {
-    ContextMenuModel::new(vec![
-        ContextMenuEntry::item(ContextMenuAction::new("Duplicate", "same")),
-        ContextMenuEntry::submenu(ContextMenuSubmenu::new(
-            "Nested duplicate",
-            "nested-duplicate",
-            vec![ContextMenuAction::new("Duplicate again", "same")],
-        )),
-    ])
-}
-
 fn themed_context_menu_story_model() -> ContextMenuModel {
     ContextMenuModel::new(vec![
         ContextMenuEntry::item(ContextMenuAction::new("Inspect token", "inspect-token")),
@@ -2494,17 +2313,6 @@ fn disabled_data_table_story_model() -> DataTableModel {
         .disabled()
 }
 
-fn invalid_data_table_story_model() -> DataTableModel {
-    DataTableModel::new(
-        data_table_story_columns(),
-        vec![DataTableRow::new(
-            "bad-row",
-            vec!["Missing cells".to_owned(), "Data".to_owned()],
-        )],
-    )
-    .with_title("Invalid table")
-}
-
 fn themed_data_table_story_model() -> DataTableModel {
     DataTableModel::new(data_table_story_columns(), data_table_story_rows())
         .with_title("Theme scoped table")
@@ -2541,10 +2349,6 @@ fn disabled_date_picker_story_model() -> DatePickerModel {
         .with_placeholder("Unavailable")
         .with_selected(CalendarDate::new(2026, 9, 15))
         .disabled()
-}
-
-fn invalid_date_picker_story_model() -> DatePickerModel {
-    DatePickerModel::new(2026, 7).with_label("")
 }
 
 fn themed_date_picker_story_model() -> DatePickerModel {
@@ -2599,10 +2403,6 @@ fn disabled_dialog_story_model() -> DialogModel {
     )
     .with_default_open(true)
     .disabled()
-}
-
-fn invalid_dialog_story_model() -> DialogModel {
-    DialogModel::new("Broken dialog", "", "Description", "Body")
 }
 
 fn themed_dialog_story_model() -> DialogModel {
@@ -2661,10 +2461,6 @@ fn disabled_direction_story_model() -> DirectionModel {
     .disabled()
 }
 
-fn invalid_direction_story_model() -> DirectionModel {
-    DirectionModel::new("", "Broken scope", "Missing provider label")
-}
-
 fn themed_direction_story_model() -> DirectionModel {
     DirectionModel::new(
         "Theme direction",
@@ -2716,10 +2512,6 @@ fn disabled_drawer_story_model() -> DrawerModel {
     )
     .with_default_open(true)
     .disabled()
-}
-
-fn invalid_drawer_story_model() -> DrawerModel {
-    DrawerModel::new("Broken drawer", "", "Description", "Body")
 }
 
 fn themed_drawer_story_model() -> DrawerModel {
@@ -2783,10 +2575,6 @@ fn disabled_dropdown_menu_story_model() -> DropdownMenuModel {
         .disabled()
 }
 
-fn invalid_dropdown_menu_story_model() -> DropdownMenuModel {
-    DropdownMenuModel::new(vec![DropdownMenuEntry::separator("only-separator")])
-}
-
 fn themed_dropdown_menu_story_model() -> DropdownMenuModel {
     DropdownMenuModel::new(dropdown_menu_story_entries())
         .with_trigger_label("Theme actions")
@@ -2826,10 +2614,6 @@ fn disabled_empty_story_model() -> EmptyModel {
     .with_content("The copy remains visible while action affordances are disabled.")
     .with_action(EmptyAction::new("Create", "create-locked").disabled())
     .disabled()
-}
-
-fn invalid_empty_story_model() -> EmptyModel {
-    EmptyModel::new("", "The validation boundary rejects empty titles.")
 }
 
 fn themed_empty_story_model() -> EmptyModel {
@@ -2873,14 +2657,6 @@ fn disabled_field_story_model() -> FieldModel {
     )
     .with_value("stable-id")
     .disabled()
-}
-
-fn invalid_field_story_model() -> FieldModel {
-    FieldModel::new("Email", "Use a reachable address for invitations.")
-        .with_input_kind(FieldInputKind::Email)
-        .with_placeholder("name@example.com")
-        .with_error("Email address is required.")
-        .required()
 }
 
 fn themed_field_story_model() -> FieldModel {
@@ -2927,14 +2703,6 @@ fn disabled_hover_card_story_model() -> HoverCardModel {
     .disabled()
 }
 
-fn invalid_hover_card_story_model() -> HoverCardModel {
-    HoverCardModel::new(
-        "",
-        "Preview",
-        "The validation boundary rejects empty trigger labels.",
-    )
-}
-
 fn themed_hover_card_story_model() -> HoverCardModel {
     HoverCardModel::new(
         "Palette preview",
@@ -2975,14 +2743,6 @@ fn disabled_input_story_model() -> InputModel {
         .disabled()
 }
 
-fn invalid_input_story_model() -> InputModel {
-    InputModel::new("Email")
-        .with_input_kind(InputKind::Email)
-        .with_prefix("@")
-        .with_error("Email address is required.")
-        .required()
-}
-
 fn themed_input_story_model() -> InputModel {
     InputModel::new("theme token")
         .with_input_kind(InputKind::Text)
@@ -3019,14 +2779,6 @@ fn disabled_input_group_story_model() -> InputGroupModel {
         .disabled()
 }
 
-fn invalid_input_group_story_model() -> InputGroupModel {
-    InputGroupModel::new("Amount")
-        .with_addon("$")
-        .with_button(InputAction::new("Apply", "apply-invalid"))
-        .with_error("Amount is required.")
-        .required()
-}
-
 fn themed_input_group_story_model() -> InputGroupModel {
     InputGroupModel::new("theme token")
         .with_value("brand")
@@ -3057,13 +2809,6 @@ fn disabled_input_otp_story_model() -> InputOtpModel {
         .with_value("987654")
         .with_group_size(3)
         .disabled()
-}
-
-fn invalid_input_otp_story_model() -> InputOtpModel {
-    InputOtpModel::new(6)
-        .with_value("12")
-        .with_error("Enter the full six digit code.")
-        .required()
 }
 
 fn themed_input_otp_story_model() -> InputOtpModel {
@@ -3108,16 +2853,6 @@ fn disabled_item_story_model() -> ItemModel {
         .disabled()
 }
 
-fn invalid_item_story_model() -> ItemModel {
-    ItemModel::new(
-        "Missing owner",
-        "Assign an owner before this item can advance.",
-    )
-    .with_media("!")
-    .with_actions(vec![ItemAction::new("Resolve", "resolve-missing-owner")])
-    .with_error("Owner is required.")
-}
-
 fn themed_item_story_model() -> ItemModel {
     ItemModel::new(
         "Theme scoped row",
@@ -3157,12 +2892,6 @@ fn disabled_kbd_story_model() -> KbdModel {
     .disabled()
 }
 
-fn invalid_kbd_story_model() -> KbdModel {
-    KbdModel::new(vec![KbdKey::new("Alt"), KbdKey::new("Enter")])
-        .with_separator(" + ")
-        .with_error("Shortcut is already assigned.")
-}
-
 fn themed_kbd_story_model() -> KbdModel {
     KbdModel::new(vec![
         KbdKey::new("Ctrl"),
@@ -3193,13 +2922,6 @@ fn disabled_label_story_model() -> LabelModel {
         .with_for("archived_email")
         .required()
         .disabled()
-}
-
-fn invalid_label_story_model() -> LabelModel {
-    LabelModel::new("Workspace")
-        .with_for("workspace")
-        .required()
-        .with_error("Workspace is required.")
 }
 
 fn themed_label_story_model() -> LabelModel {
@@ -3233,14 +2955,6 @@ fn disabled_marker_story_model() -> MarkerModel {
         .with_dot_label("Archived marker")
         .with_anchor(MarkerAnchor::new("Open", "#archived").disabled())
         .disabled()
-}
-
-fn invalid_marker_story_model() -> MarkerModel {
-    MarkerModel::new("Stale")
-        .with_tone(MarkerTone::Danger)
-        .with_value("stale")
-        .with_dot_label("Stale marker")
-        .with_error("Marker target is stale.")
 }
 
 fn themed_marker_story_model() -> MarkerModel {
@@ -3282,10 +2996,6 @@ fn loading_menubar_story_model() -> MenubarModel {
 
 fn disabled_menubar_story_model() -> MenubarModel {
     default_menubar_story_model().disabled()
-}
-
-fn invalid_menubar_story_model() -> MenubarModel {
-    default_menubar_story_model().with_error("Menu commands are unavailable.")
 }
 
 fn themed_menubar_story_model() -> MenubarModel {
@@ -3351,17 +3061,6 @@ fn disabled_message_story_model() -> MessageModel {
     .disabled()
 }
 
-fn invalid_message_story_model() -> MessageModel {
-    MessageModel::new(
-        "Sync",
-        "Retry required",
-        "The persisted transcript did not accept this update.",
-        "Failed",
-    )
-    .with_side(MessageSide::Outgoing)
-    .with_error("Message failed to persist.")
-}
-
 fn themed_message_story_model() -> MessageModel {
     MessageModel::new(
         "Theme runner",
@@ -3415,10 +3114,6 @@ fn disabled_message_scroller_story_model() -> MessageScrollerModel {
         .with_anchor_label("Transcript locked")
         .with_jump_label("Locked")
         .disabled()
-}
-
-fn invalid_message_scroller_story_model() -> MessageScrollerModel {
-    default_message_scroller_story_model().with_error("Transcript hydration failed.")
 }
 
 fn themed_message_scroller_story_model() -> MessageScrollerModel {
@@ -3477,13 +3172,6 @@ fn disabled_native_select_story_model() -> NativeSelectModel {
     default_native_select_story_model()
         .with_label("Locked renderer")
         .disabled()
-}
-
-fn invalid_native_select_story_model() -> NativeSelectModel {
-    default_native_select_story_model()
-        .without_selected_value()
-        .required()
-        .with_error("Select a renderer before this state can persist.")
 }
 
 fn themed_native_select_story_model() -> NativeSelectModel {
@@ -3561,10 +3249,6 @@ fn disabled_navigation_menu_story_model() -> NavigationMenuModel {
         .disabled()
 }
 
-fn invalid_navigation_menu_story_model() -> NavigationMenuModel {
-    default_navigation_menu_story_model().with_error("Navigation hydration failed.")
-}
-
 fn themed_navigation_menu_story_model() -> NavigationMenuModel {
     NavigationMenuModel::new(vec![
         NavigationMenuItem::link(
@@ -3626,10 +3310,6 @@ fn disabled_pagination_story_model() -> PaginationModel {
         .disabled()
 }
 
-fn invalid_pagination_story_model() -> PaginationModel {
-    default_pagination_story_model().with_error("Page range failed to hydrate.")
-}
-
 fn themed_pagination_story_model() -> PaginationModel {
     PaginationModel::new(9, 7)
         .with_sibling_count(1)
@@ -3670,10 +3350,6 @@ fn disabled_popover_story_model() -> PopoverModel {
     .disabled()
 }
 
-fn invalid_popover_story_model() -> PopoverModel {
-    default_popover_story_model().with_error("Popover content failed validation upstream.")
-}
-
 fn themed_popover_story_model() -> PopoverModel {
     PopoverModel::new(
         "Palette controls",
@@ -3706,13 +3382,6 @@ fn disabled_progress_story_model() -> ProgressModel {
         .with_label("Locked task")
         .with_detail("Progress is visible but not focus-highlightable.")
         .disabled()
-}
-
-fn invalid_progress_story_model() -> ProgressModel {
-    ProgressModel::new(72)
-        .with_label("Import")
-        .with_detail("Import progress is paused.")
-        .with_error("The consumer reported a recoverable progress error.")
 }
 
 fn indeterminate_progress_story_model() -> ProgressModel {
@@ -3758,10 +3427,6 @@ fn disabled_radio_group_story_model() -> RadioGroupModel {
         .with_label("Locked rollout")
         .with_selected_value("system")
         .disabled()
-}
-
-fn invalid_radio_group_story_model() -> RadioGroupModel {
-    default_radio_group_story_model().with_error("A selected value must be persisted upstream.")
 }
 
 fn themed_radio_group_story_model() -> RadioGroupModel {
@@ -3825,10 +3490,6 @@ fn disabled_resizable_story_model() -> ResizableModel {
         .disabled()
 }
 
-fn invalid_resizable_story_model() -> ResizableModel {
-    default_resizable_story_model().with_error("Panel layout must be reviewed before persistence.")
-}
-
 fn themed_resizable_story_model() -> ResizableModel {
     ResizableModel::new(three_panel_resizable_story_panels()).with_label("Theme scoped split")
 }
@@ -3875,10 +3536,6 @@ fn disabled_scroll_area_story_model() -> ScrollAreaModel {
     ScrollAreaModel::new(scroll_area_story_items())
         .with_label("Locked feed")
         .disabled()
-}
-
-fn invalid_scroll_area_story_model() -> ScrollAreaModel {
-    default_scroll_area_story_model().with_error("Scroll content failed validation upstream.")
 }
 
 fn themed_scroll_area_story_model() -> ScrollAreaModel {
@@ -3936,12 +3593,6 @@ fn disabled_select_story_model() -> SelectModel {
         .disabled()
 }
 
-fn invalid_select_story_model() -> SelectModel {
-    default_select_story_model()
-        .without_selected_value()
-        .with_error("A renderer target is required before this state can persist.")
-}
-
 fn themed_select_story_model() -> SelectModel {
     SelectModel::new(select_story_groups())
         .with_label("Theme scoped target")
@@ -3975,10 +3626,6 @@ fn disabled_separator_story_model() -> SeparatorModel {
     default_separator_story_model()
         .with_label("Locked boundary")
         .disabled()
-}
-
-fn invalid_separator_story_model() -> SeparatorModel {
-    default_separator_story_model().with_error("Separator metadata failed validation upstream.")
 }
 
 fn themed_separator_story_model() -> SeparatorModel {
@@ -4025,10 +3672,6 @@ fn disabled_sheet_story_model() -> SheetModel {
     default_sheet_story_model()
         .with_close_label("Locked")
         .disabled()
-}
-
-fn invalid_sheet_story_model() -> SheetModel {
-    SheetModel::new("", "Missing trigger", "Invalid sheet metadata", "Invalid")
 }
 
 fn themed_sheet_story_model() -> SheetModel {
@@ -4091,10 +3734,6 @@ fn disabled_sidebar_story_model() -> SidebarModel {
         .disabled()
 }
 
-fn invalid_sidebar_story_model() -> SidebarModel {
-    SidebarModel::new(Vec::new())
-}
-
 fn themed_sidebar_story_model() -> SidebarModel {
     SidebarModel::new(sidebar_story_groups())
         .with_label("Theme scoped navigation")
@@ -4133,11 +3772,6 @@ fn disabled_skeleton_story_model() -> SkeletonModel {
     default_skeleton_story_model()
         .with_detail("The loading surface is locked while the owner resolves durable state.")
         .disabled()
-}
-
-fn invalid_skeleton_story_model() -> SkeletonModel {
-    default_skeleton_story_model()
-        .with_error("Skeleton layout metadata failed validation before render.")
 }
 
 fn themed_skeleton_story_model() -> SkeletonModel {
@@ -4180,11 +3814,6 @@ fn disabled_slider_story_model() -> SliderModel {
         .with_label("Locked threshold")
         .with_value(32)
         .disabled()
-}
-
-fn invalid_slider_story_model() -> SliderModel {
-    default_slider_story_model()
-        .with_error("Slider value cannot be persisted until the range is reconciled.")
 }
 
 fn themed_slider_story_model() -> SliderModel {
@@ -4250,11 +3879,6 @@ fn disabled_sonner_story_model() -> SonnerModel {
     .disabled()
 }
 
-fn invalid_sonner_story_model() -> SonnerModel {
-    default_sonner_story_model()
-        .with_error("Toast delivery failed validation before the renderer accepted it.")
-}
-
 fn themed_sonner_story_model() -> SonnerModel {
     SonnerModel::new(vec![
         SonnerToast::new(
@@ -4303,11 +3927,6 @@ fn disabled_spinner_story_model() -> SpinnerModel {
         .disabled()
 }
 
-fn invalid_spinner_story_model() -> SpinnerModel {
-    default_spinner_story_model()
-        .with_error("Spinner metadata failed validation before the renderer accepted it.")
-}
-
 fn themed_spinner_story_model() -> SpinnerModel {
     SpinnerModel::new("Theme scoped loading")
         .with_size(SpinnerSize::Large)
@@ -4347,10 +3966,6 @@ fn disabled_switch_story_model() -> SwitchModel {
     default_switch_story_model()
         .with_detail("Disabled switches expose a stable read-only state to every renderer.")
         .disabled()
-}
-
-fn invalid_switch_story_model() -> SwitchModel {
-    default_switch_story_model().with_error("Persisted setting failed validation at the edge.")
 }
 
 fn themed_switch_story_model() -> SwitchModel {
@@ -4398,10 +4013,6 @@ fn disabled_toggle_story_model() -> ToggleModel {
     default_toggle_story_model()
         .with_detail("Disabled toggles expose a read-only pressed state to every renderer.")
         .disabled()
-}
-
-fn invalid_toggle_story_model() -> ToggleModel {
-    default_toggle_story_model().with_error("Toolbar state failed validation at the edge.")
 }
 
 fn themed_toggle_story_model() -> ToggleModel {
@@ -4457,10 +4068,6 @@ fn disabled_toggle_group_story_model() -> ToggleGroupModel {
     default_toggle_group_story_model().disabled()
 }
 
-fn invalid_toggle_group_story_model() -> ToggleGroupModel {
-    default_toggle_group_story_model().with_error("Selected alignment is not available.")
-}
-
 fn themed_toggle_group_story_model() -> ToggleGroupModel {
     ToggleGroupModel::new(vec![
         ToggleGroupItem::new("Compact", "compact").with_detail("Compact density preset."),
@@ -4509,10 +4116,6 @@ fn disabled_tooltip_story_model() -> TooltipModel {
         "Disabled tooltips keep the trigger readable but block hover and focus transitions.",
     )
     .disabled()
-}
-
-fn invalid_tooltip_story_model() -> TooltipModel {
-    default_tooltip_story_model().with_error("Tooltip content failed validation upstream.")
 }
 
 fn hidden_arrow_tooltip_story_model() -> TooltipModel {
@@ -4601,10 +4204,6 @@ fn disabled_table_story_model() -> TableModel {
         .disabled()
 }
 
-fn invalid_table_story_model() -> TableModel {
-    default_table_story_model().with_error("Table rows failed validation before persistence.")
-}
-
 fn themed_table_story_model() -> TableModel {
     TableModel::new(table_story_columns(), table_story_rows())
         .with_caption("Table surfaces resolve through the nested Luxury theme.")
@@ -4661,10 +4260,6 @@ fn disabled_tabs_story_model() -> TabsModel {
         .disabled()
 }
 
-fn invalid_tabs_story_model() -> TabsModel {
-    default_tabs_story_model().with_error("Selected tab failed validation before render.")
-}
-
 fn themed_tabs_story_model() -> TabsModel {
     TabsModel::new(tabs_story_items())
         .with_label("Theme scoped tabs")
@@ -4705,11 +4300,6 @@ fn disabled_textarea_story_model() -> TextareaModel {
     default_textarea_story_model()
         .with_hint("Disabled textareas expose a read-only draft across renderers.")
         .disabled()
-}
-
-fn invalid_textarea_story_model() -> TextareaModel {
-    default_textarea_story_model()
-        .with_error("Textarea draft failed validation before the app accepted it.")
 }
 
 fn themed_textarea_story_model() -> TextareaModel {
@@ -4759,12 +4349,6 @@ fn disabled_toast_story_model() -> ToastModel {
         .with_title("Notifications paused")
         .with_description("Disabled toasts preserve anatomy while muting action affordances.")
         .disabled()
-}
-
-fn invalid_toast_story_model() -> ToastModel {
-    default_toast_story_model()
-        .with_tone(ToastTone::Warning)
-        .with_error("Toast delivery failed validation before the renderer accepted it.")
 }
 
 fn themed_toast_story_model() -> ToastModel {
@@ -4820,10 +4404,6 @@ fn disabled_typography_story_model() -> TypographyModel {
         .with_heading("Locked copy")
         .with_paragraph("Disabled typography exposes a read-only content flow to every renderer.")
         .disabled()
-}
-
-fn invalid_typography_story_model() -> TypographyModel {
-    default_typography_story_model().with_error("Typography copy failed validation at the edge.")
 }
 
 fn themed_typography_story_model() -> TypographyModel {
@@ -4898,5 +4478,15 @@ mod tests {
         assert!(style.contains(r#"[data-story-shell-header]"#));
         assert!(style.contains(r#"[data-story-id]:not([data-story-id="ui-button"])"#));
         assert!(style.contains(r#"[data-story-id="ui-button"] > header"#));
+    }
+
+    #[test]
+    fn stories_do_not_render_bad_fixtures() {
+        let source = include_str!("main.rs");
+        let bad_fixture_name = ["invalid", "_"].concat();
+        let bad_fixture_binding = ["model=", "invalid", "_"].concat();
+
+        assert!(!source.contains(&bad_fixture_name));
+        assert!(!source.contains(&bad_fixture_binding));
     }
 }

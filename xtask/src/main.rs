@@ -975,10 +975,13 @@ fn check_ui_book_story_anchors() -> Result<()> {
         fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
     let bevy_stories = fs::read_to_string("apps/ui-bevy-stories/src/main.rs")
         .context("read apps/ui-bevy-stories/src/main.rs")?;
+    if stories.contains("model=invalid_") || stories.contains("fn invalid_") {
+        bail!("UI Leptos stories must not mount intentionally invalid fixtures in mdBook demos");
+    }
     if !bevy_stories.contains("SHADCN_COMPONENTS")
-        || !bevy_stories.contains("bevy_primitives_for_component")
+        || !bevy_stories.contains("bevy_story_variants_for_component")
     {
-        bail!("UI Bevy stories must route catalog components through shared Bevy primitives");
+        bail!("UI Bevy stories must route catalog components through shared Bevy story variants");
     }
     for definition in SHADCN_COMPONENTS {
         let story_id = format!("ui-{}", definition.slug);
