@@ -297,11 +297,11 @@ pub mod bevy_adapter {
         PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
         SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
         SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
-        Theme, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart, TogglePressed,
-        TooltipPart, TypographyPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
-        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
-        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
-        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        Theme, ThemeId, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart,
+        TogglePressed, TooltipPart, TypographyPart, UiBlockRole, UiBlockTone, UiComponentId,
+        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
+        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
+        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
         carousel_render_nodes, catalog_component_any_render_nodes_for_component,
         chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
@@ -356,6 +356,170 @@ pub mod bevy_adapter {
         pub intent: UiWidgetIntent,
         pub selected: bool,
         pub disabled: bool,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum BevyUiStoryVariantKind {
+        Default,
+        Alternate,
+        Loading,
+        Disabled,
+        Themed,
+    }
+
+    impl BevyUiStoryVariantKind {
+        pub const fn label(self) -> &'static str {
+            match self {
+                Self::Default => "Default",
+                Self::Alternate => "Alternate",
+                Self::Loading => "Loading",
+                Self::Disabled => "Disabled",
+                Self::Themed => "Themed",
+            }
+        }
+
+        pub const fn detail(self) -> &'static str {
+            match self {
+                Self::Default => "Validated default fixture",
+                Self::Alternate => "Interactive or dense fixture state",
+                Self::Loading => "Stable loading layout",
+                Self::Disabled => "Read-only disabled state",
+                Self::Themed => "Nested ThemeScope palette",
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct BevyUiStoryVariant {
+        pub kind: BevyUiStoryVariantKind,
+        pub theme_id: ThemeId,
+        pub primitives: Vec<BevyUiPrimitive>,
+    }
+
+    impl BevyUiStoryVariant {
+        pub fn new(
+            kind: BevyUiStoryVariantKind,
+            theme_id: ThemeId,
+            primitives: Vec<BevyUiPrimitive>,
+        ) -> Self {
+            Self {
+                kind,
+                theme_id,
+                primitives,
+            }
+        }
+
+        pub const fn label(&self) -> &'static str {
+            self.kind.label()
+        }
+
+        pub const fn detail(&self) -> &'static str {
+            self.kind.detail()
+        }
+    }
+
+    pub fn bevy_story_variants_for_component(
+        id: UiComponentId,
+        base_theme_id: ThemeId,
+    ) -> Vec<BevyUiStoryVariant> {
+        let base_theme = base_theme_id.palette();
+        let themed_theme_id = story_theme_for_component(id, base_theme_id);
+        let themed_theme = themed_theme_id.palette();
+
+        let default_primitives = bevy_primitives_for_component(id, &base_theme);
+        let mut alternate_primitives = bevy_primitives_for_component(id, &base_theme);
+        apply_alternate_story_state(&mut alternate_primitives, &base_theme);
+
+        let mut loading_primitives = bevy_primitives_for_component(id, &base_theme);
+        apply_loading_story_state(&mut loading_primitives, &base_theme);
+
+        let mut disabled_primitives = bevy_primitives_for_component(id, &base_theme);
+        apply_disabled_story_state(&mut disabled_primitives, &base_theme);
+
+        let mut themed_primitives = bevy_primitives_for_component(id, &themed_theme);
+        apply_themed_story_state(&mut themed_primitives, &themed_theme);
+
+        vec![
+            BevyUiStoryVariant::new(
+                BevyUiStoryVariantKind::Default,
+                base_theme_id,
+                default_primitives,
+            ),
+            BevyUiStoryVariant::new(
+                BevyUiStoryVariantKind::Alternate,
+                base_theme_id,
+                alternate_primitives,
+            ),
+            BevyUiStoryVariant::new(
+                BevyUiStoryVariantKind::Loading,
+                base_theme_id,
+                loading_primitives,
+            ),
+            BevyUiStoryVariant::new(
+                BevyUiStoryVariantKind::Disabled,
+                base_theme_id,
+                disabled_primitives,
+            ),
+            BevyUiStoryVariant::new(
+                BevyUiStoryVariantKind::Themed,
+                themed_theme_id,
+                themed_primitives,
+            ),
+        ]
+    }
+
+    fn story_theme_for_component(id: UiComponentId, base_theme_id: ThemeId) -> ThemeId {
+        let themed = ThemeId::ALL[(id.index() + 2) % ThemeId::ALL.len()];
+        if themed == base_theme_id {
+            base_theme_id.next()
+        } else {
+            themed
+        }
+    }
+
+    fn apply_alternate_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
+        if let Some(primitive) = primitives.iter_mut().find(|primitive| {
+            matches!(
+                primitive.role,
+                UiBlockRole::Action
+                    | UiBlockRole::Control
+                    | UiBlockRole::Data
+                    | UiBlockRole::Navigation
+                    | UiBlockRole::Overlay
+            )
+        }) {
+            primitive.selected = true;
+            primitive.fill = theme.selected_tint().to_bevy();
+            primitive.text = theme.text_1().to_bevy();
+        }
+    }
+
+    fn apply_loading_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
+        for (index, primitive) in primitives.iter_mut().enumerate() {
+            primitive.selected = false;
+            primitive.disabled = true;
+            primitive.fill = theme.surface_3().to_bevy();
+            primitive.text = theme.text_muted().to_bevy();
+            if index == 0 {
+                primitive.label = "Loading".to_owned();
+                primitive.value = "Hydrating shared component state".to_owned();
+            }
+        }
+    }
+
+    fn apply_disabled_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
+        for primitive in primitives {
+            primitive.selected = false;
+            primitive.disabled = true;
+            primitive.text = theme.text_disabled().to_bevy();
+        }
+    }
+
+    fn apply_themed_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
+        if let Some(primitive) = primitives.first_mut() {
+            primitive.selected = true;
+            primitive.fill = theme.primary_soft().to_bevy();
+        }
     }
 
     pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
@@ -6807,6 +6971,54 @@ mod tests {
                 "{} has too little spec",
                 spec.definition.name
             );
+        }
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn every_component_builds_bevy_story_variants() {
+        use crate::BevyUiStoryVariantKind;
+
+        let expected_kinds = [
+            BevyUiStoryVariantKind::Default,
+            BevyUiStoryVariantKind::Alternate,
+            BevyUiStoryVariantKind::Loading,
+            BevyUiStoryVariantKind::Disabled,
+            BevyUiStoryVariantKind::Themed,
+        ];
+
+        for id in UiComponentId::ALL {
+            let definition = id.definition();
+            let variants =
+                bevy_adapter::bevy_story_variants_for_component(id, crate::ThemeId::Dark);
+            assert_eq!(
+                variants.len(),
+                expected_kinds.len(),
+                "{} has the wrong Bevy story variant count",
+                definition.name
+            );
+
+            for (variant, expected_kind) in variants.iter().zip(expected_kinds) {
+                assert_eq!(
+                    variant.kind, expected_kind,
+                    "{} has an unexpected Bevy story variant order",
+                    definition.name
+                );
+                assert!(
+                    !variant.primitives.is_empty(),
+                    "{} {} Bevy story has no primitives",
+                    definition.name,
+                    variant.label()
+                );
+                for primitive in &variant.primitives {
+                    assert!(
+                        !primitive.part.trim().is_empty(),
+                        "{} {} Bevy primitive has no part label",
+                        definition.name,
+                        variant.label()
+                    );
+                }
+            }
         }
     }
 }

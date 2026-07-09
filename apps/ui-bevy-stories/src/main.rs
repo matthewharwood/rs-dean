@@ -1,17 +1,23 @@
 #[cfg(target_arch = "wasm32")]
 use bevy::{
+    camera::ScalingMode,
     color::Alpha,
     prelude::*,
+    sprite::Anchor,
     window::{Window, WindowPlugin, WindowResolution},
 };
 #[cfg(target_arch = "wasm32")]
 use rs_dean_ui::{
-    ActiveTheme, BevyUiPrimitive, SHADCN_COMPONENTS, Theme, ThemeId, UiComponentId,
-    bevy_primitives_for_component, component_implementation, scale,
+    ActiveTheme, BevyUiPrimitive, BevyUiStoryVariant, SHADCN_COMPONENTS, Theme, ThemeId,
+    UiComponentId, bevy_story_variants_for_component, component_implementation, scale,
 };
 
 #[cfg(target_arch = "wasm32")]
 const CANVAS_SELECTOR: &str = "#ui-bevy-stories-canvas";
+#[cfg(target_arch = "wasm32")]
+const STORY_CARD_WIDTH: f32 = 410.0;
+#[cfg(target_arch = "wasm32")]
+const STORY_CARD_HEIGHT: f32 = 178.0;
 
 #[cfg(target_arch = "wasm32")]
 #[derive(Resource, Debug, Clone, Copy)]
@@ -34,7 +40,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: format!("rs-dean Bevy UI story: {}", selected.definition().name),
-                resolution: WindowResolution::new(960, 640),
+                resolution: WindowResolution::new(960, 704),
                 canvas: Some(CANVAS_SELECTOR.to_owned()),
                 fit_canvas_to_parent: true,
                 ..default()
@@ -86,18 +92,27 @@ fn setup_story_scene(
     let theme = active_theme.palette();
     let definition = selection.id.definition();
     let implementation = component_implementation(selection.id);
-    let primitives = bevy_primitives_for_component(selection.id, &theme);
+    let variants = bevy_story_variants_for_component(selection.id, active_theme.0);
 
-    commands.spawn(Camera2d);
+    commands.spawn((
+        Camera2d,
+        Projection::Orthographic(OrthographicProjection {
+            scaling_mode: ScalingMode::Fixed {
+                width: 960.0,
+                height: 704.0,
+            },
+            ..OrthographicProjection::default_2d()
+        }),
+    ));
     spawn_story_header(
         &mut commands,
         &theme,
         definition.name,
         definition.summary,
-        primitives.len(),
+        variants.len(),
+        implementation.state.label(),
     );
-    spawn_contract_footer(&mut commands, &theme, implementation.state.label());
-    spawn_primitives(&mut commands, &theme, &primitives);
+    spawn_story_variants(&mut commands, &variants);
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -106,50 +121,135 @@ fn spawn_story_header(
     theme: &Theme,
     name: &str,
     summary: &str,
-    primitive_count: usize,
+    variant_count: usize,
+    state_label: &str,
 ) {
     spawn_text(
         commands,
-        format!("{name} · Bevy primitive story"),
-        Vec3::new(-420.0, 280.0, 3.0),
+        name.to_owned(),
+        Vec3::new(-430.0, 314.0, 3.0),
         scale::font_size::F2,
         theme.text_1().to_bevy(),
+        Anchor::CENTER_LEFT,
     );
     spawn_text(
         commands,
-        format!("{} primitives · {}", primitive_count, truncate(summary, 82)),
-        Vec3::new(-420.0, 248.0, 3.0),
+        truncate(summary, 96),
+        Vec3::new(-430.0, 282.0, 3.0),
         scale::font_size::F0,
         theme.text_2().to_bevy(),
+        Anchor::CENTER_LEFT,
     );
-}
-
-#[cfg(target_arch = "wasm32")]
-fn spawn_contract_footer(commands: &mut Commands, theme: &Theme, state_label: &str) {
     spawn_text(
         commands,
-        format!("Shared rs-dean-ui Bevy adapter · state: {state_label}"),
-        Vec3::new(-420.0, -292.0, 3.0),
+        format!("{variant_count} variants | shared rs-dean-ui Bevy adapter | state: {state_label}"),
+        Vec3::new(-430.0, 254.0, 3.0),
         scale::font_size::F00,
         theme.text_muted().to_bevy(),
+        Anchor::CENTER_LEFT,
     );
 }
 
 #[cfg(target_arch = "wasm32")]
-fn spawn_primitives(commands: &mut Commands, theme: &Theme, primitives: &[BevyUiPrimitive]) {
-    let columns = columns_for_count(primitives.len());
-    let gap = Vec2::new(24.0, 26.0);
-    let cell = Vec2::new(260.0, 84.0);
-    let total_width = (columns as f32 * cell.x) + ((columns.saturating_sub(1)) as f32 * gap.x);
-    let origin_x = -total_width / 2.0 + cell.x / 2.0;
-    let origin_y = 168.0;
+fn spawn_story_variants(commands: &mut Commands, variants: &[BevyUiStoryVariant]) {
+    let columns = 2;
+    let gap = Vec2::new(26.0, 24.0);
+    let origin_x = -((STORY_CARD_WIDTH + gap.x) / 2.0);
+    let origin_y = 154.0;
 
-    for (index, primitive) in primitives.iter().enumerate() {
+    for (index, variant) in variants.iter().enumerate() {
         let column = index % columns;
         let row = index / columns;
-        let x = origin_x + column as f32 * (cell.x + gap.x);
-        let y = origin_y - row as f32 * (cell.y + gap.y);
-        spawn_primitive(commands, theme, primitive, Vec2::new(x, y), index);
+        let x = origin_x + column as f32 * (STORY_CARD_WIDTH + gap.x);
+        let y = origin_y - row as f32 * (STORY_CARD_HEIGHT + gap.y);
+        spawn_variant_card(commands, variant, Vec2::new(x, y), index);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_variant_card(
+    commands: &mut Commands,
+    variant: &BevyUiStoryVariant,
+    center: Vec2,
+    index: usize,
+) {
+    let theme = variant.theme_id.palette();
+    let z = index as f32 * 0.1;
+    let card_size = Vec2::new(STORY_CARD_WIDTH, STORY_CARD_HEIGHT);
+
+    commands.spawn((
+        Sprite {
+            color: theme.border_subtle().to_bevy(),
+            custom_size: Some(card_size + Vec2::splat(2.0)),
+            ..default()
+        },
+        Transform::from_xyz(center.x, center.y, z),
+    ));
+    commands.spawn((
+        Sprite {
+            color: theme.surface_1().to_bevy(),
+            custom_size: Some(card_size),
+            ..default()
+        },
+        Transform::from_xyz(center.x, center.y, z + 0.01),
+    ));
+    commands.spawn((
+        Sprite {
+            color: theme.selected_tint().to_bevy(),
+            custom_size: Some(Vec2::new(card_size.x, 4.0)),
+            ..default()
+        },
+        Transform::from_xyz(center.x, center.y + card_size.y / 2.0 - 2.0, z + 0.02),
+    ));
+
+    let left = center.x - card_size.x / 2.0 + 18.0;
+    let top = center.y + card_size.y / 2.0 - 24.0;
+    spawn_text(
+        commands,
+        format!("{} - {}", variant.label(), variant.theme_id.label()),
+        Vec3::new(left, top, z + 0.1),
+        scale::font_size::F00,
+        theme.text_1().to_bevy(),
+        Anchor::CENTER_LEFT,
+    );
+    spawn_text(
+        commands,
+        variant.detail().to_owned(),
+        Vec3::new(left, top - 24.0, z + 0.1),
+        scale::font_size::F000,
+        theme.text_2().to_bevy(),
+        Anchor::CENTER_LEFT,
+    );
+
+    let visible_count = variant.primitives.len().min(6);
+    let primitive_columns = if visible_count <= 3 { 1 } else { 2 };
+    let primitive_gap = Vec2::new(10.0, 10.0);
+    let primitive_cell = Vec2::new(174.0, 32.0);
+    let primitive_origin_x = left + primitive_cell.x / 2.0;
+    let primitive_origin_y = top - 58.0;
+
+    for (primitive_index, primitive) in variant.primitives.iter().take(6).enumerate() {
+        let column = primitive_index % primitive_columns;
+        let row = primitive_index / primitive_columns;
+        let primitive_center = Vec2::new(
+            primitive_origin_x + column as f32 * (primitive_cell.x + primitive_gap.x),
+            primitive_origin_y - row as f32 * (primitive_cell.y + primitive_gap.y),
+        );
+        spawn_primitive(commands, &theme, primitive, primitive_center, z + 0.2);
+    }
+
+    if variant.primitives.len() > visible_count {
+        spawn_text(
+            commands,
+            format!(
+                "+ {} shared render nodes",
+                variant.primitives.len() - visible_count
+            ),
+            Vec3::new(left, center.y - card_size.y / 2.0 + 18.0, z + 0.2),
+            scale::font_size::F000,
+            theme.text_muted().to_bevy(),
+            Anchor::CENTER_LEFT,
+        );
     }
 }
 
@@ -159,10 +259,9 @@ fn spawn_primitive(
     theme: &Theme,
     primitive: &BevyUiPrimitive,
     center: Vec2,
-    index: usize,
+    z: f32,
 ) {
     let size = primitive_size(primitive);
-    let z = index as f32 * 0.01;
     let border_color = if primitive.selected {
         theme.brand().to_bevy()
     } else {
@@ -191,24 +290,36 @@ fn spawn_primitive(
         Transform::from_xyz(center.x, center.y, z + 0.1),
     ));
 
+    if primitive.selected {
+        commands.spawn((
+            Sprite {
+                color: theme.brand().to_bevy(),
+                custom_size: Some(Vec2::splat(7.0)),
+                ..default()
+            },
+            Transform::from_xyz(center.x - size.x / 2.0 + 11.0, center.y, z + 0.2),
+        ));
+    }
+
     spawn_text(
         commands,
         primitive_label(primitive),
-        Vec3::new(center.x - size.x / 2.0 + 12.0, center.y + 8.0, z + 0.2),
-        scale::font_size::F00,
-        primitive.text,
-    );
-    spawn_text(
-        commands,
-        primitive_meta(primitive),
-        Vec3::new(center.x - size.x / 2.0 + 12.0, center.y - 16.0, z + 0.2),
+        Vec3::new(center.x - size.x / 2.0 + 22.0, center.y + 1.0, z + 0.3),
         scale::font_size::F000,
-        theme.text_2().to_bevy(),
+        primitive.text,
+        Anchor::CENTER_LEFT,
     );
 }
 
 #[cfg(target_arch = "wasm32")]
-fn spawn_text(commands: &mut Commands, text: String, position: Vec3, font_size: f32, color: Color) {
+fn spawn_text(
+    commands: &mut Commands,
+    text: String,
+    position: Vec3,
+    font_size: f32,
+    color: Color,
+    anchor: Anchor,
+) {
     commands.spawn((
         Text2d::new(text),
         TextFont {
@@ -216,6 +327,7 @@ fn spawn_text(commands: &mut Commands, text: String, position: Vec3, font_size: 
             ..default()
         },
         TextColor(color),
+        anchor,
         Transform::from_translation(position),
     ));
 }
@@ -223,18 +335,9 @@ fn spawn_text(commands: &mut Commands, text: String, position: Vec3, font_size: 
 #[cfg(target_arch = "wasm32")]
 fn primitive_size(primitive: &BevyUiPrimitive) -> Vec2 {
     Vec2::new(
-        primitive.size.x.clamp(96.0, 244.0),
-        primitive.size.y.clamp(42.0, 76.0),
+        primitive.size.x.clamp(96.0, 170.0),
+        primitive.size.y.clamp(26.0, 30.0),
     )
-}
-
-#[cfg(target_arch = "wasm32")]
-fn columns_for_count(count: usize) -> usize {
-    match count {
-        0..=4 => 2,
-        5..=12 => 3,
-        _ => 4,
-    }
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -244,22 +347,7 @@ fn primitive_label(primitive: &BevyUiPrimitive) -> String {
     } else {
         primitive.label.as_str()
     };
-    truncate(label, 24)
-}
-
-#[cfg(target_arch = "wasm32")]
-fn primitive_meta(primitive: &BevyUiPrimitive) -> String {
-    let state = if primitive.selected {
-        "selected"
-    } else if primitive.disabled {
-        "disabled"
-    } else {
-        "ready"
-    };
-    truncate(
-        &format!("{} · {:?} · {:?}", primitive.part, primitive.kind, state),
-        34,
-    )
+    truncate(label, 18)
 }
 
 #[cfg(target_arch = "wasm32")]
