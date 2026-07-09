@@ -4,8 +4,8 @@
 component catalog, Leptos renderers, and Bevy primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
-the live stories harness, so each page shows the same pre-filled fixtures used
-by local component development.
+the live stories harness with isolated story routes, so each page shows only
+that component's pre-filled fixtures used by local component development.
 
 ## Pages Structure
 

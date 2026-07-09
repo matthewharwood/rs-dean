@@ -48,7 +48,8 @@ with a Leptos marketing app plus a Bevy-only game app.
   audit loop for component implementation work.
 - `docs/crates/ui` is generated from the `crates/ui` catalog by
   `cargo xtask gen-ui-book`. It publishes one mdBook page per component and
-  embeds the matching `/stories/#ui-{component}` live fixture. Update the Rust
+  embeds the matching `/stories/?story=ui-{component}` isolated live fixture so
+  the page shows only that component's variants and states. Update the Rust
   catalog and story fixture first, regenerate the book, then let the gate verify
   the book has not drifted.
 - Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
@@ -91,34 +92,41 @@ The pass runs, in order:
 
 1. `cargo fmt --all -- --check`
 2. Bevy WebGPU-only feature-tree check
-3. required app persistent-state wiring check
-4. Leptos Tailwind asset wiring check for apps and generated templates
-5. Leptos/UI design-token class usage check
-6. UI crate mdBook source and story-anchor drift check
-7. native `cargo clippy` for workspace crates except browser-only Bevy crates
-8. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
+3. `apps/game` Bevy-only dependency check
+4. required app persistent-state wiring check
+5. Leptos Tailwind asset wiring check for apps and generated templates
+6. Leptos/UI design-token class usage check
+7. UI crate mdBook source, story-anchor, and isolated iframe drift check
+8. native `cargo clippy` for workspace crates except browser-only Bevy crates
+9. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
-9. native `cargo nextest` for workspace crates except browser-only Bevy crates
-10. native `cargo test --doc` for workspace crates except browser-only Bevy
+10. native `cargo nextest` for workspace crates except browser-only Bevy crates
+11. native `cargo test --doc` for workspace crates except browser-only Bevy
    crates
-11. wasm `cargo check` for browser crates
-12. wasm compile of the browser refresh hydration regression
-13. strict rustdoc build
-14. `cargo deny check`
-15. `cargo machete`
-16. regenerate `apps/test-project` from `templates/app`
-17. assert the generated template keeps the shared schema/state contract
-18. build and verify generated template output
-19. build and verify `apps/marketing`, `apps/game`, `apps/stories`,
+12. wasm `cargo check` for browser crates
+13. wasm compile of the browser refresh hydration regression
+14. strict rustdoc build
+15. `cargo deny check`
+16. `cargo-machete --skip-target-dir`
+17. regenerate `apps/test-project` from `templates/app`
+18. assert the generated template keeps the shared schema/state contract
+19. build and verify generated template output
+20. build and verify `apps/marketing`, `apps/game`, `apps/stories`,
     `/crates/`, and `/crates/ui/` static Pages artifacts
-20. build and verify `apps/stories` static output
-21. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
+21. build and verify `apps/stories` static output
+22. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
-22. docs and skill sweep for stale non-Rust stack references
+23. docs and skill sweep for stale non-Rust stack references
 
 Warnings fail. Missing expected artifacts fail. Missing gate tools fail with a
 clear install message. Do not bypass a failing step; fix the source of the
 failure and rerun the whole pass.
+
+For a focused non-runtime lane, run `cargo xtask static-analysis` or
+`just static-analysis`. It runs the format check, repo policy checks, native and
+wasm clippy, strict rustdoc, `cargo deny check`, `cargo-machete`, and the docs
+sweep. The one-pass gate reuses those checks and still finishes with the docs
+sweep after tests and artifact builds.
 
 ## Five-Phase Pass
 
@@ -152,6 +160,7 @@ committed.
 | `just build` | Build static marketing/game output and Pages artifacts. |
 | `just pages` | Build the aggregate GitHub Pages artifact under `target/pages`. |
 | `just ui-book` | Regenerate the UI crate mdBook source from the Rust catalog. |
+| `just static-analysis` | Run the focused static-analysis lane used by the gate. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |
 | `just five-phase-pass` | Run the Rust five-phase pass. |

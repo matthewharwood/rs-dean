@@ -5,9 +5,10 @@ A durable chat or activity message with content and metadata.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Message examples.
 
-<iframe title="Message live story fixtures" src="../../../stories/#ui-message" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Message live story fixtures" src="../../../stories/?story=ui-message" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-message) when a wider canvas is
 needed.

@@ -5,9 +5,10 @@ A bottom or edge-attached panel for mobile-first workflows.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Drawer examples.
 
-<iframe title="Drawer live story fixtures" src="../../../stories/#ui-drawer" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Drawer live story fixtures" src="../../../stories/?story=ui-drawer" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-drawer) when a wider canvas is
 needed.

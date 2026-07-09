@@ -5,9 +5,10 @@ A paged horizontal media or content strip with previous/next controls.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Carousel examples.
 
-<iframe title="Carousel live story fixtures" src="../../../stories/#ui-carousel" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Carousel live story fixtures" src="../../../stories/?story=ui-carousel" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-carousel) when a wider canvas is
 needed.

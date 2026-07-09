@@ -48,6 +48,7 @@ fn main() -> Result<()> {
         }
         Some("preview") => preview(),
         Some("pages") => pages(),
+        Some("static-analysis") => static_analysis(),
         Some("stories") => stories(),
         Some("help") | None => {
             print_help();
@@ -70,6 +71,7 @@ Commands:
   gen-ui-book      regenerate the UI crate mdBook source from the Rust catalog
   build            build static marketing/game output and GitHub Pages artifacts
   pages            build aggregate GitHub Pages artifact in target/pages
+  static-analysis  run format, clippy, rustdoc, dependency, and repo policy checks
   gate             one-pass Rust gate
   check            alias for gate
   check-fast       alias for gate
@@ -139,6 +141,11 @@ fn doctor() -> Result<()> {
     report.command("cargo", ["--version"]);
     report.command("rustc", ["--version"]);
     report.command("rustup", ["--version"]);
+    report.check("rustfmt", command_output("rustfmt", ["--version"]));
+    report.check(
+        "cargo clippy",
+        command_output("cargo", ["clippy", "--version"]),
+    );
     report.command("trunk", ["--version"]);
     report.command("mdbook", ["--version"]);
     report.check("tailwindcss", check_tailwindcss_cli());
@@ -412,57 +419,13 @@ fn git_check_ignore(path: &str) -> Result<bool> {
 
 fn gate() -> Result<()> {
     require_tool("trunk")?;
-    require_tool("mdbook")?;
-    check_tailwindcss_cli()?;
     require_cargo_subcommand("cargo-nextest")?;
-    require_cargo_subcommand("cargo-deny")?;
-    require_cargo_subcommand("cargo-machete")?;
+    require_static_analysis_tools()?;
 
     run("cargo", ["fmt", "--all", "--", "--check"])?;
-    check_bevy_webgpu_only()?;
-    check_game_bevy_only()?;
-    check_required_app_persistence()?;
-    check_leptos_tailwind_assets()?;
-    check_ui_design_token_classes()?;
-    check_ui_book()?;
-    run(
-        "cargo",
-        [
-            "clippy",
-            "--workspace",
-            "--exclude",
-            "rs-dean-game",
-            "--exclude",
-            "rs-dean-bevy-scenes",
-            "--all-targets",
-            "--",
-            "-D",
-            "warnings",
-        ],
-    )?;
-    run(
-        "cargo",
-        [
-            "clippy",
-            "--target",
-            "wasm32-unknown-unknown",
-            "-p",
-            "rs-dean-marketing",
-            "-p",
-            "rs-dean-game",
-            "-p",
-            "rs-dean-stories",
-            "-p",
-            "rs-dean-bevy-scenes",
-            "-p",
-            "rs-dean-idb",
-            "-p",
-            "rs-dean-state",
-            "--",
-            "-D",
-            "warnings",
-        ],
-    )?;
+    run_static_policy_checks()?;
+    run_native_clippy()?;
+    run_wasm_clippy()?;
     run(
         "cargo",
         [
@@ -520,6 +483,90 @@ fn gate() -> Result<()> {
             "--no-run",
         ],
     )?;
+    run_rustdoc_analysis()?;
+    run_dependency_analysis()?;
+    check_template()?;
+    check_generated_template_build()?;
+    build()?;
+    build_stories()?;
+    cube_smoke()?;
+    docs_sweep()
+}
+
+fn static_analysis() -> Result<()> {
+    require_static_analysis_tools()?;
+    run("cargo", ["fmt", "--all", "--", "--check"])?;
+    run_static_policy_checks()?;
+    run_native_clippy()?;
+    run_wasm_clippy()?;
+    run_rustdoc_analysis()?;
+    run_dependency_analysis()?;
+    docs_sweep()
+}
+
+fn require_static_analysis_tools() -> Result<()> {
+    command_output("rustfmt", ["--version"])?;
+    command_output("cargo", ["clippy", "--version"])?;
+    require_tool("mdbook")?;
+    check_tailwindcss_cli()?;
+    require_cargo_subcommand("cargo-deny")?;
+    require_cargo_subcommand("cargo-machete")
+}
+
+fn run_static_policy_checks() -> Result<()> {
+    check_bevy_webgpu_only()?;
+    check_game_bevy_only()?;
+    check_required_app_persistence()?;
+    check_leptos_tailwind_assets()?;
+    check_ui_design_token_classes()?;
+    check_ui_book()
+}
+
+fn run_native_clippy() -> Result<()> {
+    run(
+        "cargo",
+        [
+            "clippy",
+            "--workspace",
+            "--exclude",
+            "rs-dean-game",
+            "--exclude",
+            "rs-dean-bevy-scenes",
+            "--all-targets",
+            "--",
+            "-D",
+            "warnings",
+        ],
+    )
+}
+
+fn run_wasm_clippy() -> Result<()> {
+    run(
+        "cargo",
+        [
+            "clippy",
+            "--target",
+            "wasm32-unknown-unknown",
+            "-p",
+            "rs-dean-marketing",
+            "-p",
+            "rs-dean-game",
+            "-p",
+            "rs-dean-stories",
+            "-p",
+            "rs-dean-bevy-scenes",
+            "-p",
+            "rs-dean-idb",
+            "-p",
+            "rs-dean-state",
+            "--",
+            "-D",
+            "warnings",
+        ],
+    )
+}
+
+fn run_rustdoc_analysis() -> Result<()> {
     run_with_env(
         "cargo",
         [
@@ -533,15 +580,12 @@ fn gate() -> Result<()> {
             "--document-private-items",
         ],
         [("RUSTDOCFLAGS", "-D warnings")],
-    )?;
+    )
+}
+
+fn run_dependency_analysis() -> Result<()> {
     run("cargo", ["deny", "check"])?;
-    run("cargo-machete", ["--skip-target-dir"])?;
-    check_template()?;
-    check_generated_template_build()?;
-    build()?;
-    build_stories()?;
-    cube_smoke()?;
-    docs_sweep()
+    run("cargo-machete", ["--skip-target-dir"])
 }
 
 fn build_stories() -> Result<()> {
@@ -695,8 +739,8 @@ fn ui_book_index() -> String {
 component catalog, Leptos renderers, and Bevy primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
-the live stories harness, so each page shows the same pre-filled fixtures used
-by local component development.
+the live stories harness with isolated story routes, so each page shows only
+that component's pre-filled fixtures used by local component development.
 
 ## Pages Structure
 
@@ -742,9 +786,10 @@ fn ui_component_book_page(definition: ComponentDefinition) -> String {
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows {name} examples.
 
-<iframe title="{name} live story fixtures" src="../../../stories/#ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="{name} live story fixtures" src="../../../stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-{slug}) when a wider canvas is
 needed.
@@ -887,6 +932,19 @@ fn check_ui_book_story_anchors() -> Result<()> {
         }
         if !stories.contains(&data_story_id) {
             bail!("stories missing `{data_story_id}` for {}", definition.name);
+        }
+        let page_path = Path::new(UI_BOOK)
+            .join("src")
+            .join("components")
+            .join(format!("{}.md", definition.slug));
+        let page = fs::read_to_string(&page_path)
+            .with_context(|| format!("read {}", page_path.display()))?;
+        let isolated_story_src = format!("src=\"../../../stories/?story={story_id}\"");
+        if !page.contains(&isolated_story_src) {
+            bail!(
+                "{} must embed isolated story route `{isolated_story_src}`",
+                page_path.display()
+            );
         }
     }
     Ok(())

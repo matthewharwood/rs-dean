@@ -5,9 +5,10 @@ A focus and hover popup that describes a control.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Tooltip examples.
 
-<iframe title="Tooltip live story fixtures" src="../../../stories/#ui-tooltip" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Tooltip live story fixtures" src="../../../stories/?story=ui-tooltip" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-tooltip) when a wider canvas is
 needed.

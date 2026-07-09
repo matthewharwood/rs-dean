@@ -42,6 +42,9 @@ pages:
 ui-book:
     cargo xtask gen-ui-book
 
+static-analysis:
+    cargo xtask static-analysis
+
 gate:
     cargo xtask gate
 

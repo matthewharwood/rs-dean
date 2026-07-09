@@ -5,9 +5,10 @@ A flexible content row with media, title, description, and actions.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Item examples.
 
-<iframe title="Item live story fixtures" src="../../../stories/#ui-item" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Item live story fixtures" src="../../../stories/?story=ui-item" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-item) when a wider canvas is
 needed.

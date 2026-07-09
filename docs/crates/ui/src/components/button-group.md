@@ -5,9 +5,10 @@ A grouped set of related actions with shared edge and focus behavior.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Button Group examples.
 
-<iframe title="Button Group live story fixtures" src="../../../stories/#ui-button-group" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Button Group live story fixtures" src="../../../stories/?story=ui-button-group" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-button-group) when a wider canvas is
 needed.

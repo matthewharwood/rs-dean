@@ -5,9 +5,10 @@ A blocking confirmation dialog for destructive or high-friction actions.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Alert Dialog examples.
 
-<iframe title="Alert Dialog live story fixtures" src="../../../stories/#ui-alert-dialog" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Alert Dialog live story fixtures" src="../../../stories/?story=ui-alert-dialog" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-alert-dialog) when a wider canvas is
 needed.

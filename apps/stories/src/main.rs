@@ -30,24 +30,25 @@ use rs_dean_ui::{
     NavigationMenuLink, NavigationMenuModel, Pagination, PaginationDensity, PaginationModel,
     Popover, PopoverDensity, PopoverModel, Progress, ProgressDensity, ProgressModel, RadioGroup,
     RadioGroupDensity, RadioGroupModel, RadioGroupOption, RadioGroupOrientation, Resizable,
-    ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, ScrollArea,
-    ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select, SelectDensity,
-    SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity, SeparatorModel,
-    SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity, SheetModel,
-    SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel, Skeleton,
-    SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel, SliderOrientation, Sonner,
-    SonnerAction, SonnerDensity, SonnerModel, SonnerPosition, SonnerToast, SonnerTone, Spinner,
-    SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone, Switch, SwitchDensity, SwitchModel,
-    Table, TableColumn, TableDensity, TableModel, TableRow, Tabs, TabsDensity, TabsItem, TabsModel,
-    TabsOrientation, Textarea, TextareaDensity, TextareaModel, ThemeCycleButton, ThemeId,
-    ThemeScope, Toast, ToastAction, ToastDensity, ToastModel, ToastPosition, ToastTone, Toggle,
-    ToggleDensity, ToggleGroup, ToggleGroupItem, ToggleGroupModel, ToggleGroupOrientation,
-    ToggleGroupSelectionMode, ToggleModel, TogglePressed, ToggleVariant, Tooltip, TooltipDensity,
-    TooltipModel, TooltipPlacement, Typography, TypographyDensity, TypographyListItem,
-    TypographyModel,
+    ResizableDensity, ResizableModel, ResizableOrientation, ResizablePanel, SHADCN_COMPONENTS,
+    ScrollArea, ScrollAreaDensity, ScrollAreaItem, ScrollAreaModel, ScrollAreaOverflow, Select,
+    SelectDensity, SelectGroup, SelectModel, SelectOption, Separator, SeparatorDensity,
+    SeparatorModel, SeparatorOrientation, ShadcnComponentGallery, Sheet, SheetAction, SheetDensity,
+    SheetModel, SheetSide, Sidebar, SidebarDensity, SidebarGroup, SidebarItem, SidebarModel,
+    Skeleton, SkeletonDensity, SkeletonModel, Slider, SliderDensity, SliderModel,
+    SliderOrientation, Sonner, SonnerAction, SonnerDensity, SonnerModel, SonnerPosition,
+    SonnerToast, SonnerTone, Spinner, SpinnerDensity, SpinnerModel, SpinnerSize, SpinnerTone,
+    Switch, SwitchDensity, SwitchModel, Table, TableColumn, TableDensity, TableModel, TableRow,
+    Tabs, TabsDensity, TabsItem, TabsModel, TabsOrientation, Textarea, TextareaDensity,
+    TextareaModel, ThemeCycleButton, ThemeId, ThemeScope, Toast, ToastAction, ToastDensity,
+    ToastModel, ToastPosition, ToastTone, Toggle, ToggleDensity, ToggleGroup, ToggleGroupItem,
+    ToggleGroupModel, ToggleGroupOrientation, ToggleGroupSelectionMode, ToggleModel, TogglePressed,
+    ToggleVariant, Tooltip, TooltipDensity, TooltipModel, TooltipPlacement, Typography,
+    TypographyDensity, TypographyListItem, TypographyModel,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
+const STORIES_SHELL_ISOLATED: &str = "min-h-screen bg-surface-1 p-s text-text-1";
 const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
 const STORIES_HEADER: &str = "mb-m flex flex-col gap-s sm:flex-row sm:items-end sm:justify-between";
 const STORIES_HEADER_COPY: &str = "grid gap-2xs";
@@ -70,10 +71,24 @@ const THEME_SWATCH: &str = "size-l rounded-field border border-border-subtle";
 
 #[component]
 fn Stories() -> impl IntoView {
+    let isolated_story_id = isolated_story_id();
+    let shell_class = if isolated_story_id.is_some() {
+        STORIES_SHELL_ISOLATED
+    } else {
+        STORIES_SHELL
+    };
+    let shell_mode = if isolated_story_id.is_some() {
+        "isolated"
+    } else {
+        "catalog"
+    };
+    let isolated_style = isolated_story_style(isolated_story_id.as_deref());
+
     view! {
-        <main class=STORIES_SHELL>
+        <main class=shell_class data-story-shell=shell_mode>
+            <style>{isolated_style}</style>
             <div class=STORIES_SHELL_INNER>
-                <header class=STORIES_HEADER>
+                <header class=STORIES_HEADER data-story-shell-header="true">
                     <div class=STORIES_HEADER_COPY>
                         <p class=STORIES_EYEBROW>
                             "Developer workbench"
@@ -82,7 +97,7 @@ fn Stories() -> impl IntoView {
                     </div>
                     <ThemeCycleButton />
                 </header>
-                <div class=STORIES_GRID>
+                <div class=STORIES_GRID data-story-grid="true">
                     <section id="ui-health-card" data-story-id="ui-health-card" class=STORY_FRAME>
                         <HealthCard
                             title="HealthCard"
@@ -1276,6 +1291,59 @@ fn Stories() -> impl IntoView {
             </div>
         </main>
     }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn isolated_story_id() -> Option<String> {
+    web_sys::window()
+        .and_then(|window| window.location().search().ok())
+        .and_then(|search| isolated_story_id_from_search(&search))
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn isolated_story_id() -> Option<String> {
+    isolated_story_id_from_search("")
+}
+
+fn isolated_story_id_from_search(search: &str) -> Option<String> {
+    let query = search.strip_prefix('?').unwrap_or(search);
+    query.split('&').find_map(|pair| {
+        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
+        (key == "story")
+            .then_some(value)
+            .and_then(valid_catalog_story_id)
+    })
+}
+
+fn valid_catalog_story_id(value: &str) -> Option<String> {
+    let slug = value.strip_prefix("ui-")?;
+    if slug.is_empty()
+        || !slug
+            .bytes()
+            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+    {
+        return None;
+    }
+    SHADCN_COMPONENTS
+        .iter()
+        .any(|definition| definition.slug == slug)
+        .then(|| value.to_owned())
+}
+
+fn isolated_story_style(story_id: Option<&str>) -> String {
+    story_id
+        .map(|story_id| {
+            format!(
+                r#"
+body {{ margin: 0; }}
+[data-story-shell="isolated"] [data-story-shell-header] {{ display: none !important; }}
+[data-story-shell="isolated"] [data-story-grid] {{ gap: 0; }}
+[data-story-shell="isolated"] [data-story-id]:not([data-story-id="{story_id}"]) {{ display: none !important; }}
+[data-story-shell="isolated"] [data-story-id="{story_id}"] > header {{ display: none !important; }}
+"#
+            )
+        })
+        .unwrap_or_default()
 }
 
 fn accordion_story_items() -> Vec<AccordionItem> {
@@ -4799,3 +4867,36 @@ fn main() {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn isolated_story_id_accepts_catalog_story_query() {
+        assert_eq!(
+            isolated_story_id_from_search("?story=ui-button"),
+            Some("ui-button".to_owned())
+        );
+        assert_eq!(
+            isolated_story_id_from_search("foo=bar&story=ui-alert-dialog"),
+            Some("ui-alert-dialog".to_owned())
+        );
+    }
+
+    #[test]
+    fn isolated_story_id_rejects_non_catalog_or_malformed_values() {
+        assert_eq!(isolated_story_id_from_search("?story=ui-health-card"), None);
+        assert_eq!(isolated_story_id_from_search("?story=button"), None);
+        assert_eq!(isolated_story_id_from_search("?story=ui-Button"), None);
+        assert_eq!(isolated_story_id_from_search("?story=ui-button%20"), None);
+    }
+
+    #[test]
+    fn isolated_story_style_hides_everything_except_requested_story() {
+        let style = isolated_story_style(Some("ui-button"));
+        assert!(style.contains(r#"[data-story-shell-header]"#));
+        assert!(style.contains(r#"[data-story-id]:not([data-story-id="ui-button"])"#));
+        assert!(style.contains(r#"[data-story-id="ui-button"] > header"#));
+    }
+}

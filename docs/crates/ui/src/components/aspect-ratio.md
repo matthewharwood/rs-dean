@@ -5,9 +5,10 @@ A fixed-ratio media frame that keeps images, canvases, and embeds stable.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Aspect Ratio examples.
 
-<iframe title="Aspect Ratio live story fixtures" src="../../../stories/#ui-aspect-ratio" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Aspect Ratio live story fixtures" src="../../../stories/?story=ui-aspect-ratio" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-aspect-ratio) when a wider canvas is
 needed.

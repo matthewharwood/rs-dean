@@ -5,9 +5,10 @@ A platform-native select control styled to match tokens.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Native Select examples.
 
-<iframe title="Native Select live story fixtures" src="../../../stories/#ui-native-select" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Native Select live story fixtures" src="../../../stories/?story=ui-native-select" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-native-select) when a wider canvas is
 needed.

@@ -5,9 +5,10 @@ A composed date input, popover, and calendar selection control.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Date Picker examples.
 
-<iframe title="Date Picker live story fixtures" src="../../../stories/#ui-date-picker" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Date Picker live story fixtures" src="../../../stories/?story=ui-date-picker" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-date-picker) when a wider canvas is
 needed.

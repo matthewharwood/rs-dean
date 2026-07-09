@@ -29,6 +29,12 @@ compiles the browser refresh hydration regression for wasm. It also runs the
 generated `apps/test-project/cube-smoke` browser render check, which verifies a
 centered square canvas, WebGPU startup, and the lit green-cube scene contract.
 
+For a focused non-runtime pass, `cargo xtask static-analysis` runs the shared
+static-analysis lane used by the gate: `cargo fmt --all -- --check`, repo
+policy checks, native and wasm `cargo clippy -D warnings`, strict rustdoc,
+`cargo deny check`, `cargo-machete --skip-target-dir`, and the docs sweep. It
+is useful before the full gate, but it does not replace `cargo xtask gate`.
+
 ## App Surfaces
 
 - `apps/marketing`: required Leptos marketing app. It may host Bevy canvas
@@ -71,16 +77,17 @@ and Bevy primitive derivation from the same widget slots for scene consumers.
 `_issues/` mirrors the catalog with one technical-program-management task per
 component plus a sweep log for the repeated first-to-current audit.
 `cargo xtask gen-ui-book` regenerates the UI crate mdBook from that Rust
-catalog. The book has one page per component and embeds the matching live story
-fixture so variant and state samples stay tied to the component harness.
+catalog. The book has one page per component and embeds the matching isolated
+story fixture through `/stories/?story=ui-{component}`, so each page shows only
+that component's variants and states.
 
 ## Doctor
 
 `just doctor` is the fast local preflight. It checks tool availability,
-including the standalone Tailwind CLI, the wasm target, Chrome discovery,
-WebGPU feature wiring, common local ports, ignored generated outputs, and
-required repo files. Use it before a long gate when a machine or checkout may be
-stale.
+including `rustfmt`, `cargo clippy`, the standalone Tailwind CLI, dependency
+audit tools, the wasm target, Chrome discovery, WebGPU feature wiring, common
+local ports, ignored generated outputs, and required repo files. Use it before a
+long gate when a machine or checkout may be stale.
 
 ## Durable State
 
@@ -113,9 +120,9 @@ confirmed.
 The root index links binaries at `/marketing/`, `/game/`, and `/stories/`.
 It also links `/crates/`, the workspace crate index. The crate index lists each
 workspace crate and links `rs-dean-ui` to its book at `/crates/ui/`. The UI
-crate book embeds `/stories/#ui-{component}` for live component fixtures. The
-deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits
-project-page-safe asset URLs.
+crate book embeds `/stories/?story=ui-{component}` for isolated live component
+fixtures. The deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk
+emits project-page-safe asset URLs.
 
 ## Skill Docs
 

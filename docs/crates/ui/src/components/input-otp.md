@@ -5,9 +5,10 @@ A grouped one-time-code input with fixed slots.
 ## Live Fixtures
 
 The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+variants, states, themed rendering, and validation paths. The frame uses the
+isolated story route so this page only shows Input OTP examples.
 
-<iframe title="Input OTP live story fixtures" src="../../../stories/#ui-input-otp" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<iframe title="Input OTP live story fixtures" src="../../../stories/?story=ui-input-otp" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
 
 Open the [full stories page](../../../stories/#ui-input-otp) when a wider canvas is
 needed.

@@ -68,7 +68,12 @@ cargo xtask five-phase-pass
 ```
 
 This regenerates ignored `apps/test-project`, runs the one-pass Rust gate, and
-sweeps docs. `apps/test-project` is proof output only; never commit it.
+sweeps docs. The one-pass gate includes the focused static-analysis lane:
+format check, repo policy checks, native and wasm clippy, strict rustdoc,
+`cargo deny check`, `cargo-machete`, and the docs sweep. For gate or tooling
+changes, run `cargo xtask static-analysis` directly before the full pass to
+fail fast. The full gate still runs its final docs sweep after tests and
+artifact builds. `apps/test-project` is proof output only; never commit it.
 
 ### P4 — Docs And Owning Skill
 
@@ -91,6 +96,8 @@ remove the old wording from docs/skills.
 ## Acceptance Criteria
 
 - `cargo xtask gate` passes.
+- `cargo xtask static-analysis` passes when the task changes gate,
+  static-analysis, or local tooling behavior.
 - `cargo xtask doctor` passes when the task changes local tooling or gate
   prerequisites.
 - `cargo xtask docs-sweep` passes.
@@ -104,7 +111,8 @@ remove the old wording from docs/skills.
   every catalog component can build a shared implementation recipe, literal
   widget constructor, named Leptos component, and Bevy primitive spec.
 - `docs/crates/ui` has one generated mdBook page per catalog component, and
-  each page embeds the matching `/stories/#ui-{component}` live fixture.
+  each page embeds the matching `/stories/?story=ui-{component}` isolated live
+  fixture so the page shows only that component's variants and states.
 - Shared UI themes switch through Tailwind tokens in Leptos and through the
   same Rust palette in Bevy without adding Leptos to `rs-dean-game`.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.
