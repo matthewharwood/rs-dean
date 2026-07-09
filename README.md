@@ -4,9 +4,10 @@ Rust/WASM browser-game scaffold for Dean.
 
 Every clone has a static GitHub Pages shape: `apps/marketing` for the Leptos
 marketing surface, `apps/game` for the Bevy-only WebGPU game, `apps/stories` for
-independent UI and scene proofs, `rs-dean-ui` for shared Leptos/Bevy design
-tokens and themes, `rs-dean-idb` for isomorphic durable state, and generated
-template proof under ignored `apps/test-project`.
+independent Leptos UI and scene proofs, `apps/ui-bevy-stories` for Bevy-only UI
+primitive proofs, `rs-dean-ui` for shared Leptos/Bevy design tokens and themes,
+`rs-dean-idb` for isomorphic durable state, and generated template proof under
+ignored `apps/test-project`.
 
 ## First Run
 
@@ -29,6 +30,12 @@ compiles the browser refresh hydration regression for wasm. It also runs the
 generated `apps/test-project/cube-smoke` browser render check, which verifies a
 centered square canvas, WebGPU startup, and the lit green-cube scene contract.
 
+For a focused non-runtime pass, `cargo xtask static-analysis` runs the shared
+static-analysis lane used by the gate: `cargo fmt --all -- --check`, repo
+policy checks, native and wasm `cargo clippy -D warnings`, strict rustdoc,
+`cargo deny check`, `cargo-machete --skip-target-dir`, and the docs sweep. It
+is useful before the full gate, but it does not replace `cargo xtask gate`.
+
 ## App Surfaces
 
 - `apps/marketing`: required Leptos marketing app. It may host Bevy canvas
@@ -43,6 +50,10 @@ centered square canvas, WebGPU startup, and the lit green-cube scene contract.
   proofs. Leptos stories use the same Trunk Tailwind asset path as marketing
   and include a theme gallery for every `rs-dean-ui` theme plus the full
   shadcn-inspired component catalog.
+- `apps/ui-bevy-stories`: Bevy-only story harness for `rs-dean-ui` component
+  primitives. It uses `rs-dean-ui` with `default-features = false` and
+  `features = ["bevy"]`, stays Leptos-free, and exposes isolated routes such as
+  `/ui-bevy-stories/?story=ui-button` for mdBook embeds.
 - `apps/test-project`: ignored generated proof from `templates/app`; it contains
   a generated Leptos app with Tailwind already wired, plus the generated
   cube-smoke app used by the render gate.
@@ -71,16 +82,18 @@ and Bevy primitive derivation from the same widget slots for scene consumers.
 `_issues/` mirrors the catalog with one technical-program-management task per
 component plus a sweep log for the repeated first-to-current audit.
 `cargo xtask gen-ui-book` regenerates the UI crate mdBook from that Rust
-catalog. The book has one page per component and embeds the matching live story
-fixture so variant and state samples stay tied to the component harness.
+catalog. The book has one page per component and embeds the matching isolated
+Leptos story fixture through `/stories/?story=ui-{component}` beside the Bevy
+primitive story through `/ui-bevy-stories/?story=ui-{component}`, so each page
+shows only that component's DOM variants and Bevy adapter output.
 
 ## Doctor
 
 `just doctor` is the fast local preflight. It checks tool availability,
-including the standalone Tailwind CLI, the wasm target, Chrome discovery,
-WebGPU feature wiring, common local ports, ignored generated outputs, and
-required repo files. Use it before a long gate when a machine or checkout may be
-stale.
+including `rustfmt`, `cargo clippy`, the standalone Tailwind CLI, dependency
+audit tools, the wasm target, Chrome discovery, WebGPU feature wiring, common
+local ports, ignored generated outputs, and required repo files. Use it before a
+long gate when a machine or checkout may be stale.
 
 ## Durable State
 
@@ -110,11 +123,12 @@ confirmed.
 ## GitHub Pages
 
 `cargo xtask pages` builds an aggregate static artifact under `target/pages`.
-The root index links binaries at `/marketing/`, `/game/`, and `/stories/`.
-It also links `/crates/`, the workspace crate index. The crate index lists each
-workspace crate and links `rs-dean-ui` to its book at `/crates/ui/`. The UI
-crate book embeds `/stories/#ui-{component}` for live component fixtures. The
-deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits
+The root index links binaries at `/marketing/`, `/game/`, `/stories/`, and
+`/ui-bevy-stories/`. It also links `/crates/`, the workspace crate index. The
+crate index lists each workspace crate and links `rs-dean-ui` to its book at
+`/crates/ui/`. The UI crate book embeds `/stories/?story=ui-{component}` and
+`/ui-bevy-stories/?story=ui-{component}` for isolated live component fixtures.
+The deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits
 project-page-safe asset URLs.
 
 ## Skill Docs

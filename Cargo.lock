@@ -4761,6 +4761,7 @@ dependencies = [
  "console_error_panic_hook",
  "leptos",
  "rs-dean-ui",
+ "web-sys",
 ]
 
 [[package]]
@@ -4771,6 +4772,16 @@ dependencies = [
  "garde",
  "leptos",
  "serde",
+ "web-sys",
+]
+
+[[package]]
+name = "rs-dean-ui-bevy-stories"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "console_error_panic_hook",
+ "rs-dean-ui",
  "web-sys",
 ]
 

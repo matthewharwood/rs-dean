@@ -24,6 +24,11 @@ and code-judgment rules around those APIs.
   behind wasm-specific adapter modules.
 - For workspace commands, prefer deterministic scripts or `xtask` code over
   shell fragments copied into multiple places.
+- For focused static analysis, use `cargo xtask static-analysis`. It runs the
+  repo's format check, policy checks, native and wasm `cargo clippy -D
+  warnings`, strict rustdoc, `cargo deny check`, `cargo-machete`, and docs
+  sweep; `cargo xtask gate` reuses those checks and still finishes with the
+  docs sweep after tests and artifact builds.
 
 ## Rust 2024 Rules
 

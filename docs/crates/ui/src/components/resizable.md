@@ -4,13 +4,26 @@ A split panel layout with draggable handles.
 
 ## Live Fixtures
 
-The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths.
+The embedded Leptos surface renders pre-filled DOM fixtures for this
+component's variants, states, themed rendering, and validation paths. The Bevy
+surface renders the same shared `rs-dean-ui` component contract through its
+Bevy primitive adapter. Both frames use isolated story routes so this page only
+shows Resizable examples.
 
-<iframe title="Resizable live story fixtures" src="../../../stories/#ui-resizable" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start;">
+  <section>
+    <h3>Leptos DOM Story</h3>
+    <iframe title="Resizable Leptos live story fixtures" src="../../../stories/?story=ui-resizable" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+  <section>
+    <h3>Bevy Primitive Story</h3>
+    <iframe title="Resizable Bevy primitive story fixtures" src="../../../ui-bevy-stories/?story=ui-resizable" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+</div>
 
-Open the [full stories page](../../../stories/#ui-resizable) when a wider canvas is
-needed.
+Open the [full Leptos stories page](../../../stories/#ui-resizable) or the
+[full Bevy story page](../../../ui-bevy-stories/?story=ui-resizable) when a wider
+canvas is needed.
 
 ## Contract
 
