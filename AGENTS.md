@@ -2,7 +2,8 @@
 
 `rs-dean` is a Rust/WASM browser-game scaffold workspace. It is static-only,
 targets GitHub Pages, stores durable state in IndexedDB, and ships every clone
-with a Leptos marketing app plus a Bevy-only game app.
+with a Leptos marketing app, a Leptos story harness, a Bevy UI story harness,
+and a Bevy-only game app.
 
 ## Non-Negotiables
 
@@ -48,10 +49,11 @@ with a Leptos marketing app plus a Bevy-only game app.
   audit loop for component implementation work.
 - `docs/crates/ui` is generated from the `crates/ui` catalog by
   `cargo xtask gen-ui-book`. It publishes one mdBook page per component and
-  embeds the matching `/stories/?story=ui-{component}` isolated live fixture so
-  the page shows only that component's variants and states. Update the Rust
-  catalog and story fixture first, regenerate the book, then let the gate verify
-  the book has not drifted.
+  embeds the matching `/stories/?story=ui-{component}` Leptos fixture beside the
+  `/ui-bevy-stories/?story=ui-{component}` Bevy primitive fixture so the page
+  shows only that component's DOM variants and Bevy adapter output. Update the
+  Rust catalog and story fixtures first, regenerate the book, then let the gate
+  verify the book has not drifted.
 - Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
   typography, spacing, radius, shadow, and motion scales, such as `text-0`,
   `gap-m`, `p-s`, `rounded-box`, `font-7`, `leading-0`, and `shadow-2`.
@@ -61,6 +63,9 @@ with a Leptos marketing app plus a Bevy-only game app.
   Leptos.
 - `apps/stories` is the required independent story harness for reusable UI and
   scene proofs.
+- `apps/ui-bevy-stories` is the required Bevy-only story harness for reusable
+  UI primitive proofs. It must not depend on Leptos and publishes isolated
+  component routes for the UI mdBook.
 - Bevy `0.19.0` for browser scenes, WebGPU-only. The gate fails if a WebGL
   feature appears in the Bevy wasm feature tree.
 - `templates/app/cube-smoke` is copied into generated `apps/test-project` as
@@ -92,11 +97,11 @@ The pass runs, in order:
 
 1. `cargo fmt --all -- --check`
 2. Bevy WebGPU-only feature-tree check
-3. `apps/game` Bevy-only dependency check
+3. Bevy-only dependency check for `apps/game` and `apps/ui-bevy-stories`
 4. required app persistent-state wiring check
 5. Leptos Tailwind asset wiring check for apps and generated templates
 6. Leptos/UI design-token class usage check
-7. UI crate mdBook source, story-anchor, and isolated iframe drift check
+7. UI crate mdBook source, story-anchor, and dual isolated iframe drift check
 8. native `cargo clippy` for workspace crates except browser-only Bevy crates
 9. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
@@ -112,8 +117,9 @@ The pass runs, in order:
 18. assert the generated template keeps the shared schema/state contract
 19. build and verify generated template output
 20. build and verify `apps/marketing`, `apps/game`, `apps/stories`,
-    `/crates/`, and `/crates/ui/` static Pages artifacts
-21. build and verify `apps/stories` static output
+    `apps/ui-bevy-stories`, `/crates/`, and `/crates/ui/` static Pages
+    artifacts
+21. build and verify `apps/stories` and `apps/ui-bevy-stories` static output
 22. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
 23. docs and skill sweep for stale non-Rust stack references
@@ -155,6 +161,7 @@ committed.
 | `just dev` | Run the marketing app with Trunk on LAN-friendly host/port. |
 | `just game` | Run the Bevy game app with Trunk on LAN-friendly host/port. |
 | `just stories` | Run the Rust story harness. |
+| `just ui-bevy-stories` | Run the Bevy UI story harness. |
 | `just cube-smoke` | Generate the test project, build its green-cube page, and verify the WebGPU scene contract. |
 | `just doctor` | Run the fast local environment preflight. |
 | `just build` | Build static marketing/game output and Pages artifacts. |

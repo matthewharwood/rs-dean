@@ -4776,6 +4776,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rs-dean-ui-bevy-stories"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "console_error_panic_hook",
+ "rs-dean-ui",
+ "web-sys",
+]
+
+[[package]]
 name = "rstml"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

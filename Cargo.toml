@@ -4,6 +4,7 @@ members = [
     "apps/marketing",
     "apps/game",
     "apps/stories",
+    "apps/ui-bevy-stories",
     "crates/ui",
     "crates/state",
     "crates/idb",

@@ -18,7 +18,8 @@ Implement the change in the owning app or crate:
 
 - `apps/marketing` for the required Leptos marketing app.
 - `apps/game` for the required Bevy-only game app.
-- `apps/stories` for isolated UI or scene proofs.
+- `apps/stories` for isolated Leptos UI or scene proofs.
+- `apps/ui-bevy-stories` for isolated Bevy UI primitive proofs.
 - `crates/*` for reusable Rust logic.
 - `xtask` for commands, gates, generated templates, and artifact checks.
 
@@ -43,8 +44,9 @@ story, template, and shared component surfaces.
 The shadcn-inspired catalog lives in `crates/ui`. Keep its Rust definitions,
 implementation recipes, literal widget constructors, named token-only Leptos
 components, Bevy primitive adapters, `apps/stories` gallery, `_issues/`
-component task files, generated `docs/crates/ui` mdBook pages, and sweep log in
-sync. Run `cargo xtask gen-ui-book` after catalog or story fixture changes.
+component task files, generated `docs/crates/ui` mdBook pages,
+`apps/ui-bevy-stories` primitive routes, and sweep log in sync. Run
+`cargo xtask gen-ui-book` after catalog or story fixture changes.
 
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
@@ -102,8 +104,9 @@ remove the old wording from docs/skills.
   prerequisites.
 - `cargo xtask docs-sweep` passes.
 - Template regeneration succeeds and `apps/test-project` remains untracked.
-- `apps/marketing`, `apps/game`, and `apps/stories` produce Trunk `.wasm`,
-  glue, and CSS artifacts; Leptos CSS artifacts are compiled through Tailwind.
+- `apps/marketing`, `apps/game`, `apps/stories`, and
+  `apps/ui-bevy-stories` produce Trunk `.wasm`, glue, and CSS artifacts;
+  Leptos CSS artifacts are compiled through Tailwind.
 - Leptos app, story, template, and shared component examples use
   `rs-dean-ui` token utilities for design scales instead of stock Tailwind
   scale classes.
@@ -112,9 +115,11 @@ remove the old wording from docs/skills.
   widget constructor, named Leptos component, and Bevy primitive spec.
 - `docs/crates/ui` has one generated mdBook page per catalog component, and
   each page embeds the matching `/stories/?story=ui-{component}` isolated live
-  fixture so the page shows only that component's variants and states.
+  Leptos fixture beside `/ui-bevy-stories/?story=ui-{component}` so the page
+  shows only that component's DOM variants and Bevy primitive adapter output.
 - Shared UI themes switch through Tailwind tokens in Leptos and through the
-  same Rust palette in Bevy without adding Leptos to `rs-dean-game`.
+  same Rust palette in Bevy without adding Leptos to `rs-dean-game` or
+  `rs-dean-ui-bevy-stories`.
 - Required app packages keep persistent-state wiring through `rs-dean-state`.
 - Generated `apps/test-project/cube-smoke` verifies the WebGPU smoke surface.
 - The Bevy wasm feature tree contains WebGPU and no WebGL.

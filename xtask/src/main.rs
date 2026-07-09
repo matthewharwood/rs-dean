@@ -23,6 +23,7 @@ use serde_json::{Value, json};
 const MARKETING_APP: &str = "apps/marketing";
 const GAME_APP: &str = "apps/game";
 const STORIES_APP: &str = "apps/stories";
+const UI_BEVY_STORIES_APP: &str = "apps/ui-bevy-stories";
 const TEST_PROJECT: &str = "apps/test-project";
 const CUBE_SMOKE_APP: &str = "apps/test-project/cube-smoke";
 const UI_BOOK: &str = "docs/crates/ui";
@@ -50,6 +51,7 @@ fn main() -> Result<()> {
         Some("pages") => pages(),
         Some("static-analysis") => static_analysis(),
         Some("stories") => stories(),
+        Some("ui-bevy-stories") => ui_bevy_stories(),
         Some("help") | None => {
             print_help();
             Ok(())
@@ -67,6 +69,7 @@ Commands:
   dev              run the Leptos marketing app on :5173
   game             run the Bevy game app on :5174
   stories          run the Rust story harness on :6106
+  ui-bevy-stories  run the Bevy UI story harness on :6107
   preview          serve the release app on :3100
   gen-ui-book      regenerate the UI crate mdBook source from the Rust catalog
   build            build static marketing/game output and GitHub Pages artifacts
@@ -108,6 +111,14 @@ fn stories() -> Result<()> {
         STORIES_APP,
         "trunk",
         ["serve", "--address", "0.0.0.0", "--port", "6106"],
+    )
+}
+
+fn ui_bevy_stories() -> Result<()> {
+    run_in(
+        UI_BEVY_STORIES_APP,
+        "trunk",
+        ["serve", "--address", "0.0.0.0", "--port", "6107"],
     )
 }
 
@@ -176,6 +187,7 @@ fn doctor() -> Result<()> {
         ("marketing dev port", 5173),
         ("game dev port", 5174),
         ("story harness port", 6106),
+        ("UI Bevy story harness port", 6107),
         ("preview port", 3100),
         ("cube smoke port", 6173),
     ] {
@@ -192,6 +204,9 @@ fn doctor() -> Result<()> {
         "apps/game/Trunk.toml",
         "apps/stories/Trunk.toml",
         "apps/stories/public/.gitkeep",
+        "apps/ui-bevy-stories/Cargo.toml",
+        "apps/ui-bevy-stories/Trunk.toml",
+        "apps/ui-bevy-stories/index.html",
     ] {
         report.check(
             path,
@@ -436,6 +451,8 @@ fn gate() -> Result<()> {
             "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
+            "--exclude",
+            "rs-dean-ui-bevy-stories",
         ],
     )?;
     run(
@@ -447,6 +464,8 @@ fn gate() -> Result<()> {
             "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
+            "--exclude",
+            "rs-dean-ui-bevy-stories",
             "--doc",
         ],
     )?;
@@ -462,6 +481,8 @@ fn gate() -> Result<()> {
             "rs-dean-game",
             "-p",
             "rs-dean-stories",
+            "-p",
+            "rs-dean-ui-bevy-stories",
             "-p",
             "rs-dean-bevy-scenes",
             "-p",
@@ -489,6 +510,7 @@ fn gate() -> Result<()> {
     check_generated_template_build()?;
     build()?;
     build_stories()?;
+    build_ui_bevy_stories()?;
     cube_smoke()?;
     docs_sweep()
 }
@@ -515,7 +537,7 @@ fn require_static_analysis_tools() -> Result<()> {
 
 fn run_static_policy_checks() -> Result<()> {
     check_bevy_webgpu_only()?;
-    check_game_bevy_only()?;
+    check_bevy_only_apps()?;
     check_required_app_persistence()?;
     check_leptos_tailwind_assets()?;
     check_ui_design_token_classes()?;
@@ -532,6 +554,8 @@ fn run_native_clippy() -> Result<()> {
             "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
+            "--exclude",
+            "rs-dean-ui-bevy-stories",
             "--all-targets",
             "--",
             "-D",
@@ -553,6 +577,8 @@ fn run_wasm_clippy() -> Result<()> {
             "rs-dean-game",
             "-p",
             "rs-dean-stories",
+            "-p",
+            "rs-dean-ui-bevy-stories",
             "-p",
             "rs-dean-bevy-scenes",
             "-p",
@@ -576,6 +602,8 @@ fn run_rustdoc_analysis() -> Result<()> {
             "rs-dean-game",
             "--exclude",
             "rs-dean-bevy-scenes",
+            "--exclude",
+            "rs-dean-ui-bevy-stories",
             "--no-deps",
             "--document-private-items",
         ],
@@ -593,6 +621,11 @@ fn build_stories() -> Result<()> {
     verify_trunk_dist(&Path::new(STORIES_APP).join("dist"))
 }
 
+fn build_ui_bevy_stories() -> Result<()> {
+    run_in(UI_BEVY_STORIES_APP, "trunk", ["build", "--release"])?;
+    verify_trunk_dist(&Path::new(UI_BEVY_STORIES_APP).join("dist"))
+}
+
 fn pages() -> Result<()> {
     let target = Path::new("target/pages");
     if target.exists() {
@@ -604,6 +637,7 @@ fn pages() -> Result<()> {
     build_pages_app(MARKETING_APP, target, "marketing", &base)?;
     build_pages_app(GAME_APP, target, "game", &base)?;
     build_pages_app(STORIES_APP, target, "stories", &base)?;
+    build_pages_app(UI_BEVY_STORIES_APP, target, "ui-bevy-stories", &base)?;
     build_ui_book(target)?;
     write_pages_index(target, &base)?;
     write_crates_index(target, &base)?;
@@ -739,14 +773,16 @@ fn ui_book_index() -> String {
 component catalog, Leptos renderers, and Bevy primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
-the live stories harness with isolated story routes, so each page shows only
-that component's pre-filled fixtures used by local component development.
+the live Leptos and Bevy story harnesses with isolated story routes, so each
+page shows only that component's pre-filled DOM fixtures and matching Bevy
+primitive adapter used by local component development.
 
 ## Pages Structure
 
 - [Marketing app](../../marketing/)
 - [Game app](../../game/)
 - [Stories app](../../stories/)
+- [UI Bevy stories app](../../ui-bevy-stories/)
 - [Crate index](../)
 
 ## Component Coverage
@@ -754,10 +790,12 @@ that component's pre-filled fixtures used by local component development.
 - Components documented: {}
 - Source of truth: `crates/ui/src/catalog.rs`
 - Implementation contracts: `crates/ui/src/kit.rs`
-- Live fixtures: `apps/stories/src/main.rs`
+- Leptos live fixtures: `apps/stories/src/main.rs`
+- Bevy primitive fixtures: `apps/ui-bevy-stories/src/main.rs`
 
 Run `cargo xtask gen-ui-book` after adding, removing, or renaming a component.
-`cargo xtask gate` verifies this book stays in sync with the catalog and stories.
+`cargo xtask gate` verifies this book stays in sync with the catalog and story
+harnesses.
 "#,
         SHADCN_COMPONENTS.len()
     )
@@ -785,14 +823,26 @@ fn ui_component_book_page(definition: ComponentDefinition) -> String {
 
 ## Live Fixtures
 
-The embedded stories surface renders pre-filled fixtures for this component's
-variants, states, themed rendering, and validation paths. The frame uses the
-isolated story route so this page only shows {name} examples.
+The embedded Leptos surface renders pre-filled DOM fixtures for this
+component's variants, states, themed rendering, and validation paths. The Bevy
+surface renders the same shared `rs-dean-ui` component contract through its
+Bevy primitive adapter. Both frames use isolated story routes so this page only
+shows {name} examples.
 
-<iframe title="{name} live story fixtures" src="../../../stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start;">
+  <section>
+    <h3>Leptos DOM Story</h3>
+    <iframe title="{name} Leptos live story fixtures" src="../../../stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+  <section>
+    <h3>Bevy Primitive Story</h3>
+    <iframe title="{name} Bevy primitive story fixtures" src="../../../ui-bevy-stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+</div>
 
-Open the [full stories page](../../../stories/#ui-{slug}) when a wider canvas is
-needed.
+Open the [full Leptos stories page](../../../stories/#ui-{slug}) or the
+[full Bevy story page](../../../ui-bevy-stories/?story=ui-{slug}) when a wider
+canvas is needed.
 
 ## Contract
 
@@ -923,6 +973,13 @@ fn collect_generated_source_files(
 fn check_ui_book_story_anchors() -> Result<()> {
     let stories =
         fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
+    let bevy_stories = fs::read_to_string("apps/ui-bevy-stories/src/main.rs")
+        .context("read apps/ui-bevy-stories/src/main.rs")?;
+    if !bevy_stories.contains("SHADCN_COMPONENTS")
+        || !bevy_stories.contains("bevy_primitives_for_component")
+    {
+        bail!("UI Bevy stories must route catalog components through shared Bevy primitives");
+    }
     for definition in SHADCN_COMPONENTS {
         let story_id = format!("ui-{}", definition.slug);
         let id = format!("id=\"{story_id}\"");
@@ -943,6 +1000,13 @@ fn check_ui_book_story_anchors() -> Result<()> {
         if !page.contains(&isolated_story_src) {
             bail!(
                 "{} must embed isolated story route `{isolated_story_src}`",
+                page_path.display()
+            );
+        }
+        let isolated_bevy_story_src = format!("src=\"../../../ui-bevy-stories/?story={story_id}\"");
+        if !page.contains(&isolated_bevy_story_src) {
+            bail!(
+                "{} must embed isolated Bevy story route `{isolated_bevy_story_src}`",
                 page_path.display()
             );
         }
@@ -986,6 +1050,7 @@ fn write_pages_index(target: &Path, base: &str) -> Result<()> {
           <li><a href="{base}marketing/">Marketing</a></li>
           <li><a href="{base}game/">Game</a></li>
           <li><a href="{base}stories/">Stories</a></li>
+          <li><a href="{base}ui-bevy-stories/">UI Bevy Stories</a></li>
         </ul>
       </section>
       <section>
@@ -1055,6 +1120,7 @@ fn write_pages_support_files(target: &Path, base: &str) -> Result<()> {
   <url><loc>{base}marketing/</loc></url>
   <url><loc>{base}game/</loc></url>
   <url><loc>{base}stories/</loc></url>
+  <url><loc>{base}ui-bevy-stories/</loc></url>
   <url><loc>{base}crates/</loc></url>
   <url><loc>{base}crates/ui/</loc></url>
 </urlset>
@@ -1074,6 +1140,7 @@ fn verify_pages_site(target: &Path) -> Result<()> {
     verify_trunk_dist(&target.join("marketing"))?;
     verify_trunk_dist(&target.join("game"))?;
     verify_trunk_dist(&target.join("stories"))?;
+    verify_trunk_dist(&target.join("ui-bevy-stories"))?;
     verify_ui_book_dist(&target.join("crates/ui"))
 }
 
@@ -1094,6 +1161,17 @@ fn check_generated_template_build() -> Result<()> {
 }
 
 fn check_bevy_webgpu_only() -> Result<()> {
+    for package in [
+        "rs-dean-game",
+        "rs-dean-bevy-scenes",
+        "rs-dean-ui-bevy-stories",
+    ] {
+        check_bevy_webgpu_only_package(package)?;
+    }
+    Ok(())
+}
+
+fn check_bevy_webgpu_only_package(package: &str) -> Result<()> {
     let output = Command::new("cargo")
         .args([
             "tree",
@@ -1102,45 +1180,46 @@ fn check_bevy_webgpu_only() -> Result<()> {
             "-e",
             "features",
             "-p",
-            "rs-dean-bevy-scenes",
+            package,
         ])
         .output()
-        .context("inspect Bevy wasm feature tree")?;
+        .with_context(|| format!("inspect {package} Bevy wasm feature tree"))?;
     if !output.status.success() {
-        bail!("cargo tree exited with {}", output.status);
+        bail!("cargo tree for {package} exited with {}", output.status);
     }
     let stdout = String::from_utf8(output.stdout).context("cargo tree output was not UTF-8")?;
     let stdout = strip_ansi_codes(&stdout);
     if stdout.contains("webgl") {
-        bail!("Bevy wasm feature tree includes WebGL; keep `webgl2` disabled");
+        bail!("{package} Bevy wasm feature tree includes WebGL; keep `webgl2` disabled");
     }
     if !stdout.contains("webgpu") {
-        bail!("Bevy wasm feature tree does not include WebGPU");
+        bail!("{package} Bevy wasm feature tree does not include WebGPU");
     }
     Ok(())
 }
 
-fn check_game_bevy_only() -> Result<()> {
+fn check_bevy_only_apps() -> Result<()> {
+    for package in ["rs-dean-game", "rs-dean-ui-bevy-stories"] {
+        check_bevy_only_package(package)?;
+    }
+    Ok(())
+}
+
+fn check_bevy_only_package(package: &str) -> Result<()> {
     let output = Command::new("cargo")
-        .args([
-            "tree",
-            "--target",
-            "wasm32-unknown-unknown",
-            "-p",
-            "rs-dean-game",
-        ])
+        .args(["tree", "--target", "wasm32-unknown-unknown", "-p", package])
         .output()
-        .context("inspect game wasm dependency tree")?;
+        .with_context(|| format!("inspect {package} wasm dependency tree"))?;
     if !output.status.success() {
-        bail!("cargo tree exited with {}", output.status);
+        bail!("cargo tree for {package} exited with {}", output.status);
     }
     let stdout = String::from_utf8(output.stdout).context("cargo tree output was not UTF-8")?;
     let stdout = strip_ansi_codes(&stdout);
     if !cargo_tree_has_package(&stdout, "bevy") {
-        bail!("rs-dean-game must depend on Bevy");
+        bail!("{package} must depend on Bevy");
     }
     if cargo_tree_has_package(&stdout, "leptos") {
-        bail!("rs-dean-game must stay Bevy-only and cannot depend on Leptos");
+        bail!("{package} must stay Bevy-only and cannot depend on Leptos");
     }
     Ok(())
 }

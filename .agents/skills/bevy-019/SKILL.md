@@ -29,8 +29,10 @@ WebGL features.
 ## App Shape
 
 For reusable scene crates, expose a plugin. `apps/game` is the required
-Bevy-only game binary and must not depend on Leptos. `apps/marketing` may use
-Bevy for canvas moments, but it owns the Leptos marketing surface.
+Bevy-only game binary and must not depend on Leptos. `apps/ui-bevy-stories` is
+the Bevy-only UI primitive story harness for the generated UI mdBook and must
+also stay Leptos-free. `apps/marketing` may use Bevy for canvas moments, but it
+owns the Leptos marketing surface.
 
 ```rust
 use bevy::prelude::*;
@@ -187,8 +189,10 @@ The gate checks the wasm feature tree and fails if WebGL is present.
 
 - Pure gameplay logic belongs in native unit tests under crates such as
   `crates/srs`, `crates/cards`, or future domain crates.
-- Bevy scene wiring should have compile tests via `cargo check` and story-harness
-  proofs when visible output matters.
+- Bevy scene wiring should have compile tests via `cargo check` and
+  story-harness proofs when visible output matters. UI primitive stories belong
+  in `apps/ui-bevy-stories` and should be linked from `docs/crates/ui` beside
+  the matching Leptos story route.
 - `templates/app/cube-smoke` is copied into generated `apps/test-project` as
   the required visible 3D smoke surface. It renders one green
   `StandardMaterial` cube in a centered square canvas with a light and camera,
@@ -208,4 +212,6 @@ The gate checks the wasm feature tree and fails if WebGL is present.
 - Putting durable progress or settings only in Bevy resources.
 - Hiding scene setup behind generic abstractions before there are repeated
   scene patterns in this repo.
-- Adding a browser scene feature without a route in `apps/stories`.
+- Adding a browser scene feature without a route in `apps/stories` or
+  `apps/ui-bevy-stories`, depending on whether the proof is DOM UI or Bevy UI
+  primitives.

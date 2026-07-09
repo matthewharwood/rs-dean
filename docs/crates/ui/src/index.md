@@ -4,14 +4,16 @@
 component catalog, Leptos renderers, and Bevy primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
-the live stories harness with isolated story routes, so each page shows only
-that component's pre-filled fixtures used by local component development.
+the live Leptos and Bevy story harnesses with isolated story routes, so each
+page shows only that component's pre-filled DOM fixtures and matching Bevy
+primitive adapter used by local component development.
 
 ## Pages Structure
 
 - [Marketing app](../../marketing/)
 - [Game app](../../game/)
 - [Stories app](../../stories/)
+- [UI Bevy stories app](../../ui-bevy-stories/)
 - [Crate index](../)
 
 ## Component Coverage
@@ -19,7 +21,9 @@ that component's pre-filled fixtures used by local component development.
 - Components documented: 64
 - Source of truth: `crates/ui/src/catalog.rs`
 - Implementation contracts: `crates/ui/src/kit.rs`
-- Live fixtures: `apps/stories/src/main.rs`
+- Leptos live fixtures: `apps/stories/src/main.rs`
+- Bevy primitive fixtures: `apps/ui-bevy-stories/src/main.rs`
 
 Run `cargo xtask gen-ui-book` after adding, removing, or renaming a component.
-`cargo xtask gate` verifies this book stays in sync with the catalog and stories.
+`cargo xtask gate` verifies this book stays in sync with the catalog and story
+harnesses.
