@@ -283,54 +283,36 @@ impl UiBlockRole {
 pub mod bevy_adapter {
     use bevy::prelude::{Color, Vec2};
 
+    pub use crate::story_fixtures::UiStoryVariantKind as BevyUiStoryVariantKind;
+
     use crate::{
-        AccordionMode, AccordionModel, AccordionPart, AlertDialogPart, AlertDialogState, AlertPart,
-        AspectRatioPart, AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone,
-        BreadcrumbPart, BubblePart, BubbleSide, ButtonGroupOrientation, ButtonGroupPart,
-        ButtonKind, ButtonPart, ButtonSize, ButtonVariant, CalendarPart, CalendarSelectionMode,
-        CardPart, CardVariant, CarouselPart, ChartPart, ChartTone, CheckboxChecked, CheckboxPart,
-        CollapsiblePart, ComboboxPart, CommandPart, ContextMenuPart, DataTablePart, DatePickerPart,
-        DialogPart, DirectionPart, DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart,
-        EmptyPart, FieldPart, HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart,
-        KbdPart, LabelPart, LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart,
-        MessageScrollerPart, MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart,
-        PopoverPart, ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart,
-        SelectPart, SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart,
-        SpinnerPart, StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart,
-        Theme, ThemeId, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart,
-        TogglePressed, TooltipPart, TypographyPart, UiBlockRole, UiBlockTone, UiComponentId,
-        UiWidgetIntent, UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes,
-        alert_render_nodes, aspect_ratio_render_nodes, attachment_render_nodes,
-        avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
+        AccordionPart, AlertDialogPart, AlertDialogState, AlertPart, AspectRatioPart,
+        AttachmentPart, AvatarPart, AvatarVisual, BadgePart, BadgeTone, BreadcrumbPart, BubblePart,
+        BubbleSide, ButtonGroupOrientation, ButtonGroupPart, ButtonKind, ButtonPart, ButtonSize,
+        ButtonVariant, CalendarPart, CalendarSelectionMode, CardPart, CardVariant, CarouselPart,
+        ChartPart, ChartTone, CheckboxChecked, CheckboxPart, CollapsiblePart, ComboboxPart,
+        CommandPart, ContextMenuPart, DataTablePart, DatePickerPart, DialogPart, DirectionPart,
+        DirectionValue, DrawerPart, DrawerSide, DropdownMenuPart, EmptyPart, FieldPart,
+        HoverCardPart, InputGroupPart, InputOtpPart, InputPart, ItemPart, KbdPart, LabelPart,
+        LabelRequirement, MarkerPart, MarkerTone, MenubarPart, MessagePart, MessageScrollerPart,
+        MessageSide, NativeSelectPart, NavigationMenuPart, PaginationPart, PopoverPart,
+        ProgressPart, RadioGroupPart, RenderContract, ResizablePart, ScrollAreaPart, SelectPart,
+        SeparatorPart, SheetPart, SidebarPart, SkeletonPart, SliderPart, SonnerPart, SpinnerPart,
+        StateContract, SwitchChecked, SwitchPart, TablePart, TabsPart, TextareaPart, Theme,
+        ThemeId, ToastPart, ToggleGroupPart, ToggleGroupSelectionMode, TogglePart, TogglePressed,
+        TooltipPart, TypographyPart, UiBlockRole, UiBlockTone, UiComponentId, UiWidgetIntent,
+        UiWidgetSlotKind, accordion_render_nodes, alert_dialog_render_nodes, alert_render_nodes,
+        aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes,
+        badge_render_nodes, breadcrumb_render_nodes, bubble_render_nodes,
         button_group_render_nodes, button_render_nodes, calendar_render_nodes, card_render_nodes,
-        carousel_render_nodes, catalog_component_any_render_nodes_for_component,
-        chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes,
-        command_render_nodes, component_implementation, context_menu_render_nodes,
-        data_table_render_nodes, date_picker_render_nodes, default_accordion_items,
-        default_alert_dialog_model, default_alert_model, default_aspect_ratio_model,
-        default_attachment_model, default_avatar_model, default_badge_model,
-        default_breadcrumb_model, default_bubble_model, default_button_group_model,
-        default_button_model, default_calendar_model, default_card_model, default_carousel_model,
-        default_chart_model, default_checkbox_model, default_collapsible_model,
-        default_combobox_model, default_command_model, default_context_menu_model,
-        default_data_table_model, default_date_picker_model, default_dialog_model,
-        default_direction_model, default_drawer_model, default_dropdown_menu_model,
-        default_empty_model, default_field_model, default_hover_card_model,
-        default_input_group_model, default_input_model, default_input_otp_model,
-        default_item_model, default_kbd_model, default_label_model, default_marker_model,
-        default_menubar_model, default_message_model, default_message_scroller_model,
-        default_native_select_model, default_navigation_menu_model, default_pagination_model,
-        default_popover_model, default_progress_model, default_radio_group_model,
-        default_resizable_model, default_scroll_area_model, default_select_model,
-        default_separator_model, default_sheet_model, default_sidebar_model,
-        default_skeleton_model, default_slider_model, default_sonner_model, default_spinner_model,
-        default_switch_model, default_table_model, default_tabs_model, default_textarea_model,
-        default_toast_model, default_toggle_group_model, default_toggle_model,
-        default_tooltip_model, default_typography_model, dialog_render_nodes,
-        direction_render_nodes, drawer_render_nodes, dropdown_menu_render_nodes,
-        empty_render_nodes, field_render_nodes, hover_card_render_nodes, input_group_render_nodes,
-        input_otp_render_nodes, input_render_nodes, item_render_nodes, kbd_render_nodes,
-        label_render_nodes, marker_render_nodes, menubar_render_nodes, message_render_nodes,
+        carousel_render_nodes, chart_render_nodes, checkbox_render_nodes, collapsible_render_nodes,
+        combobox_render_nodes, command_render_nodes, component_implementation,
+        context_menu_render_nodes, data_table_render_nodes, date_picker_render_nodes,
+        dialog_render_nodes, direction_render_nodes, drawer_render_nodes,
+        dropdown_menu_render_nodes, empty_render_nodes, field_render_nodes,
+        hover_card_render_nodes, input_group_render_nodes, input_otp_render_nodes,
+        input_render_nodes, item_render_nodes, kbd_render_nodes, label_render_nodes,
+        marker_render_nodes, menubar_render_nodes, message_render_nodes,
         message_scroller_render_nodes, native_select_render_nodes, navigation_menu_render_nodes,
         pagination_render_nodes, popover_render_nodes, progress_render_nodes,
         radio_group_render_nodes, resizable_render_nodes, scale, scroll_area_render_nodes,
@@ -358,53 +340,37 @@ pub mod bevy_adapter {
         pub disabled: bool,
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum BevyUiStoryVariantKind {
-        Default,
-        Alternate,
-        Loading,
-        Disabled,
-        Themed,
-    }
-
-    impl BevyUiStoryVariantKind {
-        pub const fn label(self) -> &'static str {
-            match self {
-                Self::Default => "Default",
-                Self::Alternate => "Alternate",
-                Self::Loading => "Loading",
-                Self::Disabled => "Disabled",
-                Self::Themed => "Themed",
-            }
-        }
-
-        pub const fn detail(self) -> &'static str {
-            match self {
-                Self::Default => "Validated default fixture",
-                Self::Alternate => "Interactive or dense fixture state",
-                Self::Loading => "Stable loading layout",
-                Self::Disabled => "Read-only disabled state",
-                Self::Themed => "Nested ThemeScope palette",
-            }
-        }
-    }
-
     #[derive(Debug, Clone, PartialEq)]
     pub struct BevyUiStoryVariant {
-        pub kind: BevyUiStoryVariantKind,
+        pub fixture_id: &'static str,
+        pub kind: crate::story_fixtures::UiStoryVariantKind,
         pub theme_id: ThemeId,
+        pub model: crate::story_fixtures::UiStoryModel,
+        pub default_open: bool,
         pub primitives: Vec<BevyUiPrimitive>,
     }
 
     impl BevyUiStoryVariant {
-        pub fn new(
-            kind: BevyUiStoryVariantKind,
-            theme_id: ThemeId,
-            primitives: Vec<BevyUiPrimitive>,
+        fn from_fixture(
+            fixture: crate::story_fixtures::UiStoryFixture,
+            base_theme_id: ThemeId,
         ) -> Self {
+            let theme_id = if fixture.theme_id == ThemeId::Dark {
+                base_theme_id
+            } else {
+                fixture.theme_id
+            };
+            let primitives = bevy_primitives_for_story_model(
+                &fixture.model,
+                &theme_id.palette(),
+                fixture.default_open,
+            );
             Self {
-                kind,
+                fixture_id: fixture.fixture_id,
+                kind: fixture.kind,
                 theme_id,
+                model: fixture.model,
+                default_open: fixture.default_open,
                 primitives,
             }
         }
@@ -422,457 +388,185 @@ pub mod bevy_adapter {
         id: UiComponentId,
         base_theme_id: ThemeId,
     ) -> Vec<BevyUiStoryVariant> {
-        let base_theme = base_theme_id.palette();
-        let themed_theme_id = story_theme_for_component(id, base_theme_id);
-        let themed_theme = themed_theme_id.palette();
-
-        let default_primitives = bevy_primitives_for_component(id, &base_theme);
-        let mut alternate_primitives = bevy_primitives_for_component(id, &base_theme);
-        apply_alternate_story_state(&mut alternate_primitives, &base_theme);
-
-        let mut loading_primitives = bevy_primitives_for_component(id, &base_theme);
-        apply_loading_story_state(&mut loading_primitives, &base_theme);
-
-        let mut disabled_primitives = bevy_primitives_for_component(id, &base_theme);
-        apply_disabled_story_state(&mut disabled_primitives, &base_theme);
-
-        let mut themed_primitives = bevy_primitives_for_component(id, &themed_theme);
-        apply_themed_story_state(&mut themed_primitives, &themed_theme);
-
-        vec![
-            BevyUiStoryVariant::new(
-                BevyUiStoryVariantKind::Default,
-                base_theme_id,
-                default_primitives,
-            ),
-            BevyUiStoryVariant::new(
-                BevyUiStoryVariantKind::Alternate,
-                base_theme_id,
-                alternate_primitives,
-            ),
-            BevyUiStoryVariant::new(
-                BevyUiStoryVariantKind::Loading,
-                base_theme_id,
-                loading_primitives,
-            ),
-            BevyUiStoryVariant::new(
-                BevyUiStoryVariantKind::Disabled,
-                base_theme_id,
-                disabled_primitives,
-            ),
-            BevyUiStoryVariant::new(
-                BevyUiStoryVariantKind::Themed,
-                themed_theme_id,
-                themed_primitives,
-            ),
-        ]
+        crate::story_fixtures::ui_story_fixtures(id)
+            .into_iter()
+            .map(|fixture| BevyUiStoryVariant::from_fixture(fixture, base_theme_id))
+            .collect()
     }
 
-    fn story_theme_for_component(id: UiComponentId, base_theme_id: ThemeId) -> ThemeId {
-        let themed = ThemeId::ALL[(id.index() + 2) % ThemeId::ALL.len()];
-        if themed == base_theme_id {
-            base_theme_id.next()
-        } else {
-            themed
-        }
+    pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
+        let fixture = crate::story_fixtures::ui_story_fixtures(id)
+            .into_iter()
+            .next()
+            .expect("invariant: every catalog component has a canonical story fixture");
+        bevy_primitives_for_story_model(&fixture.model, theme, fixture.default_open)
     }
 
-    fn apply_alternate_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
-        if let Some(primitive) = primitives.iter_mut().find(|primitive| {
-            matches!(
-                primitive.role,
-                UiBlockRole::Action
-                    | UiBlockRole::Control
-                    | UiBlockRole::Data
-                    | UiBlockRole::Navigation
-                    | UiBlockRole::Overlay
-            )
-        }) {
-            primitive.selected = true;
-            primitive.fill = theme.selected_tint().to_bevy();
-            primitive.text = theme.text_1().to_bevy();
-        }
-    }
+    pub fn bevy_primitives_for_story_model(
+        model: &crate::story_fixtures::UiStoryModel,
+        theme: &Theme,
+        default_open: bool,
+    ) -> Vec<BevyUiPrimitive> {
+        use crate::story_fixtures::UiStoryModel;
 
-    fn apply_loading_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
-        for (index, primitive) in primitives.iter_mut().enumerate() {
-            primitive.selected = false;
-            primitive.disabled = true;
-            primitive.fill = theme.surface_3().to_bevy();
-            primitive.text = theme.text_muted().to_bevy();
-            if index == 0 {
-                primitive.label = "Loading".to_owned();
-                primitive.value = "Hydrating shared component state".to_owned();
+        let implementation = component_implementation(model.component_id());
+        let render = implementation.render;
+        let state = implementation.state;
+
+        match model {
+            UiStoryModel::Accordion(model) => {
+                bevy_primitives_for_accordion(model, theme, render, state)
+            }
+            UiStoryModel::Alert(model) => bevy_primitives_for_alert(model, theme, render, state),
+            UiStoryModel::AlertDialog(model) => {
+                bevy_primitives_for_alert_dialog(model, theme, render, state, default_open)
+            }
+            UiStoryModel::AspectRatio(model) => {
+                bevy_primitives_for_aspect_ratio(model, theme, render, state)
+            }
+            UiStoryModel::Attachment(model) => {
+                bevy_primitives_for_attachment(model, theme, render, state)
+            }
+            UiStoryModel::Avatar(model) => bevy_primitives_for_avatar(model, theme, render, state),
+            UiStoryModel::Badge(model) => bevy_primitives_for_badge(model, theme, render, state),
+            UiStoryModel::Breadcrumb(model) => {
+                bevy_primitives_for_breadcrumb(model, theme, render, state)
+            }
+            UiStoryModel::Bubble(model) => bevy_primitives_for_bubble(model, theme, render, state),
+            UiStoryModel::Button(model) => bevy_primitives_for_button(model, theme, render, state),
+            UiStoryModel::ButtonGroup(model) => {
+                bevy_primitives_for_button_group(model, theme, render, state)
+            }
+            UiStoryModel::Calendar(model) => {
+                bevy_primitives_for_calendar(model, theme, render, state)
+            }
+            UiStoryModel::Card(model) => bevy_primitives_for_card(model, theme, render, state),
+            UiStoryModel::Carousel(model) => {
+                bevy_primitives_for_carousel(model, theme, render, state)
+            }
+            UiStoryModel::Chart(model) => bevy_primitives_for_chart(model, theme, render, state),
+            UiStoryModel::Checkbox(model) => {
+                bevy_primitives_for_checkbox(model, theme, render, state)
+            }
+            UiStoryModel::Collapsible(model) => {
+                bevy_primitives_for_collapsible(model, theme, render, state)
+            }
+            UiStoryModel::Combobox(model) => {
+                bevy_primitives_for_combobox(model, theme, render, state)
+            }
+            UiStoryModel::Command(model) => {
+                bevy_primitives_for_command(model, theme, render, state)
+            }
+            UiStoryModel::ContextMenu(model) => {
+                bevy_primitives_for_context_menu(model, theme, render, state)
+            }
+            UiStoryModel::DataTable(model) => {
+                bevy_primitives_for_data_table(model, theme, render, state)
+            }
+            UiStoryModel::DatePicker(model) => {
+                bevy_primitives_for_date_picker(model, theme, render, state)
+            }
+            UiStoryModel::Dialog(model) => bevy_primitives_for_dialog(model, theme, render, state),
+            UiStoryModel::Direction(model) => {
+                bevy_primitives_for_direction(model, theme, render, state)
+            }
+            UiStoryModel::Drawer(model) => bevy_primitives_for_drawer(model, theme, render, state),
+            UiStoryModel::DropdownMenu(model) => {
+                bevy_primitives_for_dropdown_menu(model, theme, render, state)
+            }
+            UiStoryModel::Empty(model) => bevy_primitives_for_empty(model, theme, render, state),
+            UiStoryModel::Field(model) => bevy_primitives_for_field(model, theme, render, state),
+            UiStoryModel::HoverCard(model) => {
+                bevy_primitives_for_hover_card(model, theme, render, state)
+            }
+            UiStoryModel::Input(model) => bevy_primitives_for_input(model, theme, render, state),
+            UiStoryModel::InputGroup(model) => {
+                bevy_primitives_for_input_group(model, theme, render, state)
+            }
+            UiStoryModel::InputOtp(model) => {
+                bevy_primitives_for_input_otp(model, theme, render, state)
+            }
+            UiStoryModel::Item(model) => bevy_primitives_for_item(model, theme, render, state),
+            UiStoryModel::Kbd(model) => bevy_primitives_for_kbd(model, theme, render, state),
+            UiStoryModel::Label(model) => bevy_primitives_for_label(model, theme, render, state),
+            UiStoryModel::Marker(model) => bevy_primitives_for_marker(model, theme, render, state),
+            UiStoryModel::Menubar(model) => {
+                bevy_primitives_for_menubar(model, theme, render, state)
+            }
+            UiStoryModel::Message(model) => {
+                bevy_primitives_for_message(model, theme, render, state)
+            }
+            UiStoryModel::MessageScroller(model) => {
+                bevy_primitives_for_message_scroller(model, theme, render, state)
+            }
+            UiStoryModel::NativeSelect(model) => {
+                bevy_primitives_for_native_select(model, theme, render, state)
+            }
+            UiStoryModel::NavigationMenu(model) => {
+                bevy_primitives_for_navigation_menu(model, theme, render, state)
+            }
+            UiStoryModel::Pagination(model) => {
+                bevy_primitives_for_pagination(model, theme, render, state)
+            }
+            UiStoryModel::Popover(model) => {
+                bevy_primitives_for_popover(model, theme, render, state)
+            }
+            UiStoryModel::Progress(model) => {
+                bevy_primitives_for_progress(model, theme, render, state)
+            }
+            UiStoryModel::RadioGroup(model) => {
+                bevy_primitives_for_radio_group(model, theme, render, state)
+            }
+            UiStoryModel::Resizable(model) => {
+                bevy_primitives_for_resizable(model, theme, render, state)
+            }
+            UiStoryModel::ScrollArea(model) => {
+                bevy_primitives_for_scroll_area(model, theme, render, state)
+            }
+            UiStoryModel::Select(model) => bevy_primitives_for_select(model, theme, render, state),
+            UiStoryModel::Separator(model) => {
+                bevy_primitives_for_separator(model, theme, render, state)
+            }
+            UiStoryModel::Sheet(model) => bevy_primitives_for_sheet(model, theme, render, state),
+            UiStoryModel::Sidebar(model) => {
+                bevy_primitives_for_sidebar(model, theme, render, state)
+            }
+            UiStoryModel::Skeleton(model) => {
+                bevy_primitives_for_skeleton(model, theme, render, state)
+            }
+            UiStoryModel::Slider(model) => bevy_primitives_for_slider(model, theme, render, state),
+            UiStoryModel::Sonner(model) => bevy_primitives_for_sonner(model, theme, render, state),
+            UiStoryModel::Spinner(model) => {
+                bevy_primitives_for_spinner(model, theme, render, state)
+            }
+            UiStoryModel::Switch(model) => bevy_primitives_for_switch(model, theme, render, state),
+            UiStoryModel::Table(model) => bevy_primitives_for_table(model, theme, render, state),
+            UiStoryModel::Tabs(model) => bevy_primitives_for_tabs(model, theme, render, state),
+            UiStoryModel::Textarea(model) => {
+                bevy_primitives_for_textarea(model, theme, render, state)
+            }
+            UiStoryModel::Toast(model) => bevy_primitives_for_toast(model, theme, render, state),
+            UiStoryModel::Toggle(model) => bevy_primitives_for_toggle(model, theme, render, state),
+            UiStoryModel::ToggleGroup(model) => {
+                bevy_primitives_for_toggle_group(model, theme, render, state)
+            }
+            UiStoryModel::Tooltip(model) => {
+                bevy_primitives_for_tooltip(model, theme, render, state)
+            }
+            UiStoryModel::Typography(model) => {
+                bevy_primitives_for_typography(model, theme, render, state)
             }
         }
     }
 
-    fn apply_disabled_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
-        for primitive in primitives {
-            primitive.selected = false;
-            primitive.disabled = true;
-            primitive.text = theme.text_disabled().to_bevy();
-        }
-    }
-
-    fn apply_themed_story_state(primitives: &mut [BevyUiPrimitive], theme: &Theme) {
-        if let Some(primitive) = primitives.first_mut() {
-            primitive.selected = true;
-            primitive.fill = theme.primary_soft().to_bevy();
-        }
-    }
-
-    pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
-        let implementation = component_implementation(id);
-        if id == UiComponentId::Accordion {
-            return bevy_primitives_for_accordion(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Alert {
-            return bevy_primitives_for_alert(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::AlertDialog {
-            return bevy_primitives_for_alert_dialog(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::AspectRatio {
-            return bevy_primitives_for_aspect_ratio(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Attachment {
-            return bevy_primitives_for_attachment(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Avatar {
-            return bevy_primitives_for_avatar(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Badge {
-            return bevy_primitives_for_badge(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Breadcrumb {
-            return bevy_primitives_for_breadcrumb(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Bubble {
-            return bevy_primitives_for_bubble(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Button {
-            return bevy_primitives_for_button(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::ButtonGroup {
-            return bevy_primitives_for_button_group(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Calendar {
-            return bevy_primitives_for_calendar(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Card {
-            return bevy_primitives_for_card(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Carousel {
-            return bevy_primitives_for_carousel(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Chart {
-            return bevy_primitives_for_chart(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Checkbox {
-            return bevy_primitives_for_checkbox(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Collapsible {
-            return bevy_primitives_for_collapsible(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Combobox {
-            return bevy_primitives_for_combobox(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Command {
-            return bevy_primitives_for_command(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::ContextMenu {
-            return bevy_primitives_for_context_menu(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::DropdownMenu {
-            return bevy_primitives_for_dropdown_menu(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Empty {
-            return bevy_primitives_for_empty(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Field {
-            return bevy_primitives_for_field(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::HoverCard {
-            return bevy_primitives_for_hover_card(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Input {
-            return bevy_primitives_for_input(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::InputGroup {
-            return bevy_primitives_for_input_group(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::InputOtp {
-            return bevy_primitives_for_input_otp(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Item {
-            return bevy_primitives_for_item(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Kbd {
-            return bevy_primitives_for_kbd(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Label {
-            return bevy_primitives_for_label(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Marker {
-            return bevy_primitives_for_marker(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Menubar {
-            return bevy_primitives_for_menubar(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Message {
-            return bevy_primitives_for_message(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::MessageScroller {
-            return bevy_primitives_for_message_scroller(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::NativeSelect {
-            return bevy_primitives_for_native_select(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::NavigationMenu {
-            return bevy_primitives_for_navigation_menu(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Pagination {
-            return bevy_primitives_for_pagination(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Popover {
-            return bevy_primitives_for_popover(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Progress {
-            return bevy_primitives_for_progress(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::RadioGroup {
-            return bevy_primitives_for_radio_group(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Resizable {
-            return bevy_primitives_for_resizable(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::ScrollArea {
-            return bevy_primitives_for_scroll_area(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Select {
-            return bevy_primitives_for_select(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Separator {
-            return bevy_primitives_for_separator(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Sheet {
-            return bevy_primitives_for_sheet(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Sidebar {
-            return bevy_primitives_for_sidebar(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Skeleton {
-            return bevy_primitives_for_skeleton(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Slider {
-            return bevy_primitives_for_slider(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Sonner {
-            return bevy_primitives_for_sonner(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Spinner {
-            return bevy_primitives_for_spinner(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Switch {
-            return bevy_primitives_for_switch(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Toggle {
-            return bevy_primitives_for_toggle(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::ToggleGroup {
-            return bevy_primitives_for_toggle_group(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Tooltip {
-            return bevy_primitives_for_tooltip(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Typography {
-            return bevy_primitives_for_typography(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Table {
-            return bevy_primitives_for_table(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Tabs {
-            return bevy_primitives_for_tabs(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Textarea {
-            return bevy_primitives_for_textarea(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Toast {
-            return bevy_primitives_for_toast(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::DataTable {
-            return bevy_primitives_for_data_table(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::DatePicker {
-            return bevy_primitives_for_date_picker(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Dialog {
-            return bevy_primitives_for_dialog(theme, implementation.render, implementation.state);
-        }
-        if id == UiComponentId::Direction {
-            return bevy_primitives_for_direction(
-                theme,
-                implementation.render,
-                implementation.state,
-            );
-        }
-        if id == UiComponentId::Drawer {
-            return bevy_primitives_for_drawer(theme, implementation.render, implementation.state);
-        }
-        catalog_component_any_render_nodes_for_component(id)
-            .expect("invariant: non-bespoke component has generated concrete render nodes")
-            .into_iter()
-            .map(|node| BevyUiPrimitive {
-                part: node.part,
-                kind: node.kind,
-                role: node.role,
-                label: node.label,
-                value: node.value,
-                size: size_for_role(node.role),
-                fill: fill_for_tone(node.tone, theme),
-                text: theme.text_1().to_bevy(),
-                render: implementation.render,
-                state: implementation.state,
-                intent: node.intent,
-                selected: node.selected,
-                disabled: node.disabled,
-            })
-            .collect()
-    }
-
     fn bevy_primitives_for_checkbox(
+        model: &crate::CheckboxModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_checkbox_model();
         let checkbox_state = model.state();
-        checkbox_render_nodes(&model, &checkbox_state)
+        checkbox_render_nodes(model, &checkbox_state)
             .into_iter()
             .map(|node| {
                 let role = checkbox_role_for_part(node.part);
@@ -899,13 +593,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_collapsible(
+        model: &crate::CollapsibleModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_collapsible_model();
         let collapsible_state = model.state();
-        collapsible_render_nodes(&model, &collapsible_state)
+        collapsible_render_nodes(model, &collapsible_state)
             .into_iter()
             .map(|node| {
                 let role = collapsible_role_for_part(node.part);
@@ -932,14 +626,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_combobox(
+        model: &crate::ComboboxModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_combobox_model();
-        let mut combobox_state = model.state();
-        let _ = combobox_state.apply(crate::ComboboxIntent::Open);
-        combobox_render_nodes(&model, &combobox_state)
+        let combobox_state = model.state();
+        combobox_render_nodes(model, &combobox_state)
             .into_iter()
             .map(|node| {
                 let role = combobox_role_for_part(node.part);
@@ -966,13 +659,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_command(
+        model: &crate::CommandModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_command_model();
         let command_state = model.state();
-        command_render_nodes(&model, &command_state)
+        command_render_nodes(model, &command_state)
             .into_iter()
             .map(|node| {
                 let role = command_role_for_part(node.part);
@@ -1004,13 +697,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_context_menu(
+        model: &crate::ContextMenuModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_context_menu_model();
         let context_menu_state = model.state();
-        context_menu_render_nodes(&model, &context_menu_state)
+        context_menu_render_nodes(model, &context_menu_state)
             .into_iter()
             .map(|node| {
                 let role = context_menu_role_for_part(node.part);
@@ -1043,13 +736,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_dropdown_menu(
+        model: &crate::DropdownMenuModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_dropdown_menu_model();
         let dropdown_menu_state = model.state();
-        dropdown_menu_render_nodes(&model, &dropdown_menu_state)
+        dropdown_menu_render_nodes(model, &dropdown_menu_state)
             .into_iter()
             .map(|node| {
                 let role = dropdown_menu_role_for_part(node.part);
@@ -1082,13 +775,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_empty(
+        model: &crate::EmptyModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_empty_model();
         let empty_state = model.state();
-        empty_render_nodes(&model, &empty_state)
+        empty_render_nodes(model, &empty_state)
             .into_iter()
             .map(|node| {
                 let role = empty_role_for_part(node.part);
@@ -1115,13 +808,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_field(
+        model: &crate::FieldModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_field_model();
         let field_state = model.state();
-        field_render_nodes(&model, &field_state)
+        field_render_nodes(model, &field_state)
             .into_iter()
             .map(|node| {
                 let role = field_role_for_part(node.part);
@@ -1148,13 +841,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_hover_card(
+        model: &crate::HoverCardModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_hover_card_model().default_open();
         let hover_card_state = model.state();
-        hover_card_render_nodes(&model, &hover_card_state)
+        hover_card_render_nodes(model, &hover_card_state)
             .into_iter()
             .map(|node| {
                 let role = hover_card_role_for_part(node.part);
@@ -1181,13 +874,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_input(
+        model: &crate::InputModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_input_model();
         let input_state = model.state();
-        input_render_nodes(&model, &input_state)
+        input_render_nodes(model, &input_state)
             .into_iter()
             .map(|node| {
                 let role = input_role_for_part(node.part);
@@ -1214,13 +907,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_input_group(
+        model: &crate::InputGroupModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_input_group_model();
         let input_group_state = model.state();
-        input_group_render_nodes(&model, &input_group_state)
+        input_group_render_nodes(model, &input_group_state)
             .into_iter()
             .map(|node| {
                 let role = input_group_role_for_part(node.part);
@@ -1252,13 +945,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_input_otp(
+        model: &crate::InputOtpModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_input_otp_model();
         let input_otp_state = model.state();
-        input_otp_render_nodes(&model, &input_otp_state)
+        input_otp_render_nodes(model, &input_otp_state)
             .into_iter()
             .map(|node| {
                 let role = input_otp_role_for_part(node.part);
@@ -1291,13 +984,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_item(
+        model: &crate::ItemModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_item_model();
         let item_state = model.state();
-        item_render_nodes(&model, &item_state)
+        item_render_nodes(model, &item_state)
             .into_iter()
             .map(|node| {
                 let role = item_role_for_part(node.part);
@@ -1330,13 +1023,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_kbd(
+        model: &crate::KbdModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_kbd_model();
         let kbd_state = model.state();
-        kbd_render_nodes(&model, &kbd_state)
+        kbd_render_nodes(model, &kbd_state)
             .into_iter()
             .map(|node| {
                 let role = kbd_role_for_part(node.part);
@@ -1363,13 +1056,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_label(
+        model: &crate::LabelModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_label_model();
         let label_state = model.state();
-        label_render_nodes(&model, &label_state)
+        label_render_nodes(model, &label_state)
             .into_iter()
             .map(|node| {
                 let role = label_role_for_part(node.part);
@@ -1403,13 +1096,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_marker(
+        model: &crate::MarkerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_marker_model();
         let marker_state = model.state();
-        marker_render_nodes(&model, &marker_state)
+        marker_render_nodes(model, &marker_state)
             .into_iter()
             .map(|node| {
                 let role = marker_role_for_part(node.part);
@@ -1444,13 +1137,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_menubar(
+        model: &crate::MenubarModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_menubar_model();
         let menubar_state = model.state();
-        menubar_render_nodes(&model, &menubar_state)
+        menubar_render_nodes(model, &menubar_state)
             .into_iter()
             .map(|node| {
                 let role = menubar_role_for_part(node.part);
@@ -1475,13 +1168,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_message(
+        model: &crate::MessageModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_message_model();
         let message_state = model.state();
-        message_render_nodes(&model, &message_state)
+        message_render_nodes(model, &message_state)
             .into_iter()
             .map(|node| {
                 let role = message_role_for_part(node.part);
@@ -1506,13 +1199,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_message_scroller(
+        model: &crate::MessageScrollerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_message_scroller_model();
         let message_scroller_state = model.state();
-        message_scroller_render_nodes(&model, &message_scroller_state)
+        message_scroller_render_nodes(model, &message_scroller_state)
             .into_iter()
             .map(|node| {
                 let role = message_scroller_role_for_part(node.part);
@@ -1537,13 +1230,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_native_select(
+        model: &crate::NativeSelectModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_native_select_model();
         let native_select_state = model.state();
-        native_select_render_nodes(&model, &native_select_state)
+        native_select_render_nodes(model, &native_select_state)
             .into_iter()
             .map(|node| {
                 let role = native_select_role_for_part(node.part);
@@ -1568,13 +1261,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_navigation_menu(
+        model: &crate::NavigationMenuModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_navigation_menu_model();
         let navigation_menu_state = model.state();
-        navigation_menu_render_nodes(&model, &navigation_menu_state)
+        navigation_menu_render_nodes(model, &navigation_menu_state)
             .into_iter()
             .map(|node| {
                 let role = navigation_menu_role_for_part(node.part);
@@ -1599,13 +1292,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_pagination(
+        model: &crate::PaginationModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_pagination_model();
         let pagination_state = model.state();
-        pagination_render_nodes(&model, &pagination_state)
+        pagination_render_nodes(model, &pagination_state)
             .into_iter()
             .map(|node| {
                 let role = pagination_role_for_part(node.part);
@@ -1630,13 +1323,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_popover(
+        model: &crate::PopoverModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_popover_model();
         let popover_state = model.state();
-        popover_render_nodes(&model, &popover_state)
+        popover_render_nodes(model, &popover_state)
             .into_iter()
             .map(|node| {
                 let role = popover_role_for_part(node.part);
@@ -1661,13 +1354,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_progress(
+        model: &crate::ProgressModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_progress_model();
         let progress_state = model.state();
-        progress_render_nodes(&model, &progress_state)
+        progress_render_nodes(model, &progress_state)
             .into_iter()
             .map(|node| {
                 let role = progress_role_for_part(node.part);
@@ -1692,13 +1385,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_radio_group(
+        model: &crate::RadioGroupModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_radio_group_model();
         let radio_group_state = model.state();
-        radio_group_render_nodes(&model, &radio_group_state)
+        radio_group_render_nodes(model, &radio_group_state)
             .into_iter()
             .map(|node| {
                 let role = radio_group_role_for_part(node.part);
@@ -1723,13 +1416,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_resizable(
+        model: &crate::ResizableModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_resizable_model();
         let resizable_state = model.state();
-        resizable_render_nodes(&model, &resizable_state)
+        resizable_render_nodes(model, &resizable_state)
             .into_iter()
             .map(|node| {
                 let role = resizable_role_for_part(node.part);
@@ -1754,13 +1447,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_scroll_area(
+        model: &crate::ScrollAreaModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_scroll_area_model().with_overflow(crate::ScrollAreaOverflow::Both);
         let scroll_area_state = model.state();
-        scroll_area_render_nodes(&model, &scroll_area_state)
+        scroll_area_render_nodes(model, &scroll_area_state)
             .into_iter()
             .map(|node| {
                 let role = scroll_area_role_for_part(node.part);
@@ -1785,14 +1478,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_select(
+        model: &crate::SelectModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_select_model();
-        let mut select_state = model.state();
-        let _ = select_state.apply(crate::SelectIntent::Open);
-        select_render_nodes(&model, &select_state)
+        let select_state = model.state();
+        select_render_nodes(model, &select_state)
             .into_iter()
             .map(|node| {
                 let role = select_role_for_part(node.part);
@@ -1817,13 +1509,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_separator(
+        model: &crate::SeparatorModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_separator_model();
         let separator_state = model.state();
-        separator_render_nodes(&model, &separator_state)
+        separator_render_nodes(model, &separator_state)
             .into_iter()
             .map(|node| {
                 let role = separator_role_for_part(node.part);
@@ -1848,14 +1540,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_sheet(
+        model: &crate::SheetModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_sheet_model();
-        let mut sheet_state = model.state();
-        let _ = sheet_state.apply(crate::SheetIntent::Open);
-        sheet_render_nodes(&model, &sheet_state)
+        let sheet_state = model.state();
+        sheet_render_nodes(model, &sheet_state)
             .into_iter()
             .map(|node| {
                 let role = sheet_role_for_part(node.part);
@@ -1880,13 +1571,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_sidebar(
+        model: &crate::SidebarModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_sidebar_model();
         let sidebar_state = model.state();
-        sidebar_render_nodes(&model, &sidebar_state)
+        sidebar_render_nodes(model, &sidebar_state)
             .into_iter()
             .map(|node| {
                 let role = sidebar_role_for_part(node.part);
@@ -1911,13 +1602,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_skeleton(
+        model: &crate::SkeletonModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_skeleton_model();
         let skeleton_state = model.state();
-        skeleton_render_nodes(&model, &skeleton_state)
+        skeleton_render_nodes(model, &skeleton_state)
             .into_iter()
             .map(|node| {
                 let role = skeleton_role_for_part(node.part);
@@ -1942,13 +1633,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_slider(
+        model: &crate::SliderModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_slider_model();
         let slider_state = model.state();
-        slider_render_nodes(&model, &slider_state)
+        slider_render_nodes(model, &slider_state)
             .into_iter()
             .map(|node| {
                 let role = slider_role_for_part(node.part);
@@ -1973,13 +1664,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_sonner(
+        model: &crate::SonnerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_sonner_model();
         let sonner_state = model.state();
-        sonner_render_nodes(&model, &sonner_state)
+        sonner_render_nodes(model, &sonner_state)
             .into_iter()
             .map(|node| {
                 let role = sonner_role_for_part(node.part);
@@ -2004,13 +1695,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_spinner(
+        model: &crate::SpinnerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_spinner_model();
         let spinner_state = model.state();
-        spinner_render_nodes(&model, &spinner_state)
+        spinner_render_nodes(model, &spinner_state)
             .into_iter()
             .map(|node| {
                 let role = spinner_role_for_part(node.part);
@@ -2035,13 +1726,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_switch(
+        model: &crate::SwitchModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_switch_model();
         let switch_state = model.state();
-        switch_render_nodes(&model, &switch_state)
+        switch_render_nodes(model, &switch_state)
             .into_iter()
             .map(|node| {
                 let role = switch_role_for_part(node.part);
@@ -2066,13 +1757,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_toggle(
+        model: &crate::ToggleModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_toggle_model();
         let toggle_state = model.state();
-        toggle_render_nodes(&model, &toggle_state)
+        toggle_render_nodes(model, &toggle_state)
             .into_iter()
             .map(|node| {
                 let role = toggle_role_for_part(node.part);
@@ -2097,13 +1788,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_toggle_group(
+        model: &crate::ToggleGroupModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_toggle_group_model();
         let toggle_group_state = model.state();
-        toggle_group_render_nodes(&model, &toggle_group_state)
+        toggle_group_render_nodes(model, &toggle_group_state)
             .into_iter()
             .map(|node| {
                 let role = toggle_group_role_for_part(node.part);
@@ -2128,13 +1819,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_tooltip(
+        model: &crate::TooltipModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_tooltip_model();
         let tooltip_state = model.state();
-        tooltip_render_nodes(&model, &tooltip_state)
+        tooltip_render_nodes(model, &tooltip_state)
             .into_iter()
             .map(|node| {
                 let role = tooltip_role_for_part(node.part);
@@ -2159,13 +1850,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_typography(
+        model: &crate::TypographyModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_typography_model();
         let typography_state = model.state();
-        typography_render_nodes(&model, &typography_state)
+        typography_render_nodes(model, &typography_state)
             .into_iter()
             .map(|node| {
                 let role = typography_role_for_part(node.part);
@@ -2190,13 +1881,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_table(
+        model: &crate::TableModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_table_model();
         let table_state = model.state();
-        table_render_nodes(&model, &table_state)
+        table_render_nodes(model, &table_state)
             .into_iter()
             .map(|node| {
                 let role = table_role_for_part(node.part);
@@ -2221,13 +1912,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_tabs(
+        model: &crate::TabsModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_tabs_model();
         let tabs_state = model.state();
-        tabs_render_nodes(&model, &tabs_state)
+        tabs_render_nodes(model, &tabs_state)
             .into_iter()
             .map(|node| {
                 let role = tabs_role_for_part(node.part);
@@ -2252,13 +1943,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_textarea(
+        model: &crate::TextareaModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_textarea_model();
         let textarea_state = model.state();
-        textarea_render_nodes(&model, &textarea_state)
+        textarea_render_nodes(model, &textarea_state)
             .into_iter()
             .map(|node| {
                 let role = textarea_role_for_part(node.part);
@@ -2283,13 +1974,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_toast(
+        model: &crate::ToastModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_toast_model();
         let toast_state = model.state();
-        toast_render_nodes(&model, &toast_state)
+        toast_render_nodes(model, &toast_state)
             .into_iter()
             .map(|node| {
                 let role = toast_role_for_part(node.part);
@@ -2314,13 +2005,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_data_table(
+        model: &crate::DataTableModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_data_table_model();
         let data_table_state = model.state();
-        data_table_render_nodes(&model, &data_table_state)
+        data_table_render_nodes(model, &data_table_state)
             .into_iter()
             .map(|node| {
                 let role = data_table_role_for_part(node.part);
@@ -2347,13 +2038,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_date_picker(
+        model: &crate::DatePickerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_date_picker_model().with_default_open(true);
         let date_picker_state = model.state();
-        date_picker_render_nodes(&model, &date_picker_state)
+        date_picker_render_nodes(model, &date_picker_state)
             .into_iter()
             .map(|node| {
                 let role = date_picker_role_for_part(node.part);
@@ -2386,13 +2077,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_dialog(
+        model: &crate::DialogModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_dialog_model().with_default_open(true);
         let dialog_state = model.state();
-        dialog_render_nodes(&model, &dialog_state)
+        dialog_render_nodes(model, &dialog_state)
             .into_iter()
             .map(|node| {
                 let role = dialog_role_for_part(node.part);
@@ -2419,13 +2110,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_direction(
+        model: &crate::DirectionModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_direction_model().with_default_scope_active(true);
         let direction_state = model.state();
-        direction_render_nodes(&model, &direction_state)
+        direction_render_nodes(model, &direction_state)
             .into_iter()
             .map(|node| {
                 let role = direction_role_for_part(node.part);
@@ -2457,13 +2148,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_drawer(
+        model: &crate::DrawerModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_drawer_model().with_default_open(true);
         let drawer_state = model.state();
-        drawer_render_nodes(&model, &drawer_state)
+        drawer_render_nodes(model, &drawer_state)
             .into_iter()
             .map(|node| {
                 let role = drawer_role_for_part(node.part);
@@ -2496,13 +2187,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_chart(
+        model: &crate::ChartModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_chart_model();
         let chart_state = model.state();
-        chart_render_nodes(&model, &chart_state)
+        chart_render_nodes(model, &chart_state)
             .into_iter()
             .map(|node| {
                 let role = chart_role_for_part(node.part);
@@ -2526,13 +2217,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_carousel(
+        model: &crate::CarouselModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_carousel_model();
         let carousel_state = model.state();
-        carousel_render_nodes(&model, &carousel_state)
+        carousel_render_nodes(model, &carousel_state)
             .into_iter()
             .map(|node| {
                 let role = carousel_role_for_part(node.part);
@@ -2556,13 +2247,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_card(
+        model: &crate::CardModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_card_model();
         let card_state = model.state();
-        card_render_nodes(&model, &card_state)
+        card_render_nodes(model, &card_state)
             .into_iter()
             .map(|node| {
                 let role = card_role_for_part(node.part);
@@ -2589,13 +2280,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_calendar(
+        model: &crate::CalendarModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_calendar_model();
         let calendar_state = model.state();
-        calendar_render_nodes(&model, &calendar_state)
+        calendar_render_nodes(model, &calendar_state)
             .into_iter()
             .map(|node| {
                 let role = calendar_role_for_part(node.part);
@@ -2628,13 +2319,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_button_group(
+        model: &crate::ButtonGroupModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_button_group_model();
         let button_group_state = model.state();
-        button_group_render_nodes(&model, &button_group_state)
+        button_group_render_nodes(model, &button_group_state)
             .into_iter()
             .map(|node| {
                 let role = button_group_role_for_part(node.part);
@@ -2661,12 +2352,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_button(
+        model: &crate::ButtonModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_button_model();
-        button_render_nodes(&model, model.state())
+        button_render_nodes(model, model.state())
             .into_iter()
             .map(|node| {
                 let role = button_role_for_part(node.part);
@@ -2690,13 +2381,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_bubble(
+        model: &crate::BubbleModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_bubble_model();
         let bubble_state = model.state();
-        bubble_render_nodes(&model, &bubble_state)
+        bubble_render_nodes(model, &bubble_state)
             .into_iter()
             .map(|node| {
                 let role = bubble_role_for_part(node.part);
@@ -2720,13 +2411,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_breadcrumb(
+        model: &crate::BreadcrumbModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_breadcrumb_model();
         let breadcrumb_state = model.state();
-        breadcrumb_render_nodes(&model, &breadcrumb_state)
+        breadcrumb_render_nodes(model, &breadcrumb_state)
             .into_iter()
             .map(|node| {
                 let role = breadcrumb_role_for_part(node.part);
@@ -2750,12 +2441,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_badge(
+        model: &crate::BadgeModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_badge_model();
-        badge_render_nodes(&model, model.state())
+        badge_render_nodes(model, model.state())
             .into_iter()
             .map(|node| {
                 let role = badge_role_for_part(node.part);
@@ -2779,12 +2470,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_avatar(
+        model: &crate::AvatarModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = default_avatar_model();
-        avatar_render_nodes(&model, model.state())
+        avatar_render_nodes(model, model.state())
             .into_iter()
             .map(|node| {
                 let role = avatar_role_for_part(node.part);
@@ -2808,11 +2499,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_attachment(
+        model: &crate::AttachmentModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        attachment_render_nodes(&default_attachment_model())
+        attachment_render_nodes(model)
             .into_iter()
             .map(|node| {
                 let role = attachment_role_for_part(node.part);
@@ -2836,11 +2528,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_aspect_ratio(
+        model: &crate::AspectRatioModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        aspect_ratio_render_nodes(&default_aspect_ratio_model())
+        aspect_ratio_render_nodes(model)
             .into_iter()
             .map(|node| {
                 let role = aspect_ratio_role_for_part(node.part);
@@ -2864,11 +2557,18 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_alert_dialog(
+        model: &crate::AlertDialogModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
+        default_open: bool,
     ) -> Vec<BevyUiPrimitive> {
-        alert_dialog_render_nodes(&default_alert_dialog_model(), AlertDialogState::open())
+        let alert_dialog_state = if default_open {
+            AlertDialogState::open()
+        } else {
+            AlertDialogState::closed()
+        };
+        alert_dialog_render_nodes(model, alert_dialog_state)
             .into_iter()
             .map(|node| {
                 let role = alert_dialog_role_for_part(node.part);
@@ -2895,11 +2595,12 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_alert(
+        model: &crate::AlertModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        alert_render_nodes(&default_alert_model())
+        alert_render_nodes(model)
             .into_iter()
             .map(|node| {
                 let role = alert_role_for_part(node.part);
@@ -2923,14 +2624,13 @@ pub mod bevy_adapter {
     }
 
     fn bevy_primitives_for_accordion(
+        model: &crate::AccordionModel,
         theme: &Theme,
         render: RenderContract,
         state: StateContract,
     ) -> Vec<BevyUiPrimitive> {
-        let model = AccordionModel::new(AccordionMode::Single, default_accordion_items())
-            .with_default_open(vec!["tokens".to_owned()]);
         let accordion_state = model.state();
-        accordion_render_nodes(&model, &accordion_state)
+        accordion_render_nodes(model, &accordion_state)
             .into_iter()
             .map(|node| {
                 let role = accordion_role_for_part(node.part);
@@ -6977,33 +6677,25 @@ mod tests {
     #[cfg(feature = "bevy")]
     #[test]
     fn every_component_builds_bevy_story_variants() {
-        use crate::BevyUiStoryVariantKind;
-
-        let expected_kinds = [
-            BevyUiStoryVariantKind::Default,
-            BevyUiStoryVariantKind::Alternate,
-            BevyUiStoryVariantKind::Loading,
-            BevyUiStoryVariantKind::Disabled,
-            BevyUiStoryVariantKind::Themed,
-        ];
-
+        let mut total = 0;
         for id in UiComponentId::ALL {
             let definition = id.definition();
+            let fixtures = crate::story_fixtures::ui_story_fixtures(id);
             let variants =
                 bevy_adapter::bevy_story_variants_for_component(id, crate::ThemeId::Dark);
             assert_eq!(
                 variants.len(),
-                expected_kinds.len(),
+                fixtures.len(),
                 "{} has the wrong Bevy story variant count",
                 definition.name
             );
 
-            for (variant, expected_kind) in variants.iter().zip(expected_kinds) {
-                assert_eq!(
-                    variant.kind, expected_kind,
-                    "{} has an unexpected Bevy story variant order",
-                    definition.name
-                );
+            for (variant, fixture) in variants.iter().zip(fixtures) {
+                assert_eq!(variant.fixture_id, fixture.fixture_id);
+                assert_eq!(variant.kind, fixture.kind);
+                assert_eq!(variant.theme_id, fixture.theme_id);
+                assert_eq!(variant.model, fixture.model);
+                assert_eq!(variant.default_open, fixture.default_open);
                 assert!(
                     !variant.primitives.is_empty(),
                     "{} {} Bevy story has no primitives",
@@ -7019,6 +6711,39 @@ mod tests {
                     );
                 }
             }
+            total += variants.len();
         }
+        assert_eq!(total, 338);
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn alert_bevy_primitives_use_the_leptos_fixture_copy() {
+        let variants = bevy_adapter::bevy_story_variants_for_component(
+            UiComponentId::Alert,
+            crate::ThemeId::Dark,
+        );
+        let labels = variants[0]
+            .primitives
+            .iter()
+            .map(|primitive| primitive.label.as_str())
+            .collect::<Vec<_>>();
+        let values = variants[0]
+            .primitives
+            .iter()
+            .map(|primitive| primitive.value.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(labels.contains(&"Build completed"));
+        assert!(labels.contains(&"Open report"));
+        assert!(
+            variants[0]
+                .primitives
+                .iter()
+                .any(|primitive| primitive.part == "AlertDescription")
+        );
+        assert!(
+            values.contains(&"The design-token bundle is ready for review in the shared UI crate.")
+        );
     }
 }

@@ -53,6 +53,12 @@ and a Bevy-only game app.
   and Leptos/Bevy adapters over the same `BlockInstance`. The generated
   implementation backlog lives in `_issues/blocks`, and
   `docs/crates/blocks` embeds each isolated block story in both renderers.
+- `crates/ui/src/story_fixtures.rs` is the canonical typed fixture registry for
+  both UI story harnesses. It owns fixture copy, ordering, state, validation,
+  and nested themes. `apps/stories` renders those models with Leptos;
+  `apps/ui-bevy-stories` renders the same models with responsive, scrollable,
+  locally interactive Bevy UI recipes. Do not duplicate fixture models in an
+  app harness.
 - `docs/crates/ui` is generated from the `crates/ui` catalog by
   `cargo xtask gen-ui-book`. It publishes one mdBook page per component and
   embeds the matching `/stories/?story=ui-{component}` Leptos fixture beside the

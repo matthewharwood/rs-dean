@@ -1263,7 +1263,8 @@ fn ui_book_index() -> String {
         r#"# rs-dean-ui
 
 `rs-dean-ui` owns the shared design tokens, semantic themes, shadcn-inspired
-component catalog, Leptos renderers, and Bevy primitive adapters.
+component catalog, canonical typed story fixtures, Leptos renderers, and Bevy
+primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
 the live Leptos and Bevy story harnesses with isolated story routes, so each
@@ -1283,6 +1284,7 @@ primitive adapter used by local component development.
 - Components documented: {}
 - Source of truth: `crates/ui/src/catalog.rs`
 - Implementation contracts: `crates/ui/src/kit.rs`
+- Canonical story fixtures: `crates/ui/src/story_fixtures.rs`
 - Leptos live fixtures: `apps/stories/src/main.rs`
 - Bevy primitive fixtures: `apps/ui-bevy-stories/src/main.rs`
 
@@ -1471,21 +1473,30 @@ fn check_ui_book_story_anchors() -> Result<()> {
     if stories.contains("model=invalid_") || stories.contains("fn invalid_") {
         bail!("UI Leptos stories must not mount intentionally invalid fixtures in mdBook demos");
     }
+    for required in [
+        "SHADCN_COMPONENTS",
+        "ui_story_fixtures",
+        "component_story_section",
+        "id=story_id.clone()",
+        "data-story-id=story_id",
+    ] {
+        if !stories.contains(required) {
+            bail!(
+                "UI Leptos stories must derive every isolated route from the shared catalog; missing `{required}`"
+            );
+        }
+    }
     if !bevy_stories.contains("SHADCN_COMPONENTS")
         || !bevy_stories.contains("bevy_story_variants_for_component")
+        || !bevy_stories.contains("Overflow::scroll_y()")
+        || !bevy_stories.contains("InteractivePrimitive::stateful")
     {
-        bail!("UI Bevy stories must route catalog components through shared Bevy story variants");
+        bail!(
+            "UI Bevy stories must route catalog components through shared variants with scrolling and local interaction"
+        );
     }
     for definition in SHADCN_COMPONENTS {
         let story_id = format!("ui-{}", definition.slug);
-        let id = format!("id=\"{story_id}\"");
-        let data_story_id = format!("data-story-id=\"{story_id}\"");
-        if !stories.contains(&id) {
-            bail!("stories missing `{id}` for {}", definition.name);
-        }
-        if !stories.contains(&data_story_id) {
-            bail!("stories missing `{data_story_id}` for {}", definition.name);
-        }
         let page_path = Path::new(UI_BOOK)
             .join("src")
             .join("components")
