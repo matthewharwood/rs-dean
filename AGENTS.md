@@ -45,8 +45,14 @@ and a Bevy-only game app.
   entry has a shared Rust implementation recipe, a literal widget constructor,
   a named token-only Leptos component, a Bevy primitive adapter over the same
   widget slots when scene rendering is appropriate, and a matching task in
-  `_issues/`. `_issues/sweep-log.md` records the repeated first-to-current
+  `_issues/ui/`. `_issues/ui/sweep-log.md` records the repeated first-to-current
   audit loop for component implementation work.
+- `crates/blocks` owns the typed composition layer over `crates/ui`: 657
+  one-to-one Marketing, Application UI, and Ecommerce registry entries across
+  93 families, the serde plus garde authoring schema, constrained layout plans,
+  and Leptos/Bevy adapters over the same `BlockInstance`. The generated
+  implementation backlog lives in `_issues/blocks`, and
+  `docs/crates/blocks` embeds each isolated block story in both renderers.
 - `crates/ui/src/story_fixtures.rs` is the canonical typed fixture registry for
   both UI story harnesses. It owns fixture copy, ordering, state, validation,
   and nested themes. `apps/stories` renders those models with Leptos;
@@ -107,7 +113,8 @@ The pass runs, in order:
 4. required app persistent-state wiring check
 5. Leptos Tailwind asset wiring check for apps and generated templates
 6. Leptos/UI design-token class usage check
-7. UI crate mdBook source, story-anchor, and dual isolated iframe drift check
+7. UI and blocks crate mdBook source, block issue, story-anchor, and dual
+   isolated iframe drift checks
 8. native `cargo clippy` for workspace crates except browser-only Bevy crates
 9. wasm `cargo clippy` for app, story harness, Bevy scene, storage, and state
    crates
@@ -124,7 +131,7 @@ The pass runs, in order:
 19. build and verify generated template output
 20. build and verify `apps/marketing`, `apps/game`, `apps/stories`,
     `apps/ui-bevy-stories`, `/crates/`, and `/crates/ui/` static Pages
-    artifacts
+    artifacts, including `/crates/blocks/`
 21. build and verify `apps/stories` and `apps/ui-bevy-stories` static output
 22. build generated `apps/test-project/cube-smoke`, verify the centered canvas,
     WebGPU renderer, and green cube scene contract
@@ -173,6 +180,8 @@ committed.
 | `just build` | Build static marketing/game output and Pages artifacts. |
 | `just pages` | Build the aggregate GitHub Pages artifact under `target/pages`. |
 | `just ui-book` | Regenerate the UI crate mdBook source from the Rust catalog. |
+| `just blocks-book` | Regenerate the blocks crate mdBook from the block registry. |
+| `just block-issues` | Regenerate the one-to-one block implementation backlog. |
 | `just static-analysis` | Run the focused static-analysis lane used by the gate. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |

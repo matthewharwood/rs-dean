@@ -4680,6 +4680,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rs-dean-blocks"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "garde",
+ "leptos",
+ "rs-dean-ui",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "rs-dean-cards"
 version = "0.1.0"
 dependencies = [
@@ -4763,6 +4775,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "leptos",
+ "rs-dean-blocks",
  "rs-dean-ui",
  "web-sys",
 ]
@@ -4784,6 +4797,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "console_error_panic_hook",
+ "rs-dean-blocks",
  "rs-dean-ui",
  "web-sys",
 ]
@@ -6239,6 +6253,7 @@ dependencies = [
  "command-fds",
  "os_pipe",
  "png",
+ "rs-dean-blocks",
  "rs-dean-ui",
  "serde_json",
 ]

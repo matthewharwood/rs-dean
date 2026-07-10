@@ -8,9 +8,14 @@ use bevy::{
     window::{Window, WindowPlugin, WindowResolution},
 };
 #[cfg(target_arch = "wasm32")]
+use rs_dean_blocks::{
+    BevyBlockPrimitive, BevyBlockPrimitiveKind, BlockId, BlockInstance, bevy_block_primitives,
+    block_by_slug,
+};
+#[cfg(target_arch = "wasm32")]
 use rs_dean_ui::{
     ActiveTheme, AlertDensity, AlertModel, AlertTone, BevyUiPrimitive, BevyUiStoryVariant,
-    BreadcrumbDensity, BreadcrumbModel, SHADCN_COMPONENTS, Theme, ThemeId, UiBlockRole,
+    BreadcrumbDensity, BreadcrumbModel, GridAlign, SHADCN_COMPONENTS, Theme, ThemeId, UiBlockRole,
     UiComponentId, UiStoryModel, UiWidgetIntent, UiWidgetSlotKind,
     bevy_story_variants_for_component, scale,
 };
@@ -23,11 +28,32 @@ const CONTENT_MAX_WIDTH: f32 = 1024.0;
 const RESPONSIVE_BREAKPOINT: f32 = 720.0;
 #[cfg(target_arch = "wasm32")]
 const SCROLL_LINE_HEIGHT: f32 = 24.0;
+#[cfg(target_arch = "wasm32")]
+const BLOCK_CONTENT_MAX_WIDTH: f32 = 1_200.0;
+#[cfg(target_arch = "wasm32")]
+const BLOCK_CONTENT_HEIGHT: f32 = 664.0;
+
+#[cfg(target_arch = "wasm32")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum StoryId {
+    Component(UiComponentId),
+    Block(BlockId),
+}
+
+#[cfg(target_arch = "wasm32")]
+impl StoryId {
+    fn name(self) -> &'static str {
+        match self {
+            Self::Component(id) => id.definition().name,
+            Self::Block(id) => id.definition().name,
+        }
+    }
+}
 
 #[cfg(target_arch = "wasm32")]
 #[derive(Resource, Debug, Clone, Copy)]
 struct StorySelection {
-    id: UiComponentId,
+    id: StoryId,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -86,7 +112,7 @@ impl InteractivePrimitive {
 fn main() {
     console_error_panic_hook::set_once();
 
-    let selected = selected_component_id();
+    let selected = selected_story_id();
     let theme_id = ThemeId::Dark;
     let theme = theme_id.palette();
 
@@ -102,7 +128,7 @@ fn main() {
                 })
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: format!("rs-dean Bevy UI story: {}", selected.definition().name),
+                        title: format!("rs-dean Bevy UI story: {}", selected.name()),
                         resolution: WindowResolution::new(960, 704),
                         canvas: Some(CANVAS_SELECTOR.to_owned()),
                         fit_canvas_to_parent: true,
@@ -127,32 +153,35 @@ fn main() {
 fn main() {}
 
 #[cfg(target_arch = "wasm32")]
-fn selected_component_id() -> UiComponentId {
+fn selected_story_id() -> StoryId {
     web_sys::window()
         .and_then(|window| window.location().search().ok())
         .as_deref()
-        .and_then(component_id_from_search)
-        .unwrap_or(UiComponentId::Button)
+        .and_then(story_id_from_search)
+        .unwrap_or(StoryId::Component(UiComponentId::Button))
 }
 
 #[cfg(target_arch = "wasm32")]
-fn component_id_from_search(search: &str) -> Option<UiComponentId> {
+fn story_id_from_search(search: &str) -> Option<StoryId> {
     let query = search.strip_prefix('?').unwrap_or(search);
     query.split('&').find_map(|pair| {
         let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
         (key == "story")
             .then_some(value)
-            .and_then(component_id_for_story_id)
+            .and_then(story_id_for_route)
     })
 }
 
 #[cfg(target_arch = "wasm32")]
-fn component_id_for_story_id(value: &str) -> Option<UiComponentId> {
-    let slug = value.strip_prefix("ui-")?;
-    SHADCN_COMPONENTS
-        .iter()
-        .find(|definition| definition.slug == slug)
-        .map(|definition| definition.id)
+fn story_id_for_route(value: &str) -> Option<StoryId> {
+    if let Some(slug) = value.strip_prefix("ui-") {
+        return SHADCN_COMPONENTS
+            .iter()
+            .find(|definition| definition.slug == slug)
+            .map(|definition| StoryId::Component(definition.id));
+    }
+
+    block_by_slug(value.strip_prefix("block-")?).map(|definition| StoryId::Block(definition.id))
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -164,7 +193,6 @@ fn setup_story_scene(
     windows: Query<&Window>,
 ) {
     let theme = active_theme.palette();
-    let variants = bevy_story_variants_for_component(selection.id, active_theme.0);
     let fonts = StoryFonts {
         inter: asset_server.load("fonts/InterVariable.ttf"),
     };
@@ -172,8 +200,6 @@ fn setup_story_scene(
         .single()
         .map(Window::width)
         .unwrap_or(RESPONSIVE_BREAKPOINT);
-    let single_column = selection.id == UiComponentId::Accordion;
-    let columns = story_grid_column_count(window_width, single_column);
 
     commands.insert_resource(fonts.clone());
     commands.spawn((Camera2d, IsDefaultUiCamera));
@@ -192,34 +218,261 @@ fn setup_story_scene(
             ScrollPosition::default(),
             StoryViewport,
         ))
-        .with_children(|viewport| {
-            viewport
-                .spawn((
-                    Node {
-                        display: Display::Grid,
-                        width: percent(100),
-                        max_width: px(if single_column {
-                            448.0
-                        } else {
-                            CONTENT_MAX_WIDTH
-                        }),
-                        margin: UiRect::horizontal(auto()),
-                        grid_template_columns: RepeatedGridTrack::fr(columns, 1.0),
-                        grid_auto_rows: GridTrack::auto(),
-                        row_gap: px(scale::space::S),
-                        column_gap: px(scale::space::S),
-                        align_items: AlignItems::Start,
-                        padding: UiRect::bottom(px(scale::space::S)),
-                        ..default()
-                    },
-                    StoryGrid { single_column },
-                ))
-                .with_children(|grid| {
-                    for variant in &variants {
-                        spawn_story_variant(grid, selection.id, variant, &fonts);
-                    }
-                });
+        .with_children(|viewport| match selection.id {
+            StoryId::Component(id) => {
+                spawn_component_story(viewport, id, active_theme.0, window_width, &fonts);
+            }
+            StoryId::Block(id) => {
+                spawn_block_story(viewport, id, &theme, window_width, &fonts);
+            }
         });
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_component_story(
+    viewport: &mut ChildSpawnerCommands,
+    id: UiComponentId,
+    theme_id: ThemeId,
+    window_width: f32,
+    fonts: &StoryFonts,
+) {
+    let variants = bevy_story_variants_for_component(id, theme_id);
+    let single_column = id == UiComponentId::Accordion;
+    let columns = story_grid_column_count(window_width, single_column);
+
+    viewport
+        .spawn((
+            Node {
+                display: Display::Grid,
+                width: percent(100),
+                max_width: px(if single_column {
+                    448.0
+                } else {
+                    CONTENT_MAX_WIDTH
+                }),
+                margin: UiRect::horizontal(auto()),
+                grid_template_columns: RepeatedGridTrack::fr(columns, 1.0),
+                grid_auto_rows: GridTrack::auto(),
+                row_gap: px(scale::space::S),
+                column_gap: px(scale::space::S),
+                align_items: AlignItems::Start,
+                padding: UiRect::bottom(px(scale::space::S)),
+                ..default()
+            },
+            StoryGrid { single_column },
+        ))
+        .with_children(|grid| {
+            for variant in &variants {
+                spawn_story_variant(grid, id, variant, fonts);
+            }
+        });
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_block_story(
+    viewport: &mut ChildSpawnerCommands,
+    id: BlockId,
+    theme: &Theme,
+    window_width: f32,
+    fonts: &StoryFonts,
+) {
+    let content_width =
+        (window_width - scale::space::S * 2.0).clamp(240.0, BLOCK_CONTENT_MAX_WIDTH);
+    let content_size = Vec2::new(content_width, BLOCK_CONTENT_HEIGHT);
+    let instance = BlockInstance::fixture(id.definition());
+
+    match bevy_block_primitives(&instance, theme, content_size) {
+        Ok(primitives) => spawn_block_primitives(viewport, &primitives, content_size, theme, fonts),
+        Err(report) => spawn_text(
+            viewport,
+            format!("Block validation failed: {report}"),
+            fonts.inter.clone(),
+            scale::font_size::F0,
+            FontWeight::SEMIBOLD,
+            theme.danger().to_bevy(),
+        ),
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_block_primitives(
+    viewport: &mut ChildSpawnerCommands,
+    primitives: &[BevyBlockPrimitive],
+    content_size: Vec2,
+    theme: &Theme,
+    fonts: &StoryFonts,
+) {
+    let section_fill = primitives
+        .iter()
+        .find(|primitive| primitive.kind == BevyBlockPrimitiveKind::Section)
+        .map_or_else(|| theme.surface_1().to_bevy(), |primitive| primitive.fill);
+
+    viewport
+        .spawn((
+            Node {
+                position_type: PositionType::Relative,
+                width: px(content_size.x),
+                height: px(content_size.y),
+                min_width: px(content_size.x),
+                min_height: px(content_size.y),
+                flex_shrink: 0.0,
+                margin: UiRect::horizontal(auto()),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(section_fill),
+        ))
+        .with_children(|root| {
+            for primitive in primitives
+                .iter()
+                .filter(|primitive| primitive.kind != BevyBlockPrimitiveKind::Section)
+            {
+                spawn_block_primitive(root, primitive, content_size, theme, fonts);
+            }
+        });
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_block_primitive(
+    parent: &mut ChildSpawnerCommands,
+    primitive: &BevyBlockPrimitive,
+    content_size: Vec2,
+    theme: &Theme,
+    fonts: &StoryFonts,
+) {
+    let origin = block_primitive_origin(primitive.center, primitive.size, content_size);
+    let justify_content = block_justify_content(primitive.text_align);
+    let text_justify = block_text_justify(primitive.text_align);
+    let disabled = primitive.ui.as_ref().is_some_and(|ui| ui.disabled);
+    let fill = if disabled {
+        primitive.fill.with_alpha(0.42)
+    } else {
+        primitive.fill
+    };
+    let text_color = if disabled {
+        primitive.text.with_alpha(0.38)
+    } else {
+        primitive.text
+    };
+    let mut entity = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(origin.x),
+            top: px(origin.y),
+            width: px(primitive.size.x.max(0.0)),
+            height: px(primitive.size.y.max(0.0)),
+            min_width: px(0.0),
+            padding: block_primitive_padding(primitive.kind),
+            border: UiRect::all(px(primitive.border_width.max(0.0))),
+            border_radius: block_primitive_radius(primitive.kind, theme),
+            justify_content,
+            align_items: AlignItems::Center,
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(fill),
+        BorderColor::all(primitive.border),
+    ));
+
+    if primitive.font_size > 0.0 && !primitive.label.trim().is_empty() {
+        entity.insert((
+            Text::new(primitive.label.clone()),
+            TextFont {
+                font: fonts.inter.clone().into(),
+                font_size: FontSize::Px(primitive.font_size),
+                weight: block_primitive_font_weight(primitive.kind),
+                ..default()
+            },
+            TextColor(text_color),
+            TextLayout::new(text_justify, LineBreak::WordOrCharacter),
+        ));
+    }
+
+    let ui_interactive = primitive
+        .ui
+        .as_ref()
+        .is_some_and(|ui| ui.intent != UiWidgetIntent::None && !ui.disabled);
+    if primitive.kind == BevyBlockPrimitiveKind::Action || ui_interactive {
+        let interaction = if let Some(ui) = &primitive.ui {
+            InteractivePrimitive::stateful(
+                fill,
+                theme.selected_tint().to_bevy(),
+                ui.selected,
+                theme,
+            )
+        } else {
+            InteractivePrimitive::momentary(fill, theme)
+        };
+        entity.insert((Button, interaction));
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn block_primitive_origin(center: Vec2, size: Vec2, content_size: Vec2) -> Vec2 {
+    Vec2::new(
+        content_size.x / 2.0 + center.x - size.x / 2.0,
+        content_size.y / 2.0 - center.y - size.y / 2.0,
+    )
+}
+
+#[cfg(target_arch = "wasm32")]
+const fn block_justify_content(align: GridAlign) -> JustifyContent {
+    match align {
+        GridAlign::Center => JustifyContent::Center,
+        GridAlign::End => JustifyContent::FlexEnd,
+        GridAlign::Start | GridAlign::Stretch => JustifyContent::FlexStart,
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+const fn block_text_justify(align: GridAlign) -> Justify {
+    match align {
+        GridAlign::Center => Justify::Center,
+        GridAlign::End => Justify::Right,
+        GridAlign::Start | GridAlign::Stretch => Justify::Left,
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+const fn block_primitive_font_weight(kind: BevyBlockPrimitiveKind) -> FontWeight {
+    match kind {
+        BevyBlockPrimitiveKind::Heading => FontWeight::BOLD,
+        BevyBlockPrimitiveKind::Action | BevyBlockPrimitiveKind::UiComponent => {
+            FontWeight::SEMIBOLD
+        }
+        BevyBlockPrimitiveKind::Section
+        | BevyBlockPrimitiveKind::Text
+        | BevyBlockPrimitiveKind::Item
+        | BevyBlockPrimitiveKind::Media => FontWeight::NORMAL,
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn block_primitive_padding(kind: BevyBlockPrimitiveKind) -> UiRect {
+    match kind {
+        BevyBlockPrimitiveKind::Heading | BevyBlockPrimitiveKind::Text => {
+            UiRect::horizontal(px(scale::space::XS2))
+        }
+        BevyBlockPrimitiveKind::Action
+        | BevyBlockPrimitiveKind::Item
+        | BevyBlockPrimitiveKind::Media
+        | BevyBlockPrimitiveKind::UiComponent => UiRect::horizontal(px(scale::space::XS)),
+        BevyBlockPrimitiveKind::Section => UiRect::ZERO,
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn block_primitive_radius(kind: BevyBlockPrimitiveKind, theme: &Theme) -> BorderRadius {
+    let radius = match kind {
+        BevyBlockPrimitiveKind::Action => theme.radius_field,
+        BevyBlockPrimitiveKind::Item
+        | BevyBlockPrimitiveKind::Media
+        | BevyBlockPrimitiveKind::UiComponent => theme.radius_box,
+        BevyBlockPrimitiveKind::Section
+        | BevyBlockPrimitiveKind::Heading
+        | BevyBlockPrimitiveKind::Text => 0.0,
+    };
+    BorderRadius::all(px(radius))
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -3002,13 +3255,26 @@ mod tests {
     #[test]
     fn parser_accepts_catalog_story_routes() {
         assert_eq!(
-            component_id_from_search("?story=ui-alert"),
-            Some(UiComponentId::Alert)
+            story_id_from_search("?story=ui-alert"),
+            Some(StoryId::Component(UiComponentId::Alert))
         );
         assert_eq!(
-            component_id_from_search("foo=bar&story=ui-typography"),
-            Some(UiComponentId::Typography)
+            story_id_from_search("foo=bar&story=ui-typography"),
+            Some(StoryId::Component(UiComponentId::Typography))
         );
+        let block = block_by_slug("marketing-sections-heroes-01-simple-centered")
+            .expect("the first block route remains registered");
+        assert_eq!(
+            story_id_from_search("?story=block-marketing-sections-heroes-01-simple-centered"),
+            Some(StoryId::Block(block.id))
+        );
+    }
+
+    #[test]
+    fn parser_rejects_unknown_or_unprefixed_story_routes() {
+        assert_eq!(story_id_from_search("?story=button"), None);
+        assert_eq!(story_id_from_search("?story=ui-not-registered"), None);
+        assert_eq!(story_id_from_search("?story=block-not-registered"), None);
     }
 
     #[test]
@@ -3016,5 +3282,22 @@ mod tests {
         assert_eq!(story_grid_column_count(960.0, false), 2);
         assert_eq!(story_grid_column_count(719.0, false), 1);
         assert_eq!(story_grid_column_count(960.0, true), 1);
+    }
+
+    #[test]
+    fn block_coordinates_map_to_the_ui_node_origin() {
+        let content_size = Vec2::new(1_200.0, 664.0);
+        assert_eq!(
+            block_primitive_origin(Vec2::ZERO, Vec2::new(200.0, 100.0), content_size),
+            Vec2::new(500.0, 282.0)
+        );
+        assert_eq!(
+            block_primitive_origin(
+                Vec2::new(-500.0, 282.0),
+                Vec2::new(200.0, 100.0),
+                content_size,
+            ),
+            Vec2::ZERO
+        );
     }
 }

@@ -1,4 +1,7 @@
 use leptos::prelude::*;
+#[cfg(test)]
+use rs_dean_blocks::BLOCKS;
+use rs_dean_blocks::{Block, BlockInstance, block_by_slug};
 use rs_dean_ui::story_fixtures::*;
 use rs_dean_ui::{
     Accordion, Alert, AlertDialog, AspectRatio, Attachment, Avatar, Badge, Breadcrumb, Bubble,
@@ -14,7 +17,9 @@ use rs_dean_ui::{
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
 const STORIES_SHELL_ISOLATED: &str = "min-h-screen bg-surface-1 p-s text-text-1";
+const STORIES_SHELL_BLOCK: &str = "min-h-screen bg-surface-1 text-text-1";
 const STORIES_SHELL_INNER: &str = "mx-auto max-w-5xl";
+const STORIES_SHELL_INNER_BLOCK: &str = "w-full";
 const STORIES_HEADER: &str = "mb-m flex flex-col gap-s sm:flex-row sm:items-end sm:justify-between";
 const STORIES_HEADER_COPY: &str = "grid gap-2xs";
 const STORIES_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
@@ -35,24 +40,44 @@ const THEME_SWATCH_ROW: &str = "mt-s flex gap-2xs";
 const THEME_SWATCH: &str = "size-l rounded-field border border-border-subtle";
 
 #[component]
-fn Stories() -> impl IntoView {
+fn Stories() -> AnyView {
     let isolated_story_id = isolated_story_id();
+    let isolated_block = isolated_story_id
+        .as_deref()
+        .and_then(|story_id| story_id.strip_prefix("block-"))
+        .and_then(block_by_slug);
+    if let Some(definition) = isolated_block {
+        let story_id = format!("block-{}", definition.slug);
+        let story_id_for_data = story_id.clone();
+        let instance = BlockInstance::fixture(definition);
+        return view! {
+            <main class=STORIES_SHELL_BLOCK data-story-shell="isolated-block">
+                <div class=STORIES_SHELL_INNER_BLOCK>
+                    <section id=story_id data-story-id=story_id_for_data class="w-full">
+                        <Block instance />
+                    </section>
+                </div>
+            </main>
+        }
+        .into_any();
+    }
+
     let shell_class = if isolated_story_id.is_some() {
         STORIES_SHELL_ISOLATED
     } else {
         STORIES_SHELL
     };
+    let shell_inner_class = STORIES_SHELL_INNER;
     let shell_mode = if isolated_story_id.is_some() {
         "isolated"
     } else {
         "catalog"
     };
     let isolated_style = isolated_story_style(isolated_story_id.as_deref());
-
     view! {
         <main class=shell_class data-story-shell=shell_mode>
             <style>{isolated_style}</style>
-            <div class=STORIES_SHELL_INNER>
+            <div class=shell_inner_class>
                 <header class=STORIES_HEADER data-story-shell-header="true">
                     <div class=STORIES_HEADER_COPY>
                         <p class=STORIES_EYEBROW>
@@ -89,6 +114,7 @@ fn Stories() -> impl IntoView {
             </div>
         </main>
     }
+    .into_any()
 }
 
 fn component_story_section(definition: ComponentDefinition) -> impl IntoView {
@@ -231,7 +257,11 @@ fn isolated_story_id_from_search(search: &str) -> Option<String> {
 }
 
 fn valid_catalog_story_id(value: &str) -> Option<String> {
-    let slug = value.strip_prefix("ui-")?;
+    let (kind, slug) = if let Some(slug) = value.strip_prefix("ui-") {
+        ("ui", slug)
+    } else {
+        ("block", value.strip_prefix("block-")?)
+    };
     if slug.is_empty()
         || !slug
             .bytes()
@@ -239,10 +269,14 @@ fn valid_catalog_story_id(value: &str) -> Option<String> {
     {
         return None;
     }
-    SHADCN_COMPONENTS
-        .iter()
-        .any(|definition| definition.slug == slug)
-        .then(|| value.to_owned())
+    let exists = if kind == "ui" {
+        SHADCN_COMPONENTS
+            .iter()
+            .any(|definition| definition.slug == slug)
+    } else {
+        block_by_slug(slug).is_some()
+    };
+    exists.then(|| value.to_owned())
 }
 
 fn isolated_story_style(story_id: Option<&str>) -> String {
@@ -304,6 +338,21 @@ mod tests {
             isolated_story_id_from_search("foo=bar&story=ui-alert-dialog"),
             Some("ui-alert-dialog".to_owned())
         );
+        assert_eq!(
+            isolated_story_id_from_search(
+                "?story=block-marketing-sections-heroes-01-simple-centered"
+            ),
+            Some("block-marketing-sections-heroes-01-simple-centered".to_owned())
+        );
+    }
+
+    #[test]
+    fn every_block_catalog_entry_has_an_isolated_story_route() {
+        for definition in BLOCKS {
+            let story_id = format!("block-{}", definition.slug);
+            let search = format!("?story={story_id}");
+            assert_eq!(isolated_story_id_from_search(&search), Some(story_id));
+        }
     }
 
     #[test]

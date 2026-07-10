@@ -43,10 +43,18 @@ story, template, and shared component surfaces.
 
 The shadcn-inspired catalog lives in `crates/ui`. Keep its Rust definitions,
 implementation recipes, literal widget constructors, named token-only Leptos
-components, Bevy primitive adapters, `apps/stories` gallery, `_issues/`
+components, Bevy primitive adapters, `apps/stories` gallery, `_issues/ui/`
 component task files, generated `docs/crates/ui` mdBook pages,
 `apps/ui-bevy-stories` primitive routes, and sweep log in sync. Run
 `cargo xtask gen-ui-book` after catalog or story fixture changes.
+
+The composed block registry lives in `crates/blocks`. Keep its one-to-one Rust
+catalog, serde plus garde schema, renderer-neutral `BlockPlan`, constrained
+`rs-dean-ui` layout specs, dynamic Leptos/Bevy story routes,
+`_issues/blocks`, and generated `docs/crates/blocks` mdBook in sync. Blocks may
+only consume existing UI components and design tokens. Run
+`cargo xtask gen-block-issues` and `cargo xtask gen-block-book` after catalog,
+fixture, layout, or route changes.
 
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
@@ -110,7 +118,7 @@ remove the old wording from docs/skills.
 - Leptos app, story, template, and shared component examples use
   `rs-dean-ui` token utilities for design scales instead of stock Tailwind
   scale classes.
-- The shadcn-inspired catalog has one `_issues/` task file per component, and
+- The shadcn-inspired catalog has one `_issues/ui/` task file per component, and
   every catalog component can build a shared implementation recipe, literal
   widget constructor, named Leptos component, and Bevy primitive spec.
 - Shared component stories take copy, ordering, state, validation, and nested
@@ -120,6 +128,9 @@ remove the old wording from docs/skills.
   each page embeds the matching `/stories/?story=ui-{component}` isolated live
   Leptos fixture beside `/ui-bevy-stories/?story=ui-{component}` so the page
   shows only that component's DOM variants and Bevy primitive adapter output.
+- `crates/blocks` has one `_issues/blocks` task and one generated
+  `docs/crates/blocks` page per registry entry; each page embeds the matching
+  `block-{slug}` fixture in both story harnesses from one validated plan.
 - Shared UI themes switch through Tailwind tokens in Leptos and through the
   same Rust palette in Bevy without adding Leptos to `rs-dean-game` or
   `rs-dean-ui-bevy-stories`.

@@ -479,7 +479,7 @@ mod tests {
 
     #[test]
     fn issue_files_are_marked_implemented() {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../_issues");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../_issues/ui");
         for id in UiComponentId::ALL {
             let path = root.join(id.issue_filename());
             let contents = fs::read_to_string(&path).expect("issue file should be readable");

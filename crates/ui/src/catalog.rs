@@ -1,4 +1,7 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Hash, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiComponentId {
     Accordion,
     Alert,
@@ -66,7 +69,8 @@ pub enum UiComponentId {
     Typography,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiComponentCategory {
     Action,
     Data,
@@ -82,13 +86,15 @@ pub enum UiComponentCategory {
     Utility,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum FrameworkMode {
     LeptosOnly,
     SharedSpec,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum UiStateModel {
     ConsumerDurable,
     Ephemeral,
@@ -1258,7 +1264,7 @@ mod tests {
 
     #[test]
     fn every_component_has_task_file() {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../_issues");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../_issues/ui");
         for id in UiComponentId::ALL {
             let path = root.join(id.issue_filename());
             assert!(path.exists(), "missing {}", path.display());
