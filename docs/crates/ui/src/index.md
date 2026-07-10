@@ -1,7 +1,8 @@
 # rs-dean-ui
 
 `rs-dean-ui` owns the shared design tokens, semantic themes, shadcn-inspired
-component catalog, Leptos renderers, and Bevy primitive adapters.
+component catalog, canonical typed story fixtures, Leptos renderers, and Bevy
+primitive adapters.
 
 This book is generated from the Rust catalog. The component pages link back to
 the live Leptos and Bevy story harnesses with isolated story routes, so each
@@ -21,6 +22,7 @@ primitive adapter used by local component development.
 - Components documented: 64
 - Source of truth: `crates/ui/src/catalog.rs`
 - Implementation contracts: `crates/ui/src/kit.rs`
+- Canonical story fixtures: `crates/ui/src/story_fixtures.rs`
 - Leptos live fixtures: `apps/stories/src/main.rs`
 - Bevy primitive fixtures: `apps/ui-bevy-stories/src/main.rs`
 
