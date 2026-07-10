@@ -17,6 +17,7 @@ use anyhow::{Context, Result, bail};
 use base64::Engine as _;
 use command_fds::{CommandFdExt, FdMapping};
 use os_pipe::{PipeReader, PipeWriter};
+use rs_dean_blocks::{BLOCKS, BlockDefinition};
 use rs_dean_ui::{ComponentDefinition, SHADCN_COMPONENTS, component_implementation};
 use serde_json::{Value, json};
 
@@ -28,6 +29,10 @@ const TEST_PROJECT: &str = "apps/test-project";
 const CUBE_SMOKE_APP: &str = "apps/test-project/cube-smoke";
 const UI_BOOK: &str = "docs/crates/ui";
 const UI_BOOK_GENERATED: &str = "target/generated-ui-book";
+const BLOCK_BOOK: &str = "docs/crates/blocks";
+const BLOCK_BOOK_GENERATED: &str = "target/generated-block-book";
+const BLOCK_ISSUES: &str = "_issues/blocks";
+const BLOCK_ISSUES_GENERATED: &str = "target/generated-block-issues";
 
 fn main() -> Result<()> {
     let mut args = env::args().skip(1);
@@ -41,6 +46,8 @@ fn main() -> Result<()> {
         Some("docs-sweep") => docs_sweep(),
         Some("five-phase-pass") => five_phase_pass(),
         Some("game") => game(),
+        Some("gen-block-book") => gen_block_book(),
+        Some("gen-block-issues") => gen_block_issues(),
         Some("gen-ui-book") => gen_ui_book(),
         Some("install-tailwindcss") => install_tailwindcss(),
         Some("gen-app") => {
@@ -70,6 +77,8 @@ Commands:
   game             run the Bevy game app on :5174
   stories          run the Rust story harness on :6106
   ui-bevy-stories  run the Bevy UI story harness on :6107
+  gen-block-book   regenerate the blocks crate mdBook from the Rust catalog
+  gen-block-issues regenerate the Tailwind Plus block implementation backlog
   preview          serve the release app on :3100
   gen-ui-book      regenerate the UI crate mdBook source from the Rust catalog
   build            build static marketing/game output and GitHub Pages artifacts
@@ -198,6 +207,8 @@ fn doctor() -> Result<()> {
         "AGENTS.md",
         "docs/crates/ui/book.toml",
         "docs/crates/ui/src/SUMMARY.md",
+        "docs/crates/blocks/book.toml",
+        "docs/crates/blocks/src/SUMMARY.md",
         "templates/app/Cargo.toml",
         "templates/app/cube-smoke/Cargo.toml",
         "apps/marketing/Trunk.toml",
@@ -541,7 +552,9 @@ fn run_static_policy_checks() -> Result<()> {
     check_required_app_persistence()?;
     check_leptos_tailwind_assets()?;
     check_ui_design_token_classes()?;
-    check_ui_book()
+    check_ui_book()?;
+    check_block_book()?;
+    check_block_issues()
 }
 
 fn run_native_clippy() -> Result<()> {
@@ -639,6 +652,7 @@ fn pages() -> Result<()> {
     build_pages_app(STORIES_APP, target, "stories", &base)?;
     build_pages_app(UI_BEVY_STORIES_APP, target, "ui-bevy-stories", &base)?;
     build_ui_book(target)?;
+    build_block_book(target)?;
     write_pages_index(target, &base)?;
     write_crates_index(target, &base)?;
     write_pages_support_files(target, &base)?;
@@ -705,6 +719,26 @@ fn build_ui_book(target: &Path) -> Result<()> {
     verify_ui_book_dist(&destination)
 }
 
+fn build_block_book(target: &Path) -> Result<()> {
+    check_block_book()?;
+    let destination = env::current_dir()
+        .context("resolve repository root")?
+        .join(target)
+        .join("crates/blocks");
+    fs::create_dir_all(&destination)
+        .with_context(|| format!("create {}", destination.display()))?;
+    run_in(
+        BLOCK_BOOK,
+        "mdbook",
+        vec![
+            "build".to_owned(),
+            "--dest-dir".to_owned(),
+            destination.display().to_string(),
+        ],
+    )?;
+    verify_block_book_dist(&destination)
+}
+
 fn gen_ui_book() -> Result<()> {
     let root = Path::new(UI_BOOK);
     if root.exists() {
@@ -712,6 +746,465 @@ fn gen_ui_book() -> Result<()> {
     }
     write_ui_book_sources(root)?;
     println!("generated {}", root.display());
+    Ok(())
+}
+
+fn gen_block_book() -> Result<()> {
+    let root = Path::new(BLOCK_BOOK);
+    if root.exists() {
+        fs::remove_dir_all(root).with_context(|| format!("remove old {}", root.display()))?;
+    }
+    write_block_book_sources(root)?;
+    println!("generated {}", root.display());
+    Ok(())
+}
+
+fn gen_block_issues() -> Result<()> {
+    let root = Path::new(BLOCK_ISSUES);
+    if root.exists() {
+        fs::remove_dir_all(root).with_context(|| format!("remove old {}", root.display()))?;
+    }
+    write_block_issue_sources(root)?;
+    println!("generated {}", root.display());
+    Ok(())
+}
+
+fn check_block_issues() -> Result<()> {
+    let expected = Path::new(BLOCK_ISSUES_GENERATED);
+    if expected.exists() {
+        fs::remove_dir_all(expected)
+            .with_context(|| format!("remove old {}", expected.display()))?;
+    }
+    write_block_issue_sources(expected)?;
+    compare_generated_tree(expected, Path::new(BLOCK_ISSUES))
+}
+
+fn write_block_issue_sources(root: &Path) -> Result<()> {
+    fs::create_dir_all(root).with_context(|| format!("create {}", root.display()))?;
+    fs::write(root.join("00-index.md"), block_issue_index())
+        .with_context(|| format!("write {}", root.join("00-index.md").display()))?;
+    fs::write(root.join("sweep-log.md"), block_sweep_log())
+        .with_context(|| format!("write {}", root.join("sweep-log.md").display()))?;
+    for definition in BLOCKS {
+        let path = root.join(block_issue_file_name(definition));
+        fs::write(&path, block_issue_page(definition))
+            .with_context(|| format!("write {}", path.display()))?;
+    }
+    Ok(())
+}
+
+fn block_issue_file_name(definition: BlockDefinition) -> String {
+    format!("{:03}-{}.md", definition.id.index() + 1, definition.slug)
+}
+
+fn block_issue_index() -> String {
+    let mut page = format!(
+        "# UI Block Implementation Backlog\n\nSource inventory: https://tailwindcss.com/plus/ui-blocks/marketing\n\nThis generated backlog tracks all {} Tailwind Plus Marketing, Application UI,\nand Ecommerce blocks through original `rs-dean-blocks` fixtures. Each entry maps\nthe source block one-to-one onto shared `rs-dean-ui` components, design tokens,\nand the isomorphic Leptos/Bevy block plan.\n\n- [Sweep Process Log](sweep-log.md)\n",
+        BLOCKS.len()
+    );
+    let mut previous_surface = None;
+    let mut previous_family = None;
+    for definition in BLOCKS {
+        let family = definition.family_definition();
+        if previous_surface != Some(family.surface) {
+            page.push_str(&format!("\n## {}\n", family.surface.label()));
+            previous_surface = Some(family.surface);
+            previous_family = None;
+        }
+        if previous_family != Some(family.id) {
+            page.push_str(&format!("\n### {}\n\n", family.name));
+            previous_family = Some(family.id);
+        }
+        page.push_str(&format!(
+            "- [{:03} - {}]({}) - {}, {}.\n",
+            definition.id.index() + 1,
+            definition.name,
+            block_issue_file_name(definition),
+            family.pattern.label(),
+            definition.resolved_layout().label()
+        ));
+    }
+    page
+}
+
+fn block_issue_page(definition: BlockDefinition) -> String {
+    let family = definition.family_definition();
+    format!(
+        r#"# {name}
+
+Source: {source}
+
+Catalog path: {surface} / {area} / {family} / variant {ordinal} of {family_count}
+
+## TPM Outcome
+
+Ship `{slug}` as a registered Rust-first block in the {family} family. Preserve
+the source block's {layout} composition intent while using original fixture
+content, `rs-dean-ui` components, and the shared token vocabulary. The outcome
+must render from one validated block instance in Leptos and Bevy.
+
+## Design Considerations
+
+- Compose only `rs-dean-ui` components and layout primitives; do not copy or
+  embed Tailwind Plus source markup.
+- Use the shared Section -> Container -> Grid/GridItem -> Stack/Cluster box
+  model with the `{layout}` preset.
+- Apply the typed `{media}` media mode, `{chrome}` surface treatment, and
+  `{interaction}` interaction contract without adding one-off classes.
+- Use only token spacing, typography, color, radius, shadow, and motion classes.
+- Keep component choices finite and typed. Button variant and size changes must
+  use the existing `ButtonVariant` and `ButtonSize` enums.
+- Preserve responsive hierarchy, readable line length, stable media geometry,
+  keyboard access, reduced motion, and every theme's semantic contrast.
+
+## Engineering Considerations
+
+- Block index `{index}` and `{slug}` are the stable registry identity.
+- The canonical source is `crates/blocks`; renderer-specific code consumes the
+  same `BlockPlan` and must not fork content or layout rules.
+- Validate serialized instances with `garde` before catalog lookup or rendering.
+- The family maps to the `{pattern}` composition pattern and the `{component}`
+  primary UI component.
+- Variant behavior is constrained by `{media}`, `{chrome}`, and `{interaction}`
+  enums shared by the Leptos and Bevy plans.
+- Keep transient interaction state local to the owning UI component. Persisted
+  authoring data belongs in `crates/state` through `rs-dean-idb`.
+
+## Consumer Implementation
+
+- Resolve `BlockId::from_index({index})`, or look up `{slug}` with
+  `block_by_slug`, then construct the instance with `BlockInstance::new`.
+  The catalog fixture is an editable starting point for sample content.
+- Override typed `BlockContent` slots for eyebrow, title, body, media label,
+  actions, and repeated items without changing the layout contract.
+- Register vertical pages as ordered `BlockPage.blocks`; duplicate instance keys
+  and unsupported schema versions must fail validation.
+- Treat emitted component intents as application events. The block remains a
+  composition and does not become an alternate state store.
+
+## Acceptance Criteria
+
+- The registry resolves both block id `{index}` and slug `{slug}` one-to-one.
+- The default fixture and shared plan pass `garde` validation.
+- Leptos uses only `rs-dean-ui` components and token utilities.
+- Bevy derives primitives from the same plan, component id, palette, spacing,
+  and layout preset without depending on Leptos.
+- An isolated `block-{slug}` story proves the fixture in both renderers.
+- The sweep process returns to every earlier block after a shared API change.
+- `cargo xtask five-phase-pass` passes.
+
+## Implementation Status
+
+- [x] Tailwind Plus source identity and one-to-one catalog entry recorded.
+- [x] Typed family, composition pattern, primary UI component, and layout preset.
+- [x] Typed media, surface chrome, and interaction contracts.
+- [x] Original validated fixture content generated from the shared schema.
+- [x] Shared renderer-neutral `BlockPlan` implemented.
+- [x] Leptos composition path implemented from `rs-dean-ui` primitives.
+- [x] Bevy primitive adapter implemented from the same plan.
+- [x] Isolated Leptos and Bevy routes generated; all-catalog behavior and
+  geometry checks plus representative browser parity review passed.
+- [x] Recursive sweep complete through the full catalog with no remaining
+  shared API drift.
+"#,
+        name = definition.name,
+        source = definition.source_url(),
+        surface = family.surface.label(),
+        area = family.area,
+        family = family.name,
+        ordinal = definition.ordinal,
+        family_count = family.block_count,
+        slug = definition.slug,
+        layout = definition.resolved_layout().label(),
+        index = definition.id.index(),
+        pattern = family.pattern.label(),
+        component = family.primary_component.definition().name,
+        media = definition.media.label(),
+        chrome = definition.chrome.label(),
+        interaction = definition.interaction.label(),
+    )
+}
+
+fn block_sweep_log() -> String {
+    format!(
+        r#"# Block Sweep Process Log
+
+The block sweep process is the recursive first-to-current audit used for the
+entire `rs-dean-blocks` catalog. After implementing or changing block N, audit
+blocks 1 through N for shared schema, layout, token, component API, accessibility,
+Leptos, and Bevy learnings. If any earlier block changes, restart at block 1 and
+repeat until a complete pass produces no changes before moving to N + 1.
+
+## Current Baseline
+
+- Catalog entries: {count}
+- Families: 93
+- Composition patterns: 26
+- Source surfaces: Marketing, Application UI, Ecommerce
+- Shared hierarchy: Section -> Container -> Grid/GridItem -> Stack/Cluster
+- Data boundary: serde plus garde-validated `BlockPage` and `BlockInstance`
+- Renderer contract: one `BlockPlan`, consumed by Leptos and Bevy
+
+## Required Audit Per Sweep
+
+- Registry ids, slugs, family counts, and source anchors remain one-to-one.
+- Block content stays original and typed; no subscription source code is copied.
+- Layout changes use shared presets and token scales, not per-block CSS.
+- Component variants use existing finite `rs-dean-ui` enums.
+- Theme switching changes semantic tokens in both renderers without changing data.
+- Local interaction state stays in the component; resumable authoring state goes
+  through `crates/state` and `rs-dean-idb`.
+- Isolated stories render the same fixture and plan in Leptos and Bevy.
+- The five-phase pass and one-pass gate remain green.
+
+## Sweep Status
+
+- [x] Catalog and family count audit: 657 / 657 source entries.
+- [x] Shared layout, schema, plan, and renderer adapter foundation.
+- [x] Isolated route coverage for all 657 entries, representative browser
+  parity review, and exhaustive desktop/mobile geometry checks.
+- [x] Final no-change recursive sweep across schema, layout, renderers, docs,
+  issues, and theme behavior.
+"#,
+        count = BLOCKS.len()
+    )
+}
+
+fn check_block_book() -> Result<()> {
+    let expected = Path::new(BLOCK_BOOK_GENERATED);
+    if expected.exists() {
+        fs::remove_dir_all(expected)
+            .with_context(|| format!("remove old {}", expected.display()))?;
+    }
+    write_block_book_sources(expected)?;
+    compare_generated_tree(expected, Path::new(BLOCK_BOOK))?;
+    check_block_book_story_anchors()
+}
+
+fn write_block_book_sources(root: &Path) -> Result<()> {
+    let src = root.join("src");
+    let blocks = src.join("blocks");
+    fs::create_dir_all(&blocks).with_context(|| format!("create {}", blocks.display()))?;
+    fs::write(root.join("book.toml"), block_book_toml())
+        .with_context(|| format!("write {}", root.join("book.toml").display()))?;
+    fs::write(src.join("index.md"), block_book_index())
+        .with_context(|| format!("write {}", src.join("index.md").display()))?;
+    fs::write(src.join("SUMMARY.md"), block_book_summary())
+        .with_context(|| format!("write {}", src.join("SUMMARY.md").display()))?;
+    for definition in BLOCKS {
+        fs::write(
+            blocks.join(format!("{}.md", definition.slug)),
+            block_book_page(definition),
+        )
+        .with_context(|| {
+            format!(
+                "write {}",
+                blocks.join(format!("{}.md", definition.slug)).display()
+            )
+        })?;
+    }
+    Ok(())
+}
+
+fn block_book_toml() -> String {
+    r#"[book]
+title = "rs-dean-blocks"
+authors = ["rs-dean"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../../../target/mdbook/blocks"
+create-missing = false
+"#
+    .to_owned()
+}
+
+fn block_book_index() -> String {
+    format!(
+        r#"# rs-dean-blocks
+
+`rs-dean-blocks` is the typed composition layer over `rs-dean-ui`. It owns the
+one-to-one block registry, validated authoring schema, constrained layout plans,
+and shared Leptos/Bevy renderer inputs.
+
+This book is generated from the Rust catalog. Every page embeds the same
+pre-filled `BlockInstance` in the isolated Leptos and Bevy story harnesses.
+
+## Pages Structure
+
+- [Marketing app](../../marketing/)
+- [Game app](../../game/)
+- [Stories app](../../stories/)
+- [UI Bevy stories app](../../ui-bevy-stories/)
+- [Crate index](../)
+- [rs-dean-ui book](../ui/)
+
+## Catalog Coverage
+
+- Blocks documented: {blocks}
+- Families: {families}
+- Source surfaces: Marketing, Application UI, Ecommerce
+- Source of truth: `crates/blocks/src/catalog_data.rs`
+- Authoring boundary: serde plus garde-validated `BlockPage` and `BlockInstance`
+- Renderer boundary: one `BlockPlan` consumed by Leptos and Bevy
+
+Run `cargo xtask gen-block-book` after catalog, fixture, or story-route changes.
+`cargo xtask gate` verifies the book, block issues, and isolated routes remain
+in sync.
+"#,
+        blocks = BLOCKS.len(),
+        families = rs_dean_blocks::BLOCK_FAMILIES.len(),
+    )
+}
+
+fn block_book_summary() -> String {
+    let mut summary = String::from("# Summary\n\n- [Overview](index.md)\n");
+    let mut previous_surface = None;
+    let mut previous_family = None;
+    for definition in BLOCKS {
+        let family = definition.family_definition();
+        if previous_surface != Some(family.surface) {
+            summary.push_str(&format!("\n# {}\n", family.surface.label()));
+            previous_surface = Some(family.surface);
+            previous_family = None;
+        }
+        if previous_family != Some(family.id) {
+            summary.push_str(&format!("\n## {}\n", family.name));
+            previous_family = Some(family.id);
+        }
+        summary.push_str(&format!(
+            "- [{}](blocks/{}.md)\n",
+            definition.name, definition.slug
+        ));
+    }
+    summary
+}
+
+fn block_book_page(definition: BlockDefinition) -> String {
+    let family = definition.family_definition();
+    let story_id = format!("block-{}", definition.slug);
+    format!(
+        r#"# {name}
+
+Original `rs-dean-blocks` fixture corresponding one-to-one with the
+[Tailwind Plus source reference]({source}). No subscription source markup is
+copied into this implementation.
+
+## Live Fixtures
+
+Both frames deserialize the same typed fixture, validate it with `garde`, and
+derive the same `BlockPlan`. Leptos consumes token-only `rs-dean-ui` components;
+Bevy consumes the same palette, spacing, grid, and component roles without a
+Leptos dependency.
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start;">
+  <section>
+    <h3>Leptos Block Story</h3>
+    <iframe title="{name} Leptos block fixture" src="../../../stories/?story={story_id}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+  <section>
+    <h3>Bevy Block Story</h3>
+    <iframe title="{name} Bevy block fixture" src="../../../ui-bevy-stories/?story={story_id}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
+  </section>
+</div>
+
+Open the [full Leptos block story](../../../stories/?story={story_id}) or the
+[full Bevy block story](../../../ui-bevy-stories/?story={story_id}) for a wider
+surface.
+
+## Contract
+
+| Field | Value |
+| --- | --- |
+| Registry id | `{index}` |
+| Slug | `{slug}` |
+| Surface | {surface} |
+| Family | {family} |
+| Pattern | {pattern} |
+| Layout | {layout} |
+| Media | {media} |
+| Chrome | {chrome} |
+| Interaction | {interaction} |
+| Primary UI component | {component} |
+
+## Consumer Implementation
+
+Resolve `{slug}` through `block_by_slug`, or obtain its stable id with
+`BlockId::from_index({index})`. Start from `BlockInstance::fixture` for sample
+content, then replace typed content slots. Place instances in `BlockPage.blocks`
+in vertical order; schema versions and duplicate keys validate before render.
+
+Transient interaction state remains local to the owning UI component. Persisted
+authoring data belongs in `crates/state` through `rs-dean-idb`.
+"#,
+        name = definition.name,
+        source = definition.source_url(),
+        story_id = story_id,
+        index = definition.id.index(),
+        slug = definition.slug,
+        surface = family.surface.label(),
+        family = family.name,
+        pattern = family.pattern.label(),
+        layout = definition.resolved_layout().label(),
+        media = definition.media.label(),
+        chrome = definition.chrome.label(),
+        interaction = definition.interaction.label(),
+        component = family.primary_component.definition().name,
+    )
+}
+
+fn check_block_book_story_anchors() -> Result<()> {
+    let stories =
+        fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
+    let bevy_stories = fs::read_to_string("apps/ui-bevy-stories/src/main.rs")
+        .context("read apps/ui-bevy-stories/src/main.rs")?;
+    for required in ["block_by_slug", "BlockInstance::fixture", "<Block instance"] {
+        if !stories.contains(required) {
+            bail!("Leptos stories must route blocks through `{required}`");
+        }
+    }
+    for required in [
+        "block_by_slug",
+        "BlockInstance::fixture",
+        "bevy_block_primitives",
+    ] {
+        if !bevy_stories.contains(required) {
+            bail!("Bevy stories must route blocks through `{required}`");
+        }
+    }
+    for definition in BLOCKS {
+        let page_path = Path::new(BLOCK_BOOK)
+            .join("src")
+            .join("blocks")
+            .join(format!("{}.md", definition.slug));
+        let page = fs::read_to_string(&page_path)
+            .with_context(|| format!("read {}", page_path.display()))?;
+        let story_id = format!("block-{}", definition.slug);
+        for route in [
+            format!("src=\"../../../stories/?story={story_id}\""),
+            format!("src=\"../../../ui-bevy-stories/?story={story_id}\""),
+        ] {
+            if !page.contains(&route) {
+                bail!("{} must embed `{route}`", page_path.display());
+            }
+        }
+    }
+    Ok(())
+}
+
+fn verify_block_book_dist(dist: &Path) -> Result<()> {
+    if !dist.join("index.html").exists() {
+        bail!("missing {}", dist.join("index.html").display());
+    }
+    for definition in BLOCKS {
+        let path = dist
+            .join("blocks")
+            .join(format!("{}.html", definition.slug));
+        if !path.exists() {
+            bail!("missing blocks book page {}", path.display());
+        }
+    }
     Ok(())
 }
 
@@ -906,7 +1399,7 @@ fn markdown_list(items: &[&str]) -> String {
 fn compare_generated_tree(expected: &Path, actual: &Path) -> Result<()> {
     if !actual.exists() {
         bail!(
-            "{} is missing; run `cargo xtask gen-ui-book`",
+            "{} is missing; regenerate its owning catalog artifact",
             actual.display()
         );
     }
@@ -914,7 +1407,7 @@ fn compare_generated_tree(expected: &Path, actual: &Path) -> Result<()> {
     let actual_files = generated_source_files(actual)?;
     if expected_files != actual_files {
         bail!(
-            "{} is out of sync with the UI catalog; run `cargo xtask gen-ui-book`",
+            "{} is out of sync with its generated catalog source",
             actual.display()
         );
     }
@@ -930,7 +1423,7 @@ fn compare_generated_tree(expected: &Path, actual: &Path) -> Result<()> {
             .with_context(|| format!("read {}", actual.join(&relative).display()))?;
         if expected_contents != actual_contents {
             bail!(
-                "{} is out of sync with the UI catalog; run `cargo xtask gen-ui-book`",
+                "{} is out of sync with its generated catalog source",
                 actual.join(relative).display()
             );
         }
@@ -1061,6 +1554,7 @@ fn write_pages_index(target: &Path, base: &str) -> Result<()> {
         <ul>
           <li><a href="{base}crates/">Crate docs</a></li>
           <li><a href="{base}crates/ui/">rs-dean-ui book</a></li>
+          <li><a href="{base}crates/blocks/">rs-dean-blocks book</a></li>
         </ul>
       </section>
     </main>
@@ -1091,6 +1585,7 @@ fn write_crates_index(target: &Path, base: &str) -> Result<()> {
       <p>Workspace crates and crate-level books.</p>
       <ul>
         <li><a href="{base}crates/ui/">rs-dean-ui</a></li>
+        <li><a href="{base}crates/blocks/">rs-dean-blocks</a></li>
         <li>rs-dean-state</li>
         <li>rs-dean-idb</li>
         <li>rs-dean-schema</li>
@@ -1126,6 +1621,7 @@ fn write_pages_support_files(target: &Path, base: &str) -> Result<()> {
   <url><loc>{base}ui-bevy-stories/</loc></url>
   <url><loc>{base}crates/</loc></url>
   <url><loc>{base}crates/ui/</loc></url>
+  <url><loc>{base}crates/blocks/</loc></url>
 </urlset>
 "#
         ),
@@ -1144,7 +1640,8 @@ fn verify_pages_site(target: &Path) -> Result<()> {
     verify_trunk_dist(&target.join("game"))?;
     verify_trunk_dist(&target.join("stories"))?;
     verify_trunk_dist(&target.join("ui-bevy-stories"))?;
-    verify_ui_book_dist(&target.join("crates/ui"))
+    verify_ui_book_dist(&target.join("crates/ui"))?;
+    verify_block_book_dist(&target.join("crates/blocks"))
 }
 
 fn cube_smoke() -> Result<()> {
@@ -1275,6 +1772,7 @@ fn check_ui_design_token_classes() -> Result<()> {
         PathBuf::from("templates/app/src/main.rs"),
     ]);
     collect_rust_files(Path::new("crates/ui/src"), &mut source_paths)?;
+    collect_rust_files(Path::new("crates/blocks/src"), &mut source_paths)?;
     let stock_design_scale_classes = [
         "text-xs",
         "text-sm",

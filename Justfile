@@ -45,6 +45,12 @@ pages:
 ui-book:
     cargo xtask gen-ui-book
 
+blocks-book:
+    cargo xtask gen-block-book
+
+block-issues:
+    cargo xtask gen-block-issues
+
 static-analysis:
     cargo xtask static-analysis
 

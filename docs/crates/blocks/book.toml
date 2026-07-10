@@ -1,0 +1,9 @@
+[book]
+title = "rs-dean-blocks"
+authors = ["rs-dean"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../../../target/mdbook/blocks"
+create-missing = false

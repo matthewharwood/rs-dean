@@ -30,6 +30,13 @@ pub mod scale {
         pub const XL4: f32 = 160.0;
     }
 
+    pub mod container {
+        pub const NARROW: f32 = 768.0;
+        pub const PROSE: f32 = 896.0;
+        pub const CONTENT: f32 = 1_024.0;
+        pub const WIDE: f32 = 1_280.0;
+    }
+
     pub mod radius {
         pub const XS3: f32 = 3.0;
         pub const XS2: f32 = 4.0;

@@ -4,7 +4,13 @@ use bevy::{
     color::Alpha,
     prelude::*,
     sprite::Anchor,
+    text::TextBounds,
     window::{Window, WindowPlugin, WindowResolution},
+};
+#[cfg(target_arch = "wasm32")]
+use rs_dean_blocks::{
+    BevyBlockPrimitive, BevyBlockPrimitiveKind, BlockId, BlockInstance, bevy_block_primitives,
+    block_by_slug,
 };
 #[cfg(target_arch = "wasm32")]
 use rs_dean_ui::{
@@ -20,16 +26,23 @@ const STORY_CARD_WIDTH: f32 = 410.0;
 const STORY_CARD_HEIGHT: f32 = 178.0;
 
 #[cfg(target_arch = "wasm32")]
+#[derive(Debug, Clone, Copy)]
+enum StoryId {
+    Component(UiComponentId),
+    Block(BlockId),
+}
+
+#[cfg(target_arch = "wasm32")]
 #[derive(Resource, Debug, Clone, Copy)]
 struct StorySelection {
-    id: UiComponentId,
+    id: StoryId,
 }
 
 #[cfg(target_arch = "wasm32")]
 fn main() {
     console_error_panic_hook::set_once();
 
-    let selected = selected_component_id();
+    let selected = selected_story_id();
     let theme_id = ThemeId::Dark;
     let theme = theme_id.palette();
 
@@ -39,7 +52,7 @@ fn main() {
         .insert_resource(ClearColor(theme.surface_1().to_bevy()))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: format!("rs-dean Bevy UI story: {}", selected.definition().name),
+                title: format!("rs-dean Bevy UI story: {}", story_name(selected)),
                 resolution: WindowResolution::new(960, 704),
                 canvas: Some(CANVAS_SELECTOR.to_owned()),
                 fit_canvas_to_parent: true,
@@ -55,32 +68,45 @@ fn main() {
 fn main() {}
 
 #[cfg(target_arch = "wasm32")]
-fn selected_component_id() -> UiComponentId {
+fn selected_story_id() -> StoryId {
     web_sys::window()
         .and_then(|window| window.location().search().ok())
         .as_deref()
-        .and_then(component_id_from_search)
-        .unwrap_or(UiComponentId::Button)
+        .and_then(story_id_from_search)
+        .unwrap_or(StoryId::Component(UiComponentId::Button))
 }
 
 #[cfg(target_arch = "wasm32")]
-fn component_id_from_search(search: &str) -> Option<UiComponentId> {
+fn story_id_from_search(search: &str) -> Option<StoryId> {
     let query = search.strip_prefix('?').unwrap_or(search);
     query.split('&').find_map(|pair| {
         let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
         (key == "story")
             .then_some(value)
-            .and_then(component_id_for_story_id)
+            .and_then(story_id_for_story_id)
     })
 }
 
 #[cfg(target_arch = "wasm32")]
-fn component_id_for_story_id(value: &str) -> Option<UiComponentId> {
-    let slug = value.strip_prefix("ui-")?;
-    SHADCN_COMPONENTS
-        .iter()
-        .find(|definition| definition.slug == slug)
-        .map(|definition| definition.id)
+fn story_id_for_story_id(value: &str) -> Option<StoryId> {
+    if let Some(slug) = value.strip_prefix("ui-") {
+        return SHADCN_COMPONENTS
+            .iter()
+            .find(|definition| definition.slug == slug)
+            .map(|definition| StoryId::Component(definition.id));
+    }
+    value
+        .strip_prefix("block-")
+        .and_then(block_by_slug)
+        .map(|definition| StoryId::Block(definition.id))
+}
+
+#[cfg(target_arch = "wasm32")]
+fn story_name(id: StoryId) -> &'static str {
+    match id {
+        StoryId::Component(id) => id.definition().name,
+        StoryId::Block(id) => id.definition().name,
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -90,29 +116,137 @@ fn setup_story_scene(
     selection: Res<StorySelection>,
 ) {
     let theme = active_theme.palette();
-    let definition = selection.id.definition();
-    let implementation = component_implementation(selection.id);
-    let variants = bevy_story_variants_for_component(selection.id, active_theme.0);
+    let camera_width = match selection.id {
+        StoryId::Component(_) => 960.0,
+        StoryId::Block(_) => 1_280.0,
+    };
 
     commands.spawn((
         Camera2d,
         Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::Fixed {
-                width: 960.0,
+                width: camera_width,
                 height: 704.0,
             },
             ..OrthographicProjection::default_2d()
         }),
     ));
-    spawn_story_header(
-        &mut commands,
-        &theme,
-        definition.name,
-        definition.summary,
-        variants.len(),
-        implementation.state.label(),
-    );
-    spawn_story_variants(&mut commands, &variants);
+    match selection.id {
+        StoryId::Component(id) => {
+            let definition = id.definition();
+            let implementation = component_implementation(id);
+            let variants = bevy_story_variants_for_component(id, active_theme.0);
+            spawn_story_header(
+                &mut commands,
+                &theme,
+                definition.name,
+                definition.summary,
+                variants.len(),
+                implementation.state.label(),
+            );
+            spawn_story_variants(&mut commands, &variants);
+        }
+        StoryId::Block(id) => {
+            let instance = BlockInstance::fixture(id.definition());
+            match bevy_block_primitives(&instance, &theme, Vec2::new(1_200.0, 664.0)) {
+                Ok(primitives) => spawn_block_primitives(&mut commands, &primitives),
+                Err(report) => spawn_text(
+                    &mut commands,
+                    format!("Block validation failed: {report}"),
+                    Vec3::new(-430.0, 0.0, 3.0),
+                    scale::font_size::F0,
+                    theme.danger().to_bevy(),
+                    Anchor::CENTER_LEFT,
+                ),
+            }
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_block_primitives(commands: &mut Commands, primitives: &[BevyBlockPrimitive]) {
+    for (index, primitive) in primitives.iter().enumerate() {
+        let z = index as f32 * 0.1;
+        if !matches!(
+            primitive.kind,
+            BevyBlockPrimitiveKind::Heading | BevyBlockPrimitiveKind::Text
+        ) {
+            if primitive.border_width > 0.0 {
+                commands.spawn((
+                    Sprite {
+                        color: primitive.border,
+                        custom_size: Some(
+                            primitive.size + Vec2::splat(primitive.border_width * 2.0),
+                        ),
+                        ..default()
+                    },
+                    Transform::from_xyz(primitive.center.x, primitive.center.y, z),
+                ));
+            }
+            commands.spawn((
+                Sprite {
+                    color: primitive.fill,
+                    custom_size: Some(primitive.size),
+                    ..default()
+                },
+                Transform::from_xyz(primitive.center.x, primitive.center.y, z + 0.01),
+            ));
+        }
+        if primitive.kind != BevyBlockPrimitiveKind::Section
+            && primitive.font_size > 0.0
+            && !primitive.label.is_empty()
+        {
+            let (x, anchor) = match primitive.text_align {
+                rs_dean_ui::GridAlign::Center => (primitive.center.x, Anchor::CENTER),
+                rs_dean_ui::GridAlign::End => (
+                    primitive.center.x + primitive.size.x / 2.0 - 12.0,
+                    Anchor::CENTER_RIGHT,
+                ),
+                rs_dean_ui::GridAlign::Start | rs_dean_ui::GridAlign::Stretch => (
+                    primitive.center.x - primitive.size.x / 2.0 + 12.0,
+                    Anchor::CENTER_LEFT,
+                ),
+            };
+            spawn_block_text(
+                commands,
+                primitive.label.clone(),
+                Vec3::new(x, primitive.center.y, z + 0.1),
+                primitive.font_size,
+                primitive.text,
+                anchor,
+                primitive.size,
+            );
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_block_text(
+    commands: &mut Commands,
+    text: String,
+    position: Vec3,
+    font_size: f32,
+    color: Color,
+    anchor: Anchor,
+    bounds: Vec2,
+) {
+    let justify = match anchor {
+        Anchor::CENTER => Justify::Center,
+        Anchor::CENTER_RIGHT => Justify::Right,
+        _ => Justify::Left,
+    };
+    commands.spawn((
+        Text2d::new(text),
+        TextFont {
+            font_size: FontSize::Px(font_size),
+            ..default()
+        },
+        TextColor(color),
+        TextLayout::new(justify, LineBreak::WordBoundary),
+        TextBounds::from(bounds),
+        anchor,
+        Transform::from_translation(position),
+    ));
 }
 
 #[cfg(target_arch = "wasm32")]

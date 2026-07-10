@@ -1,0 +1,25 @@
+[package]
+name = "rs-dean-blocks"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[features]
+default = ["leptos"]
+bevy = ["dep:bevy", "rs-dean-ui/bevy"]
+leptos = ["dep:leptos", "rs-dean-ui/leptos"]
+
+[dependencies]
+bevy = { workspace = true, optional = true }
+garde.workspace = true
+leptos = { workspace = true, optional = true }
+rs-dean-ui = { path = "../ui", version = "0.1.0", default-features = false }
+serde.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

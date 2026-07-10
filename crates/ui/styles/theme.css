@@ -30,6 +30,11 @@
   --spacing-field: 2.5rem;
   --spacing-selector: 0.25rem;
 
+  --container-narrow: 48rem;
+  --container-prose: 56rem;
+  --container-content: 64rem;
+  --container-wide: 80rem;
+
   --radius-3xs: clamp(0.125rem, 0.0893cqi + 0.1071rem, 0.1875rem);
   --radius-2xs: clamp(0.1875rem, 0.0893cqi + 0.1696rem, 0.25rem);
   --radius-xs: clamp(0.25rem, 0.1786cqi + 0.2143rem, 0.375rem);

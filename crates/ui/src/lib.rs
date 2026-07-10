@@ -37,6 +37,7 @@ pub mod item;
 pub mod kbd;
 pub mod kit;
 pub mod label;
+pub mod layout;
 pub mod marker;
 pub mod menubar;
 pub mod message;
@@ -245,6 +246,15 @@ pub use kit::{
 pub use label::{
     LabelChange, LabelDensity, LabelIntent, LabelModel, LabelPart, LabelRenderNode,
     LabelRequirement, LabelState, default_label_model, label_render_nodes, validate_label_model,
+};
+#[cfg(feature = "leptos")]
+pub use layout::{
+    Cluster, Container, Grid, GridItem, Section, Stack, UiHeading, UiMediaFrame, UiText,
+};
+pub use layout::{
+    ClusterSpec, ContainerSpec, ContainerWidth, GridAlign, GridItemSpec, GridJustify, GridPreset,
+    GridSpan, GridSpec, HeadingLevel, LayoutRect, MediaRatio, SectionSpec, SectionSurface,
+    SpaceToken, StackSpec, TextAlign, TextElement, TextStyle, TextTone,
 };
 pub use marker::{
     MarkerAnchor, MarkerChange, MarkerDensity, MarkerIntent, MarkerModel, MarkerPart,

@@ -6,6 +6,7 @@ Every clone has a static GitHub Pages shape: `apps/marketing` for the Leptos
 marketing surface, `apps/game` for the Bevy-only WebGPU game, `apps/stories` for
 independent Leptos UI and scene proofs, `apps/ui-bevy-stories` for Bevy-only UI
 primitive proofs, `rs-dean-ui` for shared Leptos/Bevy design tokens and themes,
+`rs-dean-blocks` for validated cross-renderer page compositions,
 `rs-dean-idb` for isomorphic durable state, and generated template proof under
 ignored `apps/test-project`.
 
@@ -49,7 +50,8 @@ is useful before the full gate, but it does not replace `cargo xtask gate`.
 - `apps/stories`: required independent story harness for reusable UI and scene
   proofs. Leptos stories use the same Trunk Tailwind asset path as marketing
   and include a theme gallery for every `rs-dean-ui` theme plus the full
-  shadcn-inspired component catalog.
+  shadcn-inspired component catalog. Dynamic `block-{slug}` routes render one
+  validated `rs-dean-blocks` fixture without mounting the rest of the catalog.
 - `apps/ui-bevy-stories`: Bevy-only story harness for `rs-dean-ui` component
   primitives. It uses `rs-dean-ui` with `default-features = false` and
   `features = ["bevy"]`, stays Leptos-free, and exposes isolated routes such as
@@ -79,13 +81,30 @@ The shadcn-inspired component catalog is Rust data in `crates/ui`. Each entry
 has a component definition, shared anatomy/spec blocks, an implementation
 recipe, a literal Rust widget constructor, a named token-only Leptos component,
 and Bevy primitive derivation from the same widget slots for scene consumers.
-`_issues/` mirrors the catalog with one technical-program-management task per
+`_issues/ui/` mirrors the catalog with one technical-program-management task per
 component plus a sweep log for the repeated first-to-current audit.
 `cargo xtask gen-ui-book` regenerates the UI crate mdBook from that Rust
 catalog. The book has one page per component and embeds the matching isolated
 Leptos story fixture through `/stories/?story=ui-{component}` beside the Bevy
 primitive story through `/ui-bevy-stories/?story=ui-{component}`, so each page
 shows only that component's DOM variants and Bevy adapter output.
+
+## Block System
+
+`crates/blocks` composes `rs-dean-ui` primitives without introducing a second
+token vocabulary. Its registry contains 657 one-to-one Marketing, Application
+UI, and Ecommerce entries across 93 families. Each `BlockInstance` crosses a
+serde plus garde boundary, resolves to one renderer-neutral `BlockPlan`, and is
+then consumed by Leptos or Bevy. `BlockPage.blocks` is the ordered vertical page
+sequence intended for a future registry-backed authoring tool.
+
+The finite Section -> Container -> Grid/GridItem -> Stack/Cluster hierarchy
+owns responsive box-model decisions. Container widths, track presets, spans,
+spacing, typography, colors, radii, and action variants all come from
+`rs-dean-ui`; Bevy derives point geometry from those same specs. Run
+`cargo xtask gen-block-issues` for `_issues/blocks` and
+`cargo xtask gen-block-book` for `docs/crates/blocks`. The block book embeds
+matching `block-{slug}` Leptos and Bevy stories for every registry entry.
 
 ## Doctor
 
@@ -126,8 +145,10 @@ confirmed.
 The root index links binaries at `/marketing/`, `/game/`, `/stories/`, and
 `/ui-bevy-stories/`. It also links `/crates/`, the workspace crate index. The
 crate index lists each workspace crate and links `rs-dean-ui` to its book at
-`/crates/ui/`. The UI crate book embeds `/stories/?story=ui-{component}` and
+`/crates/ui/` and `rs-dean-blocks` to `/crates/blocks/`. The UI crate book
+embeds `/stories/?story=ui-{component}` and
 `/ui-bevy-stories/?story=ui-{component}` for isolated live component fixtures.
+The blocks book uses the corresponding `block-{slug}` routes.
 The deploy workflow sets `RS_DEAN_PAGES_BASE=/rs-dean/` so Trunk emits
 project-page-safe asset URLs.
 
