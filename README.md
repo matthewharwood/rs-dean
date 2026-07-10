@@ -49,11 +49,14 @@ is useful before the full gate, but it does not replace `cargo xtask gate`.
 - `apps/stories`: required independent story harness for reusable UI and scene
   proofs. Leptos stories use the same Trunk Tailwind asset path as marketing
   and include a theme gallery for every `rs-dean-ui` theme plus the full
-  shadcn-inspired component catalog.
+  shadcn-inspired component catalog. Catalog routes are generated from the
+  shared typed fixture registry instead of duplicating fixture data here.
 - `apps/ui-bevy-stories`: Bevy-only story harness for `rs-dean-ui` component
   primitives. It uses `rs-dean-ui` with `default-features = false` and
   `features = ["bevy"]`, stays Leptos-free, and exposes isolated routes such as
-  `/ui-bevy-stories/?story=ui-button` for mdBook embeds.
+  `/ui-bevy-stories/?story=ui-button` for mdBook embeds. Its responsive Bevy UI
+  layouts, scrolling, and local interaction render the same typed fixtures as
+  the Leptos harness while remaining WebGPU-only.
 - `apps/test-project`: ignored generated proof from `templates/app`; it contains
   a generated Leptos app with Tailwind already wired, plus the generated
   cube-smoke app used by the render gate.
@@ -79,6 +82,9 @@ The shadcn-inspired component catalog is Rust data in `crates/ui`. Each entry
 has a component definition, shared anatomy/spec blocks, an implementation
 recipe, a literal Rust widget constructor, a named token-only Leptos component,
 and Bevy primitive derivation from the same widget slots for scene consumers.
+`crates/ui/src/story_fixtures.rs` owns the validated fixture models, variant
+ordering, initial state, copy, and nested theme for both story harnesses, so a
+fixture change cannot silently diverge between Leptos and Bevy.
 `_issues/` mirrors the catalog with one technical-program-management task per
 component plus a sweep log for the repeated first-to-current audit.
 `cargo xtask gen-ui-book` regenerates the UI crate mdBook from that Rust

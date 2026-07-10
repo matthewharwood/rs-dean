@@ -113,6 +113,9 @@ remove the old wording from docs/skills.
 - The shadcn-inspired catalog has one `_issues/` task file per component, and
   every catalog component can build a shared implementation recipe, literal
   widget constructor, named Leptos component, and Bevy primitive spec.
+- Shared component stories take copy, ordering, state, validation, and nested
+  themes from `crates/ui/src/story_fixtures.rs`; the Leptos and Bevy harnesses
+  render that same registry instead of maintaining parallel fixtures.
 - `docs/crates/ui` has one generated mdBook page per catalog component, and
   each page embeds the matching `/stories/?story=ui-{component}` isolated live
   Leptos fixture beside `/ui-bevy-stories/?story=ui-{component}` so the page

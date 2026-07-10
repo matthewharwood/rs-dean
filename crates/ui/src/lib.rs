@@ -58,6 +58,8 @@ pub mod slider;
 pub mod sonner;
 pub mod spec;
 pub mod spinner;
+pub mod story_fixtures;
+pub use story_fixtures::{UiStoryFixture, UiStoryModel, UiStoryVariantKind, ui_story_fixtures};
 pub mod switch;
 pub mod table;
 pub mod tabs;
@@ -347,7 +349,7 @@ pub use sonner::{
 #[cfg(feature = "bevy")]
 pub use spec::bevy_adapter::{
     BevyUiPrimitive, BevyUiStoryVariant, BevyUiStoryVariantKind, bevy_primitives_for_component,
-    bevy_story_variants_for_component,
+    bevy_primitives_for_story_model, bevy_story_variants_for_component,
 };
 pub use spec::{
     UiBlock, UiBlockRole, UiBlockTone, UiComponentSpec, component_spec, detail_for_part,
