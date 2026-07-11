@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ScrollAreaDensity {
@@ -168,6 +170,35 @@ pub struct ScrollAreaRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ScrollAreaLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub title_font_size: f32,
+    pub status_font_size: f32,
+    pub frame_padding: f32,
+    pub frame_gap: f32,
+    pub viewport_max_height: f32,
+    pub viewport_padding: f32,
+    pub content_gap: f32,
+    pub item_padding: f32,
+    pub item_gap: f32,
+    pub emphasized_item_padding: f32,
+    pub emphasized_item_gap: f32,
+    pub item_title_font_size: f32,
+    pub disabled_item_title_font_size: f32,
+    pub item_detail_font_size: f32,
+    pub bar_row_gap: f32,
+    pub vertical_bar_width: f32,
+    pub vertical_bar_height: f32,
+    pub horizontal_bar_width: f32,
+    pub horizontal_bar_height: f32,
+    pub corner_size: f32,
+    pub line_height: f32,
 }
 
 impl ScrollAreaItem {
@@ -352,6 +383,90 @@ impl ScrollAreaState {
 
 pub fn validate_scroll_area_model(model: &ScrollAreaModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn scroll_area_layout_metrics(
+    model: &ScrollAreaModel,
+    inline_size: f32,
+) -> ScrollAreaLayoutMetrics {
+    let dense = model.density == ScrollAreaDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.disabled;
+    let emphasized_viewport = model.error.is_some() || model.loading || model.disabled;
+    ScrollAreaLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        header_gap: scale::space::xs2(inline_size),
+        title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        status_font_size: scale::font_size::f00(inline_size),
+        frame_padding: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        frame_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        viewport_max_height: if dense && !emphasized_viewport {
+            scale::space::xl(inline_size)
+        } else {
+            scale::space::xl2(inline_size)
+        },
+        viewport_padding: if dense && !emphasized_viewport {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        item_padding: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        item_gap: scale::space::xs3(inline_size),
+        emphasized_item_padding: scale::space::xs(inline_size),
+        emphasized_item_gap: scale::space::xs3(inline_size),
+        item_title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        disabled_item_title_font_size: scale::font_size::f0(inline_size),
+        item_detail_font_size: scale::font_size::f00(inline_size),
+        bar_row_gap: scale::space::xs2(inline_size),
+        vertical_bar_width: scale::space::xs2(inline_size),
+        vertical_bar_height: scale::space::m(inline_size),
+        horizontal_bar_width: scale::space::m(inline_size),
+        horizontal_bar_height: scale::space::xs2(inline_size),
+        corner_size: scale::space::xs2(inline_size),
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub const fn scroll_area_item_uses_emphasized_metrics(
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    active || disabled || invalid
 }
 
 pub fn scroll_area_render_nodes(
@@ -646,5 +761,40 @@ mod tests {
                 })
                 .all(|node| node.disabled && !node.actionable)
         );
+    }
+
+    #[test]
+    fn layout_metrics_follow_density_and_shared_token_scales() {
+        let standard = scroll_area_layout_metrics(&default_scroll_area_model(), 1_000.0);
+        let dense = scroll_area_layout_metrics(
+            &default_scroll_area_model().with_density(ScrollAreaDensity::Dense),
+            1_000.0,
+        );
+        let loading_dense = scroll_area_layout_metrics(
+            &default_scroll_area_model()
+                .with_density(ScrollAreaDensity::Dense)
+                .loading(),
+            1_000.0,
+        );
+
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.viewport_max_height < standard.viewport_max_height);
+        assert_eq!(
+            loading_dense.viewport_max_height,
+            standard.viewport_max_height
+        );
+        assert_eq!(standard.line_height, scale::line_height::LH0);
+        assert!(standard.vertical_bar_height > standard.vertical_bar_width);
+        assert!(standard.horizontal_bar_width > standard.horizontal_bar_height);
+    }
+
+    #[test]
+    fn emphasized_item_metrics_cover_css_state_precedence() {
+        assert!(scroll_area_item_uses_emphasized_metrics(true, false, false));
+        assert!(scroll_area_item_uses_emphasized_metrics(false, true, false));
+        assert!(scroll_area_item_uses_emphasized_metrics(false, false, true));
+        assert!(!scroll_area_item_uses_emphasized_metrics(
+            false, false, false
+        ));
     }
 }

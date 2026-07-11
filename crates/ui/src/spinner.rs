@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SpinnerDensity {
@@ -152,6 +154,23 @@ pub struct SpinnerRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SpinnerLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub gap: f32,
+    pub edge: f32,
+    pub border_width: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+    pub shadow_level: u8,
 }
 
 impl SpinnerModel {
@@ -417,6 +436,98 @@ pub fn spinner_render_nodes(model: &SpinnerModel, state: &SpinnerState) -> Vec<S
     ]
 }
 
+pub fn spinner_layout_metrics(
+    model: &SpinnerModel,
+    inline_size: f32,
+    border_width: f32,
+) -> SpinnerLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let invalid = model.error.is_some();
+    let dense = model.density == SpinnerDensity::Dense;
+    let dense_root = spinner_uses_dense_root_metrics(dense, invalid, model.disabled);
+    let padding_inline = if dense_root {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let padding_block = if dense_root {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let gap = scale::space::xs2(inline_size);
+    let edge = match if spinner_uses_standard_track_metrics(invalid, model.disabled) {
+        SpinnerSize::Medium
+    } else {
+        model.size
+    } {
+        SpinnerSize::Small => scale::space::s(inline_size),
+        SpinnerSize::Medium => scale::space::m(inline_size),
+        SpinnerSize::Large => scale::space::l(inline_size),
+    };
+    let label_font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let label_width = if model.show_label {
+        scale::estimate_inline_text_width(&model.label, label_font_size, 0.0)
+    } else {
+        0.0
+    };
+    let track_width = if model.loading { edge } else { 0.0 };
+    let visible_children = usize::from(model.loading)
+        + usize::from(model.show_label)
+        + usize::from(model.error.is_some());
+    let content_gap = gap * visible_children.saturating_sub(1) as f32;
+    let error_padding = scale::space::xs(inline_size);
+    let error_font_size = scale::font_size::f0(inline_size);
+    let error_width = model.error.as_ref().map_or(0.0, |error| {
+        border_width * 2.0
+            + error_padding * 2.0
+            + scale::estimate_inline_text_width(error, error_font_size, 0.0)
+    });
+    let width = border_width * 2.0
+        + padding_inline * 2.0
+        + track_width
+        + content_gap
+        + label_width
+        + error_width;
+    let error_height = if model.error.is_some() {
+        border_width * 2.0 + error_padding * 2.0 + error_font_size * scale::line_height::LH0
+    } else {
+        0.0
+    };
+    let content_height = edge
+        .max(label_font_size * scale::line_height::LH0)
+        .max(error_height);
+    let height = border_width * 2.0 + padding_block * 2.0 + content_height;
+
+    SpinnerLayoutMetrics {
+        width: width.max(1.0),
+        height,
+        padding_inline,
+        padding_block,
+        gap,
+        edge,
+        border_width,
+        label_font_size,
+        label_line_height: scale::line_height::LH0,
+        error_padding,
+        error_font_size,
+        error_line_height: scale::line_height::LH0,
+        shadow_level: u8::from(!model.disabled),
+    }
+}
+
+pub const fn spinner_uses_dense_root_metrics(dense: bool, invalid: bool, disabled: bool) -> bool {
+    dense && !invalid && !disabled
+}
+
+pub const fn spinner_uses_standard_track_metrics(invalid: bool, disabled: bool) -> bool {
+    invalid || disabled
+}
+
 pub fn default_spinner_model() -> SpinnerModel {
     SpinnerModel::new("Loading components")
         .with_detail("Compact activity state shared by Leptos and Bevy renderers.")
@@ -490,5 +601,47 @@ mod tests {
         assert_eq!(state.apply(SpinnerIntent::Clear), SpinnerChange::Cleared);
         assert!(!state.is_active(SpinnerPart::Indicator));
         assert!(!state.is_paused());
+    }
+
+    #[test]
+    fn layout_metrics_follow_size_density_and_label_visibility() {
+        let standard = default_spinner_model();
+        let dense = default_spinner_model()
+            .with_density(SpinnerDensity::Dense)
+            .with_size(SpinnerSize::Small);
+        let ready = default_spinner_model().ready();
+        let standard_metrics = spinner_layout_metrics(&standard, 1_000.0, 1.0);
+        let dense_metrics = spinner_layout_metrics(&dense, 1_000.0, 1.0);
+        let ready_metrics = spinner_layout_metrics(&ready, 1_000.0, 1.0);
+
+        assert!(standard_metrics.edge > dense_metrics.edge);
+        assert!(standard_metrics.height > dense_metrics.height);
+        assert!(ready_metrics.width < standard_metrics.width);
+    }
+
+    #[test]
+    fn layout_metrics_follow_invalid_and_disabled_class_precedence() {
+        let dense = default_spinner_model()
+            .with_density(SpinnerDensity::Dense)
+            .with_size(SpinnerSize::Small);
+        let invalid = dense.clone().with_error("Loading failed");
+        let disabled = dense.clone().disabled();
+        let dense_metrics = spinner_layout_metrics(&dense, 1_000.0, 1.0);
+        let invalid_metrics = spinner_layout_metrics(&invalid, 1_000.0, 1.0);
+        let disabled_metrics = spinner_layout_metrics(&disabled, 1_000.0, 1.0);
+
+        assert!(dense_metrics.padding_inline < invalid_metrics.padding_inline);
+        assert_eq!(
+            invalid_metrics.padding_inline,
+            disabled_metrics.padding_inline
+        );
+        assert_eq!(invalid_metrics.edge, disabled_metrics.edge);
+        assert_eq!(
+            dense_metrics.label_font_size,
+            invalid_metrics.label_font_size
+        );
+        assert_eq!(invalid_metrics.shadow_level, 1);
+        assert_eq!(disabled_metrics.shadow_level, 0);
+        assert!(invalid_metrics.error_padding > 0.0);
     }
 }

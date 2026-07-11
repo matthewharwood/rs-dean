@@ -4,15 +4,9 @@ use rs_dean_blocks::BLOCKS;
 use rs_dean_blocks::{Block, BlockInstance, block_by_slug};
 use rs_dean_ui::story_fixtures::*;
 use rs_dean_ui::{
-    Accordion, Alert, AlertDialog, AspectRatio, Attachment, Avatar, Badge, Breadcrumb, Bubble,
-    Button, ButtonGroup, Calendar, Card, Carousel, Chart, Checkbox, Collapsible, Combobox, Command,
-    ComponentDefinition, ContextMenu, DataTable, DatePicker, Dialog, Direction, Drawer,
-    DropdownMenu, Empty, Field, HealthCard, HoverCard, Input, InputGroup, InputOtp, Item, Kbd,
-    Label, Marker, Menubar, Message, MessageScroller, NativeSelect, NavigationMenu, Pagination,
-    Popover, Progress, RadioGroup, Resizable, SHADCN_COMPONENTS, ScrollArea, Select, Separator,
-    ShadcnComponentGallery, Sheet, Sidebar, Skeleton, Slider, Sonner, Spinner, Switch, Table, Tabs,
-    Textarea, ThemeCycleButton, ThemeId, ThemeScope, Toast, Toggle, ToggleGroup, Tooltip,
-    Typography,
+    ComponentDefinition, HealthCard, SHADCN_COMPONENTS, ShadcnComponentGallery, ThemeCycleButton,
+    ThemeId, ThemeScope, TooltipModel, TooltipPlacement, UiStoryModelView,
+    tooltip_effective_placement,
 };
 
 const STORIES_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
@@ -25,12 +19,23 @@ const STORIES_HEADER_COPY: &str = "grid gap-2xs";
 const STORIES_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
 const STORIES_TITLE: &str = "m-0 text-3 font-7 text-text-1";
 const STORIES_GRID: &str = "grid gap-m";
-const STORY_FRAME: &str = "max-w-md";
+const STORY_FRAME: &str = "max-w-control";
 const STORY_SECTION: &str = "grid gap-s";
 const STORY_SECTION_HEADER: &str = "grid gap-2xs";
 const STORY_SECTION_TITLE: &str = "m-0 text-2 font-7 leading-2 text-text-1";
-const STORY_SECTION_BODY: &str = "m-0 max-w-2xl text-0 leading-0 text-text-2";
+const STORY_SECTION_BODY: &str = "m-0 max-w-reading text-0 leading-0 text-text-2";
 const ALERT_STORY_GRID: &str = "grid gap-s md:grid-cols-2";
+const TOOLTIP_STORY_STAGE_TOP: &str =
+    "relative flex min-h-4xl w-full items-end justify-center overflow-visible p-s";
+const TOOLTIP_STORY_STAGE_RIGHT: &str =
+    "relative flex min-h-4xl w-full items-center justify-start overflow-visible p-s";
+const TOOLTIP_STORY_STAGE_BOTTOM: &str =
+    "relative flex min-h-4xl w-full items-start justify-center overflow-visible p-s";
+const TOOLTIP_STORY_STAGE_LEFT: &str =
+    "relative flex min-h-4xl w-full items-center justify-end overflow-visible p-s";
+const TOOLTIP_STORY_STAGE_CLOSED: &str =
+    "relative flex min-h-4xl w-full items-center justify-center overflow-visible p-s";
+const POPOVER_STORY_STAGE: &str = "relative mb-xl pb-4xl";
 const THEME_GALLERY: &str = "grid grid-cols-1 gap-s sm:grid-cols-2 lg:grid-cols-3";
 const THEME_CARD: &str =
     "min-h-4xl rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
@@ -142,95 +147,42 @@ fn component_story_section(definition: ComponentDefinition) -> impl IntoView {
 fn story_fixture_view(fixture: UiStoryFixture) -> AnyView {
     let theme_id = fixture.theme_id;
     let themed = fixture.kind == UiStoryVariantKind::Themed;
-    let component = leptos_story_model_view(fixture.model, fixture.default_open);
+    let tooltip_stage = match &fixture.model {
+        UiStoryModel::Tooltip(model) => Some(tooltip_story_stage_class(model)),
+        _ => None,
+    };
+    let popover_stage = matches!(&fixture.model, UiStoryModel::Popover(_));
+    let component =
+        view! { <UiStoryModelView model=fixture.model default_open=fixture.default_open /> }
+            .into_any();
 
-    if themed {
+    let component = if themed {
         view! {
             <ThemeScope theme=theme_id>{component}</ThemeScope>
         }
         .into_any()
     } else {
         component
+    };
+
+    if let Some(stage_class) = tooltip_stage {
+        view! { <div class=stage_class>{component}</div> }.into_any()
+    } else if popover_stage {
+        view! { <div class=POPOVER_STORY_STAGE>{component}</div> }.into_any()
+    } else {
+        component
     }
 }
 
-fn leptos_story_model_view(model: UiStoryModel, default_open: bool) -> AnyView {
-    match model {
-        UiStoryModel::Accordion(model) => view! {
-            <Accordion
-                items=model.items
-                mode=model.mode
-                default_open=model.default_open
-            />
-        }
-        .into_any(),
-        UiStoryModel::Alert(model) => view! { <Alert model=model /> }.into_any(),
-        UiStoryModel::AlertDialog(model) => {
-            view! { <AlertDialog model=model default_open=default_open /> }.into_any()
-        }
-        UiStoryModel::AspectRatio(model) => view! { <AspectRatio model=model /> }.into_any(),
-        UiStoryModel::Attachment(model) => view! { <Attachment model=model /> }.into_any(),
-        UiStoryModel::Avatar(model) => view! { <Avatar model=model /> }.into_any(),
-        UiStoryModel::Badge(model) => view! { <Badge model=model /> }.into_any(),
-        UiStoryModel::Breadcrumb(model) => view! { <Breadcrumb model=model /> }.into_any(),
-        UiStoryModel::Bubble(model) => view! { <Bubble model=model /> }.into_any(),
-        UiStoryModel::Button(model) => view! { <Button model=model /> }.into_any(),
-        UiStoryModel::ButtonGroup(model) => view! { <ButtonGroup model=model /> }.into_any(),
-        UiStoryModel::Calendar(model) => view! { <Calendar model=model /> }.into_any(),
-        UiStoryModel::Card(model) => view! { <Card model=model /> }.into_any(),
-        UiStoryModel::Carousel(model) => view! { <Carousel model=model /> }.into_any(),
-        UiStoryModel::Chart(model) => view! { <Chart model=model /> }.into_any(),
-        UiStoryModel::Checkbox(model) => view! { <Checkbox model=model /> }.into_any(),
-        UiStoryModel::Collapsible(model) => view! { <Collapsible model=model /> }.into_any(),
-        UiStoryModel::Combobox(model) => view! { <Combobox model=model /> }.into_any(),
-        UiStoryModel::Command(model) => view! { <Command model=model /> }.into_any(),
-        UiStoryModel::ContextMenu(model) => view! { <ContextMenu model=model /> }.into_any(),
-        UiStoryModel::DataTable(model) => view! { <DataTable model=model /> }.into_any(),
-        UiStoryModel::DatePicker(model) => view! { <DatePicker model=model /> }.into_any(),
-        UiStoryModel::Dialog(model) => view! { <Dialog model=model /> }.into_any(),
-        UiStoryModel::Direction(model) => view! { <Direction model=model /> }.into_any(),
-        UiStoryModel::Drawer(model) => view! { <Drawer model=model /> }.into_any(),
-        UiStoryModel::DropdownMenu(model) => view! { <DropdownMenu model=model /> }.into_any(),
-        UiStoryModel::Empty(model) => view! { <Empty model=model /> }.into_any(),
-        UiStoryModel::Field(model) => view! { <Field model=model /> }.into_any(),
-        UiStoryModel::HoverCard(model) => view! { <HoverCard model=model /> }.into_any(),
-        UiStoryModel::Input(model) => view! { <Input model=model /> }.into_any(),
-        UiStoryModel::InputGroup(model) => view! { <InputGroup model=model /> }.into_any(),
-        UiStoryModel::InputOtp(model) => view! { <InputOtp model=model /> }.into_any(),
-        UiStoryModel::Item(model) => view! { <Item model=model /> }.into_any(),
-        UiStoryModel::Kbd(model) => view! { <Kbd model=model /> }.into_any(),
-        UiStoryModel::Label(model) => view! { <Label model=model /> }.into_any(),
-        UiStoryModel::Marker(model) => view! { <Marker model=model /> }.into_any(),
-        UiStoryModel::Menubar(model) => view! { <Menubar model=model /> }.into_any(),
-        UiStoryModel::Message(model) => view! { <Message model=model /> }.into_any(),
-        UiStoryModel::MessageScroller(model) => {
-            view! { <MessageScroller model=model /> }.into_any()
-        }
-        UiStoryModel::NativeSelect(model) => view! { <NativeSelect model=model /> }.into_any(),
-        UiStoryModel::NavigationMenu(model) => view! { <NavigationMenu model=model /> }.into_any(),
-        UiStoryModel::Pagination(model) => view! { <Pagination model=model /> }.into_any(),
-        UiStoryModel::Popover(model) => view! { <Popover model=model /> }.into_any(),
-        UiStoryModel::Progress(model) => view! { <Progress model=model /> }.into_any(),
-        UiStoryModel::RadioGroup(model) => view! { <RadioGroup model=model /> }.into_any(),
-        UiStoryModel::Resizable(model) => view! { <Resizable model=model /> }.into_any(),
-        UiStoryModel::ScrollArea(model) => view! { <ScrollArea model=model /> }.into_any(),
-        UiStoryModel::Select(model) => view! { <Select model=model /> }.into_any(),
-        UiStoryModel::Separator(model) => view! { <Separator model=model /> }.into_any(),
-        UiStoryModel::Sheet(model) => view! { <Sheet model=model /> }.into_any(),
-        UiStoryModel::Sidebar(model) => view! { <Sidebar model=model /> }.into_any(),
-        UiStoryModel::Skeleton(model) => view! { <Skeleton model=model /> }.into_any(),
-        UiStoryModel::Slider(model) => view! { <Slider model=model /> }.into_any(),
-        UiStoryModel::Sonner(model) => view! { <Sonner model=model /> }.into_any(),
-        UiStoryModel::Spinner(model) => view! { <Spinner model=model /> }.into_any(),
-        UiStoryModel::Switch(model) => view! { <Switch model=model /> }.into_any(),
-        UiStoryModel::Table(model) => view! { <Table model=model /> }.into_any(),
-        UiStoryModel::Tabs(model) => view! { <Tabs model=model /> }.into_any(),
-        UiStoryModel::Textarea(model) => view! { <Textarea model=model /> }.into_any(),
-        UiStoryModel::Toast(model) => view! { <Toast model=model /> }.into_any(),
-        UiStoryModel::Toggle(model) => view! { <Toggle model=model /> }.into_any(),
-        UiStoryModel::ToggleGroup(model) => view! { <ToggleGroup model=model /> }.into_any(),
-        UiStoryModel::Tooltip(model) => view! { <Tooltip model=model /> }.into_any(),
-        UiStoryModel::Typography(model) => view! { <Typography model=model /> }.into_any(),
+fn tooltip_story_stage_class(model: &TooltipModel) -> &'static str {
+    if model.disabled || !model.default_open {
+        return TOOLTIP_STORY_STAGE_CLOSED;
+    }
+    match tooltip_effective_placement(model) {
+        TooltipPlacement::Top => TOOLTIP_STORY_STAGE_TOP,
+        TooltipPlacement::Right => TOOLTIP_STORY_STAGE_RIGHT,
+        TooltipPlacement::Bottom => TOOLTIP_STORY_STAGE_BOTTOM,
+        TooltipPlacement::Left => TOOLTIP_STORY_STAGE_LEFT,
     }
 }
 
@@ -379,5 +331,23 @@ mod tests {
 
         assert!(!source.contains(&bad_fixture_name));
         assert!(!source.contains(&bad_fixture_binding));
+    }
+
+    #[test]
+    fn tooltip_stories_reserve_space_for_the_effective_placement() {
+        let right =
+            TooltipModel::new("Sync", "sync", "Sync now.").with_placement(TooltipPlacement::Right);
+        let loading = right.clone().loading();
+        let disabled = right.clone().disabled();
+
+        assert_eq!(tooltip_story_stage_class(&right), TOOLTIP_STORY_STAGE_RIGHT);
+        assert_eq!(
+            tooltip_story_stage_class(&loading),
+            TOOLTIP_STORY_STAGE_BOTTOM
+        );
+        assert_eq!(
+            tooltip_story_stage_class(&disabled),
+            TOOLTIP_STORY_STAGE_CLOSED
+        );
     }
 }

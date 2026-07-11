@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -108,6 +109,21 @@ pub struct AttachmentRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AttachmentLayoutMetrics {
+    pub root_height: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub preview_size: f32,
+    pub preview_font_size: f32,
+    pub body_gap: f32,
+    pub title_font_size: f32,
+    pub meta_font_size: f32,
+    pub action_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+}
+
 impl AttachmentAction {
     pub fn new(label: impl Into<String>, value: impl Into<String>) -> Self {
         Self {
@@ -210,6 +226,25 @@ impl AttachmentState {
 
 pub fn validate_attachment_model(model: &AttachmentModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn attachment_layout_metrics(inline_size: f32, border_width: f32) -> AttachmentLayoutMetrics {
+    let root_padding = scale::space::xs(inline_size);
+    let preview_size = scale::space::xl(inline_size);
+
+    AttachmentLayoutMetrics {
+        root_height: preview_size + 2.0 * (root_padding + border_width),
+        root_padding,
+        root_gap: root_padding,
+        preview_size,
+        preview_font_size: scale::font_size::f00(inline_size),
+        body_gap: scale::space::xs3(inline_size),
+        title_font_size: scale::font_size::f0(inline_size),
+        meta_font_size: scale::font_size::f00(inline_size),
+        action_height: scale::space::L,
+        action_padding_inline: root_padding,
+        action_padding_block: scale::space::xs2(inline_size),
+    }
 }
 
 pub fn attachment_render_nodes(model: &AttachmentModel) -> Vec<AttachmentRenderNode> {
@@ -336,6 +371,16 @@ mod tests {
                 .iter()
                 .any(|node| node.part == AttachmentPart::Action && node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_resolve_fluid_tailwind_tokens() {
+        let compact = attachment_layout_metrics(320.0, 1.0);
+        let wide = attachment_layout_metrics(1_000.0, 1.0);
+
+        assert!(wide.root_height > compact.root_height);
+        assert_eq!(wide.action_height, scale::space::L);
+        assert!(wide.preview_font_size > compact.preview_font_size);
     }
 
     #[test]

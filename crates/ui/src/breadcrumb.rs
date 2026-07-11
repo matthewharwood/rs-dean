@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -96,6 +97,18 @@ pub struct BreadcrumbRenderNode {
     pub active: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BreadcrumbLayoutMetrics {
+    pub list_gap: f32,
+    pub item_gap: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+    pub link_min_height: f32,
+    pub link_padding_inline: f32,
+    pub link_padding_block: f32,
+    pub loading_padding_inline: f32,
 }
 
 impl BreadcrumbEntry {
@@ -213,6 +226,28 @@ impl BreadcrumbState {
 
 pub fn validate_breadcrumb_model(model: &BreadcrumbModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn breadcrumb_layout_metrics(
+    density: BreadcrumbDensity,
+    inline_size: f32,
+) -> BreadcrumbLayoutMetrics {
+    BreadcrumbLayoutMetrics {
+        list_gap: match density {
+            BreadcrumbDensity::Standard => scale::space::xs2(inline_size),
+            BreadcrumbDensity::Dense => scale::space::xs3(inline_size),
+        },
+        item_gap: scale::space::xs2(inline_size),
+        font_size: match density {
+            BreadcrumbDensity::Standard => scale::font_size::f0(inline_size),
+            BreadcrumbDensity::Dense => scale::font_size::f00(inline_size),
+        },
+        line_height: scale::line_height::LH0,
+        link_min_height: scale::space::s(inline_size),
+        link_padding_inline: scale::space::xs2(inline_size),
+        link_padding_block: scale::space::xs3(inline_size),
+        loading_padding_inline: scale::space::xs(inline_size),
+    }
 }
 
 pub fn breadcrumb_render_nodes(
@@ -417,5 +452,16 @@ mod tests {
                 .filter(|node| node.part == BreadcrumbPart::Link)
                 .all(|node| node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_use_density_and_fluid_tokens() {
+        let compact = breadcrumb_layout_metrics(BreadcrumbDensity::Standard, 320.0);
+        let wide = breadcrumb_layout_metrics(BreadcrumbDensity::Standard, 1_000.0);
+        let dense = breadcrumb_layout_metrics(BreadcrumbDensity::Dense, 1_000.0);
+
+        assert!(wide.list_gap > compact.list_gap);
+        assert!(wide.font_size > dense.font_size);
+        assert!(wide.list_gap > dense.list_gap);
     }
 }

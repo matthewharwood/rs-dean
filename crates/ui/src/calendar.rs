@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -96,6 +97,30 @@ pub struct CalendarRenderNode {
     pub loading: bool,
     pub disabled: bool,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CalendarLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub nav_size: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub grid_gap: f32,
+    pub weekday_min_height: f32,
+    pub weekday_font_size: f32,
+    pub day_min_height: f32,
+    pub day_padding_inline: f32,
+    pub day_padding_block: f32,
+    pub day_font_size: f32,
+    pub day_line_height: f32,
+    pub range_padding: f32,
+    pub range_font_size: f32,
+    pub range_line_height: f32,
+}
+
+pub const CALENDAR_WEEKDAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 impl CalendarSelectionMode {
     pub const fn label(self) -> &'static str {
@@ -282,6 +307,29 @@ impl CalendarState {
 
 pub fn validate_calendar_model(model: &CalendarModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn calendar_layout_metrics(inline_size: f32) -> CalendarLayoutMetrics {
+    CalendarLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: scale::space::s(inline_size),
+        root_gap: scale::space::s(inline_size),
+        header_gap: scale::space::xs(inline_size),
+        nav_size: scale::space::l(inline_size),
+        title_font_size: scale::font_size::f1(inline_size),
+        title_line_height: scale::line_height::LH2,
+        grid_gap: scale::space::xs2(inline_size),
+        weekday_min_height: scale::space::s(inline_size),
+        weekday_font_size: scale::font_size::f00(inline_size),
+        day_min_height: scale::space::FIELD,
+        day_padding_inline: scale::space::xs2(inline_size),
+        day_padding_block: scale::space::xs3(inline_size),
+        day_font_size: scale::font_size::f0(inline_size),
+        day_line_height: scale::line_height::LH0,
+        range_padding: scale::space::xs(inline_size),
+        range_font_size: scale::font_size::f0(inline_size),
+        range_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn calendar_render_nodes(
@@ -512,6 +560,19 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_calendar_model(&default_calendar_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_resolve_fluid_tailwind_tokens() {
+        let compact = calendar_layout_metrics(320.0);
+        let wide = calendar_layout_metrics(1_000.0);
+
+        assert_eq!(compact.max_width, scale::container::CONTROL);
+        assert_eq!(compact.day_min_height, scale::space::FIELD);
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(compact.day_font_size < wide.day_font_size);
+        assert_eq!(CALENDAR_WEEKDAYS[0], "Sun");
+        assert_eq!(CALENDAR_WEEKDAYS[6], "Sat");
     }
 
     #[test]

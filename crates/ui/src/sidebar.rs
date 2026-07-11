@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SidebarDensity {
@@ -154,6 +156,83 @@ pub struct SidebarRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SidebarControlMetrics {
+    pub min_height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+}
+
+impl SidebarControlMetrics {
+    pub fn content_min_height(self, border_width: f32) -> f32 {
+        (self.min_height - self.padding_block * 2.0 - border_width.max(0.0) * 2.0).max(0.0)
+    }
+
+    pub fn outer_height(self, border_width: f32) -> f32 {
+        self.min_height.max(
+            self.font_size * self.line_height
+                + self.padding_block * 2.0
+                + border_width.max(0.0) * 2.0,
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SidebarLayoutMetrics {
+    pub max_width: f32,
+    pub rail_width: f32,
+    pub rail_min_height: f32,
+    pub rail_font_size: f32,
+    pub panel_padding: f32,
+    pub panel_gap: f32,
+    pub header_gap: f32,
+    pub header_padding_bottom: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub content_gap: f32,
+    pub group_gap: f32,
+    pub group_label_font_size: f32,
+    pub group_label_line_height: f32,
+    pub group_label_tracking_em: f32,
+    pub menu_gap: f32,
+    pub menu_content_gap: f32,
+    pub badge_padding_inline: f32,
+    pub badge_padding_block: f32,
+    pub badge_font_size: f32,
+    pub badge_line_height: f32,
+    pub footer_gap: f32,
+    pub footer_padding_top: f32,
+    pub footer_label_font_size: f32,
+    pub footer_detail_font_size: f32,
+    pub footer_line_height: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+    pub shadow_level: u8,
+    standard_menu: SidebarControlMetrics,
+    dense_menu: SidebarControlMetrics,
+    dense: bool,
+}
+
+impl SidebarLayoutMetrics {
+    pub const fn menu_control(
+        self,
+        active: bool,
+        focused: bool,
+        disabled: bool,
+    ) -> SidebarControlMetrics {
+        if sidebar_menu_uses_standard_metrics(self.dense, active, focused, disabled) {
+            self.standard_menu
+        } else {
+            self.dense_menu
+        }
+    }
 }
 
 impl SidebarItem {
@@ -379,6 +458,84 @@ impl SidebarState {
 
 pub fn validate_sidebar_model(model: &SidebarModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn sidebar_layout_metrics(model: &SidebarModel, inline_size: f32) -> SidebarLayoutMetrics {
+    let dense = model.density == SidebarDensity::Dense;
+    let panel_space = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let standard_menu = SidebarControlMetrics {
+        min_height: scale::space::FIELD,
+        padding_inline: scale::space::xs(inline_size),
+        padding_block: scale::space::xs2(inline_size),
+        font_size: scale::font_size::f0(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+    let dense_menu = SidebarControlMetrics {
+        min_height: scale::space::s(inline_size),
+        padding_inline: scale::space::xs2(inline_size),
+        padding_block: scale::space::xs3(inline_size),
+        font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+
+    SidebarLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        rail_width: scale::space::s(inline_size),
+        rail_min_height: scale::space::xl(inline_size),
+        rail_font_size: scale::font_size::f00(inline_size),
+        panel_padding: panel_space,
+        panel_gap: panel_space,
+        header_gap: scale::space::xs3(inline_size),
+        header_padding_bottom: panel_space,
+        title_font_size: if dense {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        title_line_height: if dense {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        detail_font_size: scale::font_size::f00(inline_size),
+        detail_line_height: scale::line_height::LH0,
+        content_gap: panel_space,
+        group_gap: scale::space::xs3(inline_size),
+        group_label_font_size: scale::font_size::f00(inline_size),
+        group_label_line_height: scale::line_height::LH0,
+        group_label_tracking_em: 0.08,
+        menu_gap: panel_space,
+        menu_content_gap: scale::space::xs2(inline_size),
+        badge_padding_inline: scale::space::xs2(inline_size),
+        badge_padding_block: scale::space::xs3(inline_size),
+        badge_font_size: scale::font_size::f00(inline_size),
+        badge_line_height: scale::line_height::LH0,
+        footer_gap: scale::space::xs3(inline_size),
+        footer_padding_top: scale::space::xs(inline_size),
+        footer_label_font_size: scale::font_size::f00(inline_size),
+        footer_detail_font_size: scale::font_size::f00(inline_size),
+        footer_line_height: scale::line_height::LH0,
+        error_padding: scale::space::s(inline_size),
+        error_font_size: scale::font_size::f0(inline_size),
+        error_line_height: scale::line_height::LH0,
+        shadow_level: 1,
+        standard_menu,
+        dense_menu,
+        dense,
+    }
+}
+
+pub const fn sidebar_menu_uses_standard_metrics(
+    dense: bool,
+    active: bool,
+    focused: bool,
+    disabled: bool,
+) -> bool {
+    !dense || active || focused || disabled
 }
 
 #[derive(Debug, Clone)]
@@ -743,6 +900,41 @@ mod tests {
     fn garde_rejects_empty_error() {
         let model = default_sidebar_model().with_error("");
         assert!(validate_sidebar_model(&model).is_err());
+    }
+
+    #[test]
+    fn layout_metrics_follow_fluid_tokens_and_dense_state_precedence() {
+        let standard = default_sidebar_model();
+        let dense = default_sidebar_model().with_density(SidebarDensity::Dense);
+        let standard_metrics = sidebar_layout_metrics(&standard, 1_000.0);
+        let dense_metrics = sidebar_layout_metrics(&dense, 1_000.0);
+        let dense_resting = dense_metrics.menu_control(false, false, false);
+        let dense_active = dense_metrics.menu_control(true, false, false);
+
+        assert_eq!(standard_metrics.max_width, scale::container::CONTROL);
+        assert_eq!(standard_metrics.rail_width, scale::space::s(1_000.0));
+        assert!(dense_metrics.panel_padding < standard_metrics.panel_padding);
+        assert!(dense_resting.min_height < dense_active.min_height);
+        assert_eq!(
+            dense_active,
+            standard_metrics.menu_control(false, false, false)
+        );
+        assert_eq!(dense_metrics.menu_control(false, true, false), dense_active);
+        assert_eq!(dense_metrics.menu_control(false, false, true), dense_active);
+    }
+
+    #[test]
+    fn menu_outer_height_accounts_for_runtime_theme_border_width() {
+        let metrics = sidebar_layout_metrics(&default_sidebar_model(), 1_000.0)
+            .menu_control(false, false, false);
+        let thin = metrics.outer_height(1.0);
+        let thick = metrics.outer_height(2.0);
+
+        assert_eq!(
+            thin,
+            metrics.font_size * metrics.line_height + metrics.padding_block * 2.0 + 2.0
+        );
+        assert_eq!(thick - thin, 2.0);
     }
 
     #[test]

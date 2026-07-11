@@ -1,7 +1,7 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -109,6 +109,33 @@ pub struct AlertDialogRenderNode {
     pub destructive: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AlertDialogLayoutMetrics {
+    pub width: f32,
+    pub root_gap: f32,
+    pub trigger_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub overlay_padding: f32,
+    pub overlay_height: f32,
+    pub content_width: f32,
+    pub content_height: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub header_gap: f32,
+    pub header_height: f32,
+    pub title_height: f32,
+    pub description_height: f32,
+    pub title_font_size: f32,
+    pub description_font_size: f32,
+    pub footer_gap: f32,
+    pub footer_height: f32,
+    pub action_width: f32,
+    pub cancel_width: f32,
+    pub button_height: f32,
+    pub height: f32,
 }
 
 impl AlertDialogButton {
@@ -229,6 +256,119 @@ impl AlertDialogState {
 
 pub fn validate_alert_dialog_model(model: &AlertDialogModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn alert_dialog_layout_metrics(
+    model: &AlertDialogModel,
+    open: bool,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> AlertDialogLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let width = available_width.max(1.0);
+    let small = model.size == AlertDialogSize::Small;
+    let root_gap = scale::space::xs(inline_size);
+    let trigger_padding_inline = scale::space::xs(inline_size);
+    let trigger_padding_block = scale::space::xs2(inline_size);
+    let trigger_font_size = scale::font_size::f0(inline_size);
+    let trigger_height = (trigger_font_size * scale::line_height::LH0
+        + trigger_padding_block * 2.0
+        + border_width * 2.0)
+        .max(40.0);
+    let overlay_padding = scale::space::s(inline_size);
+    let content_padding = if small {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let content_gap = content_padding;
+    let header_gap = scale::space::xs2(inline_size);
+    let footer_gap = scale::space::xs2(inline_size);
+    let title_font_size = if small {
+        scale::font_size::f0(inline_size)
+    } else {
+        scale::font_size::f1(inline_size)
+    };
+    let title_line_height = if small {
+        scale::line_height::LH0
+    } else {
+        scale::line_height::LH2
+    };
+    let description_font_size = if small {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let content_width = (width - overlay_padding * 2.0).max(1.0);
+    let text_width = (content_width - content_padding * 2.0 - border_width * 2.0).max(1.0);
+    let title_height = scale::estimate_text_block_height(
+        &model.title,
+        text_width,
+        title_font_size,
+        title_line_height,
+        0.52,
+    );
+    let description_height = scale::estimate_text_block_height(
+        &model.description,
+        text_width,
+        description_font_size,
+        scale::line_height::LH0,
+        0.52,
+    );
+    let header_height = title_height + header_gap + description_height;
+    let button_font_size = scale::font_size::f0(inline_size);
+    let button_height = (button_font_size * scale::line_height::LH0
+        + trigger_padding_block * 2.0
+        + border_width * 2.0)
+        .max(40.0);
+    let button_width = |label: &str| {
+        scale::estimate_inline_text_width(label, button_font_size, 0.0)
+            + trigger_padding_inline * 2.0
+            + border_width * 2.0
+    };
+    let action_label = if model.loading {
+        "Working"
+    } else {
+        &model.action.label
+    };
+    let action_width = button_width(action_label);
+    let cancel_width = button_width(&model.cancel.label);
+    let footer_height = button_height;
+    let content_height =
+        content_padding * 2.0 + border_width * 2.0 + header_height + content_gap + footer_height;
+    let overlay_height = content_height + overlay_padding * 2.0;
+    let height = if open {
+        trigger_height + root_gap + overlay_height
+    } else {
+        trigger_height
+    };
+
+    AlertDialogLayoutMetrics {
+        width,
+        root_gap,
+        trigger_height,
+        trigger_padding_inline,
+        trigger_padding_block,
+        overlay_padding,
+        overlay_height,
+        content_width,
+        content_height,
+        content_padding,
+        content_gap,
+        header_gap,
+        header_height,
+        title_height,
+        description_height,
+        title_font_size,
+        description_font_size,
+        footer_gap,
+        footer_height,
+        action_width,
+        cancel_width,
+        button_height,
+        height,
+    }
 }
 
 pub fn alert_dialog_render_nodes(
@@ -465,5 +605,24 @@ mod tests {
                 .iter()
                 .any(|node| node.part == AlertDialogPart::Cancel && node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_follow_open_state_and_size_tokens() {
+        let model = default_alert_dialog_model();
+        let closed = alert_dialog_layout_metrics(&model, false, 448.0, 1_000.0, 1.0);
+        let open = alert_dialog_layout_metrics(&model, true, 448.0, 1_000.0, 1.0);
+        let small = alert_dialog_layout_metrics(
+            &model.with_size(AlertDialogSize::Small),
+            true,
+            448.0,
+            1_000.0,
+            1.0,
+        );
+
+        assert_eq!(closed.height, closed.trigger_height);
+        assert!(open.height > closed.height);
+        assert!(small.content_padding < open.content_padding);
+        assert!(open.action_width > 0.0);
     }
 }

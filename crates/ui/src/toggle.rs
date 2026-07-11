@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ToggleDensity {
@@ -155,6 +157,51 @@ pub struct ToggleRenderNode {
     pub loading: bool,
     pub disabled: bool,
     pub actionable: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ToggleLayoutMetrics {
+    pub width: f32,
+    pub frame_gap: f32,
+    pub button_width: f32,
+    pub button_height: f32,
+    pub button_padding_inline: f32,
+    pub button_padding_block: f32,
+    pub button_gap: f32,
+    pub button_font_size: f32,
+    pub button_line_height: f32,
+    pub indicator_width: f32,
+    pub indicator_height: f32,
+    pub indicator_padding_inline: f32,
+    pub indicator_font_size: f32,
+    pub indicator_line_height: f32,
+    pub indicator_letter_spacing: f32,
+    pub status_width: f32,
+    pub status_height: f32,
+    pub status_padding_inline: f32,
+    pub status_padding_block: f32,
+    pub status_font_size: f32,
+    pub status_line_height: f32,
+    pub status_letter_spacing: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ToggleControlLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub gap: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+    pub indicator_width: f32,
+    pub indicator_height: f32,
+    pub indicator_padding_inline: f32,
+    pub indicator_font_size: f32,
+    pub indicator_line_height: f32,
+    pub indicator_letter_spacing: f32,
 }
 
 impl ToggleModel {
@@ -370,6 +417,128 @@ pub fn toggle_render_nodes(model: &ToggleModel, state: &ToggleState) -> Vec<Togg
     ]
 }
 
+pub fn toggle_layout_metrics(
+    model: &ToggleModel,
+    state: &ToggleState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> ToggleLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let frame_gap = scale::space::xs2(inline_size);
+    let indicator_copy = toggle_indicator_label(model, state.pressed()).to_uppercase();
+    let control = toggle_control_layout_metrics(
+        model.density,
+        &model.label,
+        &indicator_copy,
+        inline_size,
+        border_width,
+    );
+    let status_font_size = scale::font_size::f00(inline_size);
+    let status_padding_inline = scale::space::xs2(inline_size);
+    let status_padding_block = scale::space::xs3(inline_size);
+    let status_copy = toggle_status_label(model, state.pressed()).to_uppercase();
+    let status_text_width = scale::estimate_inline_text_width(
+        &status_copy,
+        status_font_size,
+        scale::letter_spacing::LABEL,
+    );
+    let status_width = border_width * 2.0 + status_padding_inline * 2.0 + status_text_width;
+    let status_height = border_width * 2.0
+        + status_padding_block * 2.0
+        + status_font_size * scale::line_height::LH0;
+
+    ToggleLayoutMetrics {
+        width: available_width.clamp(1.0, scale::container::CONTROL),
+        frame_gap,
+        button_width: control.width,
+        button_height: control.height,
+        button_padding_inline: control.padding_inline,
+        button_padding_block: control.padding_block,
+        button_gap: control.gap,
+        button_font_size: control.font_size,
+        button_line_height: control.line_height,
+        indicator_width: control.indicator_width,
+        indicator_height: control.indicator_height,
+        indicator_padding_inline: control.indicator_padding_inline,
+        indicator_font_size: control.indicator_font_size,
+        indicator_line_height: control.indicator_line_height,
+        indicator_letter_spacing: control.indicator_letter_spacing,
+        status_width,
+        status_height,
+        status_padding_inline,
+        status_padding_block,
+        status_font_size,
+        status_line_height: scale::line_height::LH00,
+        status_letter_spacing: scale::letter_spacing::LABEL,
+        detail_font_size: scale::font_size::f0(inline_size),
+        detail_line_height: scale::line_height::LH0,
+    }
+}
+
+pub fn toggle_control_layout_metrics(
+    density: ToggleDensity,
+    label: &str,
+    indicator_copy: &str,
+    inline_size: f32,
+    border_width: f32,
+) -> ToggleControlLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let dense = density == ToggleDensity::Dense;
+    let padding_inline = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let padding_block = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let gap = scale::space::xs2(inline_size);
+    let font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let line_height = scale::line_height::LH0;
+    let indicator_font_size = scale::font_size::f00(inline_size);
+    let indicator_padding_inline = scale::space::xs2(inline_size);
+    let indicator_text_width = scale::estimate_inline_text_width(
+        indicator_copy,
+        indicator_font_size,
+        scale::letter_spacing::LABEL,
+    );
+    let indicator_height = scale::space::s(inline_size);
+    let indicator_width =
+        (indicator_text_width + indicator_padding_inline * 2.0).max(indicator_height);
+    let label_width = scale::estimate_inline_text_width(label, font_size, 0.0);
+    let width = border_width * 2.0 + padding_inline * 2.0 + indicator_width + gap + label_width;
+    let content_height = indicator_height.max(font_size * line_height);
+    let minimum_height = if dense {
+        scale::space::s(inline_size)
+    } else {
+        scale::space::L
+    };
+    let height = minimum_height.max(border_width * 2.0 + padding_block * 2.0 + content_height);
+
+    ToggleControlLayoutMetrics {
+        width,
+        height,
+        padding_inline,
+        padding_block,
+        gap,
+        font_size,
+        line_height,
+        indicator_width,
+        indicator_height,
+        indicator_padding_inline,
+        indicator_font_size,
+        indicator_line_height: scale::line_height::LH00,
+        indicator_letter_spacing: scale::letter_spacing::LABEL,
+    }
+}
+
 pub fn default_toggle_model() -> ToggleModel {
     ToggleModel::new("Bold", "bold")
         .with_detail("Pressing the toggle updates local tool state; the editor persists accepted formatting.")
@@ -380,14 +549,14 @@ pub fn default_toggle_model() -> ToggleModel {
         .pressed()
 }
 
-fn toggle_status_label(model: &ToggleModel, pressed: TogglePressed) -> String {
+pub fn toggle_status_label(model: &ToggleModel, pressed: TogglePressed) -> String {
     match pressed {
         TogglePressed::Unpressed => model.unpressed_label.clone(),
         TogglePressed::Pressed => model.pressed_label.clone(),
     }
 }
 
-fn toggle_indicator_label(model: &ToggleModel, pressed: TogglePressed) -> String {
+pub fn toggle_indicator_label(model: &ToggleModel, pressed: TogglePressed) -> String {
     match pressed {
         TogglePressed::Unpressed => model.unpressed_indicator.clone(),
         TogglePressed::Pressed => model.pressed_indicator.clone(),
@@ -501,5 +670,54 @@ mod tests {
                 .iter()
                 .any(|node| node.part == TogglePart::Root && node.disabled && !node.actionable)
         );
+    }
+
+    #[test]
+    fn layout_metrics_follow_shared_density_and_container_tokens() {
+        let standard = default_toggle_model();
+        let dense = default_toggle_model().with_density(ToggleDensity::Dense);
+        let standard_metrics =
+            toggle_layout_metrics(&standard, &standard.state(), 640.0, 480.0, 1.0);
+        let dense_metrics = toggle_layout_metrics(&dense, &dense.state(), 640.0, 480.0, 1.0);
+
+        assert_eq!(standard_metrics.width, scale::container::CONTROL);
+        assert!(dense_metrics.button_height < standard_metrics.button_height);
+        assert!(dense_metrics.button_width < standard_metrics.button_width);
+        assert!(standard_metrics.indicator_width >= standard_metrics.indicator_height);
+        assert_eq!(
+            standard_metrics.indicator_letter_spacing,
+            scale::letter_spacing::LABEL
+        );
+        assert_eq!(
+            standard_metrics.status_letter_spacing,
+            scale::letter_spacing::LABEL
+        );
+        assert_eq!(standard_metrics.button_line_height, scale::line_height::LH0);
+        assert_eq!(standard_metrics.detail_line_height, scale::line_height::LH0);
+    }
+
+    #[test]
+    fn layout_metrics_use_current_shared_status_copy() {
+        let model = ToggleModel::new("Bold", "bold")
+            .with_pressed_label("Enabled for selection")
+            .with_unpressed_label("Off");
+        let unpressed = toggle_layout_metrics(&model, &model.state(), 320.0, 320.0, 1.0);
+        let mut state = model.state();
+        state.apply(ToggleIntent::Toggle);
+        let pressed = toggle_layout_metrics(&model, &state, 320.0, 320.0, 1.0);
+
+        assert!(pressed.status_width > unpressed.status_width);
+    }
+
+    #[test]
+    fn standalone_toggle_uses_shared_control_geometry() {
+        let model = default_toggle_model();
+        let metrics = toggle_layout_metrics(&model, &model.state(), 320.0, 320.0, 1.0);
+        let control = toggle_control_layout_metrics(model.density, &model.label, "ON", 320.0, 1.0);
+
+        assert_eq!(metrics.button_width, control.width);
+        assert_eq!(metrics.button_height, control.height);
+        assert_eq!(metrics.indicator_width, control.indicator_width);
+        assert_eq!(metrics.button_font_size, control.font_size);
     }
 }

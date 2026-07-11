@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SliderDensity {
@@ -144,6 +146,57 @@ pub struct SliderRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SliderLayoutMetrics {
+    pub width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub value_padding_inline: f32,
+    pub value_padding_block: f32,
+    pub value_font_size: f32,
+    pub value_line_height: f32,
+    pub track_wrap_min_height: f32,
+    pub track_wrap_width: f32,
+    pub track_height: f32,
+    pub track_width: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+    pub shadow_level: u8,
+    standard_thumb_size: f32,
+    dense_thumb_size: f32,
+    dense: bool,
+}
+
+impl SliderLayoutMetrics {
+    pub const fn thumb_size(self, focused: bool, disabled: bool) -> f32 {
+        if slider_uses_dense_thumb_metrics(self.dense, focused, disabled) {
+            self.dense_thumb_size
+        } else {
+            self.standard_thumb_size
+        }
+    }
+
+    pub fn track_content_height(self, border_width: f32, bordered: bool) -> f32 {
+        (self.track_height
+            - if bordered {
+                border_width.max(0.0) * 2.0
+            } else {
+                0.0
+            })
+        .max(0.0)
+    }
+
+    pub fn thumb_content_size(self, focused: bool, disabled: bool, border_width: f32) -> f32 {
+        (self.thumb_size(focused, disabled) - border_width.max(0.0) * 2.0).max(0.0)
+    }
 }
 
 impl SliderModel {
@@ -341,6 +394,102 @@ impl SliderState {
 
 pub fn validate_slider_model(model: &SliderModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn slider_layout_metrics(
+    model: &SliderModel,
+    available_width: f32,
+    inline_size: f32,
+) -> SliderLayoutMetrics {
+    let dense = model.density == SliderDensity::Dense;
+    let vertical = model.orientation == SliderOrientation::Vertical;
+    let invalid = model.error.is_some();
+    let blocked = model.loading || model.disabled;
+    let dense_root = slider_uses_dense_root_metrics(dense, vertical, invalid, model.disabled);
+    let vertical_track = slider_uses_vertical_track_metrics(vertical, invalid, blocked);
+    let dense_track = slider_uses_dense_track_metrics(dense, vertical, invalid, blocked);
+
+    SliderLayoutMetrics {
+        width: available_width.clamp(1.0, scale::container::CONTROL),
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        header_gap: scale::space::xs(inline_size),
+        label_font_size: scale::font_size::f0(inline_size),
+        label_line_height: scale::line_height::LH0,
+        value_padding_inline: scale::space::xs(inline_size),
+        value_padding_block: scale::space::xs3(inline_size),
+        value_font_size: scale::font_size::f00(inline_size),
+        value_line_height: scale::line_height::LH0,
+        track_wrap_min_height: if vertical_track {
+            scale::space::xl(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        track_wrap_width: if vertical_track {
+            scale::space::l(inline_size)
+        } else {
+            f32::INFINITY
+        },
+        track_height: if vertical_track {
+            scale::space::xl(inline_size)
+        } else if dense_track {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        track_width: if vertical_track {
+            scale::space::xs(inline_size)
+        } else {
+            f32::INFINITY
+        },
+        detail_font_size: scale::font_size::f0(inline_size),
+        detail_line_height: scale::line_height::LH0,
+        error_padding: scale::space::xs(inline_size),
+        error_font_size: scale::font_size::f0(inline_size),
+        error_line_height: scale::line_height::LH0,
+        shadow_level: u8::from(!model.disabled),
+        standard_thumb_size: scale::space::s(inline_size),
+        dense_thumb_size: scale::space::xs(inline_size),
+        dense,
+    }
+}
+
+pub const fn slider_uses_dense_root_metrics(
+    dense: bool,
+    vertical: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    dense && !vertical && !invalid && !disabled
+}
+
+pub const fn slider_uses_vertical_track_metrics(
+    vertical: bool,
+    invalid: bool,
+    blocked: bool,
+) -> bool {
+    vertical && !invalid && !blocked
+}
+
+pub const fn slider_uses_dense_track_metrics(
+    dense: bool,
+    vertical: bool,
+    invalid: bool,
+    blocked: bool,
+) -> bool {
+    dense && !vertical && !invalid && !blocked
+}
+
+pub const fn slider_uses_dense_thumb_metrics(dense: bool, focused: bool, disabled: bool) -> bool {
+    dense && !focused && !disabled
 }
 
 pub fn slider_render_nodes(model: &SliderModel, state: &SliderState) -> Vec<SliderRenderNode> {
@@ -573,6 +722,45 @@ mod tests {
     fn garde_rejects_unaligned_value() {
         let model = SliderModel::new(0, 100, 63).with_step(4);
         assert!(validate_slider_model(&model).is_err());
+    }
+
+    #[test]
+    fn layout_metrics_follow_orientation_density_and_state_precedence() {
+        let standard = slider_layout_metrics(&default_slider_model(), 448.0, 1_000.0);
+        let dense_model = default_slider_model().with_density(SliderDensity::Dense);
+        let dense = slider_layout_metrics(&dense_model, 448.0, 1_000.0);
+        let vertical_model = default_slider_model().with_orientation(SliderOrientation::Vertical);
+        let vertical = slider_layout_metrics(&vertical_model, 448.0, 1_000.0);
+        let dense_disabled = slider_layout_metrics(&dense_model.disabled(), 448.0, 1_000.0);
+
+        assert_eq!(standard.width, scale::container::CONTROL);
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.track_height < standard.track_height);
+        assert!(vertical.track_height > standard.track_height);
+        assert!(vertical.track_width.is_finite());
+        assert_eq!(dense_disabled.root_padding, standard.root_padding);
+        assert_eq!(
+            dense.thumb_size(true, false),
+            standard.thumb_size(false, false)
+        );
+        assert_eq!(
+            dense.thumb_size(false, true),
+            standard.thumb_size(false, false)
+        );
+    }
+
+    #[test]
+    fn border_box_helpers_preserve_track_and_thumb_outer_sizes() {
+        let metrics = slider_layout_metrics(&default_slider_model(), 448.0, 1_000.0);
+
+        assert_eq!(
+            metrics.track_content_height(2.0, true) + 4.0,
+            metrics.track_height
+        );
+        assert_eq!(
+            metrics.thumb_content_size(false, false, 2.0) + 4.0,
+            metrics.thumb_size(false, false)
+        );
     }
 
     #[test]

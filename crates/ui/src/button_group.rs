@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::{ButtonSize, ButtonVariant};
+use crate::{ButtonLayoutMetrics, ButtonSize, ButtonVariant, button_layout_metrics, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -100,6 +100,13 @@ pub struct ButtonGroupRenderNode {
     pub selected: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ButtonGroupLayoutMetrics {
+    pub root_padding: f32,
+    pub separator_size: f32,
+    pub item: ButtonLayoutMetrics,
 }
 
 impl ButtonGroupItem {
@@ -217,6 +224,22 @@ impl ButtonGroupState {
 
 pub fn validate_button_group_model(model: &ButtonGroupModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn button_group_layout_metrics(size: ButtonSize, inline_size: f32) -> ButtonGroupLayoutMetrics {
+    ButtonGroupLayoutMetrics {
+        root_padding: scale::space::xs3(inline_size),
+        separator_size: scale::space::SELECTOR,
+        item: button_layout_metrics(size, inline_size),
+    }
+}
+
+pub fn button_group_item_icon_copy(loading: bool, icon: Option<&str>) -> Option<&str> {
+    if loading { Some("...") } else { icon }
+}
+
+pub fn button_group_item_label_copy(loading: bool, label: &str) -> &str {
+    if loading { "Loading" } else { label }
 }
 
 pub fn button_group_render_nodes(
@@ -413,6 +436,41 @@ mod tests {
                 .filter(|node| node.part == ButtonGroupPart::Item)
                 .count(),
             3
+        );
+    }
+
+    #[test]
+    fn layout_metrics_share_button_size_tokens() {
+        let compact = button_group_layout_metrics(ButtonSize::Medium, 320.0);
+        let wide = button_group_layout_metrics(ButtonSize::Medium, 1_000.0);
+
+        assert_eq!(compact.item.min_height, scale::space::FIELD);
+        assert!(compact.root_padding < wide.root_padding);
+        assert_eq!(wide.separator_size, scale::space::SELECTOR);
+    }
+
+    #[test]
+    fn item_copy_tracks_loading_and_icons() {
+        let ready = default_button_group_model();
+        let loading = default_button_group_model().loading();
+        let item = &ready.items[0];
+        let loading_item = &loading.items[0];
+
+        assert_eq!(
+            button_group_item_icon_copy(ready.loading, item.icon.as_deref()),
+            Some("D")
+        );
+        assert_eq!(
+            button_group_item_label_copy(ready.loading, &item.label),
+            "Day"
+        );
+        assert_eq!(
+            button_group_item_icon_copy(loading.loading, loading_item.icon.as_deref()),
+            Some("...")
+        );
+        assert_eq!(
+            button_group_item_label_copy(loading.loading, &loading_item.label),
+            "Loading"
         );
     }
 }

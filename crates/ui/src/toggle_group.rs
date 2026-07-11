@@ -3,7 +3,10 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::{ToggleDensity, TogglePressed, ToggleVariant};
+use crate::{
+    ToggleControlLayoutMetrics, ToggleDensity, TogglePressed, ToggleVariant, scale,
+    toggle_control_layout_metrics,
+};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -138,6 +141,30 @@ pub struct ToggleGroupRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ToggleGroupLayoutMetrics {
+    pub width: f32,
+    pub root_gap: f32,
+    pub root_padding: f32,
+    pub root_is_dense: bool,
+    pub header_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub status_width: f32,
+    pub status_height: f32,
+    pub status_padding_inline: f32,
+    pub status_padding_block: f32,
+    pub status_font_size: f32,
+    pub status_line_height: f32,
+    pub status_letter_spacing: f32,
+    pub list_gap: f32,
+    pub horizontal: bool,
+    pub items: Vec<ToggleControlLayoutMetrics>,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub error_padding: f32,
 }
 
 impl ToggleGroupItem {
@@ -453,6 +480,82 @@ pub fn toggle_group_render_nodes(
     nodes
 }
 
+pub fn toggle_group_layout_metrics(
+    model: &ToggleGroupModel,
+    state: &ToggleGroupState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> ToggleGroupLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let invalid = model.error.is_some();
+    let dense = model.density == ToggleDensity::Dense;
+    let root_is_dense = dense && !invalid && !model.disabled;
+    let title_is_dense = dense && !model.disabled;
+    let status_font_size = scale::font_size::f00(inline_size);
+    let status_padding_inline = scale::space::xs2(inline_size);
+    let status_padding_block = scale::space::xs3(inline_size);
+    let status_copy = toggle_group_selected_status_label(state.selected_values()).to_uppercase();
+    let status_width = border_width * 2.0
+        + status_padding_inline * 2.0
+        + scale::estimate_inline_text_width(
+            &status_copy,
+            status_font_size,
+            scale::letter_spacing::LABEL,
+        );
+    let status_height = border_width * 2.0
+        + status_padding_block * 2.0
+        + status_font_size * scale::line_height::LH00;
+    let items = model
+        .items
+        .iter()
+        .map(|item| {
+            toggle_control_layout_metrics(
+                model.density,
+                &item.label,
+                if state.is_selected(&item.value) {
+                    "ON"
+                } else {
+                    "OFF"
+                },
+                inline_size,
+                border_width,
+            )
+        })
+        .collect();
+
+    ToggleGroupLayoutMetrics {
+        width: available_width.clamp(1.0, scale::container::CONTROL),
+        root_gap: scale::space::xs2(inline_size),
+        root_padding: if root_is_dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_is_dense,
+        header_gap: scale::space::xs2(inline_size),
+        title_font_size: if title_is_dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        title_line_height: scale::line_height::LH0,
+        status_width,
+        status_height,
+        status_padding_inline,
+        status_padding_block,
+        status_font_size,
+        status_line_height: scale::line_height::LH00,
+        status_letter_spacing: scale::letter_spacing::LABEL,
+        list_gap: scale::space::xs2(inline_size),
+        horizontal: model.orientation == ToggleGroupOrientation::Horizontal,
+        items,
+        detail_font_size: scale::font_size::f0(inline_size),
+        detail_line_height: scale::line_height::LH0,
+        error_padding: scale::space::xs(inline_size),
+    }
+}
+
 pub fn default_toggle_group_items() -> Vec<ToggleGroupItem> {
     vec![
         ToggleGroupItem::new("Left", "left").with_detail("Align content to the left edge."),
@@ -470,6 +573,14 @@ pub fn toggle_group_selected_values_label(values: &[String]) -> String {
         "none".to_owned()
     } else {
         values.join(",")
+    }
+}
+
+pub fn toggle_group_selected_status_label(values: &[String]) -> String {
+    match values.len() {
+        0 => "none".to_owned(),
+        1 => "1 selected".to_owned(),
+        count => format!("{count} selected"),
     }
 }
 
@@ -689,6 +800,46 @@ mod tests {
             nodes.iter().any(|node| node.part == ToggleGroupPart::Item
                 && node.disabled
                 && !node.actionable)
+        );
+    }
+
+    #[test]
+    fn layout_metrics_share_toggle_control_geometry() {
+        let model = default_toggle_group_model();
+        let state = model.state();
+        let metrics = toggle_group_layout_metrics(&model, &state, 640.0, 480.0, 1.0);
+        let expected =
+            toggle_control_layout_metrics(model.density, &model.items[0].label, "ON", 480.0, 1.0);
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert_eq!(metrics.items[0], expected);
+        assert!(metrics.horizontal);
+        assert!(!metrics.root_is_dense);
+    }
+
+    #[test]
+    fn dense_and_vertical_metrics_follow_dom_contract() {
+        let model = default_toggle_group_model()
+            .with_density(ToggleDensity::Dense)
+            .with_orientation(ToggleGroupOrientation::Vertical);
+        let metrics = toggle_group_layout_metrics(&model, &model.state(), 320.0, 320.0, 1.0);
+
+        assert!(metrics.root_is_dense);
+        assert!(!metrics.horizontal);
+        assert_eq!(metrics.items.len(), model.items.len());
+        assert_eq!(metrics.status_letter_spacing, scale::letter_spacing::LABEL);
+    }
+
+    #[test]
+    fn selected_status_label_tracks_selection_count() {
+        assert_eq!(toggle_group_selected_status_label(&[]), "none");
+        assert_eq!(
+            toggle_group_selected_status_label(&["left".to_owned()]),
+            "1 selected"
+        );
+        assert_eq!(
+            toggle_group_selected_status_label(&["bold".to_owned(), "italic".to_owned()]),
+            "2 selected"
         );
     }
 

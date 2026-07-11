@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -146,6 +147,19 @@ pub struct ButtonRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ButtonLayoutMetrics {
+    pub min_height: f32,
+    pub fixed_inline_size: Option<f32>,
+    pub gap: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+    pub icon_min_width: f32,
+    pub icon_font_size: f32,
+}
+
 impl ButtonModel {
     pub fn new(label: impl Into<String>, value: impl Into<String>) -> Self {
         Self {
@@ -252,6 +266,76 @@ impl ButtonState {
 
 pub fn validate_button_model(model: &ButtonModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn button_layout_metrics(size: ButtonSize, inline_size: f32) -> ButtonLayoutMetrics {
+    let icon_min_width = scale::space::s(inline_size);
+    let icon_font_size = scale::font_size::f00(inline_size);
+    match size {
+        ButtonSize::Small => ButtonLayoutMetrics {
+            min_height: scale::space::s(inline_size),
+            fixed_inline_size: None,
+            gap: scale::space::xs2(inline_size),
+            padding_inline: scale::space::xs2(inline_size),
+            padding_block: scale::space::xs3(inline_size),
+            font_size: scale::font_size::f00(inline_size),
+            line_height: scale::line_height::LH0,
+            icon_min_width,
+            icon_font_size,
+        },
+        ButtonSize::Medium => ButtonLayoutMetrics {
+            min_height: scale::space::FIELD,
+            fixed_inline_size: None,
+            gap: scale::space::xs2(inline_size),
+            padding_inline: scale::space::xs(inline_size),
+            padding_block: scale::space::xs2(inline_size),
+            font_size: scale::font_size::f0(inline_size),
+            line_height: scale::line_height::LH0,
+            icon_min_width,
+            icon_font_size,
+        },
+        ButtonSize::Large => ButtonLayoutMetrics {
+            min_height: scale::space::FIELD,
+            fixed_inline_size: None,
+            gap: scale::space::xs(inline_size),
+            padding_inline: scale::space::s(inline_size),
+            padding_block: scale::space::xs(inline_size),
+            font_size: scale::font_size::f1(inline_size),
+            line_height: scale::line_height::LH2,
+            icon_min_width,
+            icon_font_size,
+        },
+        ButtonSize::Icon => {
+            let size = scale::space::l(inline_size);
+            ButtonLayoutMetrics {
+                min_height: size,
+                fixed_inline_size: Some(size),
+                gap: 0.0,
+                padding_inline: 0.0,
+                padding_block: 0.0,
+                font_size: scale::font_size::f0(inline_size),
+                line_height: scale::line_height::LH0,
+                icon_min_width,
+                icon_font_size,
+            }
+        }
+    }
+}
+
+pub fn button_icon_copy(model: &ButtonModel) -> Option<&str> {
+    if model.loading {
+        Some("...")
+    } else {
+        model.icon.as_deref()
+    }
+}
+
+pub fn button_label_copy(model: &ButtonModel) -> &str {
+    if model.loading {
+        "Loading"
+    } else {
+        &model.label
+    }
 }
 
 pub fn button_render_nodes(model: &ButtonModel, state: ButtonState) -> Vec<ButtonRenderNode> {
@@ -376,6 +460,31 @@ mod tests {
     fn garde_rejects_link_kind_without_href() {
         let model = ButtonModel::new("Continue", "continue").with_kind(ButtonKind::Link);
         assert!(validate_button_model(&model).is_err());
+    }
+
+    #[test]
+    fn layout_metrics_resolve_size_and_fluid_tokens() {
+        let compact = button_layout_metrics(ButtonSize::Medium, 320.0);
+        let wide = button_layout_metrics(ButtonSize::Medium, 1_000.0);
+        let icon = button_layout_metrics(ButtonSize::Icon, 1_000.0);
+
+        assert_eq!(compact.min_height, scale::space::FIELD);
+        assert!(compact.font_size < wide.font_size);
+        assert!(compact.padding_inline < wide.padding_inline);
+        assert_eq!(icon.fixed_inline_size, Some(icon.min_height));
+    }
+
+    #[test]
+    fn display_copy_tracks_loading_and_icons() {
+        let ready = default_button_model();
+        let loading = default_button_model().loading();
+        let iconless = default_button_model().without_icon();
+
+        assert_eq!(button_icon_copy(&ready), Some("Go"));
+        assert_eq!(button_label_copy(&ready), "Continue");
+        assert_eq!(button_icon_copy(&loading), Some("..."));
+        assert_eq!(button_label_copy(&loading), "Loading");
+        assert_eq!(button_icon_copy(&iconless), None);
     }
 
     #[test]

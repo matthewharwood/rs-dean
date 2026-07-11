@@ -182,6 +182,7 @@ committed.
 | `just ui-book` | Regenerate the UI crate mdBook source from the Rust catalog. |
 | `just blocks-book` | Regenerate the blocks crate mdBook from the block registry. |
 | `just block-issues` | Regenerate the one-to-one block implementation backlog. |
+| `cargo xtask story-parity ui` | Verify every paired UI story at desktop and mobile viewports; use `blocks`, a story ID, or `*-through:<slug>` for other sweep scopes. |
 | `just static-analysis` | Run the focused static-analysis lane used by the gate. |
 | `just gate` | Run the one-pass Rust gate. |
 | `just check` | Alias for the one-pass Rust gate. |

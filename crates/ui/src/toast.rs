@@ -1,7 +1,7 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -182,6 +182,43 @@ pub struct ToastRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ToastLayoutMetrics {
+    pub max_width: f32,
+    pub provider_gap: f32,
+    pub provider_padding: f32,
+    pub meta_font_size: f32,
+    pub meta_line_height: f32,
+    pub meta_letter_spacing: f32,
+    pub viewport_gap: f32,
+    pub card_width: f32,
+    pub card_gap: f32,
+    pub card_padding: f32,
+    pub card_is_dense: bool,
+    pub card_shadow_level: u8,
+    pub header_gap: f32,
+    pub copy_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_font_size: f32,
+    pub description_line_height: f32,
+    pub action_row_gap: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+    pub action_font_size: f32,
+    pub action_line_height: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+}
+
+impl ToastLayoutMetrics {
+    pub fn action_content_min_height(self, border_width: f32) -> f32 {
+        (self.action_min_height - border_width.max(0.0) * 2.0).max(0.0)
+    }
 }
 
 impl ToastAction {
@@ -434,6 +471,108 @@ impl Default for ToastState {
 
 pub fn validate_toast_model(model: &ToastModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn toast_layout_metrics(
+    model: &ToastModel,
+    state: &ToastState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> ToastLayoutMetrics {
+    let invalid = model.error.is_some();
+    let blocked = model.loading || model.disabled;
+    let dense = model.density == ToastDensity::Dense;
+    let dense_provider = toast_uses_dense_provider_metrics(dense, invalid, model.disabled);
+    let dense_card = toast_uses_dense_card_metrics(dense, state.is_focused(), invalid, blocked);
+    let max_width = available_width.clamp(1.0, scale::container::CONTROL);
+    let card_padding = if dense_card {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let card_gap = if dense_card {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let title_font_size = scale::font_size::f0(inline_size);
+    let description_font_size = scale::font_size::f0(inline_size);
+    let action_font_size = scale::font_size::f00(inline_size);
+    let content_width = scale::estimate_inline_text_width(&model.title, title_font_size, 0.0)
+        .max(scale::estimate_inline_text_width(
+            &model.description,
+            description_font_size,
+            0.0,
+        ))
+        .max(model.action.as_ref().map_or(0.0, |action| {
+            scale::estimate_inline_text_width(&action.label, action_font_size, 0.0)
+                + scale::space::xs(inline_size) * 2.0
+                + border_width.max(0.0) * 2.0
+        }));
+    let card_width =
+        (content_width + card_padding * 2.0 + border_width.max(0.0) * 2.0).clamp(1.0, max_width);
+
+    ToastLayoutMetrics {
+        max_width,
+        provider_gap: if dense_provider {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        provider_padding: if invalid {
+            scale::space::s(inline_size)
+        } else {
+            0.0
+        },
+        meta_font_size: scale::font_size::f00(inline_size),
+        meta_line_height: scale::line_height::LH0,
+        meta_letter_spacing: scale::letter_spacing::LABEL,
+        viewport_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        card_width,
+        card_gap,
+        card_padding,
+        card_is_dense: dense_card,
+        card_shadow_level: if blocked {
+            0
+        } else if dense_card {
+            1
+        } else {
+            2
+        },
+        header_gap: scale::space::xs(inline_size),
+        copy_gap: scale::space::xs3(inline_size),
+        title_font_size,
+        title_line_height: scale::line_height::LH0,
+        description_font_size,
+        description_line_height: scale::line_height::LH0,
+        action_row_gap: scale::space::xs2(inline_size),
+        action_min_height: scale::space::s(inline_size),
+        action_padding_inline: scale::space::xs(inline_size),
+        action_padding_block: scale::space::xs3(inline_size),
+        action_font_size,
+        action_line_height: scale::line_height::LH0,
+        error_padding: scale::space::s(inline_size),
+        error_font_size: scale::font_size::f0(inline_size),
+        error_line_height: scale::line_height::LH0,
+    }
+}
+
+pub const fn toast_uses_dense_provider_metrics(dense: bool, invalid: bool, disabled: bool) -> bool {
+    dense && !invalid && !disabled
+}
+
+pub const fn toast_uses_dense_card_metrics(
+    dense: bool,
+    focused: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    dense && !focused && !invalid && !disabled
 }
 
 pub fn toast_render_nodes(model: &ToastModel, state: &ToastState) -> Vec<ToastRenderNode> {
@@ -741,6 +880,55 @@ mod tests {
                 .iter()
                 .all(|node| node.invalid)
         );
+    }
+
+    #[test]
+    fn dense_metrics_follow_dom_state_precedence() {
+        assert!(toast_uses_dense_provider_metrics(true, false, false));
+        assert!(!toast_uses_dense_provider_metrics(true, true, false));
+        assert!(!toast_uses_dense_provider_metrics(true, false, true));
+        assert!(toast_uses_dense_card_metrics(true, false, false, false));
+        assert!(!toast_uses_dense_card_metrics(true, true, false, false));
+        assert!(!toast_uses_dense_card_metrics(true, false, true, false));
+        assert!(!toast_uses_dense_card_metrics(true, false, false, true));
+    }
+
+    #[test]
+    fn dense_intrinsic_card_width_tracks_fixture_copy() {
+        let model = default_toast_model()
+            .with_density(ToastDensity::Dense)
+            .with_title("Gate running")
+            .with_description("Dense toasts keep the same local open and action state.");
+        let metrics = toast_layout_metrics(&model, &model.state(), 448.0, 952.0, 1.0);
+
+        assert!(metrics.card_is_dense);
+        assert!((420.0..=426.0).contains(&metrics.card_width));
+        assert_eq!(metrics.card_shadow_level, 1);
+    }
+
+    #[test]
+    fn focused_dense_card_restores_standard_metrics() {
+        let model = default_toast_model().with_density(ToastDensity::Dense);
+        let mut state = model.state();
+        let resting = toast_layout_metrics(&model, &state, 448.0, 952.0, 1.0);
+        state.apply(ToastIntent::Focus);
+        let focused = toast_layout_metrics(&model, &state, 448.0, 952.0, 1.0);
+
+        assert!(resting.card_is_dense);
+        assert!(!focused.card_is_dense);
+        assert!(focused.card_padding > resting.card_padding);
+        assert_eq!(focused.card_shadow_level, 2);
+    }
+
+    #[test]
+    fn blocked_card_uses_standard_metrics_without_shadow() {
+        let model = default_toast_model()
+            .with_density(ToastDensity::Dense)
+            .loading();
+        let metrics = toast_layout_metrics(&model, &model.state(), 448.0, 952.0, 1.0);
+
+        assert!(!metrics.card_is_dense);
+        assert_eq!(metrics.card_shadow_level, 0);
     }
 
     #[test]

@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ComboboxDensity {
@@ -121,6 +123,32 @@ pub struct ComboboxRenderNode {
     pub open: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ComboboxLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub input_min_height: f32,
+    pub input_padding_inline: f32,
+    pub input_padding_block: f32,
+    pub input_font_size: f32,
+    pub input_line_height: f32,
+    pub list_max_height: f32,
+    pub list_padding: f32,
+    pub list_gap: f32,
+    pub option_min_height: f32,
+    pub option_padding_inline: f32,
+    pub option_padding_block: f32,
+    pub option_gap: f32,
+    pub option_font_size: f32,
+    pub option_line_height: f32,
+    pub meta_font_size: f32,
+    pub meta_line_height: f32,
+    pub empty_padding: f32,
+    pub empty_font_size: f32,
+    pub empty_line_height: f32,
 }
 
 impl ComboboxOption {
@@ -309,6 +337,59 @@ pub fn validate_combobox_model(model: &ComboboxModel) -> Result<(), garde::Repor
     model.validate()
 }
 
+pub fn combobox_layout_metrics(
+    density: ComboboxDensity,
+    disabled: bool,
+    inline_size: f32,
+) -> ComboboxLayoutMetrics {
+    let dense_root = density == ComboboxDensity::Dense && !disabled;
+    let dense_input = density == ComboboxDensity::Dense;
+    ComboboxLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: scale::space::xs2(inline_size),
+        input_min_height: if dense_input {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        input_padding_inline: if dense_input {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        input_padding_block: if dense_input {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        input_font_size: if dense_input {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        input_line_height: scale::line_height::LH0,
+        list_max_height: scale::space::xl4(inline_size),
+        list_padding: scale::space::xs2(inline_size),
+        list_gap: scale::space::xs2(inline_size),
+        option_min_height: scale::space::FIELD,
+        option_padding_inline: scale::space::xs(inline_size),
+        option_padding_block: scale::space::xs2(inline_size),
+        option_gap: scale::space::xs(inline_size),
+        option_font_size: scale::font_size::f0(inline_size),
+        option_line_height: scale::line_height::LH0,
+        meta_font_size: scale::font_size::f00(inline_size),
+        meta_line_height: scale::line_height::LH00,
+        empty_padding: scale::space::xs(inline_size),
+        empty_font_size: scale::font_size::f0(inline_size),
+        empty_line_height: scale::line_height::LH0,
+    }
+}
+
 pub fn combobox_render_nodes(
     model: &ComboboxModel,
     state: &ComboboxState,
@@ -479,6 +560,20 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_combobox_model(&default_combobox_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens() {
+        let compact = combobox_layout_metrics(ComboboxDensity::Standard, false, 320.0);
+        let wide = combobox_layout_metrics(ComboboxDensity::Standard, false, 1_000.0);
+        let dense = combobox_layout_metrics(ComboboxDensity::Dense, false, 1_000.0);
+        let disabled_dense = combobox_layout_metrics(ComboboxDensity::Dense, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.input_font_size < wide.input_font_size);
+        assert_eq!(wide.max_width, scale::container::CONTROL);
     }
 
     #[test]

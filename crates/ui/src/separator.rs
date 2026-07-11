@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SeparatorDensity {
@@ -111,6 +113,17 @@ pub struct SeparatorRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SeparatorLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub line_width: f32,
+    pub line_height: f32,
+    pub label_font_size: f32,
 }
 
 impl SeparatorModel {
@@ -320,6 +333,85 @@ pub fn separator_render_nodes(
     ]
 }
 
+pub fn separator_layout_metrics(
+    model: &SeparatorModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> SeparatorLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let blocked = model.loading || model.disabled;
+    let dense = model.density == SeparatorDensity::Dense && !model.disabled;
+    let vertical = model.orientation == SeparatorOrientation::Vertical && !model.disabled;
+    let padding = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let gap = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let label_font_size = scale::font_size::f00(inline_size);
+    let line_thickness = if dense && !blocked && model.error.is_none() {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs3(inline_size)
+    };
+    let label_width = model.label.as_ref().map_or(0.0, |label| {
+        label.chars().count() as f32 * label_font_size * 0.66
+    });
+    let label_height = model
+        .label
+        .as_ref()
+        .map_or(0.0, |_| label_font_size * scale::line_height::LH0);
+    let error_height = model.error.as_ref().map_or(0.0, |error| {
+        scale::estimate_text_block_height(
+            error,
+            available_width.max(1.0),
+            label_font_size,
+            scale::line_height::LH0,
+            0.47,
+        ) + gap
+    });
+    let (width, line_width, line_height, content_height) = if vertical {
+        let line_height = scale::space::xl(inline_size);
+        let line_width = scale::space::xs2(inline_size);
+        (
+            border_width * 2.0
+                + padding * 2.0
+                + line_width
+                + model.label.as_ref().map_or(0.0, |_| gap + label_width),
+            line_width,
+            line_height,
+            line_height.max(label_height),
+        )
+    } else {
+        let width = available_width.clamp(1.0, scale::container::CONTROL);
+        let content_width = (width - padding * 2.0 - border_width * 2.0).max(1.0);
+        (
+            width,
+            content_width,
+            line_thickness,
+            line_thickness
+                + model.label.as_ref().map_or(0.0, |_| gap + label_height)
+                + error_height,
+        )
+    };
+    let height = border_width * 2.0 + padding * 2.0 + content_height;
+
+    SeparatorLayoutMetrics {
+        width,
+        height,
+        padding,
+        gap,
+        line_width,
+        line_height,
+        label_font_size,
+    }
+}
+
 pub fn default_separator_model() -> SeparatorModel {
     SeparatorModel::new("Component boundary")
         .with_detail("Token-backed divider shared by Leptos DOM and Bevy primitives.")
@@ -367,6 +459,21 @@ mod tests {
 
         assert!(!label.visible);
         assert!(label.disabled);
+    }
+
+    #[test]
+    fn layout_metrics_preserve_horizontal_and_vertical_shapes() {
+        let horizontal = default_separator_model();
+        let horizontal_metrics = separator_layout_metrics(&horizontal, 1_000.0, 1_000.0, 1.0);
+        let vertical = default_separator_model()
+            .with_orientation(SeparatorOrientation::Vertical)
+            .with_label("Rail divider");
+        let vertical_metrics = separator_layout_metrics(&vertical, 1_000.0, 1_000.0, 1.0);
+
+        assert_eq!(horizontal_metrics.width, scale::container::CONTROL);
+        assert!(horizontal_metrics.width > horizontal_metrics.height * 5.0);
+        assert!(vertical_metrics.height > vertical_metrics.width * 0.4);
+        assert!(vertical_metrics.width < horizontal_metrics.width / 2.0);
     }
 
     #[test]

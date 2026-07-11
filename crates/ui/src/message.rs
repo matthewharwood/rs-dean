@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum MessageDensity {
@@ -143,6 +145,32 @@ pub struct MessageRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MessageLayoutMetrics {
+    pub max_width: f32,
+    pub compact_root: bool,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub sender_font_size: f32,
+    pub sender_line_height: f32,
+    pub meta_font_size: f32,
+    pub meta_line_height: f32,
+    pub content_font_size: f32,
+    pub content_line_height: f32,
+    pub footer_padding_block_start: f32,
+    pub footer_gap: f32,
+    pub status_font_size: f32,
+    pub status_line_height: f32,
+    pub actions_gap: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub emphasized_action_padding_inline: f32,
+    pub action_padding_block: f32,
+    pub action_font_size: f32,
+    pub action_line_height: f32,
 }
 
 impl MessageAction {
@@ -317,6 +345,70 @@ impl MessageState {
 
 pub fn validate_message_model(model: &MessageModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn message_layout_metrics(
+    model: &MessageModel,
+    state: &MessageState,
+    inline_size: f32,
+) -> MessageLayoutMetrics {
+    let dense = model.density == MessageDensity::Dense;
+    let root_active = state.is_active_part(MessagePart::Root) || state.active_action().is_some();
+    let compact_root =
+        dense && !root_active && model.error.is_none() && !model.loading && !model.disabled;
+    let compact_content = dense && !model.disabled;
+    MessageLayoutMetrics {
+        max_width: scale::container::NARROW,
+        compact_root,
+        root_padding: if compact_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if compact_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        header_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        sender_font_size: scale::font_size::f0(inline_size),
+        sender_line_height: scale::line_height::LH0,
+        meta_font_size: scale::font_size::f00(inline_size),
+        meta_line_height: scale::line_height::LH0,
+        content_font_size: if compact_content {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        content_line_height: scale::line_height::LH0,
+        footer_padding_block_start: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        footer_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        status_font_size: scale::font_size::f00(inline_size),
+        status_line_height: scale::line_height::LH0,
+        actions_gap: scale::space::xs2(inline_size),
+        action_min_height: scale::space::s(inline_size),
+        action_padding_inline: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        emphasized_action_padding_inline: scale::space::xs2(inline_size),
+        action_padding_block: scale::space::xs3(inline_size),
+        action_font_size: scale::font_size::f00(inline_size),
+        action_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn message_render_nodes(model: &MessageModel, state: &MessageState) -> Vec<MessageRenderNode> {
@@ -551,6 +643,30 @@ mod tests {
                 part.label()
             );
         }
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_emphasized_precedence() {
+        let standard =
+            message_layout_metrics(&default_message_model(), &MessageState::resting(), 1_280.0);
+        let dense_model = default_message_model().with_density(MessageDensity::Dense);
+        let dense = message_layout_metrics(&dense_model, &MessageState::resting(), 1_280.0);
+        let loading_model = dense_model.clone().loading();
+        let dense_loading =
+            message_layout_metrics(&loading_model, &MessageState::resting(), 1_280.0);
+        let mut active_state = MessageState::resting();
+        let _ = active_state.apply(MessageIntent::Activate("reply".to_owned()));
+        let dense_active = message_layout_metrics(&dense_model, &active_state, 1_280.0);
+
+        assert!(dense.compact_root);
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.root_gap < standard.root_gap);
+        assert!(dense.content_font_size < standard.content_font_size);
+        assert!(!dense_loading.compact_root);
+        assert_eq!(dense_loading.root_padding, standard.root_padding);
+        assert!(!dense_active.compact_root);
+        assert_eq!(dense_active.root_padding, standard.root_padding);
+        assert!(dense.action_padding_inline < dense.emphasized_action_padding_inline);
     }
 
     #[test]

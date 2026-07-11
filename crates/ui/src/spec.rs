@@ -340,6 +340,65 @@ pub mod bevy_adapter {
         pub disabled: bool,
     }
 
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum BevyUiFlow {
+        AspectRatioFrame,
+        CheckboxRow,
+        CommandPalette,
+        ControlRow,
+        DirectionScope,
+        DrawerOverlay,
+        FormField,
+        ItemRow,
+        SeparatorLine,
+        SpinnerInline,
+        Stack,
+        ToggleButton,
+        TooltipOverlay,
+    }
+
+    pub const fn bevy_ui_flow(id: UiComponentId) -> BevyUiFlow {
+        if matches!(id, UiComponentId::AspectRatio) {
+            BevyUiFlow::AspectRatioFrame
+        } else if matches!(id, UiComponentId::Checkbox) {
+            BevyUiFlow::CheckboxRow
+        } else if matches!(id, UiComponentId::Command) {
+            BevyUiFlow::CommandPalette
+        } else if matches!(id, UiComponentId::Direction) {
+            BevyUiFlow::DirectionScope
+        } else if matches!(id, UiComponentId::Drawer) {
+            BevyUiFlow::DrawerOverlay
+        } else if matches!(id, UiComponentId::Field) {
+            BevyUiFlow::FormField
+        } else if matches!(id, UiComponentId::Item) {
+            BevyUiFlow::ItemRow
+        } else if matches!(id, UiComponentId::Separator) {
+            BevyUiFlow::SeparatorLine
+        } else if matches!(id, UiComponentId::Spinner) {
+            BevyUiFlow::SpinnerInline
+        } else if matches!(id, UiComponentId::Toggle) {
+            BevyUiFlow::ToggleButton
+        } else if matches!(id, UiComponentId::Tooltip) {
+            BevyUiFlow::TooltipOverlay
+        } else if matches!(
+            id,
+            UiComponentId::Badge
+                | UiComponentId::Button
+                | UiComponentId::ButtonGroup
+                | UiComponentId::Input
+                | UiComponentId::InputGroup
+                | UiComponentId::InputOtp
+                | UiComponentId::Kbd
+                | UiComponentId::Marker
+                | UiComponentId::NativeSelect
+                | UiComponentId::ToggleGroup
+        ) {
+            BevyUiFlow::ControlRow
+        } else {
+            BevyUiFlow::Stack
+        }
+    }
+
     #[derive(Debug, Clone, PartialEq)]
     pub struct BevyUiStoryVariant {
         pub fixture_id: &'static str,
@@ -395,10 +454,7 @@ pub mod bevy_adapter {
     }
 
     pub fn bevy_primitives_for_component(id: UiComponentId, theme: &Theme) -> Vec<BevyUiPrimitive> {
-        let fixture = crate::story_fixtures::ui_story_fixtures(id)
-            .into_iter()
-            .next()
-            .expect("invariant: every catalog component has a canonical story fixture");
+        let fixture = crate::story_fixtures::canonical_ui_story_fixture(id);
         bevy_primitives_for_story_model(&fixture.model, theme, fixture.default_open)
     }
 
@@ -636,17 +692,15 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = combobox_role_for_part(node.part);
+                let fill = combobox_fill(&node, theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: combobox_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: combobox_size_for_part(node.part),
-                    fill: fill_for_tone(
-                        combobox_tone_for_part(node.part, node.selected, node.visible),
-                        theme,
-                    ),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
@@ -707,23 +761,15 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = context_menu_role_for_part(node.part);
+                let fill = context_menu_fill(&node, theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: context_menu_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: context_menu_size_for_part(node.part),
-                    fill: fill_for_tone(
-                        context_menu_tone_for_part(
-                            node.part,
-                            node.active,
-                            node.selected,
-                            node.destructive,
-                            node.visible,
-                        ),
-                        theme,
-                    ),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
@@ -892,7 +938,13 @@ pub mod bevy_adapter {
                     value: node.detail,
                     size: input_size_for_part(node.part),
                     fill: fill_for_tone(
-                        input_tone_for_part(node.part, node.focused, node.invalid, node.visible),
+                        input_tone_for_part(
+                            node.part,
+                            node.focused,
+                            node.active,
+                            node.invalid,
+                            node.visible,
+                        ),
                         theme,
                     ),
                     text: theme.text_1().to_bevy(),
@@ -928,6 +980,7 @@ pub mod bevy_adapter {
                         input_group_tone_for_part(
                             node.part,
                             node.focused,
+                            node.active,
                             node.invalid,
                             node.visible,
                         ),
@@ -960,7 +1013,7 @@ pub mod bevy_adapter {
                     kind: input_otp_kind_for_part(node.part, node.actionable),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: input_otp_size_for_part(node.part),
                     fill: fill_for_tone(
                         input_otp_tone_for_part(
@@ -1002,13 +1055,7 @@ pub mod bevy_adapter {
                     value: node.detail,
                     size: item_size_for_part(node.part),
                     fill: fill_for_tone(
-                        item_tone_for_part(
-                            node.part,
-                            node.active,
-                            node.invalid,
-                            node.visible,
-                            node.actionable,
-                        ),
+                        item_tone_for_part(node.part, node.active, node.invalid, node.visible),
                         theme,
                     ),
                     text: theme.text_1().to_bevy(),
@@ -1071,7 +1118,7 @@ pub mod bevy_adapter {
                     kind: label_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: label_size_for_part(node.part),
                     fill: fill_for_tone(
                         label_tone_for_part(
@@ -1153,7 +1200,7 @@ pub mod bevy_adapter {
                     kind: menubar_kind_for_part(node.part, node.actionable),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: menubar_size_for_part(node.part),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -1277,7 +1324,7 @@ pub mod bevy_adapter {
                     kind: navigation_menu_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: navigation_menu_size_for_part(node.part),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -1308,7 +1355,7 @@ pub mod bevy_adapter {
                     kind: pagination_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: pagination_size_for_part(node.part),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -1432,7 +1479,7 @@ pub mod bevy_adapter {
                     kind: resizable_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: resizable_size_for_part(node.part, node.percent, node.orientation),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -1494,7 +1541,7 @@ pub mod bevy_adapter {
                     kind: select_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: select_size_for_part(node.part),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -1587,7 +1634,7 @@ pub mod bevy_adapter {
                     kind: sidebar_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: sidebar_size_for_part(node.part, node.collapsed),
                     fill: fill_for_tone(tone, theme),
                     text: theme.text_1().to_bevy(),
@@ -2391,14 +2438,15 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = bubble_role_for_part(node.part);
+                let fill = bubble_fill(&node, theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: bubble_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: bubble_size_for_part(node.part),
-                    fill: fill_for_tone(bubble_tone_for_part(node.part, node.side), theme),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
@@ -2479,19 +2527,20 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = avatar_role_for_part(node.part);
+                let fill = avatar_fill(&node, model.image.as_ref(), theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: avatar_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
-                    size: avatar_size_for_part(node.part),
-                    fill: fill_for_tone(avatar_tone_for_part(node.part), theme),
+                    value: node.value,
+                    size: avatar_size_for_part(node.size),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
                     intent: avatar_intent_for_part(node.part),
-                    selected: node.visual == AvatarVisual::Image,
+                    selected: node.part == AvatarPart::Image && node.visual == AvatarVisual::Image,
                     disabled: node.disabled,
                 }
             })
@@ -2508,19 +2557,20 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = attachment_role_for_part(node.part);
+                let fill = attachment_fill(&node, theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: attachment_kind_for_part(node.part),
                     role,
                     label: node.label,
-                    value: node.detail,
+                    value: node.value,
                     size: size_for_role(role),
-                    fill: fill_for_tone(attachment_tone_for_part(node.part), theme),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
                     intent: attachment_intent_for_part(node.part),
-                    selected: node.loading,
+                    selected: false,
                     disabled: node.disabled,
                 }
             })
@@ -2537,6 +2587,7 @@ pub mod bevy_adapter {
             .into_iter()
             .map(|node| {
                 let role = aspect_ratio_role_for_part(node.part);
+                let fill = aspect_ratio_fill(&node, theme);
                 BevyUiPrimitive {
                     part: node.part.label().to_owned(),
                     kind: aspect_ratio_kind_for_part(node.part),
@@ -2544,7 +2595,7 @@ pub mod bevy_adapter {
                     label: node.label,
                     value: node.detail,
                     size: aspect_ratio_size(node.width, node.height, role),
-                    fill: fill_for_tone(aspect_ratio_tone_for_part(node.part), theme),
+                    fill,
                     text: theme.text_1().to_bevy(),
                     render,
                     state,
@@ -2680,10 +2731,16 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn aspect_ratio_tone_for_part(part: AspectRatioPart) -> UiBlockTone {
-        match part {
-            AspectRatioPart::Root | AspectRatioPart::Frame => UiBlockTone::Surface,
-            AspectRatioPart::Media => UiBlockTone::Success,
+    fn aspect_ratio_fill(node: &crate::AspectRatioRenderNode, theme: &Theme) -> Color {
+        match node.part {
+            AspectRatioPart::Root => Color::NONE,
+            AspectRatioPart::Frame => theme.surface_2().to_bevy(),
+            AspectRatioPart::Media if node.disabled => theme.surface_2().to_bevy(),
+            AspectRatioPart::Media if node.loading => theme.surface_3().to_bevy(),
+            AspectRatioPart::Media => match node.fit {
+                crate::AspectRatioFit::Cover => theme.primary_soft().to_bevy_on(theme.surface_2()),
+                crate::AspectRatioFit::Contain => theme.surface_1().to_bevy(),
+            },
         }
     }
 
@@ -2707,13 +2764,22 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn attachment_tone_for_part(part: AttachmentPart) -> UiBlockTone {
-        match part {
-            AttachmentPart::Root | AttachmentPart::Title | AttachmentPart::Meta => {
-                UiBlockTone::Surface
-            }
-            AttachmentPart::Preview => UiBlockTone::Info,
-            AttachmentPart::Action => UiBlockTone::Brand,
+    fn attachment_fill(node: &crate::AttachmentRenderNode, theme: &Theme) -> Color {
+        match node.part {
+            AttachmentPart::Root if node.disabled => theme.surface_2().to_bevy(),
+            AttachmentPart::Root if node.loading => theme.info_soft().to_bevy_on(theme.surface_1()),
+            AttachmentPart::Root => theme.surface_1().to_bevy(),
+            AttachmentPart::Preview if node.loading || node.disabled => theme.surface_3().to_bevy(),
+            AttachmentPart::Preview => match node.kind {
+                crate::AttachmentKind::Pdf => theme.error_soft().to_bevy_on(theme.surface_1()),
+                crate::AttachmentKind::Image => theme.success_soft().to_bevy_on(theme.surface_1()),
+                crate::AttachmentKind::Archive => {
+                    theme.warning_soft().to_bevy_on(theme.surface_1())
+                }
+                crate::AttachmentKind::Data => theme.info_soft().to_bevy_on(theme.surface_1()),
+            },
+            AttachmentPart::Action => theme.surface_2().to_bevy(),
+            AttachmentPart::Title | AttachmentPart::Meta => Color::NONE,
         }
     }
 
@@ -2743,10 +2809,26 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn avatar_tone_for_part(part: AvatarPart) -> UiBlockTone {
-        match part {
-            AvatarPart::Root | AvatarPart::Fallback => UiBlockTone::Surface,
-            AvatarPart::Image => UiBlockTone::Success,
+    fn avatar_fill(
+        node: &crate::AvatarRenderNode,
+        image: Option<&crate::AvatarImage>,
+        theme: &Theme,
+    ) -> Color {
+        match node.part {
+            AvatarPart::Root => theme.surface_2().to_bevy(),
+            AvatarPart::Image => image.map_or_else(
+                || theme.surface_3().to_bevy(),
+                |image| {
+                    let [red, green, blue] = image.preview.srgb;
+                    Color::srgb(
+                        f32::from(red) / 255.0,
+                        f32::from(green) / 255.0,
+                        f32::from(blue) / 255.0,
+                    )
+                },
+            ),
+            AvatarPart::Fallback if node.loading || node.disabled => theme.surface_3().to_bevy(),
+            AvatarPart::Fallback => theme.primary_soft().to_bevy_on(theme.surface_2()),
         }
     }
 
@@ -2757,12 +2839,13 @@ pub mod bevy_adapter {
         }
     }
 
-    fn avatar_size_for_part(part: AvatarPart) -> Vec2 {
-        match part {
-            AvatarPart::Root | AvatarPart::Image | AvatarPart::Fallback => {
-                Vec2::new(scale::space::XL, scale::space::XL)
-            }
-        }
+    fn avatar_size_for_part(size: crate::AvatarSize) -> Vec2 {
+        let diameter = match size {
+            crate::AvatarSize::Small => scale::space::L,
+            crate::AvatarSize::Medium => scale::space::XL,
+            crate::AvatarSize::Large => scale::space::XL2,
+        };
+        Vec2::splat(diameter)
     }
 
     const fn badge_kind_for_part(part: BadgePart) -> UiWidgetSlotKind {
@@ -2877,15 +2960,20 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn bubble_tone_for_part(part: BubblePart, side: BubbleSide) -> UiBlockTone {
-        match part {
-            BubblePart::Avatar => UiBlockTone::Accent,
-            BubblePart::Actions => UiBlockTone::Brand,
-            BubblePart::Root | BubblePart::Content | BubblePart::Meta => match side {
-                BubbleSide::Incoming => UiBlockTone::Surface,
-                BubbleSide::Outgoing => UiBlockTone::Brand,
-                BubbleSide::System => UiBlockTone::Muted,
+    fn bubble_fill(node: &crate::BubbleRenderNode, theme: &Theme) -> Color {
+        match node.part {
+            BubblePart::Root | BubblePart::Meta => Color::NONE,
+            BubblePart::Avatar if node.side == BubbleSide::System => Color::NONE,
+            BubblePart::Avatar if node.side == BubbleSide::Outgoing => theme.brand().to_bevy(),
+            BubblePart::Avatar => theme.primary_soft().to_bevy_on(theme.surface_1()),
+            BubblePart::Content if node.disabled => theme.surface_2().to_bevy(),
+            BubblePart::Content if node.loading => theme.info_soft().to_bevy_on(theme.surface_1()),
+            BubblePart::Content => match node.side {
+                BubbleSide::Incoming => theme.surface_1().to_bevy(),
+                BubbleSide::Outgoing => theme.primary_soft().to_bevy_on(theme.surface_1()),
+                BubbleSide::System => theme.surface_2().to_bevy(),
             },
+            BubblePart::Actions => theme.surface_2().to_bevy(),
         }
     }
 
@@ -3346,28 +3434,16 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn combobox_tone_for_part(
-        part: ComboboxPart,
-        selected: bool,
-        visible: bool,
-    ) -> UiBlockTone {
-        match part {
-            ComboboxPart::Option => {
-                if selected {
-                    UiBlockTone::Brand
-                } else {
-                    UiBlockTone::Surface
-                }
+    fn combobox_fill(node: &crate::ComboboxRenderNode, theme: &Theme) -> Color {
+        match node.part {
+            ComboboxPart::Root | ComboboxPart::Input => theme.surface_1().to_bevy(),
+            ComboboxPart::List => theme.surface_elevated().to_bevy(),
+            ComboboxPart::Option if !node.selected => theme.surface_elevated().to_bevy(),
+            ComboboxPart::Option => theme.selected_tint().to_bevy_on(theme.surface_elevated()),
+            ComboboxPart::Empty if node.visible => {
+                theme.warning_soft().to_bevy_on(theme.surface_elevated())
             }
-            ComboboxPart::Empty => {
-                if visible {
-                    UiBlockTone::Warning
-                } else {
-                    UiBlockTone::Muted
-                }
-            }
-            ComboboxPart::Input => UiBlockTone::Brand,
-            ComboboxPart::List | ComboboxPart::Root => UiBlockTone::Surface,
+            ComboboxPart::Empty => Color::NONE,
         }
     }
 
@@ -3481,40 +3557,27 @@ pub mod bevy_adapter {
         }
     }
 
-    const fn context_menu_tone_for_part(
-        part: ContextMenuPart,
-        active: bool,
-        selected: bool,
-        destructive: bool,
-        visible: bool,
-    ) -> UiBlockTone {
-        match part {
-            ContextMenuPart::Item => {
-                if destructive {
-                    UiBlockTone::Danger
-                } else if selected || active {
-                    UiBlockTone::Brand
-                } else {
-                    UiBlockTone::Surface
-                }
+    fn context_menu_fill(node: &crate::ContextMenuRenderNode, theme: &Theme) -> Color {
+        match node.part {
+            ContextMenuPart::Root => theme.surface_1().to_bevy(),
+            ContextMenuPart::Trigger => theme.surface_2().to_bevy(),
+            ContextMenuPart::Content if node.visible => theme.surface_elevated().to_bevy(),
+            ContextMenuPart::Content => Color::NONE,
+            ContextMenuPart::Item if node.destructive => {
+                theme.error_soft().to_bevy_on(theme.surface_elevated())
             }
-            ContextMenuPart::Submenu => {
-                if active {
-                    UiBlockTone::Brand
-                } else {
-                    UiBlockTone::Surface
-                }
+            ContextMenuPart::Item if node.selected => {
+                theme.primary_soft().to_bevy_on(theme.surface_elevated())
             }
-            ContextMenuPart::Content => {
-                if visible {
-                    UiBlockTone::Surface
-                } else {
-                    UiBlockTone::Muted
-                }
+            ContextMenuPart::Item if node.active => {
+                theme.selected_tint().to_bevy_on(theme.surface_elevated())
             }
-            ContextMenuPart::Trigger => UiBlockTone::Brand,
-            ContextMenuPart::Separator => UiBlockTone::Muted,
-            ContextMenuPart::Root => UiBlockTone::Surface,
+            ContextMenuPart::Item => theme.surface_1().to_bevy(),
+            ContextMenuPart::Separator => theme.border_subtle().to_bevy(),
+            ContextMenuPart::Submenu if node.active || node.submenu_open => {
+                theme.selected_tint().to_bevy_on(theme.surface_elevated())
+            }
+            ContextMenuPart::Submenu => theme.surface_1().to_bevy(),
         }
     }
 
@@ -3800,6 +3863,7 @@ pub mod bevy_adapter {
     const fn input_tone_for_part(
         part: InputPart,
         focused: bool,
+        active: bool,
         invalid: bool,
         visible: bool,
     ) -> UiBlockTone {
@@ -3808,7 +3872,7 @@ pub mod bevy_adapter {
         }
         match part {
             InputPart::Control if focused => UiBlockTone::Brand,
-            InputPart::Suffix if visible => UiBlockTone::Brand,
+            InputPart::Suffix if active => UiBlockTone::Brand,
             InputPart::Prefix if visible => UiBlockTone::Muted,
             InputPart::Prefix | InputPart::Suffix => UiBlockTone::Muted,
             InputPart::Root | InputPart::Control => UiBlockTone::Surface,
@@ -3853,6 +3917,7 @@ pub mod bevy_adapter {
     const fn input_group_tone_for_part(
         part: InputGroupPart,
         focused: bool,
+        active: bool,
         invalid: bool,
         visible: bool,
     ) -> UiBlockTone {
@@ -3861,7 +3926,7 @@ pub mod bevy_adapter {
         }
         match part {
             InputGroupPart::Input if focused => UiBlockTone::Brand,
-            InputGroupPart::Button if visible => UiBlockTone::Brand,
+            InputGroupPart::Button if active => UiBlockTone::Brand,
             InputGroupPart::Addon if visible => UiBlockTone::Muted,
             InputGroupPart::Addon | InputGroupPart::Button => UiBlockTone::Muted,
             InputGroupPart::Root | InputGroupPart::Input => UiBlockTone::Surface,
@@ -3986,14 +4051,13 @@ pub mod bevy_adapter {
         active: bool,
         invalid: bool,
         visible: bool,
-        actionable: bool,
     ) -> UiBlockTone {
         if invalid {
             return UiBlockTone::Danger;
         }
         match part {
-            ItemPart::Actions if active || actionable => UiBlockTone::Brand,
-            ItemPart::Media if visible => UiBlockTone::Success,
+            ItemPart::Actions if active => UiBlockTone::Brand,
+            ItemPart::Media if visible => UiBlockTone::Brand,
             ItemPart::Media | ItemPart::Actions => UiBlockTone::Muted,
             ItemPart::Root | ItemPart::Content | ItemPart::Title | ItemPart::Description => {
                 UiBlockTone::Surface
@@ -6714,6 +6778,44 @@ mod tests {
             total += variants.len();
         }
         assert_eq!(total, 338);
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn bevy_flow_keeps_inline_controls_renderer_independent() {
+        assert_eq!(
+            bevy_adapter::bevy_ui_flow(UiComponentId::Input),
+            bevy_adapter::BevyUiFlow::ControlRow
+        );
+        assert_eq!(
+            bevy_adapter::bevy_ui_flow(UiComponentId::Checkbox),
+            bevy_adapter::BevyUiFlow::CheckboxRow
+        );
+        assert_eq!(
+            bevy_adapter::bevy_ui_flow(UiComponentId::Card),
+            bevy_adapter::BevyUiFlow::Stack
+        );
+        assert_eq!(
+            bevy_adapter::bevy_ui_flow(UiComponentId::Field),
+            bevy_adapter::BevyUiFlow::FormField
+        );
+        assert_eq!(
+            bevy_adapter::bevy_ui_flow(UiComponentId::Item),
+            bevy_adapter::BevyUiFlow::ItemRow
+        );
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn inactive_input_suffix_uses_the_muted_surface() {
+        let theme = crate::ThemeId::Dark.palette();
+        let suffix = bevy_adapter::bevy_primitives_for_component(UiComponentId::Input, &theme)
+            .into_iter()
+            .find(|primitive| primitive.part == "InputSuffix")
+            .expect("input suffix primitive should exist");
+
+        assert!(!suffix.selected);
+        assert_eq!(suffix.fill, theme.surface_sunken().to_bevy());
     }
 
     #[cfg(feature = "bevy")]

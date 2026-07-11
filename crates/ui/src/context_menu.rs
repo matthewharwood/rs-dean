@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ContextMenuDensity {
@@ -166,6 +168,34 @@ pub struct ContextMenuRenderNode {
     pub loading: bool,
     pub disabled: bool,
     pub destructive: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ContextMenuLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub item_min_height: f32,
+    pub item_padding_inline: f32,
+    pub item_padding_block: f32,
+    pub item_gap: f32,
+    pub item_font_size: f32,
+    pub item_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub body_gap: f32,
+    pub shortcut_padding_inline: f32,
+    pub shortcut_padding_block: f32,
+    pub shortcut_font_size: f32,
+    pub shortcut_line_height: f32,
+    pub separator_height: f32,
 }
 
 impl ContextMenuAction {
@@ -460,6 +490,61 @@ impl ContextMenuState {
 
 pub fn validate_context_menu_model(model: &ContextMenuModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn context_menu_layout_metrics(
+    density: ContextMenuDensity,
+    disabled: bool,
+    inline_size: f32,
+) -> ContextMenuLayoutMetrics {
+    let dense_root = density == ContextMenuDensity::Dense && !disabled;
+    let dense_trigger = density == ContextMenuDensity::Dense;
+    ContextMenuLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: scale::space::xs2(inline_size),
+        trigger_min_height: if dense_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_font_size: if dense_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        content_padding: scale::space::xs2(inline_size),
+        content_gap: scale::space::xs2(inline_size),
+        item_min_height: scale::space::FIELD,
+        item_padding_inline: scale::space::xs(inline_size),
+        item_padding_block: scale::space::xs2(inline_size),
+        item_gap: scale::space::xs(inline_size),
+        item_font_size: scale::font_size::f0(inline_size),
+        item_line_height: scale::line_height::LH0,
+        detail_font_size: scale::font_size::f00(inline_size),
+        detail_line_height: scale::line_height::LH0,
+        body_gap: scale::space::xs3(inline_size),
+        shortcut_padding_inline: scale::space::xs2(inline_size),
+        shortcut_padding_block: scale::space::xs3(inline_size),
+        shortcut_font_size: scale::font_size::f00(inline_size),
+        shortcut_line_height: scale::line_height::LH00,
+        separator_height: scale::space::xs3(inline_size),
+    }
 }
 
 pub fn context_menu_render_nodes(
@@ -834,6 +919,20 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_context_menu_model(&default_context_menu_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens() {
+        let compact = context_menu_layout_metrics(ContextMenuDensity::Standard, false, 320.0);
+        let wide = context_menu_layout_metrics(ContextMenuDensity::Standard, false, 1_000.0);
+        let dense = context_menu_layout_metrics(ContextMenuDensity::Dense, false, 1_000.0);
+        let disabled_dense = context_menu_layout_metrics(ContextMenuDensity::Dense, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.trigger_font_size < wide.trigger_font_size);
+        assert_eq!(wide.max_width, scale::container::CONTROL);
     }
 
     #[test]

@@ -9,13 +9,13 @@ use crate::{
     BreadcrumbIntent, BreadcrumbModel, BreadcrumbPart, BreadcrumbState, BubbleIntent, BubbleModel,
     BubblePart, BubbleSide, ButtonGroupIntent, ButtonGroupModel, ButtonGroupOrientation,
     ButtonGroupPart, ButtonIntent, ButtonKind, ButtonModel, ButtonPart, ButtonSize, ButtonVariant,
-    CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode, CardDensity, CardIntent,
-    CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent, CarouselModel, CarouselPart,
-    ChartDensity, ChartIntent, ChartModel, ChartPart, ChartTone, CheckboxChecked, CheckboxDensity,
-    CheckboxIntent, CheckboxModel, CheckboxPart, CollapsibleDensity, CollapsibleIntent,
-    CollapsibleModel, CollapsiblePart, ComboboxDensity, ComboboxIntent, ComboboxModel,
-    ComboboxPart, CommandDensity, CommandIntent, CommandModel, CommandPart,
-    ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
+    CALENDAR_WEEKDAYS, CalendarIntent, CalendarModel, CalendarPart, CalendarSelectionMode,
+    CardDensity, CardIntent, CardModel, CardPart, CardVariant, CarouselDensity, CarouselIntent,
+    CarouselModel, CarouselPart, ChartDensity, ChartIntent, ChartModel, ChartPart, ChartTone,
+    CheckboxChecked, CheckboxDensity, CheckboxIntent, CheckboxModel, CheckboxPart,
+    CollapsibleDensity, CollapsibleIntent, CollapsibleModel, CollapsiblePart, ComboboxDensity,
+    ComboboxIntent, ComboboxModel, ComboboxPart, CommandDensity, CommandIntent, CommandModel,
+    CommandPart, ComponentImplementation, ContextMenuDensity, ContextMenuIntent, ContextMenuModel,
     ContextMenuPart, ContextMenuState, DataTableDensity, DataTableIntent, DataTableModel,
     DataTablePart, DataTableState, DatePickerDensity, DatePickerIntent, DatePickerModel,
     DatePickerPart, DatePickerState, DialogIntent, DialogMode, DialogModel, DialogPart, DialogSize,
@@ -55,11 +55,13 @@ use crate::{
     ToggleGroupPart, ToggleGroupState, ToggleIntent, ToggleModel, TogglePart, TogglePressed,
     ToggleVariant, TooltipDensity, TooltipIntent, TooltipModel, TooltipPart, TooltipPlacement,
     TypographyDensity, TypographyIntent, TypographyModel, TypographyPart, TypographyState, UiBlock,
-    UiBlockTone, UiComponentId, accordion_dom_id, alert_dialog_dom_id, aspect_ratio_render_nodes,
-    attachment_render_nodes, avatar_render_nodes, badge_render_nodes, breadcrumb_render_nodes,
-    bubble_render_nodes, button_group_render_nodes, button_render_nodes, calendar_render_nodes,
-    card_render_nodes, carousel_render_nodes, chart_render_nodes, checkbox_render_nodes,
-    collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
+    UiBlockTone, UiComponentId, UiStoryModel, accordion_dom_id, alert_dialog_dom_id,
+    aspect_ratio_render_nodes, attachment_render_nodes, avatar_render_nodes, badge_icon_copy,
+    badge_render_nodes, badge_text_copy, breadcrumb_render_nodes, bubble_render_nodes,
+    button_group_item_icon_copy, button_group_item_label_copy, button_group_render_nodes,
+    button_icon_copy, button_label_copy, button_render_nodes, calendar_render_nodes,
+    canonical_ui_story_fixture, card_render_nodes, carousel_render_nodes, chart_render_nodes,
+    checkbox_render_nodes, collapsible_render_nodes, combobox_render_nodes, command_render_nodes,
     component_implementation, component_spec, context_menu_render_nodes, data_table_render_nodes,
     date_picker_render_nodes, default_accordion_items, default_alert_dialog_model,
     default_alert_model, default_aspect_ratio_model, default_attachment_model,
@@ -91,11 +93,12 @@ use crate::{
     sheet_render_nodes, sidebar_render_nodes, skeleton_render_nodes, slider_render_nodes,
     sonner_render_nodes, spinner_render_nodes, switch_render_nodes, table_render_nodes,
     tabs_dom_id, tabs_render_nodes, textarea_dom_id, textarea_render_nodes, toast_dom_id,
-    toast_render_nodes, toggle_group_render_nodes, toggle_group_selected_values_label,
-    toggle_render_nodes, tooltip_dom_id, tooltip_render_nodes, typography_dom_id,
-    typography_render_nodes, validate_accordion_model, validate_alert_dialog_model,
-    validate_alert_model, validate_aspect_ratio_model, validate_attachment_model,
-    validate_avatar_model, validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
+    toast_render_nodes, toggle_group_render_nodes, toggle_group_selected_status_label,
+    toggle_group_selected_values_label, toggle_render_nodes, tooltip_content_copy, tooltip_dom_id,
+    tooltip_render_nodes, tooltip_trigger_copy, typography_dom_id, typography_render_nodes,
+    validate_accordion_model, validate_alert_dialog_model, validate_alert_model,
+    validate_aspect_ratio_model, validate_attachment_model, validate_avatar_model,
+    validate_badge_model, validate_breadcrumb_model, validate_bubble_model,
     validate_button_group_model, validate_button_model, validate_calendar_model,
     validate_card_model, validate_carousel_model, validate_chart_model, validate_checkbox_model,
     validate_collapsible_model, validate_combobox_model, validate_command_model,
@@ -167,7 +170,7 @@ const ALERT_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const ALERT_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const ALERT_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const ALERT_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
-const ALERT_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const ALERT_MARKER_DEFAULT: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
 const ALERT_MARKER_INFO: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-info text-00 font-7 text-text-on-brand";
 const ALERT_MARKER_SUCCESS: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-success text-00 font-7 text-text-on-brand";
@@ -177,7 +180,7 @@ const ALERT_MARKER_DESTRUCTIVE: &str = "grid size-s shrink-0 place-items-center 
 const ALERT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const ALERT_DIALOG_ROOT: &str = "grid w-full gap-xs text-text-1";
-const ALERT_DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const ALERT_DIALOG_OVERLAY: &str =
     "grid w-full place-items-center rounded-box bg-surface-overlay p-s";
 const ALERT_DIALOG_CONTENT: &str = "grid w-full gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
@@ -190,9 +193,9 @@ const ALERT_DIALOG_TITLE_SMALL: &str = "m-0 text-0 font-7 leading-0 text-text-1"
 const ALERT_DIALOG_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const ALERT_DIALOG_DESCRIPTION_SMALL: &str = "m-0 text-00 leading-0 text-text-2";
 const ALERT_DIALOG_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
-const ALERT_DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ALERT_DIALOG_ACTION_DESTRUCTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ALERT_DIALOG_CANCEL: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ALERT_DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ALERT_DIALOG_ACTION_DESTRUCTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ALERT_DIALOG_CANCEL: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const ALERT_DIALOG_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const ASPECT_RATIO_ROOT: &str = "grid w-full gap-2xs text-text-1";
@@ -231,8 +234,8 @@ const ATTACHMENT_TITLE: &str =
 const ATTACHMENT_TITLE_DISABLED: &str = "m-0 overflow-hidden text-ellipsis whitespace-nowrap text-0 font-7 leading-0 text-text-disabled";
 const ATTACHMENT_META: &str = "m-0 text-00 leading-0 text-text-2";
 const ATTACHMENT_META_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
-const ATTACHMENT_ACTION: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ATTACHMENT_ACTION_ACTIVE: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const ATTACHMENT_ACTION: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ATTACHMENT_ACTION_ACTIVE: &str = "inline-flex min-h-field shrink-0 items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const ATTACHMENT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const AVATAR_ROOT_SMALL: &str = "m-0 grid size-l place-items-center overflow-hidden rounded-pill border border-border-subtle bg-surface-2 text-text-1 shadow-1";
@@ -274,7 +277,7 @@ const BADGE_OUTLINE_SUCCESS: &str = "border-success bg-surface-1 text-success";
 const BADGE_OUTLINE_WARNING: &str = "border-warning bg-surface-1 text-warning";
 const BADGE_OUTLINE_DESTRUCTIVE: &str = "border-danger bg-surface-1 text-danger";
 const BADGE_OUTLINE_MUTED: &str = "border-border-muted bg-surface-1 text-text-muted";
-const BADGE_DISABLED: &str = "opacity-disabled";
+const BADGE_DISABLED: &str = "opacity-45";
 const BADGE_HIGHLIGHTED: &str = "shadow-1";
 const BADGE_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
 const BADGE_TEXT: &str = "truncate";
@@ -306,23 +309,19 @@ const BUBBLE_ROOT_DISABLED: &str = "flex w-full min-w-0 items-start gap-xs text-
 const BUBBLE_AVATAR: &str = "grid size-l shrink-0 place-items-center rounded-pill border border-border-subtle bg-primary-soft text-00 font-7 text-text-1";
 const BUBBLE_AVATAR_OUTGOING: &str = "grid size-l shrink-0 place-items-center rounded-pill border border-brand bg-brand text-00 font-7 text-text-on-brand";
 const BUBBLE_AVATAR_SYSTEM: &str = "hidden";
-const BUBBLE_PANEL_INCOMING: &str =
-    "grid max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s shadow-1";
-const BUBBLE_PANEL_OUTGOING: &str =
-    "grid max-w-2xl gap-2xs rounded-box border border-brand bg-primary-soft p-s shadow-1";
+const BUBBLE_PANEL_INCOMING: &str = "grid min-w-0 flex-1 max-w-reading gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s shadow-1";
+const BUBBLE_PANEL_OUTGOING: &str = "grid min-w-0 flex-1 max-w-reading gap-2xs rounded-box border border-brand bg-primary-soft p-s shadow-1";
 const BUBBLE_PANEL_SYSTEM: &str =
-    "grid max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s";
-const BUBBLE_PANEL_LOADING: &str =
-    "grid max-w-2xl gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
-const BUBBLE_PANEL_DISABLED: &str =
-    "grid max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s";
+    "grid w-full max-w-reading gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s";
+const BUBBLE_PANEL_LOADING: &str = "grid min-w-0 flex-1 max-w-reading gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
+const BUBBLE_PANEL_DISABLED: &str = "grid min-w-0 flex-1 max-w-reading gap-2xs rounded-box border border-border-muted bg-surface-2 p-s";
 const BUBBLE_CONTENT: &str = "m-0 text-0 leading-0 text-text-1";
 const BUBBLE_CONTENT_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
 const BUBBLE_META: &str = "m-0 text-00 leading-0 text-text-muted";
 const BUBBLE_META_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const BUBBLE_ACTIONS: &str = "flex flex-wrap items-center gap-2xs pt-2xs";
-const BUBBLE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const BUBBLE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const BUBBLE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const BUBBLE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const BUBBLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const BUTTON_BASE: &str = "inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-field border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
@@ -337,7 +336,7 @@ const BUTTON_OUTLINE: &str = "border-border-strong bg-surface-1 text-text-1 hove
 const BUTTON_GHOST: &str = "border-border-faint bg-surface-1 text-text-1 hover:bg-hover-tint";
 const BUTTON_LINK: &str = "border-border-faint bg-surface-1 text-link hover:bg-hover-tint";
 const BUTTON_PRESSED: &str = "shadow-1";
-const BUTTON_BLOCKED: &str = "opacity-disabled";
+const BUTTON_BLOCKED: &str = "opacity-45";
 const BUTTON_ICON: &str = "inline-flex min-w-s justify-center text-00 font-7 leading-0";
 const BUTTON_LABEL: &str = "truncate";
 const BUTTON_LABEL_ICON: &str = "sr-only";
@@ -345,7 +344,7 @@ const BUTTON_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const BUTTON_GROUP_ROOT_HORIZONTAL: &str = "inline-flex max-w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 p-3xs text-text-1 shadow-1";
 const BUTTON_GROUP_ROOT_VERTICAL: &str = "inline-grid max-w-full overflow-hidden rounded-field border border-border-strong bg-surface-1 p-3xs text-text-1 shadow-1";
-const BUTTON_GROUP_ROOT_DISABLED: &str = "opacity-disabled";
+const BUTTON_GROUP_ROOT_DISABLED: &str = "opacity-45";
 const BUTTON_GROUP_ITEM_BASE: &str = "inline-flex max-w-full items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const BUTTON_GROUP_ITEM_SMALL: &str = "min-h-s gap-2xs px-2xs py-3xs text-00 font-7 leading-0";
 const BUTTON_GROUP_ITEM_MEDIUM: &str = "min-h-field gap-2xs px-xs py-2xs text-0 font-7 leading-0";
@@ -368,17 +367,17 @@ const BUTTON_GROUP_SEPARATOR_HORIZONTAL: &str = "w-selector bg-border-subtle";
 const BUTTON_GROUP_SEPARATOR_VERTICAL: &str = "h-selector bg-border-subtle";
 const BUTTON_GROUP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CALENDAR_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const CALENDAR_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CALENDAR_ROOT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CALENDAR_ROOT_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const CALENDAR_HEADER: &str = "flex items-center justify-between gap-xs";
-const CALENDAR_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CALENDAR_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CALENDAR_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const CALENDAR_GRID: &str = "grid grid-cols-7 gap-2xs";
 const CALENDAR_WEEKDAY: &str =
     "grid min-h-s place-items-center text-00 font-7 uppercase text-text-muted";
 const CALENDAR_DAY: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-faint bg-surface-1 px-2xs py-3xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled";
-const CALENDAR_DAY_SELECTED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-0 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CALENDAR_DAY_RANGE: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CALENDAR_DAY_SELECTED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-0 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CALENDAR_DAY_RANGE: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CALENDAR_DAY_OUTSIDE: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-faint bg-surface-2 px-2xs py-3xs text-0 font-6 leading-0 text-text-muted disabled:text-text-disabled";
 const CALENDAR_RANGE: &str =
     "rounded-field border border-border-subtle bg-surface-2 p-xs text-0 leading-0 text-text-2";
@@ -386,13 +385,13 @@ const CALENDAR_RANGE_ACTIVE: &str =
     "rounded-field border border-brand bg-primary-soft p-xs text-0 font-7 leading-0 text-text-1";
 const CALENDAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CARD_STANDARD_ELEVATED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
-const CARD_STANDARD_OUTLINE: &str = "grid w-full max-w-md gap-s rounded-box border border-border-strong bg-surface-1 p-s text-text-1 shadow-1";
-const CARD_STANDARD_GHOST: &str = "grid w-full max-w-md gap-s rounded-box border border-border-faint bg-surface-1 p-s text-text-1";
-const CARD_DENSE_ELEVATED: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-1";
-const CARD_DENSE_OUTLINE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-strong bg-surface-1 p-xs text-text-1 shadow-1";
-const CARD_DENSE_GHOST: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-faint bg-surface-1 p-xs text-text-1";
-const CARD_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CARD_STANDARD_ELEVATED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-2";
+const CARD_STANDARD_OUTLINE: &str = "grid w-full max-w-control gap-s rounded-box border border-border-strong bg-surface-1 p-s text-text-1 shadow-1";
+const CARD_STANDARD_GHOST: &str = "grid w-full max-w-control gap-s rounded-box border border-border-faint bg-surface-1 p-s text-text-1";
+const CARD_DENSE_ELEVATED: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-1";
+const CARD_DENSE_OUTLINE: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-strong bg-surface-1 p-xs text-text-1 shadow-1";
+const CARD_DENSE_GHOST: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-faint bg-surface-1 p-xs text-text-1";
+const CARD_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const CARD_HEADER: &str = "grid gap-2xs";
 const CARD_HEADER_DENSE: &str = "grid gap-3xs";
 const CARD_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
@@ -408,13 +407,13 @@ const CARD_FOOTER: &str =
 const CARD_FOOTER_DENSE: &str =
     "flex flex-wrap items-center justify-between gap-2xs border-t border-border-subtle pt-xs";
 const CARD_FOOTER_TEXT: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
-const CARD_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CARD_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CARD_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CARD_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CARD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CAROUSEL_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const CAROUSEL_ROOT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const CAROUSEL_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CAROUSEL_ROOT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CAROUSEL_ROOT_DENSE: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CAROUSEL_ROOT_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const CAROUSEL_CONTENT: &str = "grid gap-xs overflow-hidden";
 const CAROUSEL_CONTENT_DENSE: &str = "grid gap-2xs overflow-hidden";
 const CAROUSEL_ITEM: &str = "grid min-h-xl gap-2xs rounded-field border border-border-subtle bg-surface-2 p-s text-text-1 transition-colors";
@@ -425,19 +424,19 @@ const CAROUSEL_ITEM_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1
 const CAROUSEL_ITEM_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 const CAROUSEL_ITEM_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const CAROUSEL_CONTROLS: &str = "flex items-center justify-between gap-xs";
-const CAROUSEL_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CAROUSEL_NAV: &str = "inline-flex size-l items-center justify-center rounded-field border border-border-strong bg-surface-2 text-0 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CAROUSEL_INDICATOR: &str = "rounded-pill border border-border-subtle bg-surface-2 px-xs py-3xs text-00 font-7 text-text-muted";
 const CAROUSEL_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CHART_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const CHART_ROOT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const CHART_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CHART_ROOT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CHART_ROOT_DENSE: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CHART_ROOT_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const CHART_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const CHART_TITLE_DENSE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const CHART_SERIES_LIST: &str = "grid gap-xs";
 const CHART_SERIES_LIST_DENSE: &str = "grid gap-2xs";
-const CHART_SERIES: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CHART_SERIES_SELECTED: &str = "grid gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHART_SERIES: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CHART_SERIES_SELECTED: &str = "grid gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CHART_SERIES_LABEL: &str = "flex items-center justify-between gap-xs text-00 font-7 uppercase tracking-label text-text-muted";
 const CHART_TRACK: &str = "h-s overflow-hidden rounded-pill bg-surface-3";
 const CHART_BAR_BRAND: &str = "block h-full rounded-pill bg-brand";
@@ -455,14 +454,14 @@ const CHART_AXIS: &str =
     "border-t border-border-subtle pt-2xs text-00 font-6 uppercase tracking-label text-text-muted";
 const CHART_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CHECKBOX_ROOT: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const CHECKBOX_ROOT_DENSE: &str = "flex w-full max-w-md items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const CHECKBOX_ROOT_INVALID: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const CHECKBOX_ROOT_DISABLED: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
-const CHECKBOX_CONTROL: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-border-strong bg-surface-1 text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CHECKBOX_CONTROL_CHECKED: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-brand text-00 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CHECKBOX_CONTROL_INDETERMINATE: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-primary-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CHECKBOX_CONTROL_INVALID: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-danger bg-error-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CHECKBOX_ROOT: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CHECKBOX_ROOT_DENSE: &str = "flex w-full max-w-control items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CHECKBOX_ROOT_INVALID: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const CHECKBOX_ROOT_DISABLED: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CHECKBOX_CONTROL: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-border-strong bg-surface-1 text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CHECKBOX_CONTROL_CHECKED: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-brand text-00 font-7 leading-0 text-text-on-brand transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CHECKBOX_CONTROL_INDETERMINATE: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-brand bg-primary-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CHECKBOX_CONTROL_INVALID: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-danger bg-error-soft text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CHECKBOX_CONTROL_DISABLED: &str = "inline-grid size-s shrink-0 place-items-center rounded-selector border border-border-muted bg-surface-3 text-00 font-7 leading-0 text-text-disabled";
 const CHECKBOX_TEXT: &str = "grid min-w-0 gap-3xs";
 const CHECKBOX_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
@@ -473,13 +472,13 @@ const CHECKBOX_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-dis
 const CHECKBOX_REQUIRED: &str = "text-danger";
 const CHECKBOX_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const COLLAPSIBLE_ROOT: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
-const COLLAPSIBLE_ROOT_DENSE: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
-const COLLAPSIBLE_ROOT_DISABLED: &str = "grid w-full max-w-md gap-0 overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled";
-const COLLAPSIBLE_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COLLAPSIBLE_TRIGGER_DENSE: &str = "flex min-h-field w-full items-center justify-between gap-2xs px-xs py-2xs text-left text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COLLAPSIBLE_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs bg-selected-tint px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COLLAPSIBLE_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-disabled";
+const COLLAPSIBLE_ROOT: &str = "grid w-full max-w-control gap-0 overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const COLLAPSIBLE_ROOT_DENSE: &str = "grid w-full max-w-control gap-0 overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const COLLAPSIBLE_ROOT_DISABLED: &str = "grid w-full max-w-control gap-0 overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled";
+const COLLAPSIBLE_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COLLAPSIBLE_TRIGGER_DENSE: &str = "flex min-h-field w-full items-center justify-between gap-2xs px-xs py-2xs text-left text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COLLAPSIBLE_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs bg-selected-tint px-s py-xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COLLAPSIBLE_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs px-s py-xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-45";
 const COLLAPSIBLE_INDICATOR: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-2 text-00 font-7 text-text-muted";
 const COLLAPSIBLE_CONTENT: &str =
     "border-t border-border-subtle bg-surface-1 p-s text-0 leading-0 text-text-2";
@@ -488,36 +487,36 @@ const COLLAPSIBLE_CONTENT_DENSE: &str =
 const COLLAPSIBLE_CONTENT_HIDDEN: &str = "hidden";
 const COLLAPSIBLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const COMBOBOX_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const COMBOBOX_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const COMBOBOX_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
-const COMBOBOX_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMBOBOX_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMBOBOX_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const COMBOBOX_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const COMBOBOX_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const COMBOBOX_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMBOBOX_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const COMBOBOX_LIST: &str = "grid max-h-4xl gap-2xs overflow-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
 const COMBOBOX_LIST_HIDDEN: &str = "hidden";
-const COMBOBOX_OPTION: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMBOBOX_OPTION_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMBOBOX_OPTION_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const COMBOBOX_OPTION: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMBOBOX_OPTION_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMBOBOX_OPTION_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-45";
 const COMBOBOX_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
 const COMBOBOX_META: &str = "text-00 font-6 uppercase tracking-label text-text-muted";
 const COMBOBOX_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const COMMAND_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const COMMAND_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const COMMAND_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
-const COMMAND_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMMAND_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const COMMAND_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const COMMAND_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const COMMAND_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const COMMAND_INPUT: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMMAND_INPUT_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const COMMAND_LIST: &str = "grid max-h-4xl gap-2xs overflow-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
 const COMMAND_LIST_HIDDEN: &str = "hidden";
 const COMMAND_GROUP: &str =
     "grid gap-2xs rounded-field border border-border-faint bg-surface-1 p-2xs";
 const COMMAND_GROUP_LABEL: &str =
     "px-2xs pt-2xs text-00 font-7 uppercase tracking-label text-text-muted";
-const COMMAND_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMMAND_ITEM_HIGHLIGHTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMMAND_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const COMMAND_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const COMMAND_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMMAND_ITEM_HIGHLIGHTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMMAND_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const COMMAND_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-45";
 const COMMAND_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
 const COMMAND_ITEM_LABEL: &str = "m-0 text-0 font-7 leading-0";
 const COMMAND_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
@@ -526,36 +525,36 @@ const COMMAND_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-1 p-xs text-0 leading-0 text-text-muted";
 const COMMAND_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const CONTEXT_MENU_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const CONTEXT_MENU_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const CONTEXT_MENU_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
-const CONTEXT_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const CONTEXT_MENU_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const CONTEXT_MENU_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const CONTEXT_MENU_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const CONTEXT_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const CONTEXT_MENU_CONTENT: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
 const CONTEXT_MENU_CONTENT_HIDDEN: &str = "hidden";
-const CONTEXT_MENU_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_ITEM_DANGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-disabled";
+const CONTEXT_MENU_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_ITEM_DANGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 leading-0 text-text-disabled disabled:opacity-45";
 const CONTEXT_MENU_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
 const CONTEXT_MENU_ITEM_LABEL: &str = "m-0 text-0 font-7 leading-0";
 const CONTEXT_MENU_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const CONTEXT_MENU_SHORTCUT: &str = "rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs font-mono text-00 text-text-muted shadow-1";
 const CONTEXT_MENU_SEPARATOR: &str = "h-3xs rounded-pill bg-border-subtle";
-const CONTEXT_MENU_SUBMENU: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_SUBMENU_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const CONTEXT_MENU_SUBMENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-disabled";
+const CONTEXT_MENU_SUBMENU: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-faint bg-surface-1 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_SUBMENU_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const CONTEXT_MENU_SUBMENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-7 leading-0 text-text-disabled disabled:opacity-45";
 const CONTEXT_MENU_SUBMENU_MARKER: &str = "text-00 font-7 text-text-muted";
 const CONTEXT_MENU_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const DATA_TABLE_ROOT: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const DATA_TABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const DATA_TABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const DATA_TABLE_ROOT: &str = "grid w-full max-w-content gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const DATA_TABLE_ROOT_DENSE: &str = "grid w-full max-w-content gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const DATA_TABLE_ROOT_DISABLED: &str = "grid w-full max-w-content gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const DATA_TABLE_TOOLBAR: &str = "flex flex-wrap items-center justify-between gap-2xs";
 const DATA_TABLE_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
-const DATA_TABLE_FILTER: &str = "min-h-field min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DATA_TABLE_FILTER_DENSE: &str = "min-h-s min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATA_TABLE_FILTER: &str = "min-h-field min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DATA_TABLE_FILTER_DENSE: &str = "min-h-s min-w-0 flex-1 rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DATA_TABLE_FRAME: &str =
     "w-full overflow-hidden rounded-field border border-border-subtle bg-surface-1";
 const DATA_TABLE_TABLE: &str = "w-full border-collapse text-left text-0 text-text-1";
@@ -574,13 +573,13 @@ const DATA_TABLE_CELL_DENSE: &str = "px-2xs py-3xs text-00 leading-0 text-text-1
 const DATA_TABLE_EMPTY: &str = "px-xs py-s text-center text-0 leading-0 text-text-muted";
 const DATA_TABLE_PAGINATION: &str = "flex flex-wrap items-center justify-between gap-2xs";
 const DATA_TABLE_PAGE_LABEL: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
-const DATA_TABLE_PAGE_BUTTON: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATA_TABLE_PAGE_BUTTON: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DATA_TABLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const TABLE_ROOT: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const TABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const TABLE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const TABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TABLE_ROOT: &str = "grid w-full max-w-content gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TABLE_ROOT_DENSE: &str = "grid w-full max-w-content gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TABLE_ROOT_INVALID: &str = "grid w-full max-w-content gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TABLE_ROOT_DISABLED: &str = "grid w-full max-w-content gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const TABLE_FRAME: &str =
     "overflow-hidden rounded-field border border-border-subtle bg-surface-elevated";
 const TABLE_TABLE: &str = "w-full border-collapse text-left text-0 text-text-1";
@@ -594,18 +593,18 @@ const TABLE_HEAD_DENSE: &str = "border-b border-border-subtle px-2xs py-3xs text
 const TABLE_HEAD_NUMERIC: &str = "border-b border-border-subtle px-xs py-2xs text-right text-00 font-7 uppercase tracking-label text-text-muted";
 const TABLE_ROW: &str = "transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TABLE_ROW_SELECTED: &str = "bg-primary-soft transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const TABLE_ROW_DISABLED: &str = "bg-surface-2 text-text-disabled opacity-disabled";
+const TABLE_ROW_DISABLED: &str = "bg-surface-2 text-text-disabled opacity-45";
 const TABLE_CELL: &str = "px-xs py-2xs text-0 leading-0 text-text-1";
 const TABLE_CELL_DENSE: &str = "px-2xs py-3xs text-00 leading-0 text-text-1";
 const TABLE_CELL_NUMERIC: &str = "px-xs py-2xs text-right text-0 leading-0 text-text-1";
 const TABLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const TABS_ROOT: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const TABS_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const TABS_ROOT_VERTICAL: &str = "flex w-full max-w-2xl flex-col gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1 md:flex-row";
-const TABS_ROOT_DENSE_VERTICAL: &str = "flex w-full max-w-2xl flex-col gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 md:flex-row";
-const TABS_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const TABS_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TABS_ROOT: &str = "grid w-full max-w-content gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TABS_ROOT_DENSE: &str = "grid w-full max-w-content gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TABS_ROOT_VERTICAL: &str = "flex w-full max-w-content flex-col gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1 md:flex-row";
+const TABS_ROOT_DENSE_VERTICAL: &str = "flex w-full max-w-content flex-col gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 md:flex-row";
+const TABS_ROOT_INVALID: &str = "grid w-full max-w-content gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TABS_ROOT_DISABLED: &str = "grid w-full max-w-content gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const TABS_LIST: &str = "flex flex-wrap items-center gap-2xs rounded-field bg-surface-2 p-2xs";
 const TABS_LIST_DENSE: &str =
     "flex flex-wrap items-center gap-2xs rounded-field bg-surface-2 p-3xs";
@@ -613,26 +612,26 @@ const TABS_LIST_VERTICAL: &str =
     "flex shrink-0 flex-col items-stretch gap-2xs rounded-field bg-surface-2 p-2xs";
 const TABS_LIST_DENSE_VERTICAL: &str =
     "flex shrink-0 flex-col items-stretch gap-2xs rounded-field bg-surface-2 p-3xs";
-const TABS_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-transparent px-xs py-2xs text-0 font-6 text-text-2 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const TABS_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-transparent px-2xs py-3xs text-00 font-6 text-text-2 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const TABS_TRIGGER_SELECTED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const TABS_TRIGGER_DENSE_SELECTED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const TABS_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-transparent px-xs py-2xs text-0 font-6 text-text-2 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const TABS_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-transparent px-2xs py-3xs text-00 font-6 text-text-2 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const TABS_TRIGGER_SELECTED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const TABS_TRIGGER_DENSE_SELECTED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
 const TABS_TRIGGER_FOCUSED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-focus-ring bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TABS_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const TABS_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const TABS_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
 const TABS_STATUS: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
 const TABS_CONTENT: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-s text-0 leading-0 text-text-2";
 const TABS_CONTENT_DENSE: &str = "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-00 leading-0 text-text-2";
 const TABS_CONTENT_INVALID: &str = "grid gap-2xs rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const TABS_CONTENT_DISABLED: &str = "grid gap-2xs rounded-field border border-border-muted bg-surface-2 p-s text-0 leading-0 text-text-disabled opacity-disabled";
+const TABS_CONTENT_DISABLED: &str = "grid gap-2xs rounded-field border border-border-muted bg-surface-2 p-s text-0 leading-0 text-text-disabled opacity-45";
 const TABS_CONTENT_COPY: &str = "m-0";
 const TABS_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const TEXTAREA_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const TEXTAREA_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const TEXTAREA_ROOT_LOADING: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 shadow-1";
-const TEXTAREA_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const TEXTAREA_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TEXTAREA_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TEXTAREA_ROOT_LOADING: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_INVALID: &str = "grid w-full max-w-control gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TEXTAREA_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const TEXTAREA_LABEL: &str =
     "flex min-w-0 items-center gap-2xs text-0 font-7 leading-0 text-text-1";
 const TEXTAREA_LABEL_DENSE: &str =
@@ -640,14 +639,14 @@ const TEXTAREA_LABEL_DENSE: &str =
 const TEXTAREA_LABEL_DISABLED: &str =
     "flex min-w-0 items-center gap-2xs text-0 font-7 leading-0 text-text-disabled";
 const TEXTAREA_REQUIRED: &str = "text-danger";
-const TEXTAREA_CONTROL: &str = "min-h-xl w-full resize-y rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TEXTAREA_CONTROL_DENSE: &str = "min-h-l w-full resize-y rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TEXTAREA_CONTROL: &str = "min-h-xl w-full resize-y rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TEXTAREA_CONTROL_DENSE: &str = "min-h-l w-full resize-y rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const TEXTAREA_CONTROL_FOCUSED: &str = "min-h-xl w-full resize-y rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TEXTAREA_CONTROL_DENSE_FOCUSED: &str = "min-h-l w-full resize-y rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TEXTAREA_CONTROL_INVALID: &str = "min-h-xl w-full resize-y rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 leading-0 text-text-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TEXTAREA_CONTROL_DENSE_INVALID: &str = "min-h-l w-full resize-y rounded-field border border-danger bg-error-soft px-2xs py-3xs text-00 leading-0 text-text-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const TEXTAREA_CONTROL_DISABLED: &str = "min-h-xl w-full resize-y rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-disabled";
-const TEXTAREA_CONTROL_DENSE_DISABLED: &str = "min-h-l w-full resize-y rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 leading-0 text-text-disabled opacity-disabled";
+const TEXTAREA_CONTROL_DISABLED: &str = "min-h-xl w-full resize-y rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-45";
+const TEXTAREA_CONTROL_DENSE_DISABLED: &str = "min-h-l w-full resize-y rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 leading-0 text-text-disabled opacity-45";
 const TEXTAREA_META: &str = "flex flex-wrap items-start justify-between gap-2xs";
 const TEXTAREA_HINT: &str = "m-0 min-w-0 flex-1 text-00 leading-0 text-text-2";
 const TEXTAREA_HINT_INVALID: &str = "m-0 min-w-0 flex-1 text-00 leading-0 text-danger";
@@ -660,11 +659,10 @@ const TEXTAREA_COUNTER_DISABLED: &str =
     "shrink-0 rounded-pill bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled";
 const TEXTAREA_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const TOAST_PROVIDER: &str = "grid w-full max-w-md gap-2xs text-text-1";
-const TOAST_PROVIDER_DENSE: &str = "grid w-full max-w-md gap-3xs text-text-1";
-const TOAST_PROVIDER_INVALID: &str =
-    "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1";
-const TOAST_PROVIDER_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const TOAST_PROVIDER: &str = "grid w-full max-w-control gap-2xs text-text-1";
+const TOAST_PROVIDER_DENSE: &str = "grid w-full max-w-control gap-3xs text-text-1";
+const TOAST_PROVIDER_INVALID: &str = "grid w-full max-w-control gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1";
+const TOAST_PROVIDER_DISABLED: &str = "grid w-full max-w-control gap-2xs text-text-disabled";
 const TOAST_VIEWPORT_CENTER: &str = "grid justify-items-center gap-2xs";
 const TOAST_VIEWPORT_END: &str = "grid justify-items-end gap-2xs";
 const TOAST_VIEWPORT_DENSE_CENTER: &str = "grid justify-items-center gap-3xs";
@@ -691,24 +689,24 @@ const TOAST_CARD_ACTIVE: &str =
     "grid gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-2";
 const TOAST_CARD_INVALID: &str =
     "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-2";
-const TOAST_CARD_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TOAST_CARD_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const TOAST_HEADER: &str = "flex min-w-0 items-start justify-between gap-xs";
 const TOAST_COPY: &str = "grid min-w-0 gap-3xs";
 const TOAST_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const TOAST_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const TOAST_META: &str = "m-0 text-00 uppercase tracking-label text-text-muted";
 const TOAST_ACTION_ROW: &str = "flex flex-wrap items-center gap-2xs";
-const TOAST_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOAST_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const TOAST_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-3xs text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const TOAST_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
+const TOAST_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-45";
 const TOAST_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const DATE_PICKER_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const DATE_PICKER_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
-const DATE_PICKER_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DATE_PICKER_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DATE_PICKER_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const DATE_PICKER_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const DATE_PICKER_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const DATE_PICKER_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DATE_PICKER_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DATE_PICKER_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DATE_PICKER_VALUE: &str = "truncate text-text-1";
 const DATE_PICKER_VALUE_EMPTY: &str = "truncate text-text-muted";
 const DATE_PICKER_MARKER: &str = "grid size-s shrink-0 place-items-center rounded-pill bg-surface-3 text-00 font-7 text-text-muted";
@@ -716,19 +714,19 @@ const DATE_PICKER_POPOVER: &str =
     "grid gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs shadow-2";
 const DATE_PICKER_POPOVER_HIDDEN: &str = "hidden";
 const DATE_PICKER_POPOVER_HEADER: &str = "flex items-center justify-between gap-2xs";
-const DATE_PICKER_CLEAR: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DATE_PICKER_CLEAR: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DATE_PICKER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DIALOG_ROOT: &str = "grid w-full gap-2xs text-text-1";
 const DIALOG_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
-const DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DIALOG_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DIALOG_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DIALOG_OVERLAY_MODAL: &str =
     "grid w-full place-items-center rounded-box bg-surface-overlay p-s";
 const DIALOG_OVERLAY_NON_MODAL: &str =
     "grid w-full place-items-center rounded-box border border-border-subtle bg-surface-2 p-s";
-const DIALOG_CONTENT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
-const DIALOG_CONTENT_SMALL: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const DIALOG_CONTENT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const DIALOG_CONTENT_SMALL: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
 const DIALOG_HEADER: &str = "grid gap-2xs";
 const DIALOG_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const DIALOG_TITLE_SMALL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
@@ -736,20 +734,20 @@ const DIALOG_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const DIALOG_DESCRIPTION_SMALL: &str = "m-0 text-00 leading-0 text-text-2";
 const DIALOG_BODY: &str = "m-0 text-0 leading-0 text-text-2";
 const DIALOG_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
-const DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DIALOG_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DIALOG_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIALOG_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DIALOG_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DIALOG_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DIALOG_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const DIRECTION_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-start text-text-1 shadow-1";
-const DIRECTION_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-start text-text-disabled shadow-1";
+const DIRECTION_ROOT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-start text-text-1 shadow-1";
+const DIRECTION_ROOT_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-start text-text-disabled shadow-1";
 const DIRECTION_HEADER: &str = "grid gap-2xs";
 const DIRECTION_EYEBROW: &str = "m-0 text-00 font-7 uppercase tracking-label text-brand";
 const DIRECTION_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const DIRECTION_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 const DIRECTION_ACTIONS: &str = "flex flex-wrap items-center gap-2xs";
-const DIRECTION_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DIRECTION_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DIRECTION_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DIRECTION_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DIRECTION_SCOPE: &str =
     "grid gap-xs rounded-field border border-border-subtle bg-surface-2 p-xs text-start";
 const DIRECTION_SCOPE_ACTIVE: &str =
@@ -763,18 +761,18 @@ const DIRECTION_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const DRAWER_ROOT: &str = "grid w-full gap-2xs text-text-1";
 const DRAWER_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
-const DRAWER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DRAWER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DRAWER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DRAWER_OVERLAY_BOTTOM: &str =
-    "fixed inset-0 z-50 grid items-end justify-items-center bg-overlay p-s text-text-1";
+    "fixed inset-0 z-50 grid items-end justify-items-center bg-surface-overlay p-s text-text-1";
 const DRAWER_OVERLAY_TOP: &str =
-    "fixed inset-0 z-50 grid items-start justify-items-center bg-overlay p-s text-text-1";
+    "fixed inset-0 z-50 grid items-start justify-items-center bg-surface-overlay p-s text-text-1";
 const DRAWER_OVERLAY_RIGHT: &str =
-    "fixed inset-0 z-50 grid items-stretch justify-items-end bg-overlay p-s text-text-1";
+    "fixed inset-0 z-50 grid items-stretch justify-items-end bg-surface-overlay p-s text-text-1";
 const DRAWER_OVERLAY_LEFT: &str =
-    "fixed inset-0 z-50 grid items-stretch justify-items-start bg-overlay p-s text-text-1";
-const DRAWER_CONTENT_VERTICAL: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
-const DRAWER_CONTENT_SIDE: &str = "grid h-full w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+    "fixed inset-0 z-50 grid items-stretch justify-items-start bg-surface-overlay p-s text-text-1";
+const DRAWER_CONTENT_VERTICAL: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const DRAWER_CONTENT_SIDE: &str = "grid h-full w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
 const DRAWER_HANDLE: &str =
     "mx-auto h-2xs w-l rounded-pill border border-border-subtle bg-surface-3";
 const DRAWER_HANDLE_ACTIVE: &str = "mx-auto h-2xs w-xl rounded-pill border border-brand bg-brand";
@@ -783,20 +781,20 @@ const DRAWER_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
 const DRAWER_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const DRAWER_BODY: &str = "m-0 text-0 leading-0 text-text-2";
 const DRAWER_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
-const DRAWER_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DRAWER_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DRAWER_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const DRAWER_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DRAWER_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DRAWER_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DRAWER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const SHEET_ROOT: &str = "grid w-full gap-2xs text-text-1";
 const SHEET_ROOT_DENSE: &str = "grid w-full gap-3xs text-text-1";
 const SHEET_ROOT_DISABLED: &str = "grid w-full gap-2xs text-text-disabled";
-const SHEET_TRIGGER: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_TRIGGER_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_TRIGGER_OPEN: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_TRIGGER_DISABLED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
-const SHEET_CONTENT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
-const SHEET_CONTENT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
+const SHEET_TRIGGER: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_TRIGGER_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_TRIGGER_OPEN: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_TRIGGER_DISABLED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
+const SHEET_CONTENT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
+const SHEET_CONTENT_DENSE: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
 const SHEET_CONTENT_RIGHT: &str = "justify-self-end border-l-brand";
 const SHEET_CONTENT_LEFT: &str = "justify-self-start border-r-brand";
 const SHEET_CONTENT_TOP: &str = "justify-self-stretch border-b-brand";
@@ -810,23 +808,23 @@ const SHEET_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const SHEET_BODY: &str = "m-0 text-0 leading-0 text-text-2";
 const SHEET_BODY_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const SHEET_FOOTER: &str = "flex flex-wrap items-center justify-end gap-2xs";
-const SHEET_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
-const SHEET_CLOSE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SHEET_CLOSE_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const SHEET_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_ACTION_SECONDARY: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
+const SHEET_CLOSE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SHEET_CLOSE_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
 const SHEET_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const SIDEBAR_ROOT: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
-const SIDEBAR_ROOT_DENSE: &str = "flex w-full max-w-md overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const SIDEBAR_ROOT: &str = "flex w-full max-w-control overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
+const SIDEBAR_ROOT_DENSE: &str = "flex w-full max-w-control overflow-hidden rounded-field border border-border-subtle bg-surface-1 text-text-1 shadow-1";
 const SIDEBAR_ROOT_COLLAPSED: &str = "flex w-fit overflow-hidden rounded-box border border-border-subtle bg-surface-1 text-text-1 shadow-1";
-const SIDEBAR_ROOT_INVALID: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-danger bg-error-soft text-text-1 shadow-1";
-const SIDEBAR_ROOT_DISABLED: &str = "flex w-full max-w-md overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled opacity-disabled";
-const SIDEBAR_RAIL: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-subtle bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SIDEBAR_ROOT_INVALID: &str = "flex w-full max-w-control overflow-hidden rounded-box border border-danger bg-error-soft text-text-1 shadow-1";
+const SIDEBAR_ROOT_DISABLED: &str = "flex w-full max-w-control overflow-hidden rounded-box border border-border-muted bg-surface-2 text-text-disabled opacity-45";
+const SIDEBAR_RAIL: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-subtle bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SIDEBAR_RAIL_ACTIVE: &str = "flex min-h-xl w-s items-center justify-center border-r border-brand bg-primary-soft text-00 font-7 text-brand shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SIDEBAR_RAIL_DISABLED: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-disabled";
+const SIDEBAR_RAIL_DISABLED: &str = "flex min-h-xl w-s items-center justify-center border-r border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-45";
 const SIDEBAR_PANEL: &str = "grid min-w-0 gap-xs p-xs";
 const SIDEBAR_PANEL_DENSE: &str = "grid min-w-0 gap-2xs p-2xs";
 const SIDEBAR_PANEL_COLLAPSED: &str = "hidden";
@@ -838,24 +836,24 @@ const SIDEBAR_DETAIL: &str = "m-0 text-00 leading-0 text-text-muted";
 const SIDEBAR_CONTENT: &str = "grid gap-xs";
 const SIDEBAR_CONTENT_DENSE: &str = "grid gap-2xs";
 const SIDEBAR_GROUP: &str = "grid gap-3xs";
-const SIDEBAR_GROUP_DISABLED: &str = "grid gap-3xs opacity-disabled";
+const SIDEBAR_GROUP_DISABLED: &str = "grid gap-3xs opacity-45";
 const SIDEBAR_GROUP_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
-const SIDEBAR_MENU: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-xs py-2xs text-left text-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SIDEBAR_MENU_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-2xs py-3xs text-left text-00 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SIDEBAR_MENU: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-xs py-2xs text-left text-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SIDEBAR_MENU_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-1 px-2xs py-3xs text-left text-00 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SIDEBAR_MENU_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SIDEBAR_MENU_FOCUSED: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-brand bg-surface-1 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SIDEBAR_MENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-2 px-xs py-2xs text-left text-0 text-text-disabled opacity-disabled";
+const SIDEBAR_MENU_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-2xs rounded-field border border-transparent bg-surface-2 px-xs py-2xs text-left text-0 text-text-disabled opacity-45";
 const SIDEBAR_BADGE: &str = "rounded-pill border border-border-subtle bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-muted";
 const SIDEBAR_FOOTER: &str = "grid gap-3xs border-t border-border-subtle pt-xs";
 const SIDEBAR_FOOTER_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const SIDEBAR_FOOTER_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const SIDEBAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const SKELETON_ROOT: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const SKELETON_ROOT_DENSE: &str = "grid w-full max-w-md gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const SKELETON_ROOT_READY: &str = "grid w-full max-w-md gap-s rounded-box border border-border-subtle bg-surface-2 p-s text-text-muted";
-const SKELETON_ROOT_INVALID: &str = "grid w-full max-w-md gap-s rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const SKELETON_ROOT_DISABLED: &str = "grid w-full max-w-md gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SKELETON_ROOT: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SKELETON_ROOT_DENSE: &str = "grid w-full max-w-control gap-xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SKELETON_ROOT_READY: &str = "grid w-full max-w-control gap-s rounded-box border border-border-subtle bg-surface-2 p-s text-text-muted";
+const SKELETON_ROOT_INVALID: &str = "grid w-full max-w-control gap-s rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SKELETON_ROOT_DISABLED: &str = "grid w-full max-w-control gap-s rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const SKELETON_CONTENT: &str = "grid gap-xs";
 const SKELETON_CONTENT_DENSE: &str = "grid gap-2xs";
 const SKELETON_BLOCK: &str = "h-l rounded-field bg-surface-3 transition-colors";
@@ -866,8 +864,8 @@ const SKELETON_BLOCK_DENSE_ACTIVE: &str =
     "h-m rounded-field border border-brand bg-selected-tint shadow-1";
 const SKELETON_BLOCK_INVALID: &str = "h-l rounded-field border border-danger bg-error-soft";
 const SKELETON_BLOCK_DENSE_INVALID: &str = "h-m rounded-field border border-danger bg-error-soft";
-const SKELETON_BLOCK_DISABLED: &str = "h-l rounded-field bg-surface-2 opacity-disabled";
-const SKELETON_BLOCK_DENSE_DISABLED: &str = "h-m rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_BLOCK_DISABLED: &str = "h-l rounded-field bg-surface-2 opacity-45";
+const SKELETON_BLOCK_DENSE_DISABLED: &str = "h-m rounded-field bg-surface-2 opacity-45";
 const SKELETON_LINE: &str = "h-xs rounded-pill bg-surface-3 transition-colors";
 const SKELETON_LINE_DENSE: &str = "h-2xs rounded-pill bg-surface-3 transition-colors";
 const SKELETON_LINE_ACTIVE: &str =
@@ -876,8 +874,8 @@ const SKELETON_LINE_DENSE_ACTIVE: &str =
     "h-2xs rounded-pill border border-brand bg-selected-tint shadow-1";
 const SKELETON_LINE_INVALID: &str = "h-xs rounded-pill border border-danger bg-error-soft";
 const SKELETON_LINE_DENSE_INVALID: &str = "h-2xs rounded-pill border border-danger bg-error-soft";
-const SKELETON_LINE_DISABLED: &str = "h-xs rounded-pill bg-surface-2 opacity-disabled";
-const SKELETON_LINE_DENSE_DISABLED: &str = "h-2xs rounded-pill bg-surface-2 opacity-disabled";
+const SKELETON_LINE_DISABLED: &str = "h-xs rounded-pill bg-surface-2 opacity-45";
+const SKELETON_LINE_DENSE_DISABLED: &str = "h-2xs rounded-pill bg-surface-2 opacity-45";
 const SKELETON_MEDIA: &str = "min-h-xl rounded-field bg-surface-3 transition-colors";
 const SKELETON_MEDIA_DENSE: &str = "min-h-l rounded-field bg-surface-3 transition-colors";
 const SKELETON_MEDIA_ACTIVE: &str =
@@ -887,16 +885,17 @@ const SKELETON_MEDIA_DENSE_ACTIVE: &str =
 const SKELETON_MEDIA_INVALID: &str = "min-h-xl rounded-field border border-danger bg-error-soft";
 const SKELETON_MEDIA_DENSE_INVALID: &str =
     "min-h-l rounded-field border border-danger bg-error-soft";
-const SKELETON_MEDIA_DISABLED: &str = "min-h-xl rounded-field bg-surface-2 opacity-disabled";
-const SKELETON_MEDIA_DENSE_DISABLED: &str = "min-h-l rounded-field bg-surface-2 opacity-disabled";
+const SKELETON_MEDIA_DISABLED: &str = "min-h-xl rounded-field bg-surface-2 opacity-45";
+const SKELETON_MEDIA_DENSE_DISABLED: &str = "min-h-l rounded-field bg-surface-2 opacity-45";
 const SKELETON_STATUS: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
+const SKELETON_ANIMATION: &str = "animate-pulse motion-reduce:animate-none";
 const SKELETON_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const SLIDER_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const SLIDER_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SLIDER_ROOT: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SLIDER_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
 const SLIDER_ROOT_VERTICAL: &str = "grid w-fit gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const SLIDER_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const SLIDER_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SLIDER_ROOT_INVALID: &str = "grid w-full max-w-control gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SLIDER_ROOT_DISABLED: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const SLIDER_HEADER: &str = "flex min-w-0 items-center justify-between gap-xs";
 const SLIDER_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const SLIDER_VALUE: &str = "rounded-pill border border-border-subtle bg-surface-2 px-xs py-3xs text-00 font-7 text-text-muted";
@@ -907,7 +906,7 @@ const SLIDER_TRACK_DENSE: &str = "h-2xs w-full overflow-hidden rounded-pill bg-s
 const SLIDER_TRACK_INVALID: &str =
     "h-xs w-full overflow-hidden rounded-pill border border-danger bg-error-soft";
 const SLIDER_TRACK_DISABLED: &str =
-    "h-xs w-full overflow-hidden rounded-pill bg-surface-2 opacity-disabled";
+    "h-xs w-full overflow-hidden rounded-pill bg-surface-2 opacity-45";
 const SLIDER_TRACK_VERTICAL: &str = "h-xl w-xs overflow-hidden rounded-pill bg-surface-3";
 const SLIDER_RANGE: &str = "block h-full rounded-pill bg-brand";
 const SLIDER_RANGE_DRAGGING: &str = "block h-full rounded-pill bg-accent";
@@ -922,14 +921,13 @@ const SLIDER_THUMB_DENSE: &str =
 const SLIDER_THUMB_FOCUSED: &str =
     "absolute top-1/2 size-s rounded-pill border border-brand bg-primary-soft shadow-2";
 const SLIDER_THUMB_DISABLED: &str =
-    "absolute top-1/2 size-s rounded-pill border border-border-muted bg-surface-2 opacity-disabled";
+    "absolute top-1/2 size-s rounded-pill border border-border-muted bg-surface-2 opacity-45";
 const SLIDER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const SONNER_PROVIDER: &str = "grid w-full max-w-md gap-xs text-text-1";
-const SONNER_PROVIDER_DENSE: &str = "grid w-full max-w-md gap-2xs text-text-1";
-const SONNER_PROVIDER_INVALID: &str =
-    "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1";
-const SONNER_PROVIDER_DISABLED: &str = "grid w-full max-w-md gap-xs text-text-disabled";
+const SONNER_PROVIDER: &str = "grid w-full max-w-control gap-xs text-text-1";
+const SONNER_PROVIDER_DENSE: &str = "grid w-full max-w-control gap-2xs text-text-1";
+const SONNER_PROVIDER_INVALID: &str = "grid w-full max-w-control gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1";
+const SONNER_PROVIDER_DISABLED: &str = "grid w-full max-w-control gap-xs text-text-disabled";
 const SONNER_VIEWPORT_CENTER: &str = "grid justify-items-center gap-xs";
 const SONNER_VIEWPORT_END: &str = "grid justify-items-end gap-xs";
 const SONNER_VIEWPORT_DENSE_CENTER: &str = "grid justify-items-center gap-2xs";
@@ -956,31 +954,31 @@ const SONNER_TOAST_ACTIVE: &str =
     "grid gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-2";
 const SONNER_TOAST_INVALID: &str =
     "grid gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const SONNER_TOAST_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SONNER_TOAST_DISABLED: &str = "grid gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const SONNER_HEADER: &str = "flex min-w-0 items-start justify-between gap-xs";
 const SONNER_COPY: &str = "grid min-w-0 gap-3xs";
 const SONNER_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const SONNER_DESCRIPTION: &str = "m-0 text-0 leading-0 text-text-2";
 const SONNER_META: &str = "m-0 text-00 uppercase tracking-label text-text-muted";
 const SONNER_ACTION_ROW: &str = "flex flex-wrap items-center gap-2xs";
-const SONNER_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SONNER_ACTION: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SONNER_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-3xs text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SONNER_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
-const SONNER_DISMISS: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-strong bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SONNER_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-3xs text-00 font-6 text-text-disabled opacity-45";
+const SONNER_DISMISS: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-strong bg-surface-2 text-00 font-7 text-text-muted transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SONNER_DISMISS_ACTIVE: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-brand bg-primary-soft text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SONNER_DISMISS_DISABLED: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-disabled";
+const SONNER_DISMISS_DISABLED: &str = "inline-flex size-m shrink-0 items-center justify-center rounded-field border border-border-muted bg-surface-2 text-00 font-7 text-text-disabled opacity-45";
 const SONNER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
 const SPINNER_ROOT: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-text-1 shadow-1";
 const SPINNER_ROOT_DENSE: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-text-1 shadow-1";
 const SPINNER_ROOT_INVALID: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-text-1 shadow-1";
-const SPINNER_ROOT_DISABLED: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-text-disabled opacity-disabled";
+const SPINNER_ROOT_DISABLED: &str = "inline-flex w-fit items-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-text-disabled opacity-45";
 const SPINNER_TRACK_SMALL: &str = "relative inline-grid size-s shrink-0 place-items-center rounded-pill border border-border-muted";
 const SPINNER_TRACK_MEDIUM: &str = "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-border-muted";
 const SPINNER_TRACK_LARGE: &str = "relative inline-grid size-l shrink-0 place-items-center rounded-pill border border-border-muted";
 const SPINNER_TRACK_INVALID: &str =
     "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-danger";
-const SPINNER_TRACK_DISABLED: &str = "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-border-muted opacity-disabled";
+const SPINNER_TRACK_DISABLED: &str = "relative inline-grid size-m shrink-0 place-items-center rounded-pill border border-border-muted opacity-45";
 const SPINNER_INDICATOR_BRAND: &str = "absolute inset-0 rounded-pill border border-transparent border-t-brand animate-spin motion-reduce:animate-none";
 const SPINNER_INDICATOR_DEFAULT: &str = "absolute inset-0 rounded-pill border border-transparent border-t-accent animate-spin motion-reduce:animate-none";
 const SPINNER_INDICATOR_INFO: &str = "absolute inset-0 rounded-pill border border-transparent border-t-info animate-spin motion-reduce:animate-none";
@@ -997,10 +995,10 @@ const SPINNER_LABEL: &str = "m-0 text-0 font-6 leading-0 text-text-1";
 const SPINNER_LABEL_DENSE: &str = "m-0 text-00 font-6 leading-0 text-text-2";
 const SPINNER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const SWITCH_ROOT: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const SWITCH_ROOT_DENSE: &str = "flex w-full max-w-md items-center justify-between gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const SWITCH_ROOT_INVALID: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const SWITCH_ROOT_DISABLED: &str = "flex w-full max-w-md items-center justify-between gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const SWITCH_ROOT: &str = "flex w-full max-w-control items-center justify-between gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SWITCH_ROOT_DENSE: &str = "flex w-full max-w-control items-center justify-between gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SWITCH_ROOT_INVALID: &str = "flex w-full max-w-control items-center justify-between gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SWITCH_ROOT_DISABLED: &str = "flex w-full max-w-control items-center justify-between gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const SWITCH_COPY: &str = "grid min-w-0 gap-3xs";
 const SWITCH_LABEL_ROW: &str = "flex min-w-0 flex-wrap items-center gap-2xs";
 const SWITCH_LABEL: &str = "m-0 text-0 font-7 leading-0 text-text-1";
@@ -1013,16 +1011,16 @@ const SWITCH_STATUS: &str = "rounded-pill border border-border-subtle bg-surface
 const SWITCH_STATUS_ON: &str = "rounded-pill border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-1";
 const SWITCH_STATUS_INVALID: &str = "rounded-pill border border-danger bg-error-soft px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-1";
 const SWITCH_STATUS_DISABLED: &str = "rounded-pill border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-7 uppercase tracking-label text-text-disabled";
-const SWITCH_TRACK: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SWITCH_TRACK_DENSE: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SWITCH_TRACK_ON: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SWITCH_TRACK_DENSE_ON: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SWITCH_TRACK: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SWITCH_TRACK_DENSE: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-start rounded-pill border border-border-strong bg-surface-3 p-3xs shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SWITCH_TRACK_ON: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SWITCH_TRACK_DENSE_ON: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-end rounded-pill border border-brand bg-brand p-3xs shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SWITCH_TRACK_ACTIVE: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SWITCH_TRACK_ACTIVE_ON: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-end rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SWITCH_TRACK_DENSE_ACTIVE: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-start rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SWITCH_TRACK_DENSE_ACTIVE_ON: &str = "inline-flex min-h-s w-l shrink-0 items-center justify-end rounded-pill border border-brand bg-primary-soft p-3xs shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SWITCH_TRACK_INVALID: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-danger bg-error-soft p-3xs shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SWITCH_TRACK_DISABLED: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-muted bg-surface-2 p-3xs opacity-disabled";
+const SWITCH_TRACK_DISABLED: &str = "inline-flex min-h-m w-xl shrink-0 items-center justify-start rounded-pill border border-border-muted bg-surface-2 p-3xs opacity-45";
 const SWITCH_THUMB: &str =
     "size-s rounded-pill border border-border-subtle bg-surface-1 shadow-2 transition-colors";
 const SWITCH_THUMB_DENSE: &str =
@@ -1038,19 +1036,19 @@ const SWITCH_THUMB_DISABLED: &str =
     "size-s rounded-pill border border-border-muted bg-surface-2 shadow-1";
 const SWITCH_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const TOGGLE_FRAME: &str = "grid w-full max-w-md gap-2xs text-text-1";
-const TOGGLE_BUTTON: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOGGLE_BUTTON_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOGGLE_BUTTON_OUTLINE: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOGGLE_BUTTON_OUTLINE_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOGGLE_BUTTON_PRESSED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOGGLE_BUTTON_PRESSED_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const TOGGLE_FRAME: &str = "grid w-full max-w-control gap-2xs text-text-1";
+const TOGGLE_BUTTON: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOGGLE_BUTTON_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOGGLE_BUTTON_OUTLINE: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOGGLE_BUTTON_OUTLINE_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOGGLE_BUTTON_PRESSED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOGGLE_BUTTON_PRESSED_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const TOGGLE_BUTTON_ACTIVE: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TOGGLE_BUTTON_ACTIVE_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TOGGLE_BUTTON_INVALID: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const TOGGLE_BUTTON_INVALID_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const TOGGLE_BUTTON_DISABLED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
-const TOGGLE_BUTTON_DISABLED_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const TOGGLE_BUTTON_DISABLED: &str = "inline-flex min-h-field w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
+const TOGGLE_BUTTON_DISABLED_DENSE: &str = "inline-flex min-h-s w-fit items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-45";
 const TOGGLE_INDICATOR: &str = "inline-grid min-h-s min-w-s place-items-center rounded-pill bg-surface-3 px-2xs text-00 font-7 uppercase tracking-label text-text-muted";
 const TOGGLE_INDICATOR_PRESSED: &str = "inline-grid min-h-s min-w-s place-items-center rounded-pill bg-brand px-2xs text-00 font-7 uppercase tracking-label text-text-on-brand";
 const TOGGLE_INDICATOR_INVALID: &str = "inline-grid min-h-s min-w-s place-items-center rounded-pill bg-error-soft px-2xs text-00 font-7 uppercase tracking-label text-text-1";
@@ -1067,10 +1065,10 @@ const TOGGLE_DETAIL_INVALID: &str = "m-0 text-0 leading-0 text-danger";
 const TOGGLE_DETAIL_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
 const TOGGLE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const TOGGLE_GROUP_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const TOGGLE_GROUP_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const TOGGLE_GROUP_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const TOGGLE_GROUP_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const TOGGLE_GROUP_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const TOGGLE_GROUP_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const TOGGLE_GROUP_ROOT_INVALID: &str = "grid w-full max-w-control gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const TOGGLE_GROUP_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const TOGGLE_GROUP_HEADER: &str = "flex min-w-0 flex-wrap items-center justify-between gap-2xs";
 const TOGGLE_GROUP_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const TOGGLE_GROUP_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
@@ -1086,26 +1084,26 @@ const TOGGLE_GROUP_DETAIL_INVALID: &str = "m-0 text-0 leading-0 text-danger";
 const TOGGLE_GROUP_DETAIL_DISABLED: &str = "m-0 text-0 leading-0 text-text-disabled";
 const TOGGLE_GROUP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const TOOLTIP_ROOT: &str = "relative inline-grid w-fit max-w-md gap-2xs text-text-1";
+const TOOLTIP_ROOT: &str = "relative inline-grid w-fit max-w-control gap-2xs text-text-1";
 const TOOLTIP_ROOT_DISABLED: &str =
-    "relative inline-grid w-fit max-w-md gap-2xs text-text-disabled";
-const TOOLTIP_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOOLTIP_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOOLTIP_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOOLTIP_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOOLTIP_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const TOOLTIP_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
-const TOOLTIP_CONTENT_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
-const TOOLTIP_CONTENT_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-md -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
-const TOOLTIP_CONTENT_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
-const TOOLTIP_CONTENT_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-md -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
-const TOOLTIP_CONTENT_DENSE_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-md -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_DENSE_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-md -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_DENSE_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_DENSE_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-md -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_LOADING: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_INVALID: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-2";
-const TOOLTIP_CONTENT_DISABLED: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-md -translate-x-1/2 gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled shadow-1";
+    "relative inline-grid w-fit max-w-control gap-2xs text-text-disabled";
+const TOOLTIP_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOOLTIP_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOOLTIP_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOOLTIP_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOOLTIP_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const TOOLTIP_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
+const TOOLTIP_CONTENT_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-control -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-control -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-control -translate-x-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-control -translate-y-1/2 gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-3";
+const TOOLTIP_CONTENT_DENSE_TOP: &str = "absolute bottom-full left-1/2 z-10 mb-2xs grid w-max max-w-control -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_RIGHT: &str = "absolute left-full top-1/2 z-10 ml-2xs grid w-max max-w-control -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_BOTTOM: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-control -translate-x-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DENSE_LEFT: &str = "absolute right-full top-1/2 z-10 mr-2xs grid w-max max-w-control -translate-y-1/2 gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_LOADING: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-control -translate-x-1/2 gap-2xs rounded-field border border-info bg-info-soft p-xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_INVALID: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-control -translate-x-1/2 gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-2";
+const TOOLTIP_CONTENT_DISABLED: &str = "absolute left-1/2 top-full z-10 mt-2xs grid w-max max-w-control -translate-x-1/2 gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled shadow-1";
 const TOOLTIP_CONTENT_HIDDEN: &str = "hidden";
 const TOOLTIP_COPY: &str = "m-0 text-00 leading-0 text-text-1";
 const TOOLTIP_COPY_DENSE: &str = "m-0 text-00 leading-0 text-text-1";
@@ -1116,16 +1114,15 @@ const TOOLTIP_ARROW: &str =
 const TOOLTIP_ARROW_HIDDEN: &str = "hidden";
 const TOOLTIP_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const TYPOGRAPHY_ROOT: &str = "grid w-full max-w-2xl gap-s text-text-1";
-const TYPOGRAPHY_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-xs text-text-1";
+const TYPOGRAPHY_ROOT: &str = "grid w-full max-w-reading gap-s text-text-1";
+const TYPOGRAPHY_ROOT_DENSE: &str = "grid w-full max-w-reading gap-xs text-text-1";
 const TYPOGRAPHY_ROOT_ACTIVE: &str =
-    "grid w-full max-w-2xl gap-s rounded-box bg-selected-tint p-s text-text-1";
-const TYPOGRAPHY_ROOT_INVALID: &str =
-    "grid w-full max-w-2xl gap-s rounded-box border border-danger bg-error-soft p-s text-text-1";
+    "grid w-full max-w-reading gap-s rounded-box bg-selected-tint p-s text-text-1";
+const TYPOGRAPHY_ROOT_INVALID: &str = "grid w-full max-w-reading gap-s rounded-box border border-danger bg-error-soft p-s text-text-1";
 const TYPOGRAPHY_ROOT_LOADING: &str =
-    "grid w-full max-w-2xl gap-s rounded-box border border-info bg-info-soft p-s text-text-1";
+    "grid w-full max-w-reading gap-s rounded-box border border-info bg-info-soft p-s text-text-1";
 const TYPOGRAPHY_ROOT_DISABLED: &str =
-    "grid w-full max-w-2xl gap-s text-text-disabled opacity-disabled";
+    "grid w-full max-w-reading gap-s text-text-disabled opacity-45";
 const TYPOGRAPHY_H1: &str = "m-0 text-4 font-8 leading-3 text-text-1";
 const TYPOGRAPHY_H1_DENSE: &str = "m-0 text-3 font-8 leading-3 text-text-1";
 const TYPOGRAPHY_H1_ACTIVE: &str = "m-0 text-4 font-8 leading-3 text-brand";
@@ -1160,13 +1157,13 @@ const TYPOGRAPHY_BLOCKQUOTE_DISABLED: &str =
     "m-0 border-l border-border-muted pl-s text-1 font-6 leading-2 text-text-disabled";
 const TYPOGRAPHY_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-xs text-0 leading-0 text-text-1";
-const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
-const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-md gap-3xs text-text-1";
+const DROPDOWN_MENU_ROOT: &str = "relative grid w-full max-w-control gap-2xs text-text-1";
+const DROPDOWN_MENU_ROOT_DENSE: &str = "relative grid w-full max-w-control gap-3xs text-text-1";
 const DROPDOWN_MENU_ROOT_DISABLED: &str =
-    "relative grid w-full max-w-md gap-2xs text-text-disabled";
-const DROPDOWN_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DROPDOWN_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const DROPDOWN_MENU_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+    "relative grid w-full max-w-control gap-2xs text-text-disabled";
+const DROPDOWN_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DROPDOWN_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const DROPDOWN_MENU_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const DROPDOWN_MENU_CONTENT: &str = "absolute start-0 top-full z-50 mt-2xs grid w-full gap-3xs rounded-box border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-3";
 const DROPDOWN_MENU_CONTENT_DENSE: &str = "absolute start-0 top-full z-50 mt-2xs grid w-full gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs text-text-1 shadow-2";
 const DROPDOWN_MENU_CONTENT_HIDDEN: &str = "hidden";
@@ -1175,7 +1172,7 @@ const DROPDOWN_MENU_ITEM_DENSE: &str = "flex min-h-s w-full items-center justify
 const DROPDOWN_MENU_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const DROPDOWN_MENU_ITEM_SELECTED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const DROPDOWN_MENU_ITEM_DESTRUCTIVE: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field bg-error-soft px-xs py-2xs text-left text-0 font-7 text-text-1 transition-colors hover:bg-press-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const DROPDOWN_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field px-xs py-2xs text-left text-0 text-text-disabled opacity-disabled";
+const DROPDOWN_MENU_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field px-xs py-2xs text-left text-0 text-text-disabled opacity-45";
 const DROPDOWN_MENU_ITEM_BODY: &str = "grid min-w-0 gap-3xs";
 const DROPDOWN_MENU_ITEM_LABEL: &str = "truncate";
 const DROPDOWN_MENU_ITEM_DETAIL: &str = "truncate text-00 leading-0 text-text-muted";
@@ -1185,10 +1182,10 @@ const DROPDOWN_MENU_LABEL: &str =
 const DROPDOWN_MENU_SEPARATOR: &str = "my-3xs h-3xs rounded-pill bg-border-subtle";
 const DROPDOWN_MENU_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const EMPTY_ROOT: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-border-subtle bg-surface-1 p-m text-center text-text-1 shadow-1";
-const EMPTY_ROOT_DENSE: &str = "grid w-full max-w-md justify-items-center gap-xs rounded-field border border-border-subtle bg-surface-1 p-s text-center text-text-1 shadow-1";
-const EMPTY_ROOT_LOADING: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-info bg-info-soft p-m text-center text-text-1 shadow-1";
-const EMPTY_ROOT_DISABLED: &str = "grid w-full max-w-md justify-items-center gap-s rounded-box border border-border-muted bg-surface-2 p-m text-center text-text-disabled";
+const EMPTY_ROOT: &str = "grid w-full max-w-control justify-items-center gap-s rounded-box border border-border-subtle bg-surface-1 p-m text-center text-text-1 shadow-1";
+const EMPTY_ROOT_DENSE: &str = "grid w-full max-w-control justify-items-center gap-xs rounded-field border border-border-subtle bg-surface-1 p-s text-center text-text-1 shadow-1";
+const EMPTY_ROOT_LOADING: &str = "grid w-full max-w-control justify-items-center gap-s rounded-box border border-info bg-info-soft p-m text-center text-text-1 shadow-1";
+const EMPTY_ROOT_DISABLED: &str = "grid w-full max-w-control justify-items-center gap-s rounded-box border border-border-muted bg-surface-2 p-m text-center text-text-disabled";
 const EMPTY_HEADER: &str = "grid justify-items-center gap-2xs";
 const EMPTY_HEADER_DENSE: &str = "grid justify-items-center gap-3xs";
 const EMPTY_TITLE: &str = "m-0 text-1 font-7 leading-2 text-text-1";
@@ -1201,31 +1198,31 @@ const EMPTY_MARKER: &str = "grid size-xl place-items-center rounded-field border
 const EMPTY_MARKER_DENSE: &str = "grid size-l place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
 const EMPTY_CONTENT_TEXT: &str = "m-0 text-0 leading-0 text-text-2";
 const EMPTY_CONTENT_TEXT_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
-const EMPTY_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const EMPTY_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const EMPTY_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const EMPTY_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const EMPTY_ACTION: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const EMPTY_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const EMPTY_ACTION_ACTIVE: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const EMPTY_ACTION_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
 const EMPTY_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const FIELD_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const FIELD_ROOT_DENSE: &str = "grid w-full max-w-md gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const FIELD_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const FIELD_ROOT_LOADING: &str = "grid w-full max-w-md gap-2xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-1";
-const FIELD_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
+const FIELD_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const FIELD_ROOT_DENSE: &str = "grid w-full max-w-control gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const FIELD_ROOT_INVALID: &str = "grid w-full max-w-control gap-2xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const FIELD_ROOT_LOADING: &str = "grid w-full max-w-control gap-2xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-1";
+const FIELD_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled";
 const FIELD_LABEL: &str = "m-0 flex items-center gap-2xs text-0 font-7 leading-0 text-text-1";
 const FIELD_LABEL_DENSE: &str =
     "m-0 flex items-center gap-2xs text-00 font-7 leading-0 text-text-1";
 const FIELD_LABEL_DISABLED: &str =
     "m-0 flex items-center gap-2xs text-0 font-7 leading-0 text-text-disabled";
 const FIELD_REQUIRED: &str = "text-danger";
-const FIELD_CONTROL: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_FOCUSED: &str = "min-h-field w-full rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_DENSE_FOCUSED: &str = "min-h-s w-full rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_INVALID: &str = "min-h-field w-full rounded-field border border-danger bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_DENSE_INVALID: &str = "min-h-s w-full rounded-field border border-danger bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const FIELD_CONTROL_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-3 px-xs py-2xs text-0 leading-0 text-text-disabled outline-none opacity-disabled";
-const FIELD_CONTROL_DENSE_DISABLED: &str = "min-h-s w-full rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs text-00 leading-0 text-text-disabled outline-none opacity-disabled";
+const FIELD_CONTROL: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_FOCUSED: &str = "min-h-field w-full rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_DENSE_FOCUSED: &str = "min-h-s w-full rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_INVALID: &str = "min-h-field w-full rounded-field border border-danger bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_DENSE_INVALID: &str = "min-h-s w-full rounded-field border border-danger bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 outline-none transition-colors placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const FIELD_CONTROL_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-3 px-xs py-2xs text-0 leading-0 text-text-disabled outline-none opacity-45";
+const FIELD_CONTROL_DENSE_DISABLED: &str = "min-h-s w-full rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs text-00 leading-0 text-text-disabled outline-none opacity-45";
 const FIELD_DESCRIPTION: &str = "m-0 text-00 leading-0 text-text-2";
 const FIELD_DESCRIPTION_DENSE: &str = "m-0 text-00 leading-0 text-text-muted";
 const FIELD_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
@@ -1233,13 +1230,14 @@ const FIELD_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const FIELD_ERROR_HIDDEN: &str = "hidden";
 const FIELD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const HOVER_CARD_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
-const HOVER_CARD_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
-const HOVER_CARD_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const HOVER_CARD_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const HOVER_CARD_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const HOVER_CARD_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const HOVER_CARD_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const HOVER_CARD_ROOT: &str = "relative grid w-full max-w-control gap-2xs text-text-1";
+const HOVER_CARD_ROOT_DISABLED: &str =
+    "relative grid w-full max-w-control gap-2xs text-text-disabled";
+const HOVER_CARD_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const HOVER_CARD_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const HOVER_CARD_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const HOVER_CARD_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const HOVER_CARD_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
 const HOVER_CARD_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
 const HOVER_CARD_CONTENT_DENSE: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
 const HOVER_CARD_CONTENT_LOADING: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
@@ -1254,8 +1252,8 @@ const HOVER_CARD_ARROW: &str = "grid size-s place-items-center rounded-field bor
 const HOVER_CARD_ARROW_HIDDEN: &str = "hidden";
 const HOVER_CARD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const INPUT_ROOT: &str = "grid w-full max-w-md gap-2xs text-text-1";
-const INPUT_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const INPUT_ROOT: &str = "grid w-full max-w-control gap-2xs text-text-1";
+const INPUT_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs text-text-disabled";
 const INPUT_ROW: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 text-text-1 shadow-1 transition-colors focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring";
 const INPUT_ROW_DENSE: &str = "flex min-h-s w-full items-stretch overflow-hidden rounded-field border border-border-strong bg-surface-1 text-text-1 shadow-1 transition-colors focus-within:border-brand focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring";
 const INPUT_ROW_FOCUSED: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-brand bg-surface-1 text-text-1 shadow-2 transition-colors";
@@ -1263,7 +1261,7 @@ const INPUT_ROW_DENSE_FOCUSED: &str = "flex min-h-s w-full items-stretch overflo
 const INPUT_ROW_INVALID: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-danger bg-error-soft text-text-1 shadow-1 transition-colors";
 const INPUT_ROW_DENSE_INVALID: &str = "flex min-h-s w-full items-stretch overflow-hidden rounded-field border border-danger bg-error-soft text-text-1 shadow-1 transition-colors";
 const INPUT_ROW_LOADING: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-info bg-info-soft text-text-1 shadow-1";
-const INPUT_ROW_DISABLED: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-border-muted bg-surface-2 text-text-disabled opacity-disabled";
+const INPUT_ROW_DISABLED: &str = "flex min-h-field w-full items-stretch overflow-hidden rounded-field border border-border-muted bg-surface-2 text-text-disabled opacity-45";
 const INPUT_PREFIX: &str = "inline-flex items-center border-r border-border-subtle bg-surface-2 px-xs text-0 font-6 text-text-muted";
 const INPUT_PREFIX_DENSE: &str = "inline-flex items-center border-r border-border-subtle bg-surface-2 px-2xs text-00 font-6 text-text-muted";
 const INPUT_PREFIX_HIDDEN: &str = "hidden";
@@ -1271,88 +1269,88 @@ const INPUT_CONTROL: &str = "min-w-0 flex-1 bg-transparent px-xs py-2xs text-0 l
 const INPUT_CONTROL_DENSE: &str = "min-w-0 flex-1 bg-transparent px-2xs py-3xs text-00 leading-0 text-text-1 outline-none placeholder:text-text-muted disabled:text-text-disabled";
 const INPUT_CONTROL_DISABLED: &str =
     "min-w-0 flex-1 bg-transparent px-xs py-2xs text-0 leading-0 text-text-disabled outline-none";
-const INPUT_SUFFIX: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const INPUT_SUFFIX_DENSE: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-2xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const INPUT_SUFFIX_ACTIVE: &str = "inline-flex shrink-0 items-center justify-center border-l border-brand bg-primary-soft px-xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const INPUT_SUFFIX_DISABLED: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-muted bg-surface-2 px-xs text-0 font-6 text-text-disabled opacity-disabled";
+const INPUT_SUFFIX: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-xs text-0 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const INPUT_SUFFIX_DENSE: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-subtle bg-surface-2 px-2xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const INPUT_SUFFIX_ACTIVE: &str = "inline-flex shrink-0 items-center justify-center border-l border-brand bg-primary-soft px-xs text-0 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const INPUT_SUFFIX_DISABLED: &str = "inline-flex shrink-0 items-center justify-center border-l border-border-muted bg-surface-2 px-xs text-0 font-6 text-text-disabled opacity-45";
 const INPUT_SUFFIX_HIDDEN: &str = "hidden";
 const INPUT_ERROR_TEXT: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const INPUT_ERROR_HIDDEN: &str = "hidden";
 const INPUT_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const NATIVE_SELECT_ROOT: &str = "grid w-full max-w-md gap-2xs text-text-1";
-const NATIVE_SELECT_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs text-text-disabled";
+const NATIVE_SELECT_ROOT: &str = "grid w-full max-w-control gap-2xs text-text-1";
+const NATIVE_SELECT_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs text-text-disabled";
 const NATIVE_SELECT_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const NATIVE_SELECT_LABEL_DISABLED: &str =
     "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
-const NATIVE_SELECT_TRIGGER: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const NATIVE_SELECT_TRIGGER_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NATIVE_SELECT_TRIGGER: &str = "min-h-field w-full rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const NATIVE_SELECT_TRIGGER_DENSE: &str = "min-h-s w-full rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
 const NATIVE_SELECT_TRIGGER_FOCUSED: &str = "min-h-field w-full rounded-field border border-brand bg-surface-1 px-xs py-2xs text-0 leading-0 text-text-1 shadow-2 outline-none transition-colors";
 const NATIVE_SELECT_TRIGGER_DENSE_FOCUSED: &str = "min-h-s w-full rounded-field border border-brand bg-surface-1 px-2xs py-3xs text-00 leading-0 text-text-1 shadow-2 outline-none transition-colors";
 const NATIVE_SELECT_TRIGGER_INVALID: &str = "min-h-field w-full rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NATIVE_SELECT_TRIGGER_DENSE_INVALID: &str = "min-h-s w-full rounded-field border border-danger bg-error-soft px-2xs py-3xs text-00 leading-0 text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NATIVE_SELECT_TRIGGER_LOADING: &str = "min-h-field w-full rounded-field border border-info bg-info-soft px-xs py-2xs text-0 leading-0 text-text-1 shadow-1 outline-none";
-const NATIVE_SELECT_TRIGGER_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-disabled outline-none";
+const NATIVE_SELECT_TRIGGER_DISABLED: &str = "min-h-field w-full rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 leading-0 text-text-disabled opacity-45 outline-none";
 const NATIVE_SELECT_VALUE: &str = "m-0 text-00 leading-0 text-text-2";
 const NATIVE_SELECT_VALUE_PLACEHOLDER: &str = "m-0 text-00 leading-0 text-text-muted";
 const NATIVE_SELECT_VALUE_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
-const NAVIGATION_MENU_ROOT: &str = "grid w-full max-w-3xl gap-2xs text-text-1";
-const NAVIGATION_MENU_ROOT_DISABLED: &str = "grid w-full max-w-3xl gap-2xs text-text-disabled";
+const NAVIGATION_MENU_ROOT: &str = "grid w-full max-w-narrow gap-2xs text-text-1";
+const NAVIGATION_MENU_ROOT_DISABLED: &str = "grid w-full max-w-narrow gap-2xs text-text-disabled";
 const NAVIGATION_MENU_LIST: &str = "flex flex-wrap items-start gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs shadow-1";
 const NAVIGATION_MENU_LIST_DENSE: &str = "flex flex-wrap items-start gap-3xs rounded-box border border-border-subtle bg-surface-1 p-3xs shadow-1";
 const NAVIGATION_MENU_LIST_LOADING: &str =
     "flex flex-wrap items-start gap-2xs rounded-box border border-info bg-info-soft p-2xs shadow-1";
 const NAVIGATION_MENU_ITEM: &str = "relative grid gap-2xs";
-const NAVIGATION_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const NAVIGATION_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const NAVIGATION_MENU_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const NAVIGATION_MENU_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
 const NAVIGATION_MENU_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const NAVIGATION_MENU_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
 const NAVIGATION_MENU_LINK: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_LINK_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_LINK_SELECTED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_LINK_DENSE_SELECTED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_LINK_INVALID: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const NAVIGATION_MENU_LINK_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
-const NAVIGATION_MENU_CONTENT: &str = "grid min-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-s shadow-2";
-const NAVIGATION_MENU_CONTENT_DENSE: &str = "grid min-w-l gap-3xs rounded-box border border-border-subtle bg-surface-elevated p-xs shadow-1";
+const NAVIGATION_MENU_LINK_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
+const NAVIGATION_MENU_CONTENT: &str = "grid min-w-4xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-s shadow-2";
+const NAVIGATION_MENU_CONTENT_DENSE: &str = "grid min-w-3xl gap-3xs rounded-box border border-border-subtle bg-surface-elevated p-xs shadow-1";
 const NAVIGATION_MENU_CONTENT_INVALID: &str =
-    "grid min-w-xl gap-2xs rounded-box border border-danger bg-error-soft p-s shadow-1";
+    "grid min-w-4xl gap-2xs rounded-box border border-danger bg-error-soft p-s shadow-1";
 const NAVIGATION_MENU_CONTENT_LOADING: &str =
-    "grid min-w-xl gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
-const NAVIGATION_MENU_CONTENT_DISABLED: &str = "grid min-w-xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+    "grid min-w-4xl gap-2xs rounded-box border border-info bg-info-soft p-s shadow-1";
+const NAVIGATION_MENU_CONTENT_DISABLED: &str = "grid min-w-4xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const NAVIGATION_MENU_CONTENT_HIDDEN: &str = "hidden";
 const NAVIGATION_MENU_PANEL_LINK: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-left text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_PANEL_LINK_DENSE: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const NAVIGATION_MENU_PANEL_LINK_SELECTED: &str = "grid gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-left text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const NAVIGATION_MENU_PANEL_LINK_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
+const NAVIGATION_MENU_PANEL_LINK_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-45";
 const NAVIGATION_MENU_PANEL_TITLE: &str = "text-0 font-7 leading-0 text-text-1";
 const NAVIGATION_MENU_PANEL_DETAIL: &str = "text-00 leading-0 text-text-2";
 const NAVIGATION_MENU_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const NAVIGATION_MENU_ERROR_HIDDEN: &str = "hidden";
-const PAGINATION_ROOT: &str = "grid w-full max-w-2xl gap-2xs text-text-1";
-const PAGINATION_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-2xs text-text-disabled";
+const PAGINATION_ROOT: &str = "grid w-full max-w-content gap-2xs text-text-1";
+const PAGINATION_ROOT_DISABLED: &str = "grid w-full max-w-content gap-2xs text-text-disabled";
 const PAGINATION_CONTENT: &str = "flex flex-wrap items-center gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs shadow-1";
 const PAGINATION_CONTENT_DENSE: &str = "flex flex-wrap items-center gap-3xs rounded-box border border-border-subtle bg-surface-1 p-3xs shadow-1";
 const PAGINATION_CONTENT_LOADING: &str = "flex flex-wrap items-center gap-2xs rounded-box border border-info bg-info-soft p-2xs shadow-1";
 const PAGINATION_ITEM: &str = "contents";
-const PAGINATION_CONTROL: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
-const PAGINATION_CONTROL_DENSE: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-disabled";
+const PAGINATION_CONTROL: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-xs py-2xs text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
+const PAGINATION_CONTROL_DENSE: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-subtle bg-surface-1 px-2xs py-3xs text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-text-disabled disabled:opacity-45";
 const PAGINATION_CONTROL_CURRENT: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const PAGINATION_CONTROL_DENSE_CURRENT: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const PAGINATION_CONTROL_INVALID: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const PAGINATION_CONTROL_DISABLED: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const PAGINATION_CONTROL_DISABLED: &str = "inline-flex min-h-field min-w-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
 const PAGINATION_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const PAGINATION_ERROR_HIDDEN: &str = "hidden";
-const POPOVER_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
-const POPOVER_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
-const POPOVER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const POPOVER_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const POPOVER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const POPOVER_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const POPOVER_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const POPOVER_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-disabled";
+const POPOVER_ROOT: &str = "relative grid w-full max-w-control gap-2xs text-text-1";
+const POPOVER_ROOT_DISABLED: &str = "relative grid w-full max-w-control gap-2xs text-text-disabled";
+const POPOVER_TRIGGER: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const POPOVER_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const POPOVER_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const POPOVER_TRIGGER_DENSE_OPEN: &str = "inline-flex min-h-s items-center justify-center gap-2xs rounded-field border border-brand bg-primary-soft px-2xs py-3xs text-00 font-7 text-text-1 shadow-2 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const POPOVER_TRIGGER_INVALID: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-0 font-7 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const POPOVER_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center gap-2xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 text-text-disabled opacity-45";
 const POPOVER_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-border-subtle bg-surface-elevated p-s text-text-1 shadow-3";
 const POPOVER_CONTENT_DENSE: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-field border border-border-subtle bg-surface-elevated p-xs text-text-1 shadow-2";
 const POPOVER_CONTENT_LOADING: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-xs rounded-box border border-info bg-info-soft p-s text-text-1 shadow-2";
@@ -1368,10 +1366,10 @@ const POPOVER_ARROW: &str = "grid size-s place-items-center rounded-field border
 const POPOVER_ARROW_HIDDEN: &str = "hidden";
 const POPOVER_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const POPOVER_ERROR_HIDDEN: &str = "hidden";
-const PROGRESS_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const PROGRESS_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const PROGRESS_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const PROGRESS_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const PROGRESS_ROOT: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const PROGRESS_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const PROGRESS_ROOT_INVALID: &str = "grid w-full max-w-control gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const PROGRESS_ROOT_DISABLED: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const PROGRESS_TRACK: &str = "h-s w-full overflow-hidden rounded-pill bg-surface-3";
 const PROGRESS_TRACK_DENSE: &str = "h-xs w-full overflow-hidden rounded-pill bg-surface-3";
 const PROGRESS_TRACK_LOADING: &str = "h-s w-full overflow-hidden rounded-pill bg-info-soft";
@@ -1392,10 +1390,10 @@ const PROGRESS_DETAIL: &str = "m-0 text-0 leading-0 text-text-2";
 const PROGRESS_DETAIL_DENSE: &str = "m-0 text-00 leading-0 text-text-2";
 const PROGRESS_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const PROGRESS_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
-const RADIO_GROUP_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const RADIO_GROUP_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const RADIO_GROUP_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const RADIO_GROUP_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const RADIO_GROUP_ROOT: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_INVALID: &str = "grid w-full max-w-control gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const RADIO_GROUP_ROOT_DISABLED: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const RADIO_GROUP_TITLE_ROW: &str = "flex flex-wrap items-center justify-between gap-2xs";
 const RADIO_GROUP_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const RADIO_GROUP_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
@@ -1407,11 +1405,11 @@ const RADIO_GROUP_ITEM: &str = "flex min-w-0 items-start gap-xs rounded-field bo
 const RADIO_GROUP_ITEM_DENSE: &str = "flex min-w-0 items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left transition-colors hover:bg-hover-tint";
 const RADIO_GROUP_ITEM_SELECTED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 transition-colors hover:bg-selected-tint";
 const RADIO_GROUP_ITEM_FOCUSED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-brand bg-surface-1 p-xs text-left shadow-1";
-const RADIO_GROUP_ITEM_DISABLED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
-const RADIO_GROUP_CONTROL: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-strong bg-surface-1 text-00 font-7 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const RADIO_GROUP_CONTROL_SELECTED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-brand bg-brand text-00 font-7 text-text-on-brand shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const RADIO_GROUP_ITEM_DISABLED: &str = "flex min-w-0 items-start gap-xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-45";
+const RADIO_GROUP_CONTROL: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-strong bg-surface-1 text-00 font-7 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const RADIO_GROUP_CONTROL_SELECTED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-brand bg-brand text-00 font-7 text-text-on-brand shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const RADIO_GROUP_CONTROL_INVALID: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-danger bg-error-soft text-00 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const RADIO_GROUP_CONTROL_DISABLED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-muted bg-surface-3 text-00 font-6 text-text-disabled opacity-disabled";
+const RADIO_GROUP_CONTROL_DISABLED: &str = "grid size-s shrink-0 place-items-center rounded-pill border border-border-muted bg-surface-3 text-00 font-6 text-text-disabled opacity-45";
 const RADIO_GROUP_DOT: &str = "size-2xs rounded-pill bg-text-on-brand";
 const RADIO_GROUP_DOT_EMPTY: &str = "hidden";
 const RADIO_GROUP_TEXT: &str = "grid min-w-0 gap-3xs";
@@ -1421,10 +1419,10 @@ const RADIO_GROUP_LABEL_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-
 const RADIO_GROUP_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const RADIO_GROUP_DETAIL_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger";
 const RADIO_GROUP_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
-const RESIZABLE_ROOT: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const RESIZABLE_ROOT_DENSE: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const RESIZABLE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const RESIZABLE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const RESIZABLE_ROOT: &str = "grid w-full max-w-content gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const RESIZABLE_ROOT_DENSE: &str = "grid w-full max-w-content gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const RESIZABLE_ROOT_INVALID: &str = "grid w-full max-w-content gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const RESIZABLE_ROOT_DISABLED: &str = "grid w-full max-w-content gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const RESIZABLE_HEADER: &str = "flex flex-wrap items-center justify-between gap-2xs";
 const RESIZABLE_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const RESIZABLE_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
@@ -1439,7 +1437,7 @@ const RESIZABLE_PANEL: &str = "relative grid min-w-0 content-start gap-2xs borde
 const RESIZABLE_PANEL_DENSE: &str = "relative grid min-w-0 content-start gap-3xs border-border-subtle bg-surface-1 p-xs text-text-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const RESIZABLE_PANEL_ACTIVE: &str = "relative grid min-w-0 content-start gap-2xs border border-brand bg-primary-soft p-s text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const RESIZABLE_PANEL_INVALID: &str = "relative grid min-w-0 content-start gap-2xs border border-danger bg-error-soft p-s text-text-1 outline-none";
-const RESIZABLE_PANEL_DISABLED: &str = "relative grid min-w-0 content-start gap-2xs border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled outline-none";
+const RESIZABLE_PANEL_DISABLED: &str = "relative grid min-w-0 content-start gap-2xs border-border-muted bg-surface-2 p-s text-text-disabled opacity-45 outline-none";
 const RESIZABLE_PANEL_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const RESIZABLE_PANEL_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
 const RESIZABLE_PANEL_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
@@ -1455,15 +1453,15 @@ const RESIZABLE_HANDLE_DENSE: &str =
 const RESIZABLE_HANDLE_ACTIVE: &str = "mt-xs grid gap-3xs rounded-field border border-brand bg-primary-soft p-2xs text-text-1 shadow-1";
 const RESIZABLE_HANDLE_INVALID: &str =
     "mt-xs grid gap-3xs rounded-field border border-danger bg-error-soft p-2xs text-danger";
-const RESIZABLE_HANDLE_DISABLED: &str = "mt-xs grid gap-3xs rounded-field border border-border-muted bg-surface-3 p-2xs text-text-disabled opacity-disabled";
+const RESIZABLE_HANDLE_DISABLED: &str = "mt-xs grid gap-3xs rounded-field border border-border-muted bg-surface-3 p-2xs text-text-disabled opacity-45";
 const RESIZABLE_HANDLE_LABEL: &str = "m-0 text-00 font-6 leading-0 text-text-muted";
 const RESIZABLE_HANDLE_LABEL_ACTIVE: &str = "m-0 text-00 font-7 leading-0 text-brand";
 const RESIZABLE_HANDLE_LABEL_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
-const RESIZABLE_RANGE: &str = "w-full accent-brand";
-const SCROLL_AREA_ROOT: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const SCROLL_AREA_ROOT_DENSE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const SCROLL_AREA_ROOT_INVALID: &str = "grid w-full max-w-md gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
-const SCROLL_AREA_ROOT_DISABLED: &str = "grid w-full max-w-md gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+const RESIZABLE_RANGE: &str = "h-s w-full accent-brand";
+const SCROLL_AREA_ROOT: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_DENSE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_INVALID: &str = "grid w-full max-w-control gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const SCROLL_AREA_ROOT_DISABLED: &str = "grid w-full max-w-control gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const SCROLL_AREA_HEADER: &str = "flex flex-wrap items-center justify-between gap-2xs";
 const SCROLL_AREA_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const SCROLL_AREA_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
@@ -1479,7 +1477,7 @@ const SCROLL_AREA_VIEWPORT_DENSE: &str = "max-h-xl overflow-auto rounded-field b
 const SCROLL_AREA_VIEWPORT_FOCUSED: &str = "max-h-2xl overflow-auto rounded-field border border-brand bg-surface-1 p-xs shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SCROLL_AREA_VIEWPORT_INVALID: &str =
     "max-h-2xl overflow-auto rounded-field border border-danger bg-error-soft p-xs outline-none";
-const SCROLL_AREA_VIEWPORT_DISABLED: &str = "max-h-2xl overflow-auto rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled outline-none";
+const SCROLL_AREA_VIEWPORT_DISABLED: &str = "max-h-2xl overflow-auto rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-45 outline-none";
 const SCROLL_AREA_CONTENT: &str = "grid min-w-max gap-2xs";
 const SCROLL_AREA_CONTENT_DENSE: &str = "grid min-w-max gap-3xs";
 const SCROLL_AREA_ITEM: &str = "grid min-w-0 gap-3xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 transition-colors hover:bg-hover-tint";
@@ -1487,7 +1485,7 @@ const SCROLL_AREA_ITEM_DENSE: &str = "grid min-w-0 gap-3xs rounded-field border 
 const SCROLL_AREA_ITEM_ACTIVE: &str = "grid min-w-0 gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1";
 const SCROLL_AREA_ITEM_INVALID: &str =
     "grid min-w-0 gap-3xs rounded-field border border-danger bg-error-soft p-xs text-text-1";
-const SCROLL_AREA_ITEM_DISABLED: &str = "grid min-w-0 gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled";
+const SCROLL_AREA_ITEM_DISABLED: &str = "grid min-w-0 gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-45";
 const SCROLL_AREA_ITEM_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const SCROLL_AREA_ITEM_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
 const SCROLL_AREA_ITEM_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
@@ -1498,22 +1496,22 @@ const SCROLL_AREA_BAR_ROW: &str = "flex flex-wrap items-center gap-2xs";
 const SCROLL_AREA_BAR: &str = "rounded-pill bg-border-subtle";
 const SCROLL_AREA_BAR_ACTIVE: &str = "rounded-pill bg-brand shadow-1";
 const SCROLL_AREA_BAR_INVALID: &str = "rounded-pill bg-danger";
-const SCROLL_AREA_BAR_DISABLED: &str = "rounded-pill bg-border-muted opacity-disabled";
+const SCROLL_AREA_BAR_DISABLED: &str = "rounded-pill bg-border-muted opacity-45";
 const SCROLL_AREA_BAR_VERTICAL: &str = "h-m w-2xs";
 const SCROLL_AREA_BAR_HORIZONTAL: &str = "h-2xs w-m";
 const SCROLL_AREA_CORNER: &str = "size-2xs rounded-field bg-border-subtle";
 const SCROLL_AREA_CORNER_ACTIVE: &str = "size-2xs rounded-field bg-brand";
 const SCROLL_AREA_CORNER_HIDDEN: &str = "hidden";
-const SELECT_ROOT: &str = "relative grid w-full max-w-md gap-2xs text-text-1";
-const SELECT_ROOT_DISABLED: &str = "relative grid w-full max-w-md gap-2xs text-text-disabled";
+const SELECT_ROOT: &str = "relative grid w-full max-w-control gap-2xs text-text-1";
+const SELECT_ROOT_DISABLED: &str = "relative grid w-full max-w-control gap-2xs text-text-disabled";
 const SELECT_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const SELECT_LABEL_DISABLED: &str =
     "m-0 text-00 font-7 uppercase tracking-label text-text-disabled";
-const SELECT_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const SELECT_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
+const SELECT_TRIGGER: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-strong bg-surface-1 px-xs py-2xs text-left text-0 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const SELECT_TRIGGER_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-2xs rounded-field border border-border-strong bg-surface-1 px-2xs py-3xs text-left text-00 font-6 text-text-1 shadow-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
 const SELECT_TRIGGER_OPEN: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-brand bg-primary-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SELECT_TRIGGER_INVALID: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-danger bg-error-soft px-xs py-2xs text-left text-0 font-7 text-text-1 shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SELECT_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-disabled opacity-disabled";
+const SELECT_TRIGGER_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-xs rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-left text-0 font-6 text-text-disabled opacity-45";
 const SELECT_VALUE: &str = "truncate";
 const SELECT_CHEVRON: &str = "text-text-muted";
 const SELECT_CONTENT: &str = "absolute left-0 top-full z-10 mt-2xs grid w-full gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-2xs text-text-1 shadow-3";
@@ -1528,27 +1526,27 @@ const SELECT_ITEM: &str = "grid gap-3xs rounded-field border border-border-subtl
 const SELECT_ITEM_DENSE: &str = "grid gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-left transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SELECT_ITEM_SELECTED: &str = "grid gap-3xs rounded-field border border-brand bg-primary-soft p-xs text-left shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SELECT_ITEM_FOCUSED: &str = "grid gap-3xs rounded-field border border-brand bg-surface-1 p-xs text-left shadow-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SELECT_ITEM_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-disabled";
+const SELECT_ITEM_DISABLED: &str = "grid gap-3xs rounded-field border border-border-muted bg-surface-2 p-xs text-left text-text-disabled opacity-45";
 const SELECT_ITEM_TITLE: &str = "m-0 text-0 font-7 leading-0 text-text-1";
 const SELECT_ITEM_TITLE_DENSE: &str = "m-0 text-00 font-7 leading-0 text-text-1";
 const SELECT_ITEM_TITLE_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
 const SELECT_ITEM_DETAIL: &str = "m-0 text-00 leading-0 text-text-2";
 const SELECT_ITEM_DETAIL_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const SELECT_ERROR: &str = "m-0 text-00 font-6 leading-0 text-danger";
-const SEPARATOR_ROOT: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SEPARATOR_ROOT_DENSE: &str = "grid w-full max-w-md gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_DENSE: &str = "grid w-full max-w-control gap-3xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SEPARATOR_ROOT_VERTICAL: &str = "flex min-h-xl w-fit items-center gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SEPARATOR_ROOT_ACTIVE: &str = "grid w-full max-w-md gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_ACTIVE: &str = "grid w-full max-w-control gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const SEPARATOR_ROOT_VERTICAL_ACTIVE: &str = "flex min-h-xl w-fit items-center gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SEPARATOR_ROOT_INVALID: &str = "grid w-full max-w-md gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const SEPARATOR_ROOT_DISABLED: &str = "grid w-full max-w-md gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-disabled";
+const SEPARATOR_ROOT_INVALID: &str = "grid w-full max-w-control gap-2xs rounded-field border border-danger bg-error-soft p-xs text-text-1 shadow-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+const SEPARATOR_ROOT_DISABLED: &str = "grid w-full max-w-control gap-2xs rounded-field border border-border-muted bg-surface-2 p-xs text-text-disabled opacity-45";
 const SEPARATOR_LINE: &str = "h-3xs w-full rounded-pill bg-border-subtle";
 const SEPARATOR_LINE_DENSE: &str = "h-2xs w-full rounded-pill bg-border-subtle";
 const SEPARATOR_LINE_VERTICAL: &str = "h-xl w-2xs rounded-pill bg-border-subtle";
 const SEPARATOR_LINE_ACTIVE: &str = "h-3xs w-full rounded-pill bg-brand shadow-1";
 const SEPARATOR_LINE_VERTICAL_ACTIVE: &str = "h-xl w-2xs rounded-pill bg-brand shadow-1";
 const SEPARATOR_LINE_INVALID: &str = "h-3xs w-full rounded-pill bg-danger";
-const SEPARATOR_LINE_DISABLED: &str = "h-3xs w-full rounded-pill bg-border-muted opacity-disabled";
+const SEPARATOR_LINE_DISABLED: &str = "h-3xs w-full rounded-pill bg-border-muted opacity-45";
 const SEPARATOR_LABEL: &str = "m-0 text-00 font-7 uppercase tracking-label text-text-muted";
 const SEPARATOR_LABEL_DENSE: &str = "m-0 text-00 font-6 uppercase tracking-label text-text-muted";
 const SEPARATOR_LABEL_INVALID: &str = "m-0 text-00 font-7 uppercase tracking-label text-danger";
@@ -1566,17 +1564,17 @@ const INPUT_OTP_SLOT_DENSE_FOCUSED: &str = "grid size-s place-items-center round
 const INPUT_OTP_SLOT_INVALID: &str = "grid size-l place-items-center rounded-field border border-danger bg-error-soft text-center text-1 font-7 leading-2 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_DENSE_INVALID: &str = "grid size-s place-items-center rounded-field border border-danger bg-error-soft text-center text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const INPUT_OTP_SLOT_LOADING: &str = "grid size-l place-items-center rounded-field border border-info bg-info-soft text-center text-1 font-7 leading-2 text-text-1 shadow-1";
-const INPUT_OTP_SLOT_DISABLED: &str = "grid size-l place-items-center rounded-field border border-border-muted bg-surface-2 text-center text-1 font-7 leading-2 text-text-disabled opacity-disabled";
+const INPUT_OTP_SLOT_DISABLED: &str = "grid size-l place-items-center rounded-field border border-border-muted bg-surface-2 text-center text-1 font-7 leading-2 text-text-disabled opacity-45";
 const INPUT_OTP_SEPARATOR: &str =
     "inline-flex min-h-field items-center px-2xs text-1 font-7 text-text-muted";
 const INPUT_OTP_SEPARATOR_DENSE: &str =
     "inline-flex min-h-s items-center px-3xs text-0 font-7 text-text-muted";
 const INPUT_OTP_SEPARATOR_HIDDEN: &str = "hidden";
-const ITEM_ROOT: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const ITEM_ROOT_DENSE: &str = "flex w-full max-w-md items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
-const ITEM_ROOT_INVALID: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-danger bg-error-soft p-xs text-text-1 shadow-1";
-const ITEM_ROOT_LOADING: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-info bg-info-soft p-xs text-text-1 shadow-1";
-const ITEM_ROOT_DISABLED: &str = "flex w-full max-w-md items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-xs text-text-disabled";
+const ITEM_ROOT: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const ITEM_ROOT_DENSE: &str = "flex w-full max-w-control items-start gap-2xs rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
+const ITEM_ROOT_INVALID: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-danger bg-error-soft p-xs text-text-1 shadow-1";
+const ITEM_ROOT_LOADING: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-info bg-info-soft p-xs text-text-1 shadow-1";
+const ITEM_ROOT_DISABLED: &str = "flex w-full max-w-control items-start gap-xs rounded-box border border-border-muted bg-surface-2 p-xs text-text-disabled";
 const ITEM_MEDIA: &str = "grid size-xl shrink-0 place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
 const ITEM_MEDIA_DENSE: &str = "grid size-l shrink-0 place-items-center rounded-field border border-border-subtle bg-primary-soft text-00 font-7 text-brand";
 const ITEM_MEDIA_DISABLED: &str = "grid size-xl shrink-0 place-items-center rounded-field border border-border-muted bg-surface-3 text-00 font-7 text-text-disabled";
@@ -1592,10 +1590,10 @@ const ITEM_DESCRIPTION_INVALID: &str = "m-0 text-00 font-6 leading-0 text-danger
 const ITEM_DESCRIPTION_DISABLED: &str = "m-0 text-00 leading-0 text-text-disabled";
 const ITEM_ACTIONS: &str = "flex shrink-0 flex-wrap items-center justify-end gap-2xs";
 const ITEM_ACTIONS_HIDDEN: &str = "hidden";
-const ITEM_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ITEM_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ITEM_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const ITEM_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled opacity-disabled";
+const ITEM_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ITEM_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ITEM_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 text-text-1 transition-colors hover:bg-selected-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const ITEM_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 text-text-disabled opacity-45";
 const ITEM_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
 const KBD_ROOT: &str = "inline-flex max-w-full items-center rounded-field border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
@@ -1610,7 +1608,7 @@ const KBD_KEY_DENSE: &str = "inline-flex min-h-s min-w-s items-center justify-ce
 const KBD_KEY_FOCUSED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-brand bg-primary-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const KBD_KEY_INVALID: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-danger bg-error-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1 shadow-1";
 const KBD_KEY_LOADING: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-info bg-info-soft px-2xs py-3xs font-mono text-00 font-7 leading-0 text-text-1";
-const KBD_KEY_DISABLED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs font-mono text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const KBD_KEY_DISABLED: &str = "inline-flex min-h-s min-w-s items-center justify-center rounded-field border border-border-muted bg-surface-3 px-2xs py-3xs font-mono text-00 font-6 leading-0 text-text-disabled opacity-45";
 const KBD_SEPARATOR: &str = "text-00 font-6 leading-0 text-text-muted";
 const KBD_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
@@ -1624,7 +1622,7 @@ const LABEL_ROOT_INVALID: &str =
 const LABEL_ROOT_LOADING: &str =
     "inline-flex max-w-full items-center gap-2xs rounded-field text-info transition-colors";
 const LABEL_ROOT_DISABLED: &str =
-    "inline-flex max-w-full items-center gap-2xs rounded-field text-text-disabled opacity-disabled";
+    "inline-flex max-w-full items-center gap-2xs rounded-field text-text-disabled opacity-45";
 const LABEL_TEXT: &str = "m-0 text-0 font-7 leading-0 text-inherit";
 const LABEL_TEXT_DENSE: &str = "m-0 text-00 font-7 leading-0 text-inherit";
 const LABEL_TEXT_DISABLED: &str = "m-0 text-0 font-7 leading-0 text-text-disabled";
@@ -1641,7 +1639,7 @@ const MARKER_ROOT_DENSE: &str = "inline-flex max-w-full items-center gap-3xs rou
 const MARKER_ROOT_ACTIVE: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-brand bg-selected-tint px-2xs py-3xs text-text-1 shadow-1 transition-colors";
 const MARKER_ROOT_INVALID: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-danger bg-error-soft px-2xs py-3xs text-danger shadow-1 transition-colors";
 const MARKER_ROOT_LOADING: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-info bg-info-soft px-2xs py-3xs text-info shadow-1 transition-colors";
-const MARKER_ROOT_DISABLED: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-border-muted bg-surface-2 px-2xs py-3xs text-text-disabled opacity-disabled";
+const MARKER_ROOT_DISABLED: &str = "inline-flex max-w-full items-center gap-2xs rounded-pill border border-border-muted bg-surface-2 px-2xs py-3xs text-text-disabled opacity-45";
 const MARKER_DOT: &str = "size-2xs shrink-0 rounded-pill bg-brand";
 const MARKER_DOT_DENSE: &str = "size-3xs shrink-0 rounded-pill bg-brand";
 const MARKER_DOT_NEUTRAL: &str = "size-2xs shrink-0 rounded-pill bg-text-muted";
@@ -1657,44 +1655,43 @@ const MARKER_LABEL_DENSE: &str = "m-0 truncate text-00 font-6 leading-0 text-inh
 const MARKER_LABEL_DISABLED: &str = "m-0 truncate text-00 font-6 leading-0 text-text-disabled";
 const MARKER_ANCHOR: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-7 leading-0 text-brand transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 const MARKER_ANCHOR_ACTIVE: &str = "inline-flex min-h-s items-center rounded-field bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-brand transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
-const MARKER_ANCHOR_DISABLED: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const MARKER_ANCHOR_DISABLED: &str = "inline-flex min-h-s items-center rounded-field px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-45";
 const MARKER_ANCHOR_HIDDEN: &str = "hidden";
 const MARKER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const MENUBAR_ROOT: &str = "grid max-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
-const MENUBAR_ROOT_DENSE: &str = "grid max-w-xl gap-3xs rounded-field border border-border-subtle bg-surface-1 p-3xs text-text-1 shadow-1";
-const MENUBAR_ROOT_INVALID: &str = "grid max-w-xl gap-2xs rounded-box border border-danger bg-error-soft p-2xs text-text-1 shadow-1";
-const MENUBAR_ROOT_LOADING: &str =
-    "grid max-w-xl gap-2xs rounded-box border border-info bg-info-soft p-2xs text-text-1 shadow-1";
-const MENUBAR_ROOT_DISABLED: &str = "grid max-w-xl gap-2xs rounded-box border border-border-muted bg-surface-2 p-2xs text-text-disabled opacity-disabled";
+const MENUBAR_ROOT: &str = "grid max-w-narrow gap-2xs rounded-box border border-border-subtle bg-surface-1 p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_DENSE: &str = "grid max-w-narrow gap-3xs rounded-field border border-border-subtle bg-surface-1 p-3xs text-text-1 shadow-1";
+const MENUBAR_ROOT_INVALID: &str = "grid max-w-narrow gap-2xs rounded-box border border-danger bg-error-soft p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_LOADING: &str = "grid max-w-narrow gap-2xs rounded-box border border-info bg-info-soft p-2xs text-text-1 shadow-1";
+const MENUBAR_ROOT_DISABLED: &str = "grid max-w-narrow gap-2xs rounded-box border border-border-muted bg-surface-2 p-2xs text-text-disabled opacity-45";
 const MENUBAR_ROW: &str = "flex flex-wrap items-center gap-2xs";
 const MENUBAR_MENU: &str = "relative grid gap-2xs";
 const MENUBAR_MENU_DENSE: &str = "relative grid gap-3xs";
-const MENUBAR_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
-const MENUBAR_CONTENT: &str = "grid min-w-xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-2xs shadow-2";
-const MENUBAR_CONTENT_DENSE: &str = "grid min-w-l gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs shadow-1";
+const MENUBAR_TRIGGER: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-strong bg-surface-2 px-xs py-2xs text-0 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_TRIGGER_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_TRIGGER_OPEN: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_TRIGGER_DISABLED: &str = "inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
+const MENUBAR_CONTENT: &str = "grid min-w-4xl gap-2xs rounded-box border border-border-subtle bg-surface-elevated p-2xs shadow-2";
+const MENUBAR_CONTENT_DENSE: &str = "grid min-w-3xl gap-3xs rounded-field border border-border-subtle bg-surface-elevated p-3xs shadow-1";
 const MENUBAR_CONTENT_HIDDEN: &str = "hidden";
-const MENUBAR_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_ITEM_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-xs rounded-field px-2xs py-3xs text-left text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MENUBAR_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const MENUBAR_ITEM: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_ITEM_DENSE: &str = "flex min-h-s w-full items-center justify-between gap-xs rounded-field px-2xs py-3xs text-left text-00 font-6 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_ITEM_ACTIVE: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field bg-selected-tint px-xs py-2xs text-left text-0 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MENUBAR_ITEM_DISABLED: &str = "flex min-h-field w-full items-center justify-between gap-s rounded-field px-xs py-2xs text-left text-0 font-6 leading-0 text-text-disabled opacity-45";
 const MENUBAR_SHORTCUT: &str = "ml-s text-00 font-6 leading-0 text-text-muted";
 const MENUBAR_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const MESSAGE_ROOT_INCOMING: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1 transition-colors";
-const MESSAGE_ROOT_OUTGOING: &str = "ml-auto grid w-full max-w-2xl gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-1 transition-colors";
-const MESSAGE_ROOT_SYSTEM: &str = "mx-auto grid w-full max-w-xl gap-xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 transition-colors";
-const MESSAGE_ROOT_DENSE_INCOMING: &str = "grid w-full max-w-2xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 transition-colors";
-const MESSAGE_ROOT_DENSE_OUTGOING: &str = "ml-auto grid w-full max-w-2xl gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 transition-colors";
-const MESSAGE_ROOT_DENSE_SYSTEM: &str = "mx-auto grid w-full max-w-xl gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-text-1 transition-colors";
-const MESSAGE_ROOT_ACTIVE: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-brand bg-selected-tint p-s text-text-1 shadow-1 transition-colors";
-const MESSAGE_ROOT_INVALID: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_INCOMING: &str = "grid w-full max-w-narrow gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_OUTGOING: &str = "ml-auto grid w-full max-w-narrow gap-xs rounded-box border border-brand bg-primary-soft p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_SYSTEM: &str = "mx-auto grid w-full max-w-narrow gap-xs rounded-box border border-border-subtle bg-surface-2 p-s text-text-1 transition-colors";
+const MESSAGE_ROOT_DENSE_INCOMING: &str = "grid w-full max-w-narrow gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_DENSE_OUTGOING: &str = "ml-auto grid w-full max-w-narrow gap-2xs rounded-field border border-brand bg-primary-soft p-xs text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_DENSE_SYSTEM: &str = "mx-auto grid w-full max-w-narrow gap-2xs rounded-field border border-border-subtle bg-surface-2 p-xs text-text-1 transition-colors";
+const MESSAGE_ROOT_ACTIVE: &str = "grid w-full max-w-narrow gap-xs rounded-box border border-brand bg-selected-tint p-s text-text-1 shadow-1 transition-colors";
+const MESSAGE_ROOT_INVALID: &str = "grid w-full max-w-narrow gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1 transition-colors";
 const MESSAGE_ROOT_LOADING: &str =
-    "grid w-full max-w-2xl gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
-const MESSAGE_ROOT_DISABLED: &str = "grid w-full max-w-2xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+    "grid w-full max-w-narrow gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
+const MESSAGE_ROOT_DISABLED: &str = "grid w-full max-w-narrow gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const MESSAGE_HEADER: &str = "flex min-w-0 flex-wrap items-start justify-between gap-xs";
 const MESSAGE_HEADER_DENSE: &str = "flex min-w-0 flex-wrap items-start justify-between gap-2xs";
 const MESSAGE_SENDER: &str = "m-0 min-w-0 truncate text-0 font-7 leading-0 text-text-1";
@@ -1713,19 +1710,18 @@ const MESSAGE_STATUS_INVALID: &str = "m-0 text-00 font-7 leading-0 text-danger";
 const MESSAGE_STATUS_DISABLED: &str = "m-0 text-00 font-6 leading-0 text-text-disabled";
 const MESSAGE_ACTIONS: &str = "flex flex-wrap items-center gap-2xs";
 const MESSAGE_ACTIONS_HIDDEN: &str = "hidden";
-const MESSAGE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-3xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-disabled";
+const MESSAGE_ACTION: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_ACTION_DENSE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-strong bg-surface-2 px-3xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors hover:bg-hover-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_ACTION_ACTIVE: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-selected-tint px-2xs py-3xs text-00 font-7 leading-0 text-text-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_ACTION_DISABLED: &str = "inline-flex min-h-s items-center justify-center rounded-field border border-border-muted bg-surface-2 px-2xs py-3xs text-00 font-6 leading-0 text-text-disabled opacity-45";
 const MESSAGE_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
-const MESSAGE_SCROLLER_ROOT: &str = "grid max-w-3xl gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
-const MESSAGE_SCROLLER_ROOT_DENSE: &str = "grid max-w-3xl gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
-const MESSAGE_SCROLLER_ROOT_INVALID: &str =
-    "grid max-w-3xl gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT: &str = "grid max-w-narrow gap-xs rounded-box border border-border-subtle bg-surface-1 p-s text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT_DENSE: &str = "grid max-w-narrow gap-2xs rounded-field border border-border-subtle bg-surface-1 p-xs text-text-1 shadow-1";
+const MESSAGE_SCROLLER_ROOT_INVALID: &str = "grid max-w-narrow gap-xs rounded-box border border-danger bg-error-soft p-s text-text-1 shadow-1";
 const MESSAGE_SCROLLER_ROOT_LOADING: &str =
-    "grid max-w-3xl gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
-const MESSAGE_SCROLLER_ROOT_DISABLED: &str = "grid max-w-3xl gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-disabled";
+    "grid max-w-narrow gap-xs rounded-box border border-info bg-info-soft p-s text-text-1";
+const MESSAGE_SCROLLER_ROOT_DISABLED: &str = "grid max-w-narrow gap-xs rounded-box border border-border-muted bg-surface-2 p-s text-text-disabled opacity-45";
 const MESSAGE_SCROLLER_VIEWPORT: &str = "max-h-4xl overflow-y-auto rounded-field border border-border-subtle bg-surface-2 p-xs scroll-smooth";
 const MESSAGE_SCROLLER_VIEWPORT_DENSE: &str =
     "max-h-3xl overflow-y-auto rounded-field border border-border-subtle bg-surface-2 p-2xs";
@@ -1735,10 +1731,10 @@ const MESSAGE_SCROLLER_EMPTY: &str =
     "rounded-field border border-border-subtle bg-surface-1 p-s text-0 leading-0 text-text-muted";
 const MESSAGE_SCROLLER_ANCHOR: &str = "h-selector rounded-pill bg-border-subtle";
 const MESSAGE_SCROLLER_ANCHOR_ACTIVE: &str = "h-selector rounded-pill bg-brand";
-const MESSAGE_SCROLLER_JUMP: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-xs py-2xs text-0 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_SCROLLER_JUMP_DENSE: &str = "justify-self-end inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-00 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_SCROLLER_JUMP_ACTIVE: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-disabled";
-const MESSAGE_SCROLLER_JUMP_DISABLED: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-disabled";
+const MESSAGE_SCROLLER_JUMP: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-brand px-xs py-2xs text-0 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_SCROLLER_JUMP_DENSE: &str = "justify-self-end inline-flex min-h-s items-center justify-center rounded-field border border-brand bg-brand px-2xs py-3xs text-00 font-7 leading-0 text-text-on-brand shadow-1 transition-colors hover:bg-selected-tint hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_SCROLLER_JUMP_ACTIVE: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-brand bg-selected-tint px-xs py-2xs text-0 font-7 leading-0 text-text-1 shadow-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:opacity-45";
+const MESSAGE_SCROLLER_JUMP_DISABLED: &str = "justify-self-end inline-flex min-h-field items-center justify-center rounded-field border border-border-muted bg-surface-2 px-xs py-2xs text-0 font-6 leading-0 text-text-disabled opacity-45";
 const MESSAGE_SCROLLER_JUMP_HIDDEN: &str = "hidden";
 const MESSAGE_SCROLLER_ERROR: &str =
     "rounded-field border border-danger bg-error-soft p-s text-0 leading-0 text-text-1";
@@ -1875,71 +1871,88 @@ fn block_class(tone: UiBlockTone) -> &'static str {
 
 #[component]
 pub fn ComponentDemo(id: UiComponentId) -> AnyView {
-    match id {
-        UiComponentId::Accordion => view! { <Accordion /> }.into_any(),
-        UiComponentId::Alert => view! { <Alert /> }.into_any(),
-        UiComponentId::AlertDialog => view! { <AlertDialog /> }.into_any(),
-        UiComponentId::AspectRatio => view! { <AspectRatio /> }.into_any(),
-        UiComponentId::Attachment => view! { <Attachment /> }.into_any(),
-        UiComponentId::Avatar => view! { <Avatar /> }.into_any(),
-        UiComponentId::Badge => view! { <Badge /> }.into_any(),
-        UiComponentId::Breadcrumb => view! { <Breadcrumb /> }.into_any(),
-        UiComponentId::Bubble => view! { <Bubble /> }.into_any(),
-        UiComponentId::Button => view! { <Button /> }.into_any(),
-        UiComponentId::ButtonGroup => view! { <ButtonGroup /> }.into_any(),
-        UiComponentId::Calendar => view! { <Calendar /> }.into_any(),
-        UiComponentId::Card => view! { <Card /> }.into_any(),
-        UiComponentId::Carousel => view! { <Carousel /> }.into_any(),
-        UiComponentId::Chart => view! { <Chart /> }.into_any(),
-        UiComponentId::Checkbox => view! { <Checkbox /> }.into_any(),
-        UiComponentId::Collapsible => view! { <Collapsible /> }.into_any(),
-        UiComponentId::Combobox => view! { <Combobox /> }.into_any(),
-        UiComponentId::Command => view! { <Command /> }.into_any(),
-        UiComponentId::ContextMenu => view! { <ContextMenu /> }.into_any(),
-        UiComponentId::DataTable => view! { <DataTable /> }.into_any(),
-        UiComponentId::DatePicker => view! { <DatePicker /> }.into_any(),
-        UiComponentId::Dialog => view! { <Dialog /> }.into_any(),
-        UiComponentId::Direction => view! { <Direction /> }.into_any(),
-        UiComponentId::Drawer => view! { <Drawer /> }.into_any(),
-        UiComponentId::DropdownMenu => view! { <DropdownMenu /> }.into_any(),
-        UiComponentId::Empty => view! { <Empty /> }.into_any(),
-        UiComponentId::Field => view! { <Field /> }.into_any(),
-        UiComponentId::HoverCard => view! { <HoverCard /> }.into_any(),
-        UiComponentId::Input => view! { <Input /> }.into_any(),
-        UiComponentId::InputGroup => view! { <InputGroup /> }.into_any(),
-        UiComponentId::InputOtp => view! { <InputOtp /> }.into_any(),
-        UiComponentId::Item => view! { <Item /> }.into_any(),
-        UiComponentId::Kbd => view! { <Kbd /> }.into_any(),
-        UiComponentId::Label => view! { <Label /> }.into_any(),
-        UiComponentId::Marker => view! { <Marker /> }.into_any(),
-        UiComponentId::Menubar => view! { <Menubar /> }.into_any(),
-        UiComponentId::Message => view! { <Message /> }.into_any(),
-        UiComponentId::MessageScroller => view! { <MessageScroller /> }.into_any(),
-        UiComponentId::NativeSelect => view! { <NativeSelect /> }.into_any(),
-        UiComponentId::NavigationMenu => view! { <NavigationMenu /> }.into_any(),
-        UiComponentId::Pagination => view! { <Pagination /> }.into_any(),
-        UiComponentId::Popover => view! { <Popover /> }.into_any(),
-        UiComponentId::Progress => view! { <Progress /> }.into_any(),
-        UiComponentId::RadioGroup => view! { <RadioGroup /> }.into_any(),
-        UiComponentId::Resizable => view! { <Resizable /> }.into_any(),
-        UiComponentId::ScrollArea => view! { <ScrollArea /> }.into_any(),
-        UiComponentId::Select => view! { <Select /> }.into_any(),
-        UiComponentId::Separator => view! { <Separator /> }.into_any(),
-        UiComponentId::Sheet => view! { <Sheet /> }.into_any(),
-        UiComponentId::Sidebar => view! { <Sidebar /> }.into_any(),
-        UiComponentId::Skeleton => view! { <Skeleton /> }.into_any(),
-        UiComponentId::Slider => view! { <Slider /> }.into_any(),
-        UiComponentId::Sonner => view! { <Sonner /> }.into_any(),
-        UiComponentId::Spinner => view! { <Spinner /> }.into_any(),
-        UiComponentId::Switch => view! { <Switch /> }.into_any(),
-        UiComponentId::Table => view! { <Table /> }.into_any(),
-        UiComponentId::Tabs => view! { <Tabs /> }.into_any(),
-        UiComponentId::Textarea => view! { <Textarea /> }.into_any(),
-        UiComponentId::Toast => view! { <Toast /> }.into_any(),
-        UiComponentId::Toggle => view! { <Toggle /> }.into_any(),
-        UiComponentId::ToggleGroup => view! { <ToggleGroup /> }.into_any(),
-        UiComponentId::Tooltip => view! { <Tooltip /> }.into_any(),
-        UiComponentId::Typography => view! { <Typography /> }.into_any(),
+    let fixture = canonical_ui_story_fixture(id);
+    view! { <UiStoryModelView model=fixture.model default_open=fixture.default_open /> }.into_any()
+}
+
+#[component]
+pub fn UiStoryModelView(model: UiStoryModel, #[prop(optional)] default_open: bool) -> AnyView {
+    match model {
+        UiStoryModel::Accordion(model) => view! {
+            <Accordion
+                items=model.items
+                mode=model.mode
+                default_open=model.default_open
+            />
+        }
+        .into_any(),
+        UiStoryModel::Alert(model) => view! { <Alert model=model /> }.into_any(),
+        UiStoryModel::AlertDialog(model) => {
+            view! { <AlertDialog model=model default_open=default_open /> }.into_any()
+        }
+        UiStoryModel::AspectRatio(model) => view! { <AspectRatio model=model /> }.into_any(),
+        UiStoryModel::Attachment(model) => view! { <Attachment model=model /> }.into_any(),
+        UiStoryModel::Avatar(model) => view! { <Avatar model=model /> }.into_any(),
+        UiStoryModel::Badge(model) => view! { <Badge model=model /> }.into_any(),
+        UiStoryModel::Breadcrumb(model) => view! { <Breadcrumb model=model /> }.into_any(),
+        UiStoryModel::Bubble(model) => view! { <Bubble model=model /> }.into_any(),
+        UiStoryModel::Button(model) => view! { <Button model=model /> }.into_any(),
+        UiStoryModel::ButtonGroup(model) => view! { <ButtonGroup model=model /> }.into_any(),
+        UiStoryModel::Calendar(model) => view! { <Calendar model=model /> }.into_any(),
+        UiStoryModel::Card(model) => view! { <Card model=model /> }.into_any(),
+        UiStoryModel::Carousel(model) => view! { <Carousel model=model /> }.into_any(),
+        UiStoryModel::Chart(model) => view! { <Chart model=model /> }.into_any(),
+        UiStoryModel::Checkbox(model) => view! { <Checkbox model=model /> }.into_any(),
+        UiStoryModel::Collapsible(model) => view! { <Collapsible model=model /> }.into_any(),
+        UiStoryModel::Combobox(model) => view! { <Combobox model=model /> }.into_any(),
+        UiStoryModel::Command(model) => view! { <Command model=model /> }.into_any(),
+        UiStoryModel::ContextMenu(model) => view! { <ContextMenu model=model /> }.into_any(),
+        UiStoryModel::DataTable(model) => view! { <DataTable model=model /> }.into_any(),
+        UiStoryModel::DatePicker(model) => view! { <DatePicker model=model /> }.into_any(),
+        UiStoryModel::Dialog(model) => view! { <Dialog model=model /> }.into_any(),
+        UiStoryModel::Direction(model) => view! { <Direction model=model /> }.into_any(),
+        UiStoryModel::Drawer(model) => view! { <Drawer model=model /> }.into_any(),
+        UiStoryModel::DropdownMenu(model) => view! { <DropdownMenu model=model /> }.into_any(),
+        UiStoryModel::Empty(model) => view! { <Empty model=model /> }.into_any(),
+        UiStoryModel::Field(model) => view! { <Field model=model /> }.into_any(),
+        UiStoryModel::HoverCard(model) => view! { <HoverCard model=model /> }.into_any(),
+        UiStoryModel::Input(model) => view! { <Input model=model /> }.into_any(),
+        UiStoryModel::InputGroup(model) => view! { <InputGroup model=model /> }.into_any(),
+        UiStoryModel::InputOtp(model) => view! { <InputOtp model=model /> }.into_any(),
+        UiStoryModel::Item(model) => view! { <Item model=model /> }.into_any(),
+        UiStoryModel::Kbd(model) => view! { <Kbd model=model /> }.into_any(),
+        UiStoryModel::Label(model) => view! { <Label model=model /> }.into_any(),
+        UiStoryModel::Marker(model) => view! { <Marker model=model /> }.into_any(),
+        UiStoryModel::Menubar(model) => view! { <Menubar model=model /> }.into_any(),
+        UiStoryModel::Message(model) => view! { <Message model=model /> }.into_any(),
+        UiStoryModel::MessageScroller(model) => {
+            view! { <MessageScroller model=model /> }.into_any()
+        }
+        UiStoryModel::NativeSelect(model) => view! { <NativeSelect model=model /> }.into_any(),
+        UiStoryModel::NavigationMenu(model) => view! { <NavigationMenu model=model /> }.into_any(),
+        UiStoryModel::Pagination(model) => view! { <Pagination model=model /> }.into_any(),
+        UiStoryModel::Popover(model) => view! { <Popover model=model /> }.into_any(),
+        UiStoryModel::Progress(model) => view! { <Progress model=model /> }.into_any(),
+        UiStoryModel::RadioGroup(model) => view! { <RadioGroup model=model /> }.into_any(),
+        UiStoryModel::Resizable(model) => view! { <Resizable model=model /> }.into_any(),
+        UiStoryModel::ScrollArea(model) => view! { <ScrollArea model=model /> }.into_any(),
+        UiStoryModel::Select(model) => view! { <Select model=model /> }.into_any(),
+        UiStoryModel::Separator(model) => view! { <Separator model=model /> }.into_any(),
+        UiStoryModel::Sheet(model) => view! { <Sheet model=model /> }.into_any(),
+        UiStoryModel::Sidebar(model) => view! { <Sidebar model=model /> }.into_any(),
+        UiStoryModel::Skeleton(model) => view! { <Skeleton model=model /> }.into_any(),
+        UiStoryModel::Slider(model) => view! { <Slider model=model /> }.into_any(),
+        UiStoryModel::Sonner(model) => view! { <Sonner model=model /> }.into_any(),
+        UiStoryModel::Spinner(model) => view! { <Spinner model=model /> }.into_any(),
+        UiStoryModel::Switch(model) => view! { <Switch model=model /> }.into_any(),
+        UiStoryModel::Table(model) => view! { <Table model=model /> }.into_any(),
+        UiStoryModel::Tabs(model) => view! { <Tabs model=model /> }.into_any(),
+        UiStoryModel::Textarea(model) => view! { <Textarea model=model /> }.into_any(),
+        UiStoryModel::Toast(model) => view! { <Toast model=model /> }.into_any(),
+        UiStoryModel::Toggle(model) => view! { <Toggle model=model /> }.into_any(),
+        UiStoryModel::ToggleGroup(model) => view! { <ToggleGroup model=model /> }.into_any(),
+        UiStoryModel::Tooltip(model) => view! { <Tooltip model=model /> }.into_any(),
+        UiStoryModel::Typography(model) => view! { <Typography model=model /> }.into_any(),
     }
 }
 
@@ -2827,18 +2840,13 @@ pub fn Badge(#[prop(optional, default = default_badge_model())] model: BadgeMode
 
     let initial_state = model.state();
     let nodes = badge_render_nodes(&model, initial_state);
-    let icon = nodes
-        .iter()
-        .find(|node| node.part == BadgePart::Icon)
-        .expect("invariant: badge render nodes include icon");
     let text = nodes
         .iter()
         .find(|node| node.part == BadgePart::Text)
         .expect("invariant: badge render nodes include text");
-    let icon_value = icon.value.clone();
-    let text_value = text.value.clone();
+    let icon_copy = badge_icon_copy(&model).map(str::to_owned);
+    let text_copy = badge_text_copy(&model).to_owned();
     let text_label = text.label.clone();
-    let has_icon = model.icon.is_some();
     let loading = model.loading;
     let disabled = model.disabled;
     let size = model.size;
@@ -2875,18 +2883,15 @@ pub fn Badge(#[prop(optional, default = default_badge_model())] model: BadgeMode
             }
         >
             {move || {
-                if loading {
-                    view! { <span class=BADGE_ICON data-ui-part="BadgeIcon" aria-hidden="true">"..."</span> }
-                        .into_any()
-                } else if has_icon {
-                    view! { <span class=BADGE_ICON data-ui-part="BadgeIcon" aria-hidden="true">{icon_value.clone()}</span> }
+                if let Some(icon) = icon_copy.clone() {
+                    view! { <span class=BADGE_ICON data-ui-part="BadgeIcon" aria-hidden="true">{icon}</span> }
                         .into_any()
                 } else {
                     ().into_any()
                 }
             }}
             <span class=BADGE_TEXT data-ui-part="BadgeText">
-                {move || if loading { "Loading".to_owned() } else { text_value.clone() }}
+                {text_copy}
             </span>
         </span>
     }
@@ -3369,10 +3374,12 @@ pub fn Button(#[prop(optional, default = default_button_model())] model: ButtonM
         .iter()
         .find(|node| node.part == ButtonPart::Icon)
         .expect("invariant: button render nodes include icon");
-    let label = nodes
+    let _label = nodes
         .iter()
         .find(|node| node.part == ButtonPart::Label)
         .expect("invariant: button render nodes include label");
+    let label_value = button_label_copy(&model).to_owned();
+    let icon_value = button_icon_copy(&model).map(str::to_owned);
     let kind = model.kind;
     let variant = model.variant;
     let size = model.size;
@@ -3380,18 +3387,6 @@ pub fn Button(#[prop(optional, default = default_button_model())] model: ButtonM
     let disabled = model.disabled;
     let blocked = loading || disabled;
     let root_value = root.value.clone();
-    let label_value = if loading {
-        "Loading".to_owned()
-    } else {
-        label.value.clone()
-    };
-    let icon_value = if loading {
-        Some("...".to_owned())
-    } else if model.icon.is_some() {
-        Some(icon.value.clone())
-    } else {
-        None
-    };
     let has_visible_icon = icon_value.is_some();
     let icon_label = icon.label.clone();
     let href = model.href.clone().unwrap_or_else(|| "#".to_owned());
@@ -3646,16 +3641,9 @@ pub fn ButtonGroup(
                     let value = node.value.clone();
                     let value_for_class = value.clone();
                     let value_for_click = value.clone();
-                    let label = if loading {
-                        "Loading".to_owned()
-                    } else {
-                        node.label.clone()
-                    };
-                    let icon = if loading {
-                        Some("...".to_owned())
-                    } else {
-                        node.icon.clone()
-                    };
+                    let label = button_group_item_label_copy(loading, &node.label).to_owned();
+                    let icon = button_group_item_icon_copy(loading, node.icon.as_deref())
+                        .map(str::to_owned);
                     let has_visible_icon = icon.is_some();
                     let item_disabled = node.disabled || loading || disabled;
                     view! {
@@ -3874,7 +3862,7 @@ pub fn Calendar(
                 </button>
             </header>
             <div class=CALENDAR_GRID data-ui-part=CalendarPart::Grid.label() role="grid">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                {CALENDAR_WEEKDAYS
                     .into_iter()
                     .map(|weekday| {
                         view! {
@@ -4798,7 +4786,9 @@ pub fn Collapsible(
                 }
                 data-ui-part=CollapsiblePart::Trigger.label()
                 data-ui-value=root.value
-                aria-expanded=move || state.with(|state| state.is_open().to_string())
+                aria-expanded=move || {
+                    state.with(|state| (state.is_open() && !disabled).to_string())
+                }
                 disabled=blocked
                 on:click=move |_| {
                     if !blocked {
@@ -6074,6 +6064,7 @@ fn table_row_view(
     set_state: WriteSignal<TableState>,
 ) -> AnyView {
     let row_value = row.value.clone();
+    let row_value_for_focus = row.value.clone();
     let row_value_for_click = row.value.clone();
     let disabled = row.disabled;
     let density = row.density;
@@ -6088,7 +6079,7 @@ fn table_row_view(
             on:focus=move |_| {
                 if !blocked && !disabled {
                     set_state.update(|state| {
-                        let _ = state.apply(TableIntent::Focus(TablePart::Row));
+                        let _ = state.apply(TableIntent::FocusRow(row_value_for_focus.clone()));
                     });
                 }
             }
@@ -6565,7 +6556,7 @@ pub fn Textarea(
                     if !blocked {
                         let value = event_target_value(&event);
                         set_state.update(|state| {
-                            let _ = state.apply(TextareaIntent::Input(value));
+                            let _ = state.apply_bounded(TextareaIntent::Input(value), max_length);
                         });
                     }
                 }
@@ -15925,19 +15916,24 @@ fn skeleton_placeholder_view(
     let hidden = !node.visible;
     let invalid = node.invalid;
     let disabled = node.disabled;
+    let animated = node.animated;
     let label = node.label.clone();
     view! {
         <span
             class=move || {
                 state.with(|state| {
-                    skeleton_placeholder_class(
+                    let class = skeleton_placeholder_class(
                         part,
                         density,
                         state.is_active(part),
                         invalid,
                         disabled,
-                    )
-                    .to_owned()
+                    );
+                    if animated && !state.animation_paused() {
+                        format!("{class} {SKELETON_ANIMATION}")
+                    } else {
+                        class.to_owned()
+                    }
                 })
             }
             data-ui-part=part.label()
@@ -15975,6 +15971,7 @@ fn skeleton_text_view(
     let hidden = !node.visible;
     let invalid = node.invalid;
     let disabled = node.disabled;
+    let animated = node.animated;
     let label = node.label.clone();
     let text_lines = node.text_lines;
     view! {
@@ -16006,13 +16003,17 @@ fn skeleton_text_view(
                         <span
                             class=move || {
                                 state.with(|state| {
-                                    skeleton_line_class(
+                                    let class = skeleton_line_class(
                                         density,
                                         state.is_active(part),
                                         invalid,
                                         disabled,
-                                    )
-                                    .to_owned()
+                                    );
+                                    if animated && !state.animation_paused() {
+                                        format!("{class} {SKELETON_ANIMATION}")
+                                    } else {
+                                        class.to_owned()
+                                    }
                                 })
                             }
                             data-ui-line=index.to_string()
@@ -16852,6 +16853,7 @@ pub fn Spinner(
     let size = model.size;
     let tone = model.tone;
     let loading = model.loading;
+    let animated = model.animated;
     let disabled = model.disabled;
     let invalid = model.error.is_some();
     let state_model = model.state();
@@ -16957,7 +16959,7 @@ pub fn Spinner(
                         state.with(|state| {
                             spinner_indicator_class(
                                 tone,
-                                state.is_paused(),
+                                state.is_paused() || !animated,
                                 invalid,
                                 disabled,
                             )
@@ -17765,7 +17767,7 @@ pub fn ToggleGroup(
                 >
                     {move || {
                         state.with(|state| {
-                            toggle_group_selected_status_copy(state.selected_values())
+                            toggle_group_selected_status_label(state.selected_values())
                         })
                     }}
                 </span>
@@ -17960,14 +17962,6 @@ fn toggle_group_pressed_for_value(state: &ToggleGroupState, value: &str) -> Togg
     }
 }
 
-fn toggle_group_selected_status_copy(values: &[String]) -> String {
-    match values.len() {
-        0 => "none".to_owned(),
-        1 => "1 selected".to_owned(),
-        count => format!("{count} selected"),
-    }
-}
-
 const fn toggle_group_state_label(
     loading: bool,
     disabled: bool,
@@ -18034,20 +18028,12 @@ pub fn Tooltip(
         .clone();
     let root_value = root.value.clone();
     let trigger_value = trigger.value.clone();
-    let trigger_label = if loading {
-        "Loading".to_owned()
-    } else {
-        trigger.label.clone()
-    };
+    let trigger_label = tooltip_trigger_copy(&model);
     let content_id = tooltip_dom_id("tooltip-content", root.value.as_str());
     let content_id_for_button = content_id.clone();
     let content_id_for_article = content_id.clone();
     let content_value = content.value.clone();
-    let content_copy = if loading {
-        "Loading tooltip content.".to_owned()
-    } else {
-        content.detail.clone()
-    };
+    let content_copy = tooltip_content_copy(&model);
     let arrow_value = arrow.value.clone();
     let arrow_detail = arrow.detail.clone();
     let (state, set_state) = signal(state_model);
@@ -18128,7 +18114,7 @@ pub fn Tooltip(
                         tooltip_content_class(
                             density,
                             placement,
-                            state.is_open(),
+                            state.is_open() && !disabled,
                             loading,
                             disabled,
                             invalid,
@@ -18138,8 +18124,10 @@ pub fn Tooltip(
                 }
                 data-ui-part=TooltipPart::Content.label()
                 data-ui-value=content_value
-                aria-hidden=move || state.with(|state| (!state.is_open()).to_string())
-                hidden=move || state.with(|state| !state.is_open())
+                aria-hidden=move || {
+                    state.with(|state| (!state.is_open() || disabled).to_string())
+                }
+                hidden=move || state.with(|state| !state.is_open() || disabled)
                 on:mouseenter=move |_| {
                     if !blocked {
                         set_state.update(|state| {
@@ -18158,7 +18146,10 @@ pub fn Tooltip(
                 <span
                     class=move || {
                         state.with(|state| {
-                            tooltip_arrow_class(state.is_open() && model.show_arrow).to_owned()
+                            tooltip_arrow_class(
+                                state.is_open() && !disabled && model.show_arrow,
+                            )
+                            .to_owned()
                         })
                     }
                     data-ui-part=TooltipPart::Arrow.label()

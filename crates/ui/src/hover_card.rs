@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum HoverCardDensity {
@@ -97,6 +99,29 @@ pub struct HoverCardRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct HoverCardLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub content_margin_top: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub arrow_size: f32,
+    pub arrow_font_size: f32,
+    pub arrow_line_height: f32,
+    pub metadata_font_size: f32,
+    pub metadata_line_height: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
 }
 
 impl HoverCardModel {
@@ -237,6 +262,74 @@ impl HoverCardState {
 
 pub fn validate_hover_card_model(model: &HoverCardModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn hover_card_layout_metrics(
+    density: HoverCardDensity,
+    loading: bool,
+    disabled: bool,
+    inline_size: f32,
+) -> HoverCardLayoutMetrics {
+    let dense_trigger = density == HoverCardDensity::Dense && !loading && !disabled;
+    let dense_content = density == HoverCardDensity::Dense && !loading && !disabled;
+
+    HoverCardLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: scale::space::xs2(inline_size),
+        trigger_min_height: if dense_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_font_size: if dense_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        content_margin_top: scale::space::xs2(inline_size),
+        content_padding: if dense_content {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_gap: if dense_content {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        arrow_size: scale::space::s(inline_size),
+        arrow_font_size: scale::font_size::f00(inline_size),
+        arrow_line_height: scale::line_height::LH0,
+        metadata_font_size: scale::font_size::f00(inline_size),
+        metadata_line_height: scale::line_height::LH0,
+        title_font_size: if density == HoverCardDensity::Dense {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        title_line_height: if density == HoverCardDensity::Dense {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        detail_font_size: if density == HoverCardDensity::Dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        detail_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn hover_card_render_nodes(
@@ -462,5 +555,23 @@ mod tests {
             assert!(node.visible);
             assert!(!node.disabled);
         }
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_blocked_token_precedence() {
+        let standard = hover_card_layout_metrics(HoverCardDensity::Standard, false, false, 1_024.0);
+        let dense = hover_card_layout_metrics(HoverCardDensity::Dense, false, false, 1_024.0);
+        let loading_dense =
+            hover_card_layout_metrics(HoverCardDensity::Dense, true, false, 1_024.0);
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert!(dense.trigger_font_size < standard.trigger_font_size);
+        assert!(dense.content_padding < standard.content_padding);
+        assert_eq!(
+            loading_dense.trigger_min_height,
+            standard.trigger_min_height
+        );
+        assert_eq!(loading_dense.content_padding, standard.content_padding);
+        assert_eq!(loading_dense.title_font_size, dense.title_font_size);
     }
 }

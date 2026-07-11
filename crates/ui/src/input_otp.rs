@@ -2,6 +2,7 @@ use garde::Validate;
 use serde::{Deserialize, Serialize};
 
 use crate::input::InputDensity;
+use crate::scale;
 
 const MAX_INPUT_OTP_LENGTH: usize = 12;
 const MAX_INPUT_OTP_GROUP_SIZE: usize = 6;
@@ -106,6 +107,20 @@ pub struct InputOtpRenderNode {
     pub required: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct InputOtpLayoutMetrics {
+    pub group_gap: f32,
+    pub slot_size: f32,
+    pub slot_font_size: f32,
+    pub slot_line_height: f32,
+    pub separator_min_height: f32,
+    pub separator_padding_inline: f32,
+    pub separator_font_size: f32,
+    pub separator_line_height: f32,
+    pub shadow_offset: f32,
+    pub shadow_blur: f32,
 }
 
 impl InputOtpModel {
@@ -346,6 +361,56 @@ impl InputOtpState {
 
 pub fn validate_input_otp_model(model: &InputOtpModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn input_otp_layout_metrics(
+    density: InputDensity,
+    loading: bool,
+    disabled: bool,
+    inline_size: f32,
+) -> InputOtpLayoutMetrics {
+    let dense_slot = density == InputDensity::Dense && !loading && !disabled;
+    let dense_separator = density == InputDensity::Dense;
+    InputOtpLayoutMetrics {
+        group_gap: scale::space::xs2(inline_size),
+        slot_size: if dense_slot {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::l(inline_size)
+        },
+        slot_font_size: if dense_slot {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        slot_line_height: if dense_slot {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        separator_min_height: if dense_separator {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        separator_padding_inline: if dense_separator {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        separator_font_size: if dense_separator {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        separator_line_height: if dense_separator {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        shadow_offset: scale::space::xs3(inline_size),
+        shadow_blur: scale::space::xs2(inline_size),
+    }
 }
 
 pub fn input_otp_render_nodes(
@@ -596,6 +661,19 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_input_otp_model(&default_input_otp_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_use_fluid_slot_and_separator_tokens() {
+        let standard = input_otp_layout_metrics(InputDensity::Standard, false, false, 952.0);
+        let dense = input_otp_layout_metrics(InputDensity::Dense, false, false, 952.0);
+        let loading_dense = input_otp_layout_metrics(InputDensity::Dense, true, false, 952.0);
+
+        assert!(standard.slot_size < scale::space::L);
+        assert!(dense.slot_size < standard.slot_size);
+        assert!(dense.slot_font_size < standard.slot_font_size);
+        assert_eq!(loading_dense.slot_size, standard.slot_size);
+        assert!(loading_dense.separator_min_height < standard.separator_min_height);
     }
 
     #[test]

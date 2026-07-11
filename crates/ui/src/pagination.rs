@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum PaginationDensity {
@@ -112,6 +114,24 @@ pub struct PaginationRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PaginationLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub control_min_size: f32,
+    pub control_padding_inline: f32,
+    pub control_padding_block: f32,
+    pub control_font_size: f32,
+    pub emphasized_control_min_size: f32,
+    pub emphasized_control_padding_inline: f32,
+    pub emphasized_control_padding_block: f32,
+    pub emphasized_control_font_size: f32,
+    pub line_height: f32,
+    pub error_font_size: f32,
 }
 
 impl PaginationModel {
@@ -241,6 +261,62 @@ impl PaginationState {
 
 pub fn validate_pagination_model(model: &PaginationModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn pagination_layout_metrics(
+    model: &PaginationModel,
+    inline_size: f32,
+) -> PaginationLayoutMetrics {
+    let dense = model.density == PaginationDensity::Dense;
+    let dense_content = dense && !model.loading;
+    PaginationLayoutMetrics {
+        max_width: scale::container::CONTENT,
+        root_gap: scale::space::xs2(inline_size),
+        content_padding: if dense_content {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        content_gap: if dense_content {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        control_min_size: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        control_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        control_padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        control_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        emphasized_control_min_size: scale::space::FIELD,
+        emphasized_control_padding_inline: scale::space::xs(inline_size),
+        emphasized_control_padding_block: scale::space::xs2(inline_size),
+        emphasized_control_font_size: scale::font_size::f0(inline_size),
+        line_height: scale::line_height::LH0,
+        error_font_size: scale::font_size::f00(inline_size),
+    }
+}
+
+pub const fn pagination_control_uses_emphasized_metrics(
+    current: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    (disabled && !current) || invalid
 }
 
 pub fn pagination_render_nodes(
@@ -611,5 +687,34 @@ mod tests {
                 })
                 .all(|node| node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_state_precedence() {
+        let standard = pagination_layout_metrics(&default_pagination_model(), 1_000.0);
+        let dense = pagination_layout_metrics(
+            &default_pagination_model().with_density(PaginationDensity::Dense),
+            1_000.0,
+        );
+        let dense_loading = pagination_layout_metrics(
+            &default_pagination_model()
+                .with_density(PaginationDensity::Dense)
+                .loading(),
+            1_000.0,
+        );
+
+        assert!(dense.content_padding < standard.content_padding);
+        assert!(dense.control_min_size < standard.control_min_size);
+        assert!(dense.control_font_size < standard.control_font_size);
+        assert_eq!(dense_loading.content_padding, standard.content_padding);
+        assert!(pagination_control_uses_emphasized_metrics(
+            false, false, true
+        ));
+        assert!(pagination_control_uses_emphasized_metrics(
+            true, true, false
+        ));
+        assert!(!pagination_control_uses_emphasized_metrics(
+            true, false, true
+        ));
     }
 }

@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -128,6 +129,17 @@ pub struct BadgeRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BadgeLayoutMetrics {
+    pub min_height: f32,
+    pub gap: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+    pub icon_min_width: f32,
+}
+
 impl BadgeModel {
     pub fn new(text: impl Into<String>) -> Self {
         Self {
@@ -223,6 +235,44 @@ impl BadgeState {
 
 pub fn validate_badge_model(model: &BadgeModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn badge_icon_copy(model: &BadgeModel) -> Option<&str> {
+    model
+        .icon
+        .as_deref()
+        .map(|icon| if model.loading { "..." } else { icon })
+}
+
+pub fn badge_text_copy(model: &BadgeModel) -> &str {
+    if model.loading {
+        "Loading"
+    } else {
+        &model.text
+    }
+}
+
+pub fn badge_layout_metrics(size: BadgeSize, inline_size: f32) -> BadgeLayoutMetrics {
+    match size {
+        BadgeSize::Small => BadgeLayoutMetrics {
+            min_height: scale::space::s(inline_size),
+            gap: scale::space::xs3(inline_size),
+            padding_inline: scale::space::xs2(inline_size),
+            padding_block: scale::space::xs3(inline_size),
+            font_size: scale::font_size::f00(inline_size),
+            line_height: scale::line_height::LH0,
+            icon_min_width: scale::space::s(inline_size),
+        },
+        BadgeSize::Medium => BadgeLayoutMetrics {
+            min_height: 40.0,
+            gap: scale::space::xs2(inline_size),
+            padding_inline: scale::space::xs(inline_size),
+            padding_block: scale::space::xs2(inline_size),
+            font_size: scale::font_size::f0(inline_size),
+            line_height: scale::line_height::LH0,
+            icon_min_width: scale::space::s(inline_size),
+        },
+    }
 }
 
 pub fn badge_render_nodes(model: &BadgeModel, state: BadgeState) -> Vec<BadgeRenderNode> {
@@ -340,5 +390,17 @@ mod tests {
                 .iter()
                 .any(|node| node.part == BadgePart::Icon && node.disabled)
         );
+    }
+
+    #[test]
+    fn display_copy_and_layout_follow_shared_state() {
+        let loading = BadgeModel::new("Syncing").loading();
+        let compact = badge_layout_metrics(BadgeSize::Medium, 320.0);
+        let wide = badge_layout_metrics(BadgeSize::Medium, 1_000.0);
+
+        assert_eq!(badge_icon_copy(&loading), Some("..."));
+        assert_eq!(badge_text_copy(&loading), "Loading");
+        assert!(wide.padding_inline > compact.padding_inline);
+        assert!(wide.font_size > compact.font_size);
     }
 }

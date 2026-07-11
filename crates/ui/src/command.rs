@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CommandDensity {
@@ -150,6 +152,26 @@ pub struct CommandRenderNode {
     pub open: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CommandLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub input_height: f32,
+    pub input_padding_inline: f32,
+    pub input_padding_block: f32,
+    pub input_font_size: f32,
+    pub list_height: f32,
+    pub list_max_height: f32,
+    pub list_padding: f32,
+    pub group_height: f32,
+    pub group_font_size: f32,
+    pub item_height: f32,
+    pub item_font_size: f32,
+    pub detail_font_size: f32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -568,6 +590,102 @@ pub fn command_render_nodes(model: &CommandModel, state: &CommandState) -> Vec<C
     nodes
 }
 
+pub fn command_layout_metrics(
+    model: &CommandModel,
+    state: &CommandState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> CommandLayoutMetrics {
+    let dense = model.density == CommandDensity::Dense;
+    let width = available_width.clamp(1.0, scale::container::CONTROL);
+    let border_width = border_width.max(0.0);
+    let padding = if dense {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let gap = scale::space::xs2(inline_size);
+    let input_padding_inline = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let input_padding_block = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let input_font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let input_min_height = if dense {
+        scale::space::s(inline_size)
+    } else {
+        scale::space::L
+    };
+    let input_height = (input_font_size * scale::line_height::LH0
+        + input_padding_block * 2.0
+        + border_width * 2.0)
+        .max(input_min_height);
+    let list_padding = gap;
+    let list_max_height = scale::space::xl4(inline_size);
+    let group_font_size = scale::font_size::f00(inline_size);
+    let group_height =
+        border_width * 2.0 + list_padding * 3.0 + group_font_size * scale::line_height::LH0;
+    let item_height = scale::space::L;
+    let item_font_size = scale::font_size::f0(inline_size);
+    let detail_font_size = scale::font_size::f00(inline_size);
+
+    let visible = filtered_command_items(model, state.query());
+    let visible_group_count = model
+        .groups
+        .iter()
+        .filter(|group| visible.iter().any(|item| item.group.value == group.value))
+        .count();
+    let child_count = visible_group_count + visible.len();
+    let list_content_height = if visible.is_empty() {
+        border_width * 2.0
+            + scale::space::xs(inline_size) * 2.0
+            + item_font_size * scale::line_height::LH0
+    } else {
+        group_height * visible_group_count as f32 + item_height * visible.len() as f32
+    };
+    let list_natural_height = border_width * 2.0
+        + list_padding * 2.0
+        + list_content_height
+        + child_count.saturating_sub(1) as f32 * gap;
+    let list_height = if state.is_open() {
+        list_natural_height.min(list_max_height)
+    } else {
+        0.0
+    };
+    let visible_child_gap = if state.is_open() { gap } else { 0.0 };
+    let height =
+        border_width * 2.0 + padding * 2.0 + input_height + visible_child_gap + list_height;
+
+    CommandLayoutMetrics {
+        width,
+        height,
+        padding,
+        gap,
+        input_height,
+        input_padding_inline,
+        input_padding_block,
+        input_font_size,
+        list_height,
+        list_max_height,
+        list_padding,
+        group_height,
+        group_font_size,
+        item_height,
+        item_font_size,
+        detail_font_size,
+    }
+}
+
 pub fn filtered_command_items<'a>(
     model: &'a CommandModel,
     query: &str,
@@ -860,5 +978,29 @@ mod tests {
                 .iter()
                 .any(|node| node.part == CommandPart::Item && node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_match_the_token_command_box_model() {
+        let model = default_command_model();
+        let state = model.state();
+        let metrics = command_layout_metrics(&model, &state, 860.0, 1_000.0, 1.0);
+        let expected =
+            2.0 + metrics.padding * 2.0 + metrics.input_height + metrics.gap + metrics.list_height;
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert!((metrics.height - expected).abs() < 0.01);
+        assert_eq!(metrics.list_height, metrics.list_max_height);
+    }
+
+    #[test]
+    fn closed_command_metrics_remove_the_list_and_its_gap() {
+        let model = default_command_model().closed();
+        let state = model.state();
+        let metrics = command_layout_metrics(&model, &state, 448.0, 1_000.0, 1.0);
+        let expected = 2.0 + metrics.padding * 2.0 + metrics.input_height;
+
+        assert_eq!(metrics.list_height, 0.0);
+        assert!((metrics.height - expected).abs() < 0.01);
     }
 }

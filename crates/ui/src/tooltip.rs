@@ -1,7 +1,7 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -99,6 +99,29 @@ pub struct TooltipRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TooltipLayoutMetrics {
+    pub stage_height: f32,
+    pub stage_padding: f32,
+    pub trigger_width: f32,
+    pub trigger_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub content_width: f32,
+    pub content_height: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub content_font_size: f32,
+    pub content_line_height: f32,
+    pub arrow_edge: f32,
+    pub placement_gap: f32,
+    pub placement: TooltipPlacement,
+    pub content_visible: bool,
+    pub arrow_visible: bool,
 }
 
 impl TooltipDensity {
@@ -421,6 +444,136 @@ pub fn tooltip_render_nodes(model: &TooltipModel, state: &TooltipState) -> Vec<T
     ]
 }
 
+pub fn tooltip_layout_metrics(
+    model: &TooltipModel,
+    state: &TooltipState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> TooltipLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let blocked = model.loading || model.disabled;
+    let invalid = model.error.is_some();
+    let dense = model.density == TooltipDensity::Dense && !blocked && !invalid;
+    let trigger_padding_inline = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let trigger_padding_block = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let trigger_font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let trigger_copy = tooltip_trigger_copy(model);
+    let trigger_width = border_width * 2.0
+        + trigger_padding_inline * 2.0
+        + scale::estimate_inline_text_width(&trigger_copy, trigger_font_size, 0.0);
+    let minimum_trigger_height = if dense {
+        scale::space::s(inline_size)
+    } else {
+        scale::space::L
+    };
+    let trigger_line_height = scale::line_height::LH0;
+    let trigger_height = minimum_trigger_height.max(
+        border_width * 2.0 + trigger_padding_block * 2.0 + trigger_font_size * trigger_line_height,
+    );
+    let content_padding = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let content_gap = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let content_font_size = scale::font_size::f00(inline_size);
+    let content_line_height = scale::line_height::LH0;
+    let arrow_edge = scale::space::xs(inline_size);
+    let content_copy = tooltip_content_copy(model);
+    let maximum_content_width = available_width.clamp(scale::space::L, scale::container::CONTROL);
+    let natural_copy_width =
+        scale::estimate_inline_text_width(&content_copy, content_font_size, 0.0)
+            + scale::space::xs3(inline_size);
+    let natural_content_width = border_width * 2.0
+        + content_padding * 2.0
+        + natural_copy_width.max(if model.show_arrow { arrow_edge } else { 0.0 });
+    let content_width = natural_content_width.min(maximum_content_width);
+    let copy_width = (content_width - border_width * 2.0 - content_padding * 2.0).max(1.0);
+    let copy_height = if natural_content_width <= maximum_content_width {
+        content_font_size * content_line_height
+    } else {
+        scale::estimate_precise_text_block_height(
+            &content_copy,
+            copy_width,
+            content_font_size,
+            content_line_height,
+            0.0,
+        )
+    };
+    let arrow_visible = state.is_open() && model.show_arrow && !model.disabled;
+    let content_height = border_width * 2.0
+        + content_padding * 2.0
+        + copy_height
+        + if arrow_visible {
+            arrow_edge + content_gap
+        } else {
+            0.0
+        };
+
+    TooltipLayoutMetrics {
+        stage_height: scale::space::xl4(inline_size),
+        stage_padding: scale::space::s(inline_size),
+        trigger_width,
+        trigger_height,
+        trigger_padding_inline,
+        trigger_padding_block,
+        trigger_font_size,
+        trigger_line_height,
+        content_width,
+        content_height,
+        content_padding,
+        content_gap,
+        content_font_size,
+        content_line_height,
+        arrow_edge,
+        placement_gap: scale::space::xs2(inline_size),
+        placement: tooltip_effective_placement(model),
+        content_visible: state.is_open() && !model.disabled,
+        arrow_visible,
+    }
+}
+
+pub fn tooltip_trigger_copy(model: &TooltipModel) -> String {
+    if model.loading {
+        "Loading".to_owned()
+    } else {
+        model.trigger_label.clone()
+    }
+}
+
+pub fn tooltip_content_copy(model: &TooltipModel) -> String {
+    if model.loading {
+        "Loading tooltip content.".to_owned()
+    } else {
+        model.error.clone().unwrap_or_else(|| model.content.clone())
+    }
+}
+
+pub const fn tooltip_effective_placement(model: &TooltipModel) -> TooltipPlacement {
+    if model.loading || model.error.is_some() || model.disabled {
+        TooltipPlacement::Bottom
+    } else {
+        model.placement
+    }
+}
+
 pub fn default_tooltip_model() -> TooltipModel {
     TooltipModel::new(
         "Save",
@@ -605,5 +758,46 @@ mod tests {
             tooltip_dom_id("tooltip-content", "Save & Publish"),
             "tooltip-content-save-publish"
         );
+    }
+
+    #[test]
+    fn layout_metrics_use_shared_copy_placement_and_density_tokens() {
+        let standard = TooltipModel::new("Save", "save", "Save draft.");
+        let dense = standard.clone().with_density(TooltipDensity::Dense);
+        let standard_metrics =
+            tooltip_layout_metrics(&standard, &standard.state(), 448.0, 1_000.0, 1.0);
+        let dense_metrics = tooltip_layout_metrics(&dense, &dense.state(), 448.0, 1_000.0, 1.0);
+
+        assert!(dense_metrics.trigger_height < standard_metrics.trigger_height);
+        assert!(dense_metrics.content_height < standard_metrics.content_height);
+        assert_eq!(standard_metrics.placement, TooltipPlacement::Top);
+        assert!(standard_metrics.content_visible);
+        assert!(standard_metrics.arrow_visible);
+        assert_eq!(
+            standard_metrics.trigger_line_height,
+            scale::line_height::LH0
+        );
+        assert_eq!(
+            standard_metrics.content_line_height,
+            scale::line_height::LH0
+        );
+        let expected_content_height = 2.0
+            + standard_metrics.content_padding * 2.0
+            + standard_metrics.arrow_edge
+            + standard_metrics.content_gap
+            + standard_metrics.content_font_size * standard_metrics.content_line_height;
+        assert!((standard_metrics.content_height - expected_content_height).abs() < 0.001);
+    }
+
+    #[test]
+    fn loading_metrics_use_bottom_placement_and_shared_loading_copy() {
+        let model = default_tooltip_model()
+            .with_placement(TooltipPlacement::Left)
+            .loading();
+        let metrics = tooltip_layout_metrics(&model, &model.state(), 448.0, 1_000.0, 1.0);
+
+        assert_eq!(tooltip_trigger_copy(&model), "Loading");
+        assert_eq!(tooltip_content_copy(&model), "Loading tooltip content.");
+        assert_eq!(metrics.placement, TooltipPlacement::Bottom);
     }
 }

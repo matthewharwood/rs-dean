@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CheckboxDensity {
@@ -129,6 +131,20 @@ pub struct CheckboxRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CheckboxLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub text_gap: f32,
+    pub indicator_size: f32,
+    pub label_font_size: f32,
+    pub helper_font_size: f32,
+    pub label_height: f32,
+    pub description_height: f32,
 }
 
 impl CheckboxModel {
@@ -319,6 +335,75 @@ pub fn checkbox_render_nodes(
     ]
 }
 
+pub fn checkbox_layout_metrics(
+    model: &CheckboxModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> CheckboxLayoutMetrics {
+    let dense = model.density == CheckboxDensity::Dense;
+    let width = available_width.clamp(1.0, scale::container::CONTROL);
+    let border_width = border_width.max(0.0);
+    let padding = if dense {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let gap = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let text_gap = scale::space::xs3(inline_size);
+    let indicator_size = scale::space::s(inline_size);
+    let label_font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let helper_font_size = scale::font_size::f00(inline_size);
+    let text_width = (width - padding * 2.0 - border_width * 2.0 - indicator_size - gap).max(1.0);
+    let label_copy = if model.required {
+        format!("{} *", model.label)
+    } else {
+        model.label.clone()
+    };
+    let description = model
+        .error
+        .as_deref()
+        .or(model.description.as_deref())
+        .unwrap_or("No checkbox description");
+    let label_height = scale::estimate_text_block_height(
+        &label_copy,
+        text_width,
+        label_font_size,
+        scale::line_height::LH0,
+        0.48,
+    );
+    let description_height = scale::estimate_text_block_height(
+        description,
+        text_width,
+        helper_font_size,
+        scale::line_height::LH0,
+        0.44,
+    );
+    let content_height = label_height + text_gap + description_height;
+    let height = border_width * 2.0 + padding * 2.0 + indicator_size.max(content_height);
+
+    CheckboxLayoutMetrics {
+        width,
+        height,
+        padding,
+        gap,
+        text_gap,
+        indicator_size,
+        label_font_size,
+        helper_font_size,
+        label_height,
+        description_height,
+    }
+}
+
 pub fn default_checkbox_model() -> CheckboxModel {
     CheckboxModel::new("Enable shared theme", "shared-theme")
         .with_description("Use the shared Rust token palette across Leptos and Bevy.")
@@ -425,5 +510,29 @@ mod tests {
                 .iter()
                 .any(|node| node.part == CheckboxPart::Indicator && node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_match_the_shared_checkbox_box_model() {
+        let model = CheckboxModel::new("Use shared theme tokens", "shared-theme")
+            .with_description("Leptos and Bevy read the same semantic checkbox state.")
+            .checked();
+        let metrics = checkbox_layout_metrics(&model, 860.0, 1_000.0, 1.0);
+        let content_height = metrics.label_height + metrics.text_gap + metrics.description_height;
+        let expected = 2.0 + metrics.padding * 2.0 + metrics.indicator_size.max(content_height);
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert!((metrics.height - expected).abs() < 0.01);
+    }
+
+    #[test]
+    fn dense_checkbox_metrics_remain_smaller_than_standard_metrics() {
+        let standard = default_checkbox_model();
+        let dense = standard.clone().with_density(CheckboxDensity::Dense);
+        let standard = checkbox_layout_metrics(&standard, 448.0, 1_000.0, 1.0);
+        let dense = checkbox_layout_metrics(&dense, 448.0, 1_000.0, 1.0);
+
+        assert!(dense.height < standard.height);
+        assert!(dense.padding < standard.padding);
     }
 }

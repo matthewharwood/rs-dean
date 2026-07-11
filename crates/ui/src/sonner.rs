@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SonnerDensity {
@@ -184,6 +186,84 @@ pub struct SonnerRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SonnerLayoutMetrics {
+    pub max_width: f32,
+    pub provider_gap: f32,
+    pub provider_padding: f32,
+    pub meta_font_size: f32,
+    pub meta_line_height: f32,
+    pub meta_letter_spacing: f32,
+    pub viewport_gap: f32,
+    pub header_gap: f32,
+    pub copy_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_font_size: f32,
+    pub description_line_height: f32,
+    pub action_row_gap: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+    pub action_font_size: f32,
+    pub dismiss_size: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+    standard_toast_gap: f32,
+    standard_toast_padding: f32,
+    dense_toast_gap: f32,
+    dense_toast_padding: f32,
+    dense: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SonnerToastLayoutMetrics {
+    pub gap: f32,
+    pub padding: f32,
+    pub dense: bool,
+    pub shadow_level: u8,
+}
+
+impl SonnerLayoutMetrics {
+    pub const fn toast(
+        self,
+        active: bool,
+        invalid: bool,
+        disabled: bool,
+    ) -> SonnerToastLayoutMetrics {
+        let dense = sonner_uses_dense_toast_metrics(self.dense, active, invalid, disabled);
+        SonnerToastLayoutMetrics {
+            gap: if dense {
+                self.dense_toast_gap
+            } else {
+                self.standard_toast_gap
+            },
+            padding: if dense {
+                self.dense_toast_padding
+            } else {
+                self.standard_toast_padding
+            },
+            dense,
+            shadow_level: if disabled {
+                0
+            } else if invalid || dense {
+                1
+            } else {
+                2
+            },
+        }
+    }
+
+    pub fn action_content_min_height(self, border_width: f32) -> f32 {
+        (self.action_min_height - border_width.max(0.0) * 2.0).max(0.0)
+    }
+
+    pub fn dismiss_content_size(self, border_width: f32) -> f32 {
+        (self.dismiss_size - border_width.max(0.0) * 2.0).max(0.0)
+    }
 }
 
 impl SonnerAction {
@@ -451,6 +531,75 @@ pub fn validate_sonner_model(model: &SonnerModel) -> Result<(), garde::Report> {
     model.validate()
 }
 
+pub fn sonner_layout_metrics(
+    model: &SonnerModel,
+    available_width: f32,
+    inline_size: f32,
+) -> SonnerLayoutMetrics {
+    let dense = model.density == SonnerDensity::Dense;
+    let invalid = model.error.is_some();
+    let dense_provider = sonner_uses_dense_provider_metrics(dense, invalid, model.disabled);
+
+    SonnerLayoutMetrics {
+        max_width: available_width.clamp(1.0, scale::container::CONTROL),
+        provider_gap: if dense_provider {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        provider_padding: if invalid {
+            scale::space::s(inline_size)
+        } else {
+            0.0
+        },
+        meta_font_size: scale::font_size::f00(inline_size),
+        meta_line_height: scale::line_height::LH0,
+        meta_letter_spacing: scale::letter_spacing::LABEL,
+        viewport_gap: if dense_provider {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        header_gap: scale::space::xs(inline_size),
+        copy_gap: scale::space::xs3(inline_size),
+        title_font_size: scale::font_size::f0(inline_size),
+        title_line_height: scale::line_height::LH0,
+        description_font_size: scale::font_size::f0(inline_size),
+        description_line_height: scale::line_height::LH0,
+        action_row_gap: scale::space::xs2(inline_size),
+        action_min_height: scale::space::s(inline_size),
+        action_padding_inline: scale::space::xs(inline_size),
+        action_padding_block: scale::space::xs3(inline_size),
+        action_font_size: scale::font_size::f00(inline_size),
+        dismiss_size: scale::space::m(inline_size),
+        error_padding: scale::space::xs(inline_size),
+        error_font_size: scale::font_size::f0(inline_size),
+        error_line_height: scale::line_height::LH0,
+        standard_toast_gap: scale::space::xs(inline_size),
+        standard_toast_padding: scale::space::s(inline_size),
+        dense_toast_gap: scale::space::xs2(inline_size),
+        dense_toast_padding: scale::space::xs(inline_size),
+        dense,
+    }
+}
+
+pub const fn sonner_uses_dense_provider_metrics(
+    dense: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    dense && !invalid && !disabled
+}
+
+pub const fn sonner_uses_dense_toast_metrics(
+    dense: bool,
+    active: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    dense && !active && !invalid && !disabled
+}
+
 pub fn sonner_render_nodes(model: &SonnerModel, state: &SonnerState) -> Vec<SonnerRenderNode> {
     let invalid = model.error.is_some();
     let blocked = model.loading || model.disabled;
@@ -681,5 +830,43 @@ mod tests {
         assert!(!state.is_dismissed("saved"));
         assert!(!state.is_actioned("saved"));
         assert!(!state.is_paused());
+    }
+
+    #[test]
+    fn layout_metrics_follow_density_and_state_precedence() {
+        let standard = default_sonner_model();
+        let dense = standard.clone().with_density(SonnerDensity::Dense);
+        let disabled = dense.clone().disabled();
+        let standard_metrics = sonner_layout_metrics(&standard, 420.0, 1_000.0);
+        let dense_metrics = sonner_layout_metrics(&dense, 420.0, 1_000.0);
+        let disabled_metrics = sonner_layout_metrics(&disabled, 420.0, 1_000.0);
+
+        assert!(dense_metrics.provider_gap < standard_metrics.provider_gap);
+        assert_eq!(disabled_metrics.provider_gap, standard_metrics.provider_gap);
+        assert!(dense_metrics.toast(false, false, false).dense);
+        assert!(!dense_metrics.toast(true, false, false).dense);
+        assert!(!dense_metrics.toast(false, true, false).dense);
+        assert!(!dense_metrics.toast(false, false, true).dense);
+        assert_eq!(dense_metrics.toast(true, false, false).shadow_level, 2);
+        assert_eq!(dense_metrics.toast(false, true, false).shadow_level, 1);
+        assert_eq!(dense_metrics.toast(false, false, true).shadow_level, 0);
+    }
+
+    #[test]
+    fn border_box_helpers_preserve_control_outer_sizes() {
+        let metrics = sonner_layout_metrics(&default_sonner_model(), 420.0, 1_000.0);
+
+        assert_eq!(
+            metrics.action_content_min_height(2.0) + 4.0,
+            metrics.action_min_height
+        );
+        assert_eq!(
+            metrics.dismiss_content_size(2.0) + 4.0,
+            metrics.dismiss_size
+        );
+        assert_eq!(
+            metrics.action_content_min_height(-2.0),
+            metrics.action_min_height
+        );
     }
 }

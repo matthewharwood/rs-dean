@@ -7,13 +7,13 @@ use rs_dean_ui::{HealthCard, ThemeCycleButton};
 use rs_dean_state::ensure_durable_snapshot;
 
 const GENERATED_SHELL: &str = "min-h-screen bg-surface-1 px-m py-l text-text-1";
-const GENERATED_SHELL_INNER: &str = "mx-auto grid max-w-3xl gap-m";
+const GENERATED_SHELL_INNER: &str = "mx-auto grid max-w-narrow gap-m";
 const GENERATED_TOPBAR: &str = "flex items-center justify-end";
 const GENERATED_HEADER: &str = "grid gap-xs";
 const GENERATED_EYEBROW: &str = "m-0 text-00 font-7 uppercase text-brand";
 const GENERATED_TITLE: &str = "m-0 text-5 font-7 leading-5 text-text-1 md:text-6";
-const GENERATED_BODY: &str = "m-0 max-w-2xl text-0 leading-0 text-text-2";
-const GENERATED_STATE: &str = "mt-m grid max-w-2xl grid-cols-1 gap-xs sm:grid-cols-2";
+const GENERATED_BODY: &str = "m-0 max-w-reading text-0 leading-0 text-text-2";
+const GENERATED_STATE: &str = "mt-m grid max-w-reading grid-cols-1 gap-xs sm:grid-cols-2";
 const GENERATED_STATE_ITEM: &str =
     "min-w-0 rounded-box border border-border-subtle bg-surface-elevated p-s";
 const GENERATED_STATE_TERM: &str = "m-0 text-00 font-7 uppercase text-text-muted";

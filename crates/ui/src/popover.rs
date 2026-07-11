@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum PopoverDensity {
@@ -101,6 +103,37 @@ pub struct PopoverRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PopoverLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub content_offset: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub arrow_size: f32,
+    pub meta_font_size: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub error_font_size: f32,
+}
+
+impl PopoverLayoutMetrics {
+    pub fn trigger_outer_height(self, border_width: f32) -> f32 {
+        self.trigger_min_height.max(
+            self.trigger_font_size * self.trigger_line_height
+                + self.trigger_padding_block * 2.0
+                + border_width.max(0.0) * 2.0,
+        )
+    }
 }
 
 impl PopoverModel {
@@ -254,6 +287,68 @@ impl PopoverState {
 
 pub fn validate_popover_model(model: &PopoverModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn popover_layout_metrics(model: &PopoverModel, inline_size: f32) -> PopoverLayoutMetrics {
+    let dense = model.density == PopoverDensity::Dense;
+    let trigger_emphasized = model.loading || model.disabled || model.error.is_some();
+    let dense_trigger = dense && !trigger_emphasized;
+    let dense_content = dense && !trigger_emphasized;
+    PopoverLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: scale::space::xs2(inline_size),
+        trigger_min_height: if dense_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_font_size: if dense_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        content_offset: scale::space::xs2(inline_size),
+        content_padding: if dense_content {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_gap: if dense_content {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        arrow_size: scale::space::s(inline_size),
+        meta_font_size: scale::font_size::f00(inline_size),
+        title_font_size: if dense {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        title_line_height: if dense {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        detail_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        detail_line_height: scale::line_height::LH0,
+        error_font_size: scale::font_size::f00(inline_size),
+    }
 }
 
 pub fn popover_render_nodes(model: &PopoverModel, state: &PopoverState) -> Vec<PopoverRenderNode> {
@@ -518,5 +613,30 @@ mod tests {
         let model = default_popover_model().with_error("Unavailable configuration");
         let nodes = popover_render_nodes(&model, &model.state());
         assert!(nodes.iter().all(|node| node.invalid));
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_state_precedence() {
+        let standard = popover_layout_metrics(&default_popover_model(), 1_000.0);
+        let dense = popover_layout_metrics(
+            &default_popover_model().with_density(PopoverDensity::Dense),
+            1_000.0,
+        );
+        let dense_loading = popover_layout_metrics(
+            &default_popover_model()
+                .with_density(PopoverDensity::Dense)
+                .loading(),
+            1_000.0,
+        );
+
+        assert!(dense.trigger_min_height < standard.trigger_min_height);
+        assert!(dense.content_padding < standard.content_padding);
+        assert!(dense.title_font_size < standard.title_font_size);
+        assert_eq!(
+            dense_loading.trigger_min_height,
+            standard.trigger_min_height
+        );
+        assert_eq!(dense_loading.content_padding, standard.content_padding);
+        assert!(standard.trigger_outer_height(1.0) >= standard.trigger_min_height);
     }
 }

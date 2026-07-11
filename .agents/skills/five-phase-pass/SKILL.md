@@ -85,6 +85,12 @@ changes, run `cargo xtask static-analysis` directly before the full pass to
 fail fast. The full gate still runs its final docs sweep after tests and
 artifact builds. `apps/test-project` is proof output only; never commit it.
 
+For shared Leptos/Bevy UI or block renderer changes, run
+`cargo xtask story-parity ui` and `cargo xtask story-parity blocks` before the
+full pass. The parity command checks each paired route at `1000x700` desktop
+and `390x844` mobile viewports, including readiness, nonblank output, theme,
+spatial occupancy, edge distribution, and color complexity.
+
 ### P4 — Docs And Owning Skill
 
 Update `AGENTS.md`, `README.md`, and the owning skill under `.agents/skills/`.
@@ -124,6 +130,9 @@ remove the old wording from docs/skills.
 - Shared component stories take copy, ordering, state, validation, and nested
   themes from `crates/ui/src/story_fixtures.rs`; the Leptos and Bevy harnesses
   render that same registry instead of maintaining parallel fixtures.
+- Shared UI and block renderer work passes `cargo xtask story-parity` for the
+  affected first-to-current sweep and the final full UI and block catalogs at
+  desktop and mobile viewports.
 - `docs/crates/ui` has one generated mdBook page per catalog component, and
   each page embeds the matching `/stories/?story=ui-{component}` isolated live
   Leptos fixture beside `/ui-bevy-stories/?story=ui-{component}` so the page

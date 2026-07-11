@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CardVariant {
@@ -137,6 +139,40 @@ pub struct CardRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CardLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub border_width: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub header_gap: f32,
+    pub header_height: f32,
+    pub title_height: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_height: f32,
+    pub copy_font_size: f32,
+    pub copy_line_height: f32,
+    pub content_padding: f32,
+    pub content_height: f32,
+    pub content_text_height: f32,
+    pub footer_padding_top: f32,
+    pub footer_gap: f32,
+    pub footer_height: f32,
+    pub footer_text_width: f32,
+    pub footer_text_height: f32,
+    pub footer_font_size: f32,
+    pub footer_line_height: f32,
+    pub footer_wraps: bool,
+    pub action_width: f32,
+    pub action_height: f32,
+    pub action_font_size: f32,
+    pub action_line_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+}
+
 impl CardAction {
     pub fn new(label: impl Into<String>, value: impl Into<String>) -> Self {
         Self {
@@ -270,6 +306,144 @@ impl CardState {
 
 pub fn validate_card_model(model: &CardModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn card_layout_metrics(
+    model: &CardModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> CardLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let width = available_width.clamp(1.0, scale::container::CONTROL);
+    let dense = model.density == CardDensity::Dense;
+    let padding = if dense {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let gap = padding;
+    let header_gap = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let content_padding = padding;
+    let footer_padding_top = padding;
+    let footer_gap = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let inner_width = (width - border_width * 2.0 - padding * 2.0).max(1.0);
+
+    let (title_font_size, title_line_height, copy_font_size) = if dense {
+        (
+            scale::font_size::f0(inline_size),
+            scale::line_height::LH0,
+            scale::font_size::f00(inline_size),
+        )
+    } else {
+        (
+            scale::font_size::f1(inline_size),
+            scale::line_height::LH2,
+            scale::font_size::f0(inline_size),
+        )
+    };
+    let title_height = scale::estimate_text_block_height(
+        &model.title,
+        inner_width,
+        title_font_size,
+        title_line_height,
+        0.52,
+    );
+    let description_height = scale::estimate_text_block_height(
+        &model.description,
+        inner_width,
+        copy_font_size,
+        scale::line_height::LH0,
+        0.52,
+    );
+    let header_height = title_height + header_gap + description_height;
+
+    let content_text_width = (inner_width - border_width * 2.0 - content_padding * 2.0).max(1.0);
+    let content_text_height = scale::estimate_text_block_height(
+        &model.content,
+        content_text_width,
+        copy_font_size,
+        scale::line_height::LH0,
+        0.52,
+    );
+    let content_height = content_text_height + content_padding * 2.0 + border_width * 2.0;
+
+    let copy_line_height = scale::line_height::LH0;
+    let footer_font_size = scale::font_size::f00(inline_size);
+    let footer_line_height = scale::line_height::LH00;
+    let footer_text_width =
+        scale::estimate_inline_text_width(&model.footer.to_uppercase(), footer_font_size, 0.08);
+    let footer_text_height = footer_font_size * footer_line_height;
+    let action_font_size = scale::font_size::f0(inline_size);
+    let action_line_height = scale::line_height::LH0;
+    let action_padding_inline = scale::space::xs(inline_size);
+    let action_padding_block = scale::space::xs2(inline_size);
+    let (action_width, action_height) = model.action.as_ref().map_or((0.0, 0.0), |action| {
+        (
+            scale::estimate_inline_text_width(&action.label, action_font_size, 0.0)
+                + action_padding_inline * 2.0
+                + border_width * 2.0,
+            (action_font_size * action_line_height
+                + action_padding_block * 2.0
+                + border_width * 2.0)
+                .max(40.0),
+        )
+    });
+    let footer_wraps =
+        action_width > 0.0 && footer_text_width + footer_gap + action_width > inner_width;
+    let footer_content_height = if footer_wraps {
+        footer_text_height + footer_gap + action_height
+    } else {
+        footer_text_height.max(action_height)
+    };
+    let footer_height = border_width + footer_padding_top + footer_content_height;
+    let height = border_width * 2.0
+        + padding * 2.0
+        + header_height
+        + content_height
+        + footer_height
+        + gap * 2.0;
+
+    CardLayoutMetrics {
+        width,
+        height,
+        border_width,
+        padding,
+        gap,
+        header_gap,
+        header_height,
+        title_height,
+        title_font_size,
+        title_line_height,
+        description_height,
+        copy_font_size,
+        copy_line_height,
+        content_padding,
+        content_height,
+        content_text_height,
+        footer_padding_top,
+        footer_gap,
+        footer_height,
+        footer_text_width,
+        footer_text_height,
+        footer_font_size,
+        footer_line_height,
+        footer_wraps,
+        action_width,
+        action_height,
+        action_font_size,
+        action_line_height,
+        action_padding_inline,
+        action_padding_block,
+    }
 }
 
 pub fn card_render_nodes(model: &CardModel, state: &CardState) -> Vec<CardRenderNode> {
@@ -437,6 +611,21 @@ mod tests {
     fn garde_rejects_empty_action_contract() {
         let model = default_card_model().with_action(CardAction::new("", "invalid-empty-action"));
         assert!(validate_card_model(&model).is_err());
+    }
+
+    #[test]
+    fn layout_metrics_preserve_the_token_control_cap_and_intrinsic_height() {
+        let metrics = card_layout_metrics(&default_card_model(), 960.0, 1_000.0, 1.0);
+        let thick_metrics = card_layout_metrics(&default_card_model(), 960.0, 1_000.0, 2.0);
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert!(metrics.height > scale::space::xl3(1_000.0) * 2.0);
+        assert!(metrics.content_height > metrics.content_text_height);
+        assert!(!metrics.footer_wraps);
+        assert!(
+            ((thick_metrics.height - metrics.height) - 7.0).abs() <= f32::EPSILON,
+            "the root, content, footer, and footer action borders must all contribute to intrinsic height",
+        );
     }
 
     #[test]

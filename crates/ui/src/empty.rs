@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum EmptyDensity {
@@ -114,6 +116,30 @@ pub struct EmptyRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct EmptyLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_font_size: f32,
+    pub description_line_height: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub marker_size: f32,
+    pub marker_font_size: f32,
+    pub marker_line_height: f32,
+    pub content_font_size: f32,
+    pub content_line_height: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+    pub action_font_size: f32,
+    pub action_line_height: f32,
 }
 
 impl EmptyAction {
@@ -258,6 +284,100 @@ impl EmptyState {
 
 pub fn validate_empty_model(model: &EmptyModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn empty_layout_metrics(
+    density: EmptyDensity,
+    loading: bool,
+    disabled: bool,
+    inline_size: f32,
+) -> EmptyLayoutMetrics {
+    let dense = density == EmptyDensity::Dense;
+    let dense_root = dense && !loading && !disabled;
+    let dense_action = dense && !loading && !disabled;
+
+    EmptyLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::m(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        header_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        title_font_size: if dense {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        title_line_height: if dense {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        description_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        description_line_height: scale::line_height::LH0,
+        content_padding: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        marker_size: if dense {
+            scale::space::l(inline_size)
+        } else {
+            scale::space::xl(inline_size)
+        },
+        marker_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        marker_line_height: scale::line_height::LH0,
+        content_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        content_line_height: scale::line_height::LH0,
+        action_min_height: if dense_action {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        action_padding_inline: if dense_action {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        action_padding_block: if dense_action {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        action_font_size: if dense_action {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        action_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn empty_render_nodes(model: &EmptyModel, state: &EmptyState) -> Vec<EmptyRenderNode> {
@@ -512,5 +632,20 @@ mod tests {
             .find(|node| node.part == EmptyPart::Action)
             .expect("empty render nodes include action");
         assert!(action.disabled);
+    }
+
+    #[test]
+    fn layout_metrics_preserve_density_and_blocked_state_token_scales() {
+        let standard = empty_layout_metrics(EmptyDensity::Standard, false, false, 1_024.0);
+        let dense = empty_layout_metrics(EmptyDensity::Dense, false, false, 1_024.0);
+        let loading_dense = empty_layout_metrics(EmptyDensity::Dense, true, false, 1_024.0);
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.marker_size < standard.marker_size);
+        assert!(dense.action_font_size < standard.action_font_size);
+        assert_eq!(loading_dense.root_padding, standard.root_padding);
+        assert_eq!(loading_dense.action_min_height, standard.action_min_height);
+        assert_eq!(loading_dense.title_font_size, dense.title_font_size);
     }
 }

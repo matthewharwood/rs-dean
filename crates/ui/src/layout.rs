@@ -298,6 +298,22 @@ impl SpaceToken {
         }
     }
 
+    pub const fn points_at(self, inline_size: f32) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::ThreeExtraSmall => crate::scale::space::xs3(inline_size),
+            Self::TwoExtraSmall => crate::scale::space::xs2(inline_size),
+            Self::ExtraSmall => crate::scale::space::xs(inline_size),
+            Self::Small => crate::scale::space::s(inline_size),
+            Self::Medium => crate::scale::space::m(inline_size),
+            Self::Large => crate::scale::space::l(inline_size),
+            Self::ExtraLarge => crate::scale::space::xl(inline_size),
+            Self::TwoExtraLarge => crate::scale::space::xl2(inline_size),
+            Self::ThreeExtraLarge => crate::scale::space::xl3(inline_size),
+            Self::FourExtraLarge => crate::scale::space::xl4(inline_size),
+        }
+    }
+
     pub const fn gap_class(self) -> &'static str {
         match self {
             Self::None => "gap-0",
@@ -352,7 +368,7 @@ impl ContainerWidth {
         match self {
             Self::Full => "w-full",
             Self::Narrow => "w-full max-w-narrow",
-            Self::Prose => "w-full max-w-prose",
+            Self::Prose => "w-full max-w-reading",
             Self::Content => "w-full max-w-content",
             Self::Wide => "w-full max-w-wide",
         }
@@ -362,7 +378,7 @@ impl ContainerWidth {
         match self {
             Self::Full => f32::MAX,
             Self::Narrow => crate::scale::container::NARROW,
-            Self::Prose => crate::scale::container::PROSE,
+            Self::Prose => crate::scale::container::READING,
             Self::Content => crate::scale::container::CONTENT,
             Self::Wide => crate::scale::container::WIDE,
         }
@@ -525,7 +541,7 @@ impl GridSpec {
             .min(item_count)
             .max(1);
         let rows = item_count.div_ceil(columns);
-        let gap = self.gap.points();
+        let gap = self.gap.points_at(viewport_width);
         let cell_width =
             ((bounds.width - gap * (columns.saturating_sub(1) as f32)) / columns as f32).max(1.0);
         let cell_height =
@@ -756,6 +772,11 @@ mod tests {
         assert!(container.contains("max-w-content"));
         assert!(container.contains("px-s"));
         assert!(grid.contains("gap-m"));
+        assert_eq!(ContainerWidth::Prose.class(), "w-full max-w-reading");
+        assert_eq!(
+            ContainerWidth::Prose.points(),
+            crate::scale::container::READING
+        );
     }
 
     #[test]

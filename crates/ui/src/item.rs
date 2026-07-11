@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ItemDensity {
@@ -122,6 +124,27 @@ pub struct ItemRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ItemLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub media_size: f32,
+    pub media_font_size: f32,
+    pub media_line_height: f32,
+    pub content_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_font_size: f32,
+    pub description_line_height: f32,
+    pub actions_gap: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
+    pub action_font_size: f32,
+    pub action_line_height: f32,
 }
 
 impl ItemAction {
@@ -301,6 +324,52 @@ impl ItemState {
 
 pub fn validate_item_model(model: &ItemModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn item_layout_metrics(model: &ItemModel, inline_size: f32) -> ItemLayoutMetrics {
+    let dense = model.density == ItemDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.loading && !model.disabled;
+    let dense_title = dense && !model.disabled;
+    let dense_media = dense && !model.disabled;
+    ItemLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        media_size: if dense_media {
+            scale::space::l(inline_size)
+        } else {
+            scale::space::xl(inline_size)
+        },
+        media_font_size: scale::font_size::f00(inline_size),
+        media_line_height: scale::line_height::LH0,
+        content_gap: if dense {
+            0.0
+        } else {
+            scale::space::xs3(inline_size)
+        },
+        title_font_size: if dense_title {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        title_line_height: scale::line_height::LH0,
+        description_font_size: scale::font_size::f00(inline_size),
+        description_line_height: scale::line_height::LH0,
+        actions_gap: scale::space::xs2(inline_size),
+        action_min_height: scale::space::s(inline_size),
+        action_padding_inline: scale::space::xs2(inline_size),
+        action_padding_block: scale::space::xs3(inline_size),
+        action_font_size: scale::font_size::f00(inline_size),
+        action_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn item_render_nodes(model: &ItemModel, state: &ItemState) -> Vec<ItemRenderNode> {
@@ -507,6 +576,27 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_item_model(&default_item_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_preserve_density_and_disabled_precedence() {
+        let standard = item_layout_metrics(&default_item_model(), 952.0);
+        let dense = item_layout_metrics(
+            &default_item_model().with_density(ItemDensity::Dense),
+            952.0,
+        );
+        let disabled_dense = item_layout_metrics(
+            &default_item_model()
+                .with_density(ItemDensity::Dense)
+                .disabled(),
+            952.0,
+        );
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.media_size < standard.media_size);
+        assert_eq!(disabled_dense.media_size, standard.media_size);
+        assert_eq!(disabled_dense.title_font_size, standard.title_font_size);
     }
 
     #[test]
