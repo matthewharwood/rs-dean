@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use garde::Validate;
-use rs_dean_ui::{ButtonSize, ButtonVariant, UiComponentId};
+use rs_dean_ui::{ButtonSize, ButtonVariant, CardAction, CardModel, CardVariant, UiComponentId};
 use serde::{Deserialize, Serialize};
 
 use crate::{BlockDefinition, BlockId, BlockInteraction, BlockLayoutPreset, BlockPattern};
@@ -116,6 +116,22 @@ impl BlockItem {
     pub const fn selected(mut self) -> Self {
         self.selected = true;
         self
+    }
+
+    pub fn card_model(&self) -> CardModel {
+        let variant = if self.selected {
+            CardVariant::Elevated
+        } else {
+            CardVariant::Outline
+        };
+        CardModel::new(
+            self.title.clone(),
+            self.meta.clone(),
+            self.body.clone(),
+            "Shared block item",
+        )
+        .with_variant(variant)
+        .with_action(CardAction::new("Open", self.value.clone()))
     }
 }
 

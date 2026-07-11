@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AspectRatioFit {
@@ -63,6 +65,24 @@ pub struct AspectRatioRenderNode {
     pub fit: AspectRatioFit,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AspectRatioLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub frame_height: f32,
+    pub gap: f32,
+    pub frame_padding: f32,
+    pub media_padding: f32,
+    pub marker_size: f32,
+    pub caption_height: f32,
+    pub caption_text_gap: f32,
+    pub label_font_size: f32,
+    pub detail_font_size: f32,
+    pub badge_height: f32,
+    pub badge_padding_inline: f32,
+    pub badge_padding_block: f32,
 }
 
 impl AspectRatioModel {
@@ -150,6 +170,50 @@ pub fn aspect_ratio_render_nodes(model: &AspectRatioModel) -> Vec<AspectRatioRen
     ]
 }
 
+pub fn aspect_ratio_layout_metrics(
+    model: &AspectRatioModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> AspectRatioLayoutMetrics {
+    let width = available_width.max(1.0);
+    let border_width = border_width.max(0.0);
+    let frame_height = width * f32::from(model.height) / f32::from(model.width);
+    let gap = scale::space::xs2(inline_size);
+    let frame_padding = gap;
+    let media_padding = scale::space::s(inline_size);
+    let marker_size = scale::space::xl(inline_size);
+    let caption_text_gap = scale::space::xs3(inline_size);
+    let label_font_size = scale::font_size::f0(inline_size);
+    let detail_font_size = scale::font_size::f00(inline_size);
+    let caption_text_height = label_font_size * scale::line_height::LH0
+        + caption_text_gap
+        + detail_font_size * scale::line_height::LH0;
+    let badge_padding_inline = gap;
+    let badge_padding_block = caption_text_gap;
+    let badge_height =
+        detail_font_size * scale::line_height::LH0 + badge_padding_block * 2.0 + border_width * 2.0;
+    let caption_height = caption_text_height.max(badge_height);
+    let height = frame_height + gap + caption_height;
+
+    AspectRatioLayoutMetrics {
+        width,
+        height,
+        frame_height,
+        gap,
+        frame_padding,
+        media_padding,
+        marker_size,
+        caption_height,
+        caption_text_gap,
+        label_font_size,
+        detail_font_size,
+        badge_height,
+        badge_padding_inline,
+        badge_padding_block,
+    }
+}
+
 pub fn default_aspect_ratio_model() -> AspectRatioModel {
     AspectRatioModel::new(
         "Course preview",
@@ -204,5 +268,18 @@ mod tests {
         let model = AspectRatioModel::new("Square", "Avatar crop").with_ratio(1, 1);
         assert_eq!(model.ratio_label(), "1:1");
         assert_eq!(model.aspect_ratio_style(), "aspect-ratio: 1 / 1;");
+    }
+
+    #[test]
+    fn layout_metrics_preserve_the_ratio_without_a_renderer_cap() {
+        let model = default_aspect_ratio_model();
+        let metrics = aspect_ratio_layout_metrics(&model, 860.0, 1_000.0, 1.0);
+
+        assert!((metrics.frame_height - 483.75).abs() < 0.01);
+        assert!(metrics.frame_height > 260.0);
+        assert!(
+            (metrics.height - metrics.frame_height - metrics.gap - metrics.caption_height).abs()
+                < 0.01
+        );
     }
 }

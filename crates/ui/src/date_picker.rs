@@ -2,7 +2,8 @@ use garde::Validate;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    CalendarDate, CalendarIntent, CalendarModel, CalendarPart, calendar_render_nodes, month_name,
+    CalendarDate, CalendarIntent, CalendarLayoutMetrics, CalendarModel, CalendarPart,
+    calendar_layout_metrics, calendar_render_nodes, month_name, scale,
 };
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
@@ -123,6 +124,29 @@ pub struct DatePickerRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DatePickerLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_gap: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub marker_size: f32,
+    pub marker_font_size: f32,
+    pub popover_padding: f32,
+    pub popover_gap: f32,
+    pub clear_min_height: f32,
+    pub clear_padding_inline: f32,
+    pub clear_padding_block: f32,
+    pub clear_font_size: f32,
+    pub clear_line_height: f32,
+    pub calendar: CalendarLayoutMetrics,
 }
 
 impl DatePickerModel {
@@ -301,6 +325,61 @@ pub fn validate_date_picker_model(model: &DatePickerModel) -> Result<(), garde::
     model.validate()
 }
 
+pub fn date_picker_layout_metrics(
+    density: DatePickerDensity,
+    open: bool,
+    disabled: bool,
+    inline_size: f32,
+) -> DatePickerLayoutMetrics {
+    let dense_root = density == DatePickerDensity::Dense && !disabled;
+    let dense_trigger = density == DatePickerDensity::Dense && !open;
+    DatePickerLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: scale::space::xs2(inline_size),
+        trigger_min_height: if dense_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_gap: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_font_size: if dense_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        marker_size: scale::space::s(inline_size),
+        marker_font_size: scale::font_size::f00(inline_size),
+        popover_padding: scale::space::xs(inline_size),
+        popover_gap: scale::space::xs2(inline_size),
+        clear_min_height: scale::space::s(inline_size),
+        clear_padding_inline: scale::space::xs2(inline_size),
+        clear_padding_block: scale::space::xs3(inline_size),
+        clear_font_size: scale::font_size::f00(inline_size),
+        clear_line_height: scale::line_height::LH0,
+        calendar: calendar_layout_metrics(inline_size),
+    }
+}
+
 pub fn date_picker_render_nodes(
     model: &DatePickerModel,
     state: &DatePickerState,
@@ -458,6 +537,22 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_date_picker_model(&default_date_picker_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_calendar_and_fluid_tailwind_tokens() {
+        let compact = date_picker_layout_metrics(DatePickerDensity::Standard, false, false, 320.0);
+        let wide = date_picker_layout_metrics(DatePickerDensity::Standard, false, false, 1_000.0);
+        let dense = date_picker_layout_metrics(DatePickerDensity::Dense, false, false, 1_000.0);
+        let dense_open = date_picker_layout_metrics(DatePickerDensity::Dense, true, false, 1_000.0);
+        let disabled_dense =
+            date_picker_layout_metrics(DatePickerDensity::Dense, false, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.trigger_font_size < dense_open.trigger_font_size);
+        assert_eq!(wide.calendar.max_width, wide.max_width);
     }
 
     #[test]

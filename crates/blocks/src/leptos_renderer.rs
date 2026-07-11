@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use rs_dean_ui::{
-    Button, ButtonKind, ButtonModel, Card, CardAction, CardModel, CardVariant, Cluster,
-    ComponentDemo, Grid, GridItem, HeadingLevel, Section, SectionSurface, Stack, TextAlign,
-    TextStyle, TextTone, UiHeading, UiMediaFrame, UiText,
+    Button, ButtonKind, ButtonModel, Card, Cluster, ComponentDemo, Grid, GridItem, HeadingLevel,
+    Section, SectionSurface, Stack, TextAlign, TextStyle, TextTone, UiHeading, UiMediaFrame,
+    UiText,
 };
 
 use crate::{
@@ -208,13 +208,5 @@ fn block_support_view(plan: &BlockPlan) -> AnyView {
 }
 
 fn block_item_view(item: BlockItem) -> AnyView {
-    let variant = if item.selected {
-        CardVariant::Elevated
-    } else {
-        CardVariant::Outline
-    };
-    let model = CardModel::new(item.title, item.meta, item.body, "Shared block item")
-        .with_variant(variant)
-        .with_action(CardAction::new("Open", item.value));
-    view! { <Card model /> }.into_any()
+    view! { <Card model=item.card_model() /> }.into_any()
 }

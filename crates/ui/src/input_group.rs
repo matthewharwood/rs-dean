@@ -1,7 +1,9 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::input::{InputAction, InputDensity, InputKind};
+use crate::input::{
+    InputAction, InputDensity, InputKind, InputLayoutMetrics, input_shell_layout_metrics,
+};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -253,6 +255,26 @@ impl InputGroupState {
 
 pub fn validate_input_group_model(model: &InputGroupModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn input_group_layout_metrics(
+    model: &InputGroupModel,
+    state: &InputGroupState,
+    inline_size: f32,
+) -> InputLayoutMetrics {
+    let blocked = model.loading || model.disabled;
+    let button_disabled = model
+        .button
+        .as_ref()
+        .is_none_or(|button| button.disabled || blocked);
+    input_shell_layout_metrics(
+        model.density,
+        model.loading,
+        model.disabled,
+        button_disabled,
+        state.is_active(InputGroupPart::Button),
+        inline_size,
+    )
 }
 
 pub fn input_group_render_nodes(
@@ -511,5 +533,18 @@ mod tests {
         assert!(nodes.iter().any(|node| {
             node.part == InputGroupPart::Input && node.detail == "Amount is required."
         }));
+    }
+
+    #[test]
+    fn layout_metrics_reuse_input_shell_precedence() {
+        let model = default_input_group_model().with_density(InputDensity::Dense);
+        let resting = model.state();
+        let mut active = model.state();
+        active.apply(InputGroupIntent::ActivateButton("apply-value".to_owned()));
+        let dense = input_group_layout_metrics(&model, &resting, 1_024.0);
+        let active = input_group_layout_metrics(&model, &active, 1_024.0);
+
+        assert!(dense.suffix_font_size < active.suffix_font_size);
+        assert_eq!(dense.max_width, crate::scale::container::CONTROL);
     }
 }

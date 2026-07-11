@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum FieldDensity {
@@ -128,6 +130,22 @@ pub struct FieldRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct FieldLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub label_font_size: f32,
+    pub helper_font_size: f32,
+    pub control_padding_inline: f32,
+    pub control_padding_block: f32,
+    pub control_min_height: f32,
+    pub control_height: f32,
+    pub description_height: f32,
+    pub error_height: f32,
 }
 
 impl FieldModel {
@@ -330,6 +348,92 @@ pub fn field_render_nodes(model: &FieldModel, state: &FieldState) -> Vec<FieldRe
     ]
 }
 
+pub fn field_layout_metrics(
+    model: &FieldModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> FieldLayoutMetrics {
+    let dense = model.density == FieldDensity::Dense;
+    let width = available_width.clamp(1.0, scale::container::CONTROL);
+    let border_width = border_width.max(0.0);
+    let padding = if dense {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let gap = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let label_font_size = if dense {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let helper_font_size = scale::font_size::f00(inline_size);
+    let control_padding_inline = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let control_padding_block = if dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let control_min_height = if dense {
+        scale::space::s(inline_size)
+    } else {
+        scale::space::l(inline_size)
+    };
+    let control_height = (label_font_size * scale::line_height::LH0
+        + control_padding_block * 2.0
+        + border_width * 2.0)
+        .max(control_min_height);
+    let content_width = (width - padding * 2.0 - border_width * 2.0).max(1.0);
+    let description_height = scale::estimate_text_block_height(
+        &model.description,
+        content_width,
+        helper_font_size,
+        scale::line_height::LH0,
+        0.44,
+    );
+    let error_height = model.error.as_ref().map_or(0.0, |error| {
+        scale::estimate_text_block_height(
+            error,
+            content_width,
+            helper_font_size,
+            scale::line_height::LH0,
+            0.44,
+        )
+    });
+    let child_count = 3_usize + usize::from(model.error.is_some());
+    let height = border_width * 2.0
+        + padding * 2.0
+        + label_font_size * scale::line_height::LH0
+        + control_height
+        + description_height
+        + error_height
+        + child_count.saturating_sub(1) as f32 * gap;
+
+    FieldLayoutMetrics {
+        width,
+        height,
+        padding,
+        gap,
+        label_font_size,
+        helper_font_size,
+        control_padding_inline,
+        control_padding_block,
+        control_min_height,
+        control_height,
+        description_height,
+        error_height,
+    }
+}
+
 pub fn default_field_model() -> FieldModel {
     FieldModel::new(
         "Project name",
@@ -485,5 +589,43 @@ mod tests {
                 .iter()
                 .any(|node| node.part == FieldPart::Error && node.visible)
         );
+    }
+
+    #[test]
+    fn layout_metrics_share_the_token_box_model_across_renderers() {
+        let model = FieldModel::new(
+            "Project name",
+            "This value stays renderer-local until a consumer persists form state.",
+        )
+        .with_value("rs-dean")
+        .required();
+        let metrics = field_layout_metrics(&model, 856.0, 1_280.0, 1.0);
+        let expected_height = 2.0
+            + metrics.padding * 2.0
+            + metrics.label_font_size * scale::line_height::LH0
+            + metrics.control_height
+            + metrics.description_height
+            + metrics.gap * 2.0;
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert_eq!(
+            metrics.description_height,
+            metrics.helper_font_size * scale::line_height::LH0
+        );
+        assert!((metrics.height - expected_height).abs() < 0.01);
+    }
+
+    #[test]
+    fn visible_error_adds_one_line_and_one_gap_to_field_height() {
+        let model = default_field_model();
+        let valid = field_layout_metrics(&model, 448.0, 1_000.0, 1.0);
+        let invalid = field_layout_metrics(
+            &model.with_error("Project name is required"),
+            448.0,
+            1_000.0,
+            1.0,
+        );
+
+        assert!((invalid.height - valid.height - invalid.error_height - invalid.gap).abs() < 0.01);
     }
 }

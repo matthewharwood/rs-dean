@@ -278,6 +278,13 @@ macro_rules! story_fixture {
     };
 }
 
+pub fn canonical_ui_story_fixture(id: UiComponentId) -> UiStoryFixture {
+    ui_story_fixtures(id)
+        .into_iter()
+        .next()
+        .expect("invariant: every catalog component has a canonical story fixture")
+}
+
 pub fn ui_story_fixtures(id: UiComponentId) -> Vec<UiStoryFixture> {
     match id {
         UiComponentId::Accordion => vec![story_fixture!(
@@ -5576,29 +5583,17 @@ pub fn themed_toggle_group_story_model() -> ToggleGroupModel {
 }
 
 pub fn default_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Save",
-        "save-command",
-        "Writes the current draft to durable state once the consumer accepts the action.",
-    )
+    TooltipModel::new("Save", "save-command", "Save the current draft.")
 }
 
 pub fn dense_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Preview",
-        "preview-command",
-        "Opens a renderer-local preview without changing persisted state.",
-    )
-    .with_density(TooltipDensity::Dense)
+    TooltipModel::new("Preview", "preview-command", "Preview without persisting.")
+        .with_density(TooltipDensity::Dense)
 }
 
 pub fn placement_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Sync",
-        "sync-command",
-        "Tooltip placement is part of the shared model and renders through token classes.",
-    )
-    .with_placement(TooltipPlacement::Right)
+    TooltipModel::new("Sync", "sync-command", "Shared right placement.")
+        .with_placement(TooltipPlacement::Right)
 }
 
 pub fn loading_tooltip_story_model() -> TooltipModel {
@@ -5606,30 +5601,16 @@ pub fn loading_tooltip_story_model() -> TooltipModel {
 }
 
 pub fn disabled_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Locked",
-        "locked-command",
-        "Disabled tooltips keep the trigger readable but block hover and focus transitions.",
-    )
-    .disabled()
+    TooltipModel::new("Locked", "locked-command", "This tooltip is unavailable.").disabled()
 }
 
 pub fn hidden_arrow_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Compact hint",
-        "compact-hint",
-        "The arrow node stays in the render contract even when a renderer hides it.",
-    )
-    .without_arrow()
+    TooltipModel::new("Compact hint", "compact-hint", "Rendered without an arrow.").without_arrow()
 }
 
 pub fn themed_tooltip_story_model() -> TooltipModel {
-    TooltipModel::new(
-        "Theme hint",
-        "theme-hint",
-        "The same Tooltip model resolves semantic tokens through the nested Dracula theme.",
-    )
-    .with_placement(TooltipPlacement::Bottom)
+    TooltipModel::new("Theme hint", "theme-hint", "Scoped Dracula theme.")
+        .with_placement(TooltipPlacement::Bottom)
 }
 
 pub fn table_story_columns() -> Vec<TableColumn> {
@@ -5963,6 +5944,17 @@ mod tests {
         assert_eq!(total, 338);
         assert_eq!(themed, UiComponentId::ALL.len() - 1);
         assert_eq!(default_open, 3);
+    }
+
+    #[test]
+    fn canonical_fixture_is_the_registry_head_for_every_component() {
+        for id in UiComponentId::ALL {
+            let canonical = canonical_ui_story_fixture(id);
+            let fixtures = ui_story_fixtures(id);
+
+            assert_eq!(canonical, fixtures[0]);
+            assert_eq!(canonical.model.component_id(), id);
+        }
     }
 
     #[test]

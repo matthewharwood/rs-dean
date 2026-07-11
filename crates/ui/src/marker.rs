@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum MarkerDensity {
@@ -136,6 +138,24 @@ pub struct MarkerRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MarkerLayoutMetrics {
+    pub root_gap: f32,
+    pub root_padding_inline: f32,
+    pub root_padding_block: f32,
+    pub root_emphasis_gap: f32,
+    pub root_emphasis_padding_inline: f32,
+    pub dot_size: f32,
+    pub dot_emphasis_size: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub anchor_min_height: f32,
+    pub anchor_padding_inline: f32,
+    pub anchor_padding_block: f32,
+    pub anchor_font_size: f32,
+    pub anchor_line_height: f32,
 }
 
 impl MarkerAnchor {
@@ -310,6 +330,44 @@ impl MarkerState {
 
 pub fn validate_marker_model(model: &MarkerModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn marker_layout_metrics(model: &MarkerModel, inline_size: f32) -> MarkerLayoutMetrics {
+    let dense = model.density == MarkerDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.loading && !model.disabled;
+    let dense_brand_dot = dense
+        && model.tone == MarkerTone::Brand
+        && model.error.is_none()
+        && !model.loading
+        && !model.disabled;
+    MarkerLayoutMetrics {
+        root_gap: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        root_padding_inline: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        root_padding_block: scale::space::xs3(inline_size),
+        root_emphasis_gap: scale::space::xs2(inline_size),
+        root_emphasis_padding_inline: scale::space::xs2(inline_size),
+        dot_size: if dense_brand_dot {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        dot_emphasis_size: scale::space::xs2(inline_size),
+        label_font_size: scale::font_size::f00(inline_size),
+        label_line_height: scale::line_height::LH0,
+        anchor_min_height: scale::space::s(inline_size),
+        anchor_padding_inline: scale::space::xs2(inline_size),
+        anchor_padding_block: scale::space::xs3(inline_size),
+        anchor_font_size: scale::font_size::f00(inline_size),
+        anchor_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn marker_render_nodes(model: &MarkerModel, state: &MarkerState) -> Vec<MarkerRenderNode> {
@@ -569,5 +627,33 @@ mod tests {
                 part.label()
             );
         }
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_tone_and_state_precedence() {
+        let standard = marker_layout_metrics(&default_marker_model(), 1_000.0);
+        let dense = marker_layout_metrics(
+            &default_marker_model().with_density(MarkerDensity::Dense),
+            1_000.0,
+        );
+        let dense_warning = marker_layout_metrics(
+            &default_marker_model()
+                .with_density(MarkerDensity::Dense)
+                .with_tone(MarkerTone::Warning),
+            1_000.0,
+        );
+        let dense_loading = marker_layout_metrics(
+            &default_marker_model()
+                .with_density(MarkerDensity::Dense)
+                .loading(),
+            1_000.0,
+        );
+
+        assert!(dense.root_gap < standard.root_gap);
+        assert!(dense.root_padding_inline < standard.root_padding_inline);
+        assert!(dense.dot_size < standard.dot_size);
+        assert_eq!(dense_warning.dot_size, standard.dot_size);
+        assert_eq!(dense_loading.root_gap, standard.root_gap);
+        assert_eq!(dense_loading.dot_size, standard.dot_size);
     }
 }

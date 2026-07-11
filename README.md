@@ -96,6 +96,14 @@ Leptos story fixture through `/stories/?story=ui-{component}` beside the Bevy
 primitive story through `/ui-bevy-stories/?story=ui-{component}`, so each page
 shows only that component's DOM variants and Bevy adapter output.
 
+`cargo xtask story-parity ui` and `cargo xtask story-parity blocks` launch both
+story harnesses and verify every paired route at `1000x700` desktop and
+`390x844` mobile viewports. Each route must become renderer-ready, produce a
+nonblank frame, preserve the shared theme, and stay within the spatial and
+color-distribution parity bounds. A single story ID or a first-to-current
+`ui-through:<slug>` / `blocks-through:<slug>` sweep is available for focused
+work.
+
 ## Block System
 
 `crates/blocks` composes `rs-dean-ui` primitives without introducing a second

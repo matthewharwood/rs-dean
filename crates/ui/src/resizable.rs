@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ResizableDensity {
@@ -150,6 +152,35 @@ pub struct ResizableRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ResizableLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub header_gap: f32,
+    pub title_font_size: f32,
+    pub status_font_size: f32,
+    pub group_min_height: f32,
+    pub panel_padding: f32,
+    pub panel_gap: f32,
+    pub emphasized_panel_padding: f32,
+    pub emphasized_panel_gap: f32,
+    pub panel_title_font_size: f32,
+    pub disabled_panel_title_font_size: f32,
+    pub detail_font_size: f32,
+    pub meta_font_size: f32,
+    pub handle_margin_top: f32,
+    pub handle_padding: f32,
+    pub handle_gap: f32,
+    pub emphasized_handle_margin_top: f32,
+    pub emphasized_handle_padding: f32,
+    pub emphasized_handle_gap: f32,
+    pub range_control_height: f32,
+    pub range_track_height: f32,
+    pub range_thumb_size: f32,
+    pub line_height: f32,
 }
 
 impl ResizablePanel {
@@ -418,6 +449,102 @@ impl ResizableState {
 
 pub fn validate_resizable_model(model: &ResizableModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn resizable_layout_metrics(
+    model: &ResizableModel,
+    inline_size: f32,
+) -> ResizableLayoutMetrics {
+    let dense = model.density == ResizableDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.disabled;
+    ResizableLayoutMetrics {
+        max_width: scale::container::CONTENT,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        header_gap: scale::space::xs2(inline_size),
+        title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        status_font_size: scale::font_size::f00(inline_size),
+        group_min_height: match (model.density, model.orientation) {
+            (ResizableDensity::Standard, ResizableOrientation::Horizontal) => {
+                scale::space::xl2(inline_size)
+            }
+            (ResizableDensity::Standard, ResizableOrientation::Vertical) => {
+                scale::space::xl4(inline_size)
+            }
+            (ResizableDensity::Dense, ResizableOrientation::Horizontal) => {
+                scale::space::xl(inline_size)
+            }
+            (ResizableDensity::Dense, ResizableOrientation::Vertical) => {
+                scale::space::xl3(inline_size)
+            }
+        },
+        panel_padding: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        panel_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        emphasized_panel_padding: scale::space::s(inline_size),
+        emphasized_panel_gap: scale::space::xs2(inline_size),
+        panel_title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        disabled_panel_title_font_size: scale::font_size::f0(inline_size),
+        detail_font_size: scale::font_size::f00(inline_size),
+        meta_font_size: scale::font_size::f00(inline_size),
+        handle_margin_top: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        handle_padding: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        handle_gap: scale::space::xs3(inline_size),
+        emphasized_handle_margin_top: scale::space::xs(inline_size),
+        emphasized_handle_padding: scale::space::xs2(inline_size),
+        emphasized_handle_gap: scale::space::xs3(inline_size),
+        range_control_height: scale::space::s(inline_size),
+        range_track_height: scale::space::xs3(inline_size),
+        range_thumb_size: scale::space::xs(inline_size),
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub const fn resizable_panel_uses_emphasized_metrics(
+    active: bool,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    active || disabled || invalid
+}
+
+pub const fn resizable_handle_uses_emphasized_metrics(
+    resizing: bool,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    resizing || disabled || invalid
 }
 
 pub fn resizable_render_nodes(
@@ -746,6 +873,38 @@ mod tests {
                 .filter(|node| node.part == ResizablePart::Handle)
                 .all(|node| node.disabled && !node.actionable)
         );
+    }
+
+    #[test]
+    fn layout_metrics_follow_density_orientation_and_token_scales() {
+        let standard = resizable_layout_metrics(&default_resizable_model(), 1_000.0);
+        let dense_vertical = resizable_layout_metrics(
+            &default_resizable_model()
+                .with_density(ResizableDensity::Dense)
+                .with_orientation(ResizableOrientation::Vertical),
+            1_000.0,
+        );
+
+        assert!(dense_vertical.root_padding < standard.root_padding);
+        assert!(dense_vertical.panel_padding < standard.panel_padding);
+        assert!(dense_vertical.group_min_height > standard.group_min_height);
+        assert!(standard.range_control_height >= standard.range_thumb_size);
+        assert!(standard.range_thumb_size > standard.range_track_height);
+        assert_eq!(standard.line_height, scale::line_height::LH0);
+    }
+
+    #[test]
+    fn emphasized_metrics_cover_css_state_precedence() {
+        assert!(resizable_panel_uses_emphasized_metrics(true, false, false));
+        assert!(resizable_panel_uses_emphasized_metrics(false, true, false));
+        assert!(resizable_panel_uses_emphasized_metrics(false, false, true));
+        assert!(!resizable_panel_uses_emphasized_metrics(
+            false, false, false
+        ));
+        assert!(resizable_handle_uses_emphasized_metrics(true, false, false));
+        assert!(!resizable_handle_uses_emphasized_metrics(
+            false, false, false
+        ));
     }
 
     #[test]

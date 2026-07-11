@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum KbdDensity {
@@ -104,6 +106,18 @@ pub struct KbdRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct KbdLayoutMetrics {
+    pub root_padding: f32,
+    pub chord_gap: f32,
+    pub key_min_size: f32,
+    pub key_padding_inline: f32,
+    pub key_emphasis_padding_inline: f32,
+    pub key_padding_block: f32,
+    pub font_size: f32,
+    pub line_height: f32,
 }
 
 impl KbdKey {
@@ -263,6 +277,34 @@ impl KbdState {
 
 pub fn validate_kbd_model(model: &KbdModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn kbd_layout_metrics(model: &KbdModel, inline_size: f32) -> KbdLayoutMetrics {
+    let dense = model.density == KbdDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.loading && !model.disabled;
+    let dense_key = dense && model.error.is_none() && !model.loading && !model.disabled;
+    KbdLayoutMetrics {
+        root_padding: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        chord_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        key_min_size: scale::space::s(inline_size),
+        key_padding_inline: if dense_key {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        key_emphasis_padding_inline: scale::space::xs2(inline_size),
+        key_padding_block: scale::space::xs3(inline_size),
+        font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn kbd_render_nodes(model: &KbdModel, state: &KbdState) -> Vec<KbdRenderNode> {
@@ -511,6 +553,31 @@ mod tests {
                 .iter()
                 .filter(|node| node.part == KbdPart::Key)
                 .all(|node| node.disabled)
+        );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_state_precedence() {
+        let standard = kbd_layout_metrics(&default_kbd_model(), 448.0);
+        let dense = kbd_layout_metrics(&default_kbd_model().with_density(KbdDensity::Dense), 448.0);
+        let dense_loading = kbd_layout_metrics(
+            &default_kbd_model()
+                .with_density(KbdDensity::Dense)
+                .loading(),
+            448.0,
+        );
+
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.chord_gap < standard.chord_gap);
+        assert!(dense.key_padding_inline < standard.key_padding_inline);
+        assert_eq!(dense_loading.root_padding, standard.root_padding);
+        assert_eq!(
+            dense_loading.key_padding_inline,
+            standard.key_padding_inline
+        );
+        assert_eq!(
+            dense.key_emphasis_padding_inline,
+            standard.key_padding_inline
         );
     }
 }

@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ChartDensity {
@@ -138,6 +140,33 @@ pub struct ChartRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ChartLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub series_list_gap: f32,
+    pub series_padding: f32,
+    pub series_gap: f32,
+    pub series_label_gap: f32,
+    pub series_label_font_size: f32,
+    pub series_label_line_height: f32,
+    pub track_height: f32,
+    pub legend_gap: f32,
+    pub legend_padding_inline: f32,
+    pub legend_padding_block: f32,
+    pub legend_font_size: f32,
+    pub legend_line_height: f32,
+    pub tooltip_padding: f32,
+    pub tooltip_font_size: f32,
+    pub tooltip_line_height: f32,
+    pub axis_padding_top: f32,
+    pub axis_font_size: f32,
+    pub axis_line_height: f32,
+}
+
 impl ChartSeries {
     pub fn new(label: impl Into<String>, value: impl Into<String>, amount: u8) -> Self {
         Self {
@@ -245,6 +274,54 @@ impl ChartState {
 
 pub fn validate_chart_model(model: &ChartModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn chart_layout_metrics(
+    density: ChartDensity,
+    disabled: bool,
+    inline_size: f32,
+) -> ChartLayoutMetrics {
+    let dense_root = density == ChartDensity::Dense && !disabled;
+    let root_padding = if dense_root {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let (title_font_size, title_line_height) = if density == ChartDensity::Dense {
+        (scale::font_size::f0(inline_size), scale::line_height::LH0)
+    } else {
+        (scale::font_size::f1(inline_size), scale::line_height::LH2)
+    };
+
+    ChartLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding,
+        root_gap: root_padding,
+        title_font_size,
+        title_line_height,
+        series_list_gap: if density == ChartDensity::Dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        series_padding: scale::space::xs(inline_size),
+        series_gap: scale::space::xs2(inline_size),
+        series_label_gap: scale::space::xs(inline_size),
+        series_label_font_size: scale::font_size::f00(inline_size),
+        series_label_line_height: scale::line_height::LH00,
+        track_height: scale::space::s(inline_size),
+        legend_gap: scale::space::xs2(inline_size),
+        legend_padding_inline: scale::space::xs2(inline_size),
+        legend_padding_block: scale::space::xs3(inline_size),
+        legend_font_size: scale::font_size::f00(inline_size),
+        legend_line_height: scale::line_height::LH00,
+        tooltip_padding: scale::space::xs(inline_size),
+        tooltip_font_size: scale::font_size::f0(inline_size),
+        tooltip_line_height: scale::line_height::LH0,
+        axis_padding_top: scale::space::xs2(inline_size),
+        axis_font_size: scale::font_size::f00(inline_size),
+        axis_line_height: scale::line_height::LH00,
+    }
 }
 
 pub fn chart_render_nodes(model: &ChartModel, state: &ChartState) -> Vec<ChartRenderNode> {
@@ -448,6 +525,20 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_chart_model(&default_chart_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens() {
+        let compact = chart_layout_metrics(ChartDensity::Standard, false, 320.0);
+        let wide = chart_layout_metrics(ChartDensity::Standard, false, 1_000.0);
+        let dense = chart_layout_metrics(ChartDensity::Dense, false, 1_000.0);
+        let disabled_dense = chart_layout_metrics(ChartDensity::Dense, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.title_font_size < wide.title_font_size);
+        assert_eq!(wide.max_width, scale::container::CONTROL);
     }
 
     #[test]

@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum NavigationMenuDensity {
@@ -159,6 +161,39 @@ pub struct NavigationMenuRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct NavigationMenuLayoutMetrics {
+    pub max_width: f32,
+    pub list_padding: f32,
+    pub list_gap: f32,
+    pub item_gap: f32,
+    pub panel_width: f32,
+    pub control_min_height: f32,
+    pub control_padding_inline: f32,
+    pub control_padding_block: f32,
+    pub control_font_size: f32,
+    pub emphasized_control_min_height: f32,
+    pub emphasized_control_padding_inline: f32,
+    pub emphasized_control_padding_block: f32,
+    pub emphasized_control_font_size: f32,
+    pub content_min_width: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub panel_link_padding: f32,
+    pub emphasized_panel_link_padding: f32,
+    pub panel_link_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+}
+
+impl NavigationMenuLayoutMetrics {
+    pub fn panel_outer_width(self, border_width: f32) -> f32 {
+        self.panel_width + border_width.max(0.0) * 4.0
+    }
 }
 
 impl NavigationMenuLink {
@@ -421,6 +456,163 @@ impl NavigationMenuState {
 
 pub fn validate_navigation_menu_model(model: &NavigationMenuModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn navigation_menu_layout_metrics(
+    model: &NavigationMenuModel,
+    inline_size: f32,
+) -> NavigationMenuLayoutMetrics {
+    let dense = model.density == NavigationMenuDensity::Dense;
+    let dense_list = dense && !model.loading;
+    let emphasized = model.error.is_some() || model.loading || model.disabled;
+    let dense_content = dense && !emphasized;
+    let content_min_width = if dense_content {
+        scale::space::xl3(inline_size)
+    } else {
+        scale::space::xl4(inline_size)
+    };
+    let content_padding = if dense_content {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let panel_link_padding = if dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let emphasized_panel_link_padding = scale::space::xs(inline_size);
+    let title_font_size = scale::font_size::f0(inline_size);
+    let detail_font_size = scale::font_size::f00(inline_size);
+    let panel_content_width = model
+        .items
+        .iter()
+        .filter(|item| item.is_panel())
+        .flat_map(|item| {
+            item.links.iter().map(|link| {
+                let disabled = model.loading || model.disabled || item.disabled || link.disabled;
+                let selected = model.selected_value.as_deref() == Some(link.value.as_str());
+                let padding = if disabled || selected {
+                    emphasized_panel_link_padding
+                } else {
+                    panel_link_padding
+                };
+                scale::estimate_inline_text_width(&link.label, title_font_size, 0.0)
+                    .max(scale::estimate_inline_text_width(
+                        &link.description,
+                        detail_font_size,
+                        0.0,
+                    ))
+                    .ceil()
+                    + padding * 2.0
+            })
+        })
+        .fold(0.0_f32, f32::max);
+    // The two nested borders are added by `panel_outer_width` once their
+    // renderer-specific width is known.
+    let panel_width = content_min_width.max(panel_content_width + content_padding * 2.0);
+    NavigationMenuLayoutMetrics {
+        max_width: scale::container::NARROW,
+        list_padding: if dense_list {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        list_gap: if dense_list {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        item_gap: scale::space::xs2(inline_size),
+        panel_width,
+        control_min_height: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        control_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        control_padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        control_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        emphasized_control_min_height: scale::space::FIELD,
+        emphasized_control_padding_inline: scale::space::xs(inline_size),
+        emphasized_control_padding_block: scale::space::xs2(inline_size),
+        emphasized_control_font_size: scale::font_size::f0(inline_size),
+        content_min_width,
+        content_padding,
+        content_gap: if dense_content {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        panel_link_padding,
+        emphasized_panel_link_padding,
+        panel_link_gap: scale::space::xs3(inline_size),
+        title_font_size,
+        title_line_height: scale::line_height::LH0,
+        detail_font_size,
+        detail_line_height: scale::line_height::LH0,
+    }
+}
+
+pub fn navigation_menu_item_starts_new_row(
+    model: &NavigationMenuModel,
+    item_index: usize,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> bool {
+    let metrics = navigation_menu_layout_metrics(model, inline_size);
+    let border_width = border_width.max(0.0);
+    let inner_width = (available_width - (metrics.list_padding + border_width) * 2.0).max(1.0);
+    let mut row_width = 0.0;
+    for (index, item) in model.items.iter().enumerate() {
+        let disabled = model.loading || model.disabled || item.disabled;
+        let emphasized = model.error.is_some() || disabled;
+        let item_width = if item.is_panel() {
+            metrics.panel_outer_width(border_width)
+        } else {
+            let font_size = if emphasized {
+                metrics.emphasized_control_font_size
+            } else {
+                metrics.control_font_size
+            };
+            let padding = if emphasized {
+                metrics.emphasized_control_padding_inline
+            } else {
+                metrics.control_padding_inline
+            };
+            scale::estimate_inline_text_width(&item.label, font_size, 0.0)
+                + padding * 2.0
+                + border_width * 2.0
+        };
+        let required = if row_width > 0.0 {
+            metrics.list_gap + item_width
+        } else {
+            item_width
+        };
+        let starts_new_row = row_width > 0.0 && row_width + required > inner_width;
+        if index == item_index {
+            return starts_new_row;
+        }
+        row_width = if starts_new_row {
+            item_width
+        } else {
+            row_width + required
+        };
+    }
+    false
 }
 
 pub fn navigation_menu_render_nodes(
@@ -967,5 +1159,82 @@ mod tests {
                 .filter(|node| node.part == NavigationMenuPart::Link)
                 .all(|node| node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_state_precedence() {
+        let standard = navigation_menu_layout_metrics(&default_navigation_menu_model(), 1_280.0);
+        let dense = navigation_menu_layout_metrics(
+            &default_navigation_menu_model().with_density(NavigationMenuDensity::Dense),
+            1_280.0,
+        );
+        let dense_loading = navigation_menu_layout_metrics(
+            &default_navigation_menu_model()
+                .with_density(NavigationMenuDensity::Dense)
+                .loading(),
+            1_280.0,
+        );
+
+        assert!(dense.list_padding < standard.list_padding);
+        assert!(dense.control_min_height < standard.control_min_height);
+        assert!(dense.panel_width < standard.panel_width);
+        assert_eq!(standard.panel_outer_width(1.0), standard.panel_width + 4.0);
+        assert!(dense.content_padding < standard.content_padding);
+        assert_eq!(dense_loading.list_padding, standard.list_padding);
+        assert_eq!(dense_loading.panel_width, standard.panel_width);
+        assert_eq!(dense_loading.content_padding, standard.content_padding);
+
+        let mut responsive = default_navigation_menu_model();
+        responsive.items[1].links = vec![
+            NavigationMenuLink::new(
+                "Accordion",
+                "accordion",
+                "/components/accordion",
+                "Disclosure state rendered through shared Rust nodes.",
+            ),
+            NavigationMenuLink::new(
+                "Native Select",
+                "native-select",
+                "/components/native-select",
+                "Browser-native select with shared option validation.",
+            ),
+            NavigationMenuLink::new(
+                "Navigation Menu",
+                "navigation-menu",
+                "/components/navigation-menu",
+                "Top-level menus with local panel state.",
+            ),
+        ];
+        responsive.selected_value = Some("native-select".to_owned());
+        assert!(navigation_menu_item_starts_new_row(
+            &responsive,
+            1,
+            472.0,
+            1_000.0,
+            1.0,
+        ));
+        responsive.density = NavigationMenuDensity::Dense;
+        responsive.selected_value = Some("docs".to_owned());
+        assert!(!navigation_menu_item_starts_new_row(
+            &responsive,
+            1,
+            472.0,
+            1_000.0,
+            1.0,
+        ));
+        assert!(navigation_menu_item_starts_new_row(
+            &default_navigation_menu_model(),
+            2,
+            502.0,
+            1_280.0,
+            1.0,
+        ));
+        assert!(!navigation_menu_item_starts_new_row(
+            &default_navigation_menu_model(),
+            2,
+            768.0,
+            1_280.0,
+            1.0,
+        ));
     }
 }

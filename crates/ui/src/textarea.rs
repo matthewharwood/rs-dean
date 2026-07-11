@@ -1,7 +1,7 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -111,6 +111,28 @@ pub struct TextareaRenderNode {
     pub actionable: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TextareaLayoutMetrics {
+    pub width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub control_min_height: f32,
+    pub control_height: f32,
+    pub control_padding_inline: f32,
+    pub control_padding_block: f32,
+    pub control_font_size: f32,
+    pub control_line_height: f32,
+    pub meta_gap: f32,
+    pub hint_font_size: f32,
+    pub hint_line_height: f32,
+    pub counter_padding_inline: f32,
+    pub counter_padding_block: f32,
+    pub counter_font_size: f32,
+    pub counter_line_height: f32,
+}
+
 impl TextareaModel {
     pub fn new(label: impl Into<String>, hint: impl Into<String>) -> Self {
         Self {
@@ -218,6 +240,18 @@ impl TextareaState {
         }
     }
 
+    pub fn apply_bounded(
+        &mut self,
+        intent: TextareaIntent,
+        max_length: Option<u16>,
+    ) -> TextareaChange {
+        match intent {
+            TextareaIntent::Input(value) => self.input(textarea_bounded_value(&value, max_length)),
+            TextareaIntent::Reset(value) => self.reset(textarea_bounded_value(&value, max_length)),
+            other => self.apply(other),
+        }
+    }
+
     fn focus(&mut self) -> TextareaChange {
         if self.focused {
             TextareaChange::Unchanged
@@ -267,6 +301,104 @@ impl TextareaState {
 
 pub fn validate_textarea_model(model: &TextareaModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub const fn textarea_uses_dense_root_metrics(
+    density: TextareaDensity,
+    loading: bool,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    matches!(density, TextareaDensity::Dense) && !loading && !disabled && !invalid
+}
+
+pub const fn textarea_uses_dense_label_metrics(density: TextareaDensity, disabled: bool) -> bool {
+    matches!(density, TextareaDensity::Dense) && !disabled
+}
+
+pub const fn textarea_uses_dense_control_metrics(density: TextareaDensity) -> bool {
+    matches!(density, TextareaDensity::Dense)
+}
+
+pub fn textarea_layout_metrics(
+    model: &TextareaModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> TextareaLayoutMetrics {
+    let invalid = model.error.is_some();
+    let dense_root =
+        textarea_uses_dense_root_metrics(model.density, model.loading, model.disabled, invalid);
+    let dense_label = textarea_uses_dense_label_metrics(model.density, model.disabled);
+    let dense_control = textarea_uses_dense_control_metrics(model.density);
+    let root_padding = if dense_root {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let label_font_size = if dense_label {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let control_padding_inline = if dense_control {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let control_padding_block = if dense_control {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let control_font_size = if dense_control {
+        scale::font_size::f00(inline_size)
+    } else {
+        scale::font_size::f0(inline_size)
+    };
+    let control_line_height = scale::line_height::LH0;
+    let control_min_height = if dense_control {
+        scale::space::l(inline_size)
+    } else {
+        scale::space::xl(inline_size)
+    };
+    let control_height = (f32::from(model.rows) * control_font_size * control_line_height
+        + control_padding_block * 2.0
+        + border_width.max(0.0) * 2.0)
+        .max(control_min_height);
+
+    TextareaLayoutMetrics {
+        width: available_width.clamp(1.0, scale::container::CONTROL),
+        root_padding,
+        root_gap: scale::space::xs2(inline_size),
+        label_font_size,
+        label_line_height: scale::line_height::LH0,
+        control_min_height,
+        control_height,
+        control_padding_inline,
+        control_padding_block,
+        control_font_size,
+        control_line_height,
+        meta_gap: scale::space::xs2(inline_size),
+        hint_font_size: scale::font_size::f00(inline_size),
+        hint_line_height: scale::line_height::LH0,
+        counter_padding_inline: scale::space::xs2(inline_size),
+        counter_padding_block: scale::space::xs3(inline_size),
+        counter_font_size: scale::font_size::f00(inline_size),
+        counter_line_height: scale::line_height::LH0,
+    }
+}
+
+pub fn textarea_counter_width(label: &str, metrics: &TextareaLayoutMetrics) -> f32 {
+    scale::estimate_inline_text_width(label, metrics.counter_font_size, 0.0)
+        + metrics.counter_padding_inline * 2.0
+}
+
+pub fn textarea_bounded_value(value: &str, max_length: Option<u16>) -> String {
+    max_length.map_or_else(
+        || value.to_owned(),
+        |max_length| value.chars().take(usize::from(max_length)).collect(),
+    )
 }
 
 pub fn textarea_render_nodes(
@@ -403,7 +535,7 @@ impl<'a> TextareaNodeDraft<'a> {
     }
 }
 
-fn textarea_counter_label(current_length: usize, max_length: Option<u16>) -> String {
+pub fn textarea_counter_label(current_length: usize, max_length: Option<u16>) -> String {
     match max_length {
         Some(max_length) => format!("{current_length} / {max_length}"),
         None => format!("{current_length} chars"),
@@ -535,6 +667,16 @@ mod tests {
     }
 
     #[test]
+    fn bounded_state_input_respects_the_consumer_limit() {
+        let mut state = TextareaState::new("");
+        assert_eq!(
+            state.apply_bounded(TextareaIntent::Input("abcdef".to_owned()), Some(4)),
+            TextareaChange::Input("abcd".to_owned())
+        );
+        assert_eq!(state.value(), "abcd");
+    }
+
+    #[test]
     fn render_nodes_cover_shadcn_anatomy() {
         let model = default_textarea_model();
         let nodes = textarea_render_nodes(&model, &model.state());
@@ -581,6 +723,42 @@ mod tests {
             .find(|node| node.part == TextareaPart::Counter)
             .expect("textarea has counter node");
         assert_eq!(counter.detail, "No character limit");
+    }
+
+    #[test]
+    fn layout_metrics_follow_rows_density_and_state_precedence() {
+        let standard = default_textarea_model().with_rows(4);
+        let dense = standard
+            .clone()
+            .with_density(TextareaDensity::Dense)
+            .with_rows(3);
+        let standard_metrics = textarea_layout_metrics(&standard, 420.0, 1_000.0, 1.0);
+        let dense_metrics = textarea_layout_metrics(&dense, 420.0, 1_000.0, 1.0);
+        assert_eq!(standard_metrics.width, 420.0);
+        assert!(standard_metrics.control_height > dense_metrics.control_height);
+        assert!(standard_metrics.root_padding > dense_metrics.root_padding);
+
+        let blocked = dense.disabled();
+        let blocked_metrics = textarea_layout_metrics(&blocked, 420.0, 1_000.0, 1.0);
+        assert_eq!(blocked_metrics.root_padding, standard_metrics.root_padding);
+        assert_eq!(
+            blocked_metrics.label_font_size,
+            standard_metrics.label_font_size
+        );
+        assert_eq!(
+            blocked_metrics.control_font_size,
+            dense_metrics.control_font_size
+        );
+    }
+
+    #[test]
+    fn counter_width_expands_with_copy() {
+        let model = default_textarea_model();
+        let metrics = textarea_layout_metrics(&model, 420.0, 1_000.0, 1.0);
+        assert!(
+            textarea_counter_width("160 / 160", &metrics)
+                > textarea_counter_width("1 / 160", &metrics)
+        );
     }
 
     #[test]

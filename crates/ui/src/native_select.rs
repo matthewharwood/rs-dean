@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum NativeSelectDensity {
@@ -120,6 +122,27 @@ pub struct NativeSelectRenderNode {
     pub required: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct NativeSelectLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub compact_trigger: bool,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_gap: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub value_font_size: f32,
+    pub value_line_height: f32,
+    pub option_panel_padding: f32,
+    pub option_panel_gap: f32,
+    pub option_padding_inline: f32,
+    pub option_padding_block: f32,
 }
 
 impl NativeSelectOption {
@@ -300,6 +323,61 @@ impl NativeSelectState {
 
 pub fn validate_native_select_model(model: &NativeSelectModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn native_select_layout_metrics(
+    model: &NativeSelectModel,
+    inline_size: f32,
+) -> NativeSelectLayoutMetrics {
+    let compact_trigger =
+        model.density == NativeSelectDensity::Dense && !model.loading && !model.disabled;
+    NativeSelectLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: scale::space::xs2(inline_size),
+        label_font_size: scale::font_size::f00(inline_size),
+        label_line_height: scale::line_height::LH0,
+        compact_trigger,
+        trigger_min_height: if compact_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if compact_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if compact_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_gap: if compact_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_font_size: if compact_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        value_font_size: scale::font_size::f00(inline_size),
+        value_line_height: scale::line_height::LH0,
+        option_panel_padding: scale::space::xs2(inline_size),
+        option_panel_gap: scale::space::xs3(inline_size),
+        option_padding_inline: if compact_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        option_padding_block: if compact_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+    }
 }
 
 pub fn native_select_render_nodes(
@@ -574,6 +652,31 @@ mod tests {
                 .filter(|node| node.part == NativeSelectPart::Option)
                 .count(),
             3
+        );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_blocked_precedence() {
+        let standard = native_select_layout_metrics(&default_native_select_model(), 1_280.0);
+        let dense = native_select_layout_metrics(
+            &default_native_select_model().with_density(NativeSelectDensity::Dense),
+            1_280.0,
+        );
+        let dense_loading = native_select_layout_metrics(
+            &default_native_select_model()
+                .with_density(NativeSelectDensity::Dense)
+                .loading(),
+            1_280.0,
+        );
+
+        assert!(dense.compact_trigger);
+        assert!(dense.trigger_min_height < standard.trigger_min_height);
+        assert!(dense.trigger_padding_inline < standard.trigger_padding_inline);
+        assert!(dense.trigger_font_size < standard.trigger_font_size);
+        assert!(!dense_loading.compact_trigger);
+        assert_eq!(
+            dense_loading.trigger_min_height,
+            standard.trigger_min_height
         );
     }
 

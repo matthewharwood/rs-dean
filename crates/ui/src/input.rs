@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum InputDensity {
@@ -137,6 +139,25 @@ pub struct InputRenderNode {
     pub required: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct InputLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub row_min_height: f32,
+    pub prefix_padding_inline: f32,
+    pub prefix_font_size: f32,
+    pub prefix_line_height: f32,
+    pub control_padding_inline: f32,
+    pub control_padding_block: f32,
+    pub control_font_size: f32,
+    pub control_line_height: f32,
+    pub suffix_padding_inline: f32,
+    pub suffix_font_size: f32,
+    pub suffix_line_height: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
 }
 
 impl InputAction {
@@ -324,6 +345,91 @@ impl InputState {
 
 pub fn validate_input_model(model: &InputModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn input_layout_metrics(
+    model: &InputModel,
+    state: &InputState,
+    inline_size: f32,
+) -> InputLayoutMetrics {
+    let blocked = model.loading || model.disabled;
+    let suffix_disabled = model
+        .suffix
+        .as_ref()
+        .is_none_or(|suffix| suffix.disabled || blocked);
+    input_shell_layout_metrics(
+        model.density,
+        model.loading,
+        model.disabled,
+        suffix_disabled,
+        state.is_active(InputPart::Suffix),
+        inline_size,
+    )
+}
+
+pub(crate) fn input_shell_layout_metrics(
+    density: InputDensity,
+    loading: bool,
+    disabled: bool,
+    action_disabled: bool,
+    action_active: bool,
+    inline_size: f32,
+) -> InputLayoutMetrics {
+    let dense = density == InputDensity::Dense;
+    let blocked = loading || disabled;
+    let dense_row = dense && !blocked;
+    let dense_control = dense && !blocked;
+    let dense_suffix = dense && !action_disabled && !action_active;
+
+    InputLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: scale::space::xs2(inline_size),
+        row_min_height: if dense_row {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        prefix_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        prefix_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        prefix_line_height: scale::line_height::LH0,
+        control_padding_inline: if dense_control {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        control_padding_block: if dense_control {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        control_font_size: if dense_control {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        control_line_height: scale::line_height::LH0,
+        suffix_padding_inline: if dense_suffix {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        suffix_font_size: if dense_suffix {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        suffix_line_height: scale::line_height::LH0,
+        error_font_size: scale::font_size::f00(inline_size),
+        error_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn input_render_nodes(model: &InputModel, state: &InputState) -> Vec<InputRenderNode> {
@@ -575,5 +681,22 @@ mod tests {
                 .iter()
                 .any(|node| node.part == InputPart::Control && node.detail == "URL is required.")
         );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_blocked_and_active_suffix_precedence() {
+        let dense_model = default_input_model().with_density(InputDensity::Dense);
+        let resting = dense_model.state();
+        let mut active = dense_model.state();
+        active.apply(InputIntent::ActivateSuffix("copy-url".to_owned()));
+        let dense = input_layout_metrics(&dense_model, &resting, 1_024.0);
+        let active = input_layout_metrics(&dense_model, &active, 1_024.0);
+        let loading = input_layout_metrics(&dense_model.loading(), &resting, 1_024.0);
+
+        assert_eq!(dense.max_width, scale::container::CONTROL);
+        assert!(dense.control_font_size < loading.control_font_size);
+        assert!(dense.suffix_font_size < active.suffix_font_size);
+        assert_eq!(loading.row_min_height, scale::space::FIELD);
+        assert_eq!(loading.prefix_font_size, dense.prefix_font_size);
     }
 }

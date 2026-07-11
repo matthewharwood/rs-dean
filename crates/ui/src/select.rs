@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SelectDensity {
@@ -143,6 +145,50 @@ pub struct SelectRenderNode {
     pub required: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SelectLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub label_font_size: f32,
+    pub label_tracking_em: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_gap: f32,
+    pub trigger_font_size: f32,
+    pub chevron_font_size: f32,
+    pub content_margin_top: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub group_gap: f32,
+    pub group_padding_top: f32,
+    pub item_padding: f32,
+    pub emphasized_item_padding: f32,
+    pub item_gap: f32,
+    pub item_title_font_size: f32,
+    pub disabled_item_title_font_size: f32,
+    pub item_detail_font_size: f32,
+    pub error_font_size: f32,
+    pub line_height: f32,
+}
+
+impl SelectLayoutMetrics {
+    pub fn trigger_outer_height(self, border_width: f32) -> f32 {
+        self.trigger_min_height.max(
+            self.trigger_font_size * self.line_height
+                + self.trigger_padding_block * 2.0
+                + border_width.max(0.0) * 2.0,
+        )
+    }
+
+    pub fn content_offset(self, border_width: f32) -> f32 {
+        self.label_font_size * self.line_height
+            + self.root_gap
+            + self.trigger_outer_height(border_width)
+            + self.content_margin_top
+    }
 }
 
 impl SelectOption {
@@ -356,6 +402,111 @@ impl SelectState {
 
 pub fn validate_select_model(model: &SelectModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn select_layout_metrics(model: &SelectModel, inline_size: f32) -> SelectLayoutMetrics {
+    select_layout_metrics_for_density(model.density, inline_size)
+}
+
+pub fn select_trigger_layout_metrics(
+    model: &SelectModel,
+    open: bool,
+    inline_size: f32,
+) -> SelectLayoutMetrics {
+    let density = if select_trigger_uses_standard_metrics(
+        open,
+        model.error.is_some(),
+        model.loading || model.disabled,
+    ) {
+        SelectDensity::Standard
+    } else {
+        model.density
+    };
+    select_layout_metrics_for_density(density, inline_size)
+}
+
+fn select_layout_metrics_for_density(
+    density: SelectDensity,
+    inline_size: f32,
+) -> SelectLayoutMetrics {
+    let dense = density == SelectDensity::Dense;
+    SelectLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: scale::space::xs2(inline_size),
+        label_font_size: scale::font_size::f00(inline_size),
+        label_tracking_em: 0.08,
+        trigger_min_height: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        chevron_font_size: scale::font_size::f00(inline_size),
+        content_margin_top: scale::space::xs2(inline_size),
+        content_padding: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        group_gap: scale::space::xs3(inline_size),
+        group_padding_top: scale::space::xs2(inline_size),
+        item_padding: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        emphasized_item_padding: scale::space::xs(inline_size),
+        item_gap: scale::space::xs3(inline_size),
+        item_title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        disabled_item_title_font_size: scale::font_size::f0(inline_size),
+        item_detail_font_size: scale::font_size::f00(inline_size),
+        error_font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub const fn select_trigger_uses_standard_metrics(
+    open: bool,
+    invalid: bool,
+    blocked: bool,
+) -> bool {
+    open || invalid || blocked
+}
+
+pub const fn select_item_uses_emphasized_metrics(
+    selected: bool,
+    focused: bool,
+    disabled: bool,
+) -> bool {
+    selected || focused || disabled
 }
 
 pub fn select_render_nodes(model: &SelectModel, state: &SelectState) -> Vec<SelectRenderNode> {
@@ -692,5 +843,52 @@ mod tests {
             selected_select_label(&model, &model.state()),
             "Choose renderer"
         );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_token_width_and_density() {
+        let inline_size = 448.0;
+        let standard = select_layout_metrics(&default_select_model(), inline_size);
+        let dense = select_layout_metrics(
+            &default_select_model().with_density(SelectDensity::Dense),
+            inline_size,
+        );
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert_eq!(standard.trigger_min_height, scale::space::FIELD);
+        assert!(dense.trigger_min_height < standard.trigger_min_height);
+        assert!(dense.trigger_padding_inline < standard.trigger_padding_inline);
+        assert!(dense.item_padding < standard.item_padding);
+        assert_eq!(dense.emphasized_item_padding, standard.item_padding);
+    }
+
+    #[test]
+    fn emphasized_trigger_states_use_standard_metrics() {
+        let inline_size = 448.0;
+        let dense = default_select_model().with_density(SelectDensity::Dense);
+        let closed = select_trigger_layout_metrics(&dense, false, inline_size);
+        let open = select_trigger_layout_metrics(&dense, true, inline_size);
+        let invalid = select_trigger_layout_metrics(
+            &dense.clone().with_error("Choose a renderer"),
+            false,
+            inline_size,
+        );
+        let blocked = select_trigger_layout_metrics(&dense.disabled(), false, inline_size);
+
+        assert!(closed.trigger_min_height < open.trigger_min_height);
+        assert_eq!(open.trigger_min_height, scale::space::FIELD);
+        assert_eq!(invalid.trigger_min_height, open.trigger_min_height);
+        assert_eq!(blocked.trigger_min_height, open.trigger_min_height);
+        assert!(select_trigger_uses_standard_metrics(true, false, false));
+        assert!(select_trigger_uses_standard_metrics(false, true, false));
+        assert!(select_trigger_uses_standard_metrics(false, false, true));
+    }
+
+    #[test]
+    fn emphasized_item_metrics_follow_shared_state_flags() {
+        assert!(!select_item_uses_emphasized_metrics(false, false, false));
+        assert!(select_item_uses_emphasized_metrics(true, false, false));
+        assert!(select_item_uses_emphasized_metrics(false, true, false));
+        assert!(select_item_uses_emphasized_metrics(false, false, true));
     }
 }

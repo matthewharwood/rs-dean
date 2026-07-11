@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum DataTableDensity {
@@ -172,6 +174,41 @@ pub struct DataTableRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DataTableLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub toolbar_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub filter_min_height: f32,
+    pub filter_padding_inline: f32,
+    pub filter_padding_block: f32,
+    pub filter_font_size: f32,
+    pub filter_line_height: f32,
+    pub header_padding_inline: f32,
+    pub header_padding_block: f32,
+    pub header_font_size: f32,
+    pub header_line_height: f32,
+    pub cell_padding_inline: f32,
+    pub cell_padding_block: f32,
+    pub cell_font_size: f32,
+    pub cell_line_height: f32,
+    pub empty_padding_inline: f32,
+    pub empty_padding_block: f32,
+    pub empty_font_size: f32,
+    pub empty_line_height: f32,
+    pub pagination_gap: f32,
+    pub page_button_min_height: f32,
+    pub page_button_padding_inline: f32,
+    pub page_button_padding_block: f32,
+    pub page_button_font_size: f32,
+    pub page_button_line_height: f32,
+    pub page_label_font_size: f32,
+    pub page_label_line_height: f32,
 }
 
 impl DataTableColumn {
@@ -427,6 +464,80 @@ impl DataTableState {
 
 pub fn validate_data_table_model(model: &DataTableModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn data_table_layout_metrics(
+    density: DataTableDensity,
+    disabled: bool,
+    inline_size: f32,
+) -> DataTableLayoutMetrics {
+    let dense_root = density == DataTableDensity::Dense && !disabled;
+    let dense_content = density == DataTableDensity::Dense;
+    DataTableLayoutMetrics {
+        max_width: scale::container::CONTENT,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: scale::space::xs2(inline_size),
+        toolbar_gap: scale::space::xs2(inline_size),
+        title_font_size: scale::font_size::f1(inline_size),
+        title_line_height: scale::line_height::LH2,
+        filter_min_height: if dense_content {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        filter_padding_inline: if dense_content {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        filter_padding_block: if dense_content {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        filter_font_size: if dense_content {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        filter_line_height: scale::line_height::LH0,
+        header_padding_inline: scale::space::xs(inline_size),
+        header_padding_block: scale::space::xs2(inline_size),
+        header_font_size: scale::font_size::f00(inline_size),
+        header_line_height: scale::line_height::LH0,
+        cell_padding_inline: if dense_content {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        cell_padding_block: if dense_content {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        cell_font_size: if dense_content {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        cell_line_height: scale::line_height::LH0,
+        empty_padding_inline: scale::space::xs(inline_size),
+        empty_padding_block: scale::space::s(inline_size),
+        empty_font_size: scale::font_size::f0(inline_size),
+        empty_line_height: scale::line_height::LH0,
+        pagination_gap: scale::space::xs2(inline_size),
+        page_button_min_height: scale::space::FIELD,
+        page_button_padding_inline: scale::space::xs(inline_size),
+        page_button_padding_block: scale::space::xs2(inline_size),
+        page_button_font_size: scale::font_size::f0(inline_size),
+        page_button_line_height: scale::line_height::LH0,
+        page_label_font_size: scale::font_size::f00(inline_size),
+        page_label_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn data_table_render_nodes(
@@ -751,6 +862,20 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_data_table_model(&default_data_table_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens() {
+        let compact = data_table_layout_metrics(DataTableDensity::Standard, false, 320.0);
+        let wide = data_table_layout_metrics(DataTableDensity::Standard, false, 1_000.0);
+        let dense = data_table_layout_metrics(DataTableDensity::Dense, false, 1_000.0);
+        let disabled_dense = data_table_layout_metrics(DataTableDensity::Dense, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.filter_font_size < wide.filter_font_size);
+        assert_eq!(wide.max_width, scale::container::CONTENT);
     }
 
     #[test]

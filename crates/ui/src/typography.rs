@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -104,6 +104,28 @@ pub struct TypographyRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TypographyLayoutMetrics {
+    pub width: f32,
+    pub root_gap: f32,
+    pub root_padding: f32,
+    pub root_framed: bool,
+    pub h1_font_size: f32,
+    pub h1_line_height: f32,
+    pub h2_font_size: f32,
+    pub h2_line_height: f32,
+    pub paragraph_font_size: f32,
+    pub paragraph_line_height: f32,
+    pub list_gap: f32,
+    pub list_padding_start: f32,
+    pub list_font_size: f32,
+    pub list_line_height: f32,
+    pub list_item_padding_start: f32,
+    pub blockquote_padding_start: f32,
+    pub blockquote_font_size: f32,
+    pub blockquote_line_height: f32,
 }
 
 impl TypographyDensity {
@@ -472,6 +494,111 @@ pub fn typography_render_nodes(
     nodes
 }
 
+pub fn typography_layout_metrics(
+    model: &TypographyModel,
+    state: &TypographyState,
+    available_width: f32,
+    inline_size: f32,
+) -> TypographyLayoutMetrics {
+    let invalid = model.error.is_some();
+    let root_active =
+        state.is_active(TypographyPart::Root) && !model.loading && !model.disabled && !invalid;
+    let dense_root = model.density == TypographyDensity::Dense
+        && !model.loading
+        && !model.disabled
+        && !invalid
+        && !root_active;
+    let dense_h1 = model.density == TypographyDensity::Dense
+        && !model.disabled
+        && !state.is_active(TypographyPart::H1);
+    let dense_h2 = model.density == TypographyDensity::Dense
+        && !model.disabled
+        && !state.is_active(TypographyPart::H2);
+    let dense_paragraph = model.density == TypographyDensity::Dense
+        && !model.disabled
+        && !invalid
+        && !state.is_active(TypographyPart::P);
+    let dense_list = model.density == TypographyDensity::Dense && !model.disabled;
+    let dense_blockquote = model.density == TypographyDensity::Dense
+        && !model.disabled
+        && !invalid
+        && !state.is_active(TypographyPart::Blockquote);
+    let root_framed = !model.disabled && (model.loading || invalid);
+
+    TypographyLayoutMetrics {
+        width: available_width.clamp(1.0, scale::container::READING),
+        root_gap: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_padding: if root_framed || root_active {
+            scale::space::s(inline_size)
+        } else {
+            0.0
+        },
+        root_framed,
+        h1_font_size: if dense_h1 {
+            scale::font_size::f3(inline_size)
+        } else {
+            scale::font_size::f4(inline_size)
+        },
+        h1_line_height: scale::line_height::LH3,
+        h2_font_size: if dense_h2 {
+            scale::font_size::f1(inline_size)
+        } else {
+            scale::font_size::f2(inline_size)
+        },
+        h2_line_height: scale::line_height::LH2,
+        paragraph_font_size: if dense_paragraph {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        paragraph_line_height: if dense_paragraph {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        list_gap: if dense_list {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        list_padding_start: if dense_list {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        list_font_size: if dense_list {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        list_line_height: if dense_list {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        list_item_padding_start: scale::space::xs2(inline_size),
+        blockquote_padding_start: if dense_blockquote {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        blockquote_font_size: if dense_blockquote {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        blockquote_line_height: if dense_blockquote {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+    }
+}
+
 pub fn default_typography_items() -> Vec<TypographyListItem> {
     vec![
         TypographyListItem::new("Shared tokens", "shared-tokens")
@@ -687,6 +814,118 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(item_nodes.len(), model.list_items.len());
         assert_eq!(item_nodes[0].index, Some(0));
+    }
+
+    #[test]
+    fn layout_metrics_follow_token_density_and_part_precedence() {
+        let inline_size = 952.0;
+        let standard_model = default_typography_model();
+        let standard =
+            typography_layout_metrics(&standard_model, &standard_model.state(), 960.0, inline_size);
+        assert_eq!(standard.width, scale::container::READING);
+        assert_eq!(standard.root_gap, scale::space::s(inline_size));
+        assert_eq!(standard.root_padding, 0.0);
+        assert!(!standard.root_framed);
+        assert_eq!(standard.h1_font_size, scale::font_size::f4(inline_size));
+        assert_eq!(standard.h1_line_height, scale::line_height::LH3);
+        assert_eq!(standard.h2_font_size, scale::font_size::f2(inline_size));
+        assert_eq!(
+            standard.paragraph_font_size,
+            scale::font_size::f0(inline_size)
+        );
+        assert_eq!(standard.list_gap, scale::space::xs2(inline_size));
+        assert_eq!(
+            standard.blockquote_font_size,
+            scale::font_size::f1(inline_size)
+        );
+
+        let dense_model = default_typography_model().with_density(TypographyDensity::Dense);
+        let mut dense_state = dense_model.state();
+        let dense = typography_layout_metrics(&dense_model, &dense_state, 420.0, inline_size);
+        assert_eq!(dense.width, 420.0);
+        assert_eq!(dense.root_gap, scale::space::xs(inline_size));
+        assert_eq!(dense.h1_font_size, scale::font_size::f3(inline_size));
+        assert_eq!(dense.h2_font_size, scale::font_size::f1(inline_size));
+        assert_eq!(
+            dense.paragraph_font_size,
+            scale::font_size::f00(inline_size)
+        );
+        assert_eq!(dense.list_gap, scale::space::xs3(inline_size));
+        assert_eq!(
+            dense.blockquote_font_size,
+            scale::font_size::f0(inline_size)
+        );
+
+        dense_state.apply(TypographyIntent::Hover(TypographyPart::H1));
+        let active_h1 = typography_layout_metrics(&dense_model, &dense_state, 420.0, inline_size);
+        assert_eq!(active_h1.root_gap, scale::space::xs(inline_size));
+        assert_eq!(active_h1.h1_font_size, scale::font_size::f4(inline_size));
+        assert_eq!(active_h1.h2_font_size, scale::font_size::f1(inline_size));
+
+        dense_state.apply(TypographyIntent::Hover(TypographyPart::Root));
+        let active_root = typography_layout_metrics(&dense_model, &dense_state, 420.0, inline_size);
+        assert_eq!(active_root.root_gap, scale::space::s(inline_size));
+        assert_eq!(active_root.root_padding, scale::space::s(inline_size));
+        assert!(!active_root.root_framed);
+    }
+
+    #[test]
+    fn layout_metrics_keep_loading_children_dense_but_promote_invalid_and_disabled_copy() {
+        let inline_size = 952.0;
+        let dense = default_typography_model().with_density(TypographyDensity::Dense);
+        let loading = dense.clone().loading();
+        let loading_metrics =
+            typography_layout_metrics(&loading, &loading.state(), 420.0, inline_size);
+        assert!(loading_metrics.root_framed);
+        assert_eq!(loading_metrics.root_gap, scale::space::s(inline_size));
+        assert_eq!(loading_metrics.root_padding, scale::space::s(inline_size));
+        assert_eq!(
+            loading_metrics.h1_font_size,
+            scale::font_size::f3(inline_size)
+        );
+        assert_eq!(
+            loading_metrics.paragraph_font_size,
+            scale::font_size::f00(inline_size)
+        );
+
+        let invalid = dense.clone().with_error("Typography content is invalid.");
+        let invalid_metrics =
+            typography_layout_metrics(&invalid, &invalid.state(), 420.0, inline_size);
+        assert!(invalid_metrics.root_framed);
+        assert_eq!(
+            invalid_metrics.paragraph_font_size,
+            scale::font_size::f0(inline_size)
+        );
+        assert_eq!(
+            invalid_metrics.blockquote_font_size,
+            scale::font_size::f1(inline_size)
+        );
+        assert_eq!(
+            invalid_metrics.h1_font_size,
+            scale::font_size::f3(inline_size)
+        );
+
+        let disabled = dense.disabled();
+        let disabled_metrics =
+            typography_layout_metrics(&disabled, &disabled.state(), 420.0, inline_size);
+        assert!(!disabled_metrics.root_framed);
+        assert_eq!(disabled_metrics.root_padding, 0.0);
+        assert_eq!(
+            disabled_metrics.h1_font_size,
+            scale::font_size::f4(inline_size)
+        );
+        assert_eq!(
+            disabled_metrics.h2_font_size,
+            scale::font_size::f2(inline_size)
+        );
+        assert_eq!(
+            disabled_metrics.list_font_size,
+            scale::font_size::f0(inline_size)
+        );
+        assert_eq!(
+            disabled_metrics.blockquote_font_size,
+            scale::font_size::f1(inline_size)
+        );
     }
 
     #[test]

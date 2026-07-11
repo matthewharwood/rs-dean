@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum DirectionValue {
@@ -119,6 +121,25 @@ pub struct DirectionRenderNode {
     pub selected: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DirectionLayoutMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub padding: f32,
+    pub gap: f32,
+    pub header_gap: f32,
+    pub scope_padding: f32,
+    pub scope_gap: f32,
+    pub content_gap: f32,
+    pub badge_padding_inline: f32,
+    pub badge_padding_block: f32,
+    pub badge_height: f32,
+    pub action_height: f32,
+    pub eyebrow_font_size: f32,
+    pub title_font_size: f32,
+    pub detail_font_size: f32,
 }
 
 impl DirectionModel {
@@ -329,6 +350,103 @@ pub fn direction_render_nodes(
     ]
 }
 
+pub fn direction_layout_metrics(
+    model: &DirectionModel,
+    state: &DirectionState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> DirectionLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let width = available_width.clamp(1.0, scale::container::CONTROL);
+    let padding = scale::space::s(inline_size);
+    let gap = padding;
+    let header_gap = scale::space::xs2(inline_size);
+    let scope_padding = scale::space::xs(inline_size);
+    let scope_gap = scope_padding;
+    let content_gap = header_gap;
+    let badge_padding_inline = header_gap;
+    let badge_padding_block = scale::space::xs3(inline_size);
+    let eyebrow_font_size = scale::font_size::f00(inline_size);
+    let title_font_size = scale::font_size::f1(inline_size);
+    let detail_font_size = scale::font_size::f0(inline_size);
+    let action_height = scale::space::l(inline_size);
+    let badge_height = (eyebrow_font_size * scale::line_height::LH0
+        + badge_padding_block * 2.0
+        + border_width * 2.0)
+        .max(scale::space::s(inline_size));
+    let inner_width = (width - padding * 2.0 - border_width * 2.0).max(1.0);
+    let provider_detail = format!(
+        "Provider dir=\"{}\". Nested scope target is {}.",
+        state.direction().label(),
+        model.scope_direction.name(),
+    );
+    let provider_detail_height = scale::estimate_text_block_height(
+        &provider_detail,
+        inner_width,
+        detail_font_size,
+        scale::line_height::LH0,
+        0.47,
+    );
+    let header_height = eyebrow_font_size * scale::line_height::LH0
+        + title_font_size * scale::line_height::LH2
+        + provider_detail_height
+        + header_gap * 2.0;
+    let content_width = (inner_width - scope_padding * 4.0 - border_width * 4.0).max(1.0);
+    let content_height = border_width * 2.0
+        + scope_padding * 2.0
+        + badge_height
+        + content_gap
+        + scale::estimate_text_block_height(
+            &model.content,
+            content_width,
+            detail_font_size,
+            scale::line_height::LH0,
+            0.47,
+        );
+    let scope_detail = direction_render_nodes(model, state)
+        .into_iter()
+        .find(|node| node.part == DirectionPart::Scope)
+        .map_or_else(String::new, |node| node.detail);
+    let scope_detail_height = scale::estimate_text_block_height(
+        &scope_detail,
+        (inner_width - scope_padding * 2.0 - border_width * 2.0).max(1.0),
+        detail_font_size,
+        scale::line_height::LH0,
+        0.47,
+    );
+    let scope_height = border_width * 2.0
+        + scope_padding * 2.0
+        + badge_height
+        + scope_detail_height
+        + content_height
+        + scope_gap * 2.0;
+    let height = border_width * 2.0
+        + padding * 2.0
+        + header_height
+        + action_height
+        + scope_height
+        + gap * 2.0;
+
+    DirectionLayoutMetrics {
+        width,
+        height,
+        padding,
+        gap,
+        header_gap,
+        scope_padding,
+        scope_gap,
+        content_gap,
+        badge_padding_inline,
+        badge_padding_block,
+        badge_height,
+        action_height,
+        eyebrow_font_size,
+        title_font_size,
+        detail_font_size,
+    }
+}
+
 pub fn default_direction_model() -> DirectionModel {
     DirectionModel::new(
         "Application direction",
@@ -419,5 +537,15 @@ mod tests {
                 .filter(|node| node.actionable)
                 .all(|node| node.disabled)
         );
+    }
+
+    #[test]
+    fn layout_metrics_use_the_shared_control_and_token_scales() {
+        let model = default_direction_model();
+        let metrics = direction_layout_metrics(&model, &model.state(), 1_000.0, 1_000.0, 1.0);
+
+        assert_eq!(metrics.width, scale::container::CONTROL);
+        assert!(metrics.height > scale::space::XL3 * 3.0);
+        assert!(metrics.action_height >= scale::space::L * 0.8);
     }
 }

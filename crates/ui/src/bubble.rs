@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -98,6 +99,23 @@ pub struct BubbleRenderNode {
     pub active: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BubbleLayoutMetrics {
+    pub avatar_size: f32,
+    pub avatar_font_size: f32,
+    pub root_gap: f32,
+    pub panel_padding: f32,
+    pub panel_gap: f32,
+    pub content_font_size: f32,
+    pub meta_font_size: f32,
+    pub line_height: f32,
+    pub actions_gap: f32,
+    pub actions_padding_top: f32,
+    pub action_min_height: f32,
+    pub action_padding_inline: f32,
+    pub action_padding_block: f32,
 }
 
 impl BubbleAction {
@@ -203,6 +221,24 @@ impl BubbleState {
 
 pub fn validate_bubble_model(model: &BubbleModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn bubble_layout_metrics(inline_size: f32) -> BubbleLayoutMetrics {
+    BubbleLayoutMetrics {
+        avatar_size: scale::space::l(inline_size),
+        avatar_font_size: scale::font_size::f00(inline_size),
+        root_gap: scale::space::xs(inline_size),
+        panel_padding: scale::space::s(inline_size),
+        panel_gap: scale::space::xs2(inline_size),
+        content_font_size: scale::font_size::f0(inline_size),
+        meta_font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+        actions_gap: scale::space::xs2(inline_size),
+        actions_padding_top: scale::space::xs2(inline_size),
+        action_min_height: scale::space::s(inline_size),
+        action_padding_inline: scale::space::xs2(inline_size),
+        action_padding_block: scale::space::xs3(inline_size),
+    }
 }
 
 pub fn bubble_render_nodes(model: &BubbleModel, state: &BubbleState) -> Vec<BubbleRenderNode> {
@@ -325,6 +361,17 @@ mod tests {
         );
         assert_eq!(state.active_action(), Some("reply"));
         assert_eq!(state.apply(BubbleIntent::Clear), BubbleChange::Cleared);
+    }
+
+    #[test]
+    fn layout_metrics_resolve_fluid_tailwind_tokens() {
+        let compact = bubble_layout_metrics(320.0);
+        let wide = bubble_layout_metrics(1_000.0);
+
+        assert!(compact.avatar_size < wide.avatar_size);
+        assert!(compact.content_font_size < wide.content_font_size);
+        assert!(compact.panel_padding < wide.panel_padding);
+        assert_eq!(wide.line_height, scale::line_height::LH0);
     }
 
     #[test]

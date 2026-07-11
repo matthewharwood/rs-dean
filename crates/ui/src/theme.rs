@@ -2,7 +2,118 @@
 use bevy::color::Alpha;
 
 pub mod scale {
+    const fn fluid_value(
+        minimum: f32,
+        intercept: f32,
+        cqi_coefficient: f32,
+        maximum: f32,
+        inline_size: f32,
+    ) -> f32 {
+        let preferred = intercept + cqi_coefficient * inline_size / 100.0;
+        if preferred < minimum {
+            minimum
+        } else if preferred > maximum {
+            maximum
+        } else {
+            preferred
+        }
+    }
+
+    pub fn estimate_text_block_height(
+        text: &str,
+        width: f32,
+        font_size: f32,
+        line_height: f32,
+        glyph_ratio: f32,
+    ) -> f32 {
+        let glyph_width = font_size * glyph_ratio;
+        let characters_per_line = (width / glyph_width.max(1.0)).floor().max(1.0) as usize;
+        let lines = text
+            .split_whitespace()
+            .fold((1_usize, 0_usize), |(lines, used), word| {
+                let length = word.chars().count();
+                if used == 0 {
+                    (lines, length)
+                } else if used + 1 + length <= characters_per_line {
+                    (lines, used + 1 + length)
+                } else {
+                    (lines + 1, length)
+                }
+            })
+            .0;
+        font_size * line_height * lines as f32
+    }
+
+    pub fn estimate_precise_text_block_height(
+        text: &str,
+        width: f32,
+        font_size: f32,
+        line_height: f32,
+        letter_spacing_em: f32,
+    ) -> f32 {
+        let line_width = width.max(1.0);
+        let space_width = estimate_inline_text_width(" ", font_size, letter_spacing_em);
+        let (lines, _) =
+            text.split_whitespace()
+                .fold((1_usize, 0.0_f32), |(mut lines, mut used), word| {
+                    let word_width = estimate_inline_text_width(word, font_size, letter_spacing_em);
+                    if used > 0.0 && used + space_width + word_width > line_width {
+                        lines += 1;
+                        used = word_width;
+                    } else if used > 0.0 {
+                        used += space_width + word_width;
+                    } else {
+                        used = word_width;
+                    }
+                    while used > line_width {
+                        lines += 1;
+                        used -= line_width;
+                    }
+                    (lines, used)
+                });
+        font_size * line_height * lines as f32
+    }
+
+    pub fn estimate_inline_text_width(text: &str, font_size: f32, letter_spacing_em: f32) -> f32 {
+        text.chars()
+            .map(|character| inline_glyph_width_em(character) + letter_spacing_em.max(0.0))
+            .sum::<f32>()
+            * font_size
+    }
+
+    const fn inline_glyph_width_em(character: char) -> f32 {
+        match character {
+            ' ' => 0.32,
+            'I' => 0.32,
+            'J' | 'L' | 'T' => 0.58,
+            'F' => 0.58,
+            'E' => 0.61,
+            'S' => 0.64,
+            'A' | 'B' | 'Y' => 0.69,
+            'R' | 'V' => 0.7,
+            'C' | 'D' => 0.73,
+            'M' | 'W' => 0.86,
+            'i' | 'j' | 'l' | 't' => 0.29,
+            'f' | 'r' => 0.38,
+            'm' | 'w' => 0.82,
+            'o' | 'q' => 0.61,
+            'd' | 'g' | 'p' => 0.62,
+            '0'..='9' => 0.58,
+            '-' | '_' => 0.42,
+            '.' | ',' | ':' | ';' | '!' | '|' => 0.28,
+            _ if character.is_ascii_uppercase() => 0.66,
+            _ if character.is_ascii_lowercase() => 0.55,
+            _ => 0.62,
+        }
+    }
+
+    pub mod opacity {
+        pub const DISABLED: f32 = 0.45;
+    }
+
     pub mod font_size {
+        use super::fluid_value;
+
         pub const F0000: f32 = 8.19;
         pub const F000: f32 = 10.24;
         pub const F00: f32 = 12.8;
@@ -15,9 +126,51 @@ pub mod scale {
         pub const F6: f32 = 61.04;
         pub const F7: f32 = 76.29;
         pub const F8: f32 = 95.37;
+
+        pub const fn f00(inline_size: f32) -> f32 {
+            fluid_value(11.1104, 10.6288, 0.1508, F00, inline_size)
+        }
+
+        pub const fn f0(inline_size: f32) -> f32 {
+            fluid_value(13.3328, 12.5712, 0.2381, F0, inline_size)
+        }
+
+        pub const fn f1(inline_size: f32) -> f32 {
+            fluid_value(16.0, 14.8576, 0.3571, F1, inline_size)
+        }
+
+        pub const fn f2(inline_size: f32) -> f32 {
+            fluid_value(19.2, 17.5424, 0.5179, F2, inline_size)
+        }
+
+        pub const fn f3(inline_size: f32) -> f32 {
+            fluid_value(23.04, 20.6944, 0.733, F3, inline_size)
+        }
+
+        pub const fn f4(inline_size: f32) -> f32 {
+            fluid_value(27.648, 24.3872, 1.0192, F4, inline_size)
+        }
+
+        pub const fn f5(inline_size: f32) -> f32 {
+            fluid_value(33.1776, 28.7104, 1.3974, F5, inline_size)
+        }
+
+        pub const fn f6(inline_size: f32) -> f32 {
+            fluid_value(39.8128, 33.7504, 1.8948, F6, inline_size)
+        }
+
+        pub const fn f7(inline_size: f32) -> f32 {
+            fluid_value(47.776, 39.6272, 2.5463, F7, inline_size)
+        }
+
+        pub const fn f8(inline_size: f32) -> f32 {
+            fluid_value(57.3312, 46.464, 3.3961, F8, inline_size)
+        }
     }
 
     pub mod space {
+        use super::fluid_value;
+
         pub const XS3: f32 = 5.0;
         pub const XS2: f32 = 10.0;
         pub const XS: f32 = 15.0;
@@ -28,11 +181,54 @@ pub mod scale {
         pub const XL2: f32 = 80.0;
         pub const XL3: f32 = 120.0;
         pub const XL4: f32 = 160.0;
+        pub const FIELD: f32 = 40.0;
+        pub const SELECTOR: f32 = 4.0;
+
+        pub const fn xs3(inline_size: f32) -> f32 {
+            fluid_value(4.0, 3.7136, 0.0893, XS3, inline_size)
+        }
+
+        pub const fn xs2(inline_size: f32) -> f32 {
+            fluid_value(8.0, 7.4288, 0.1786, XS2, inline_size)
+        }
+
+        pub const fn xs(inline_size: f32) -> f32 {
+            fluid_value(12.0, 11.1424, 0.2679, XS, inline_size)
+        }
+
+        pub const fn s(inline_size: f32) -> f32 {
+            fluid_value(16.0, 14.8576, 0.3571, S, inline_size)
+        }
+
+        pub const fn m(inline_size: f32) -> f32 {
+            fluid_value(24.0, 22.2864, 0.5357, M, inline_size)
+        }
+
+        pub const fn l(inline_size: f32) -> f32 {
+            fluid_value(32.0, 29.7136, 0.7143, L, inline_size)
+        }
+
+        pub const fn xl(inline_size: f32) -> f32 {
+            fluid_value(48.0, 44.5696, 1.0714, XL, inline_size)
+        }
+
+        pub const fn xl2(inline_size: f32) -> f32 {
+            fluid_value(64.0, 59.4288, 1.4286, XL2, inline_size)
+        }
+
+        pub const fn xl3(inline_size: f32) -> f32 {
+            fluid_value(96.0, 89.1424, 2.1429, XL3, inline_size)
+        }
+
+        pub const fn xl4(inline_size: f32) -> f32 {
+            fluid_value(128.0, 118.8544, 2.8571, XL4, inline_size)
+        }
     }
 
     pub mod container {
+        pub const CONTROL: f32 = 448.0;
         pub const NARROW: f32 = 768.0;
-        pub const PROSE: f32 = 896.0;
+        pub const READING: f32 = 896.0;
         pub const CONTENT: f32 = 1_024.0;
         pub const WIDE: f32 = 1_280.0;
     }
@@ -59,6 +255,10 @@ pub mod scale {
         pub const W7: u16 = 700;
         pub const W8: u16 = 800;
         pub const W9: u16 = 900;
+    }
+
+    pub mod letter_spacing {
+        pub const LABEL: f32 = 0.08;
     }
 
     pub mod line_height {
@@ -111,9 +311,71 @@ impl Tone {
         Self { color, alpha }
     }
 
+    pub const fn with_opacity(self, opacity: f32) -> Self {
+        Self {
+            color: self.color,
+            alpha: self.alpha * opacity,
+        }
+    }
+
     #[cfg(feature = "bevy")]
     pub fn to_bevy(self) -> bevy::prelude::Color {
         self.color.to_bevy().with_alpha(self.alpha)
+    }
+
+    #[cfg(feature = "bevy")]
+    pub fn to_bevy_on(self, background: Self) -> bevy::prelude::Color {
+        let foreground = self.color.to_bevy().to_srgba();
+        let background_color = background.color.to_bevy().to_srgba();
+        let foreground_alpha = self.alpha.clamp(0.0, 1.0);
+        let background_alpha = background.alpha.clamp(0.0, 1.0);
+        let output_alpha = foreground_alpha + background_alpha * (1.0 - foreground_alpha);
+        if output_alpha <= f32::EPSILON {
+            return bevy::prelude::Color::NONE;
+        }
+        let composite = |foreground_channel: f32, background_channel: f32| {
+            (foreground_channel * foreground_alpha
+                + background_channel * background_alpha * (1.0 - foreground_alpha))
+                / output_alpha
+        };
+        bevy::prelude::Color::srgba(
+            composite(foreground.red, background_color.red),
+            composite(foreground.green, background_color.green),
+            composite(foreground.blue, background_color.blue),
+            output_alpha,
+        )
+    }
+
+    #[cfg(feature = "bevy")]
+    pub fn to_bevy_css_alpha_on(self, background: Self) -> bevy::prelude::Color {
+        let alpha = self.alpha.clamp(0.0, 1.0);
+        if alpha <= f32::EPSILON {
+            return bevy::prelude::Color::NONE;
+        }
+        if alpha >= 1.0 {
+            return self.to_bevy();
+        }
+
+        let foreground = self.color.to_bevy().to_srgba();
+        let background_srgba = background.color.to_bevy().to_srgba();
+        let target = bevy::prelude::Color::srgba(
+            foreground.red * alpha + background_srgba.red * (1.0 - alpha),
+            foreground.green * alpha + background_srgba.green * (1.0 - alpha),
+            foreground.blue * alpha + background_srgba.blue * (1.0 - alpha),
+            1.0,
+        )
+        .to_linear();
+        let background_linear = background.color.to_bevy().to_linear();
+        let source = |target_channel: f32, background_channel: f32| {
+            ((target_channel - background_channel * (1.0 - alpha)) / alpha).clamp(0.0, 1.0)
+        };
+
+        bevy::prelude::Color::linear_rgba(
+            source(target.red, background_linear.red),
+            source(target.green, background_linear.green),
+            source(target.blue, background_linear.blue),
+            alpha,
+        )
     }
 }
 
@@ -273,6 +535,18 @@ impl Theme {
 
     pub const fn selected_tint(&self) -> Tone {
         Tone::with_alpha(self.primary, 0.14)
+    }
+
+    pub const fn shadow_1(&self) -> Tone {
+        Tone::with_alpha(self.base_content, 0.08)
+    }
+
+    pub const fn shadow_2(&self) -> Tone {
+        Tone::with_alpha(self.base_content, 0.1)
+    }
+
+    pub const fn shadow_3(&self) -> Tone {
+        Tone::with_alpha(self.base_content, 0.12)
     }
 
     #[cfg(feature = "bevy")]
@@ -744,12 +1018,70 @@ mod tests {
             "--color-focus-ring",
             "--radius-field",
             "--radius-box",
+            "--default-border-width",
             "--spacing-3xs",
+            "--container-reading",
             "--text-0",
             "--shadow-2",
         ] {
             assert!(THEME_CSS.contains(token), "missing Tailwind token {token}");
         }
+    }
+
+    #[test]
+    fn css_theme_utilities_remain_runtime_variables() {
+        assert!(THEME_CSS.contains("@theme {"));
+        assert!(!THEME_CSS.contains("@theme inline"));
+        assert!(THEME_CSS.contains("--default-border-width: var(--border);"));
+    }
+
+    #[test]
+    fn scoped_themes_rebind_derived_semantic_tokens() {
+        for token in [
+            "--color-surface-elevated",
+            "--color-surface-overlay",
+            "--color-text-1",
+            "--color-border-subtle",
+            "--color-brand",
+            "--color-primary-soft",
+            "--color-focus-ring",
+            "--shadow-3",
+        ] {
+            assert!(
+                THEME_CSS.matches(token).count() >= 2,
+                "scoped themes do not rebind {token}"
+            );
+        }
+    }
+
+    #[test]
+    fn inline_text_width_estimator_distinguishes_glyph_shapes_and_tracking() {
+        let wide = scale::estimate_inline_text_width("ON", 12.0, 0.08);
+        let narrow = scale::estimate_inline_text_width("II", 12.0, 0.08);
+        let tracked = scale::estimate_inline_text_width("ON", 12.0, 0.16);
+
+        assert!(wide > narrow);
+        assert!(tracked > wide);
+    }
+
+    #[test]
+    fn precise_text_height_uses_per_glyph_line_widths() {
+        let one_line = scale::estimate_precise_text_block_height(
+            "The DOM renderer owns selected state locally.",
+            320.0,
+            12.8,
+            1.5,
+            0.0,
+        );
+        let wrapped = scale::estimate_precise_text_block_height(
+            "Trigger, panel, focus, and selected states all resolve through shared Tailwind tokens.",
+            320.0,
+            16.0,
+            1.5,
+            0.0,
+        );
+        assert_eq!(one_line, 12.8 * 1.5);
+        assert!(wrapped > 16.0 * 1.5);
     }
 
     #[test]
@@ -761,5 +1093,74 @@ mod tests {
             theme.text_muted(),
             Tone::with_alpha(theme.base_content, 0.55)
         );
+        assert_eq!(theme.shadow_1(), Tone::with_alpha(theme.base_content, 0.08));
+        assert_eq!(theme.shadow_2(), Tone::with_alpha(theme.base_content, 0.1));
+        assert_eq!(theme.shadow_3(), Tone::with_alpha(theme.base_content, 0.12));
+    }
+
+    #[test]
+    fn tone_opacity_multiplies_existing_alpha() {
+        let theme = ThemeId::Dark.palette();
+        let tone = theme.primary_soft();
+        let faded = tone.with_opacity(scale::opacity::DISABLED);
+
+        assert_eq!(faded.color, tone.color);
+        assert!((faded.alpha - tone.alpha * scale::opacity::DISABLED).abs() < f32::EPSILON);
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn translucent_tones_can_resolve_over_an_opaque_surface() {
+        let theme = ThemeId::Dark.palette();
+        let resolved = theme
+            .primary_soft()
+            .to_bevy_on(theme.surface_2())
+            .to_srgba();
+
+        assert!((resolved.alpha - 1.0).abs() < f32::EPSILON);
+        assert_ne!(resolved, theme.primary_soft().to_bevy().to_srgba());
+
+        let css_surface = theme
+            .primary_soft()
+            .to_bevy_on(theme.surface_1())
+            .to_srgba();
+        let expected = [35.0 / 255.0, 40.0 / 255.0, 62.0 / 255.0];
+        for (actual, expected) in [css_surface.red, css_surface.green, css_surface.blue]
+            .into_iter()
+            .zip(expected)
+        {
+            assert!(
+                (actual - expected).abs() < 0.015,
+                "expected {expected:.4}, got {actual:.4} from {css_surface:?}"
+            );
+        }
+    }
+
+    #[cfg(feature = "bevy")]
+    #[test]
+    fn css_alpha_adapter_preserves_transparency_and_display_space_compositing() {
+        let theme = ThemeId::Dark.palette();
+        let overlay = theme.surface_overlay();
+        let source = overlay.to_bevy_css_alpha_on(theme.surface_1());
+        let source_linear = source.to_linear();
+        let background_linear = theme.surface_1().to_bevy().to_linear();
+        let alpha = source_linear.alpha;
+        let blended = bevy::prelude::Color::linear_rgba(
+            source_linear.red * alpha + background_linear.red * (1.0 - alpha),
+            source_linear.green * alpha + background_linear.green * (1.0 - alpha),
+            source_linear.blue * alpha + background_linear.blue * (1.0 - alpha),
+            1.0,
+        )
+        .to_srgba();
+        let expected = overlay.to_bevy_on(theme.surface_1()).to_srgba();
+
+        assert!((alpha - overlay.alpha).abs() < f32::EPSILON);
+        for (actual, expected) in [blended.red, blended.green, blended.blue].into_iter().zip([
+            expected.red,
+            expected.green,
+            expected.blue,
+        ]) {
+            assert!((actual - expected).abs() < 0.001);
+        }
     }
 }

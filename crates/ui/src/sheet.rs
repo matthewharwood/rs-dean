@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SheetDensity {
@@ -154,6 +156,73 @@ pub struct SheetRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SheetControlMetrics {
+    pub min_height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub gap: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+}
+
+impl SheetControlMetrics {
+    pub fn outer_height(self, border_width: f32) -> f32 {
+        self.min_height.max(
+            self.font_size * self.line_height
+                + self.padding_block * 2.0
+                + border_width.max(0.0) * 2.0,
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SheetLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub header_gap: f32,
+    pub footer_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub description_font_size: f32,
+    pub description_line_height: f32,
+    pub body_font_size: f32,
+    pub body_line_height: f32,
+    pub content_shadow_level: u8,
+    standard_control: SheetControlMetrics,
+    dense_control: SheetControlMetrics,
+    dense: bool,
+}
+
+impl SheetLayoutMetrics {
+    pub const fn trigger_control(self, open: bool, blocked: bool) -> SheetControlMetrics {
+        if sheet_uses_dense_trigger_metrics(self.dense, open, blocked) {
+            self.dense_control
+        } else {
+            self.standard_control
+        }
+    }
+
+    pub const fn action_control(
+        self,
+        index: usize,
+        selected: bool,
+        disabled: bool,
+    ) -> SheetControlMetrics {
+        if sheet_uses_dense_action_metrics(self.dense, index, selected, disabled) {
+            self.dense_control
+        } else {
+            self.standard_control
+        }
+    }
+
+    pub const fn close_control(self) -> SheetControlMetrics {
+        self.standard_control
+    }
 }
 
 impl SheetAction {
@@ -328,6 +397,90 @@ impl SheetState {
 
 pub fn validate_sheet_model(model: &SheetModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn sheet_layout_metrics(model: &SheetModel, inline_size: f32) -> SheetLayoutMetrics {
+    let dense = model.density == SheetDensity::Dense;
+    let standard_control = SheetControlMetrics {
+        min_height: scale::space::FIELD,
+        padding_inline: scale::space::xs(inline_size),
+        padding_block: scale::space::xs2(inline_size),
+        gap: scale::space::xs2(inline_size),
+        font_size: scale::font_size::f0(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+    let dense_control = SheetControlMetrics {
+        min_height: scale::space::s(inline_size),
+        padding_inline: scale::space::xs2(inline_size),
+        padding_block: scale::space::xs3(inline_size),
+        gap: scale::space::xs2(inline_size),
+        font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+
+    SheetLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: if dense && !model.disabled {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        content_padding: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        header_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        footer_gap: scale::space::xs2(inline_size),
+        title_font_size: if dense {
+            scale::font_size::f0(inline_size)
+        } else {
+            scale::font_size::f1(inline_size)
+        },
+        title_line_height: if dense {
+            scale::line_height::LH0
+        } else {
+            scale::line_height::LH2
+        },
+        description_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        description_line_height: scale::line_height::LH0,
+        body_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        body_line_height: scale::line_height::LH0,
+        content_shadow_level: if dense { 2 } else { 3 },
+        standard_control,
+        dense_control,
+        dense,
+    }
+}
+
+pub const fn sheet_uses_dense_trigger_metrics(dense: bool, open: bool, blocked: bool) -> bool {
+    dense && !open && !blocked
+}
+
+pub const fn sheet_uses_dense_action_metrics(
+    dense: bool,
+    index: usize,
+    selected: bool,
+    disabled: bool,
+) -> bool {
+    dense && index == 0 && !selected && !disabled
 }
 
 pub fn sheet_render_nodes(model: &SheetModel, state: &SheetState) -> Vec<SheetRenderNode> {
@@ -572,5 +725,47 @@ mod tests {
         for node in sheet_render_nodes(&model, &state) {
             assert_eq!(node.side, SheetSide::Left);
         }
+    }
+
+    #[test]
+    fn layout_metrics_preserve_content_density_and_control_precedence() {
+        let inline_size = 1_000.0;
+        let standard = sheet_layout_metrics(&default_sheet_model(), inline_size);
+        let dense_model = default_sheet_model().with_density(SheetDensity::Dense);
+        let dense = sheet_layout_metrics(&dense_model, inline_size);
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert!(dense.content_padding < standard.content_padding);
+        assert!(dense.title_font_size < standard.title_font_size);
+        assert_eq!(standard.content_shadow_level, 3);
+        assert_eq!(dense.content_shadow_level, 2);
+
+        let dense_closed = dense.trigger_control(false, false);
+        let dense_open = dense.trigger_control(true, false);
+        let dense_blocked = dense.trigger_control(false, true);
+        assert!(dense_closed.min_height < dense_open.min_height);
+        assert_eq!(dense_open, standard.trigger_control(false, false));
+        assert_eq!(dense_blocked, standard.trigger_control(false, false));
+    }
+
+    #[test]
+    fn dense_metrics_only_apply_to_the_unselected_primary_action() {
+        let metrics = sheet_layout_metrics(
+            &default_sheet_model().with_density(SheetDensity::Dense),
+            1_000.0,
+        );
+        let primary = metrics.action_control(0, false, false);
+        let selected = metrics.action_control(0, true, false);
+        let secondary = metrics.action_control(1, false, false);
+        let disabled = metrics.action_control(0, false, true);
+
+        assert!(primary.min_height < selected.min_height);
+        assert_eq!(selected, secondary);
+        assert_eq!(selected, disabled);
+        assert_eq!(selected, metrics.close_control());
+        assert!(sheet_uses_dense_trigger_metrics(true, false, false));
+        assert!(!sheet_uses_dense_trigger_metrics(true, true, false));
+        assert!(sheet_uses_dense_action_metrics(true, 0, false, false));
+        assert!(!sheet_uses_dense_action_metrics(true, 1, false, false));
     }
 }

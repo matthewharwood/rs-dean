@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CollapsibleDensity {
@@ -84,6 +86,23 @@ pub struct CollapsibleRenderNode {
     pub open: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CollapsibleLayoutMetrics {
+    pub max_width: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_gap: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub indicator_size: f32,
+    pub indicator_font_size: f32,
+    pub indicator_line_height: f32,
+    pub content_padding: f32,
+    pub content_font_size: f32,
+    pub content_line_height: f32,
 }
 
 impl CollapsibleModel {
@@ -179,6 +198,56 @@ pub fn validate_collapsible_model(model: &CollapsibleModel) -> Result<(), garde:
     model.validate()
 }
 
+pub fn collapsible_layout_metrics(
+    density: CollapsibleDensity,
+    disabled: bool,
+    open: bool,
+    inline_size: f32,
+) -> CollapsibleLayoutMetrics {
+    let dense_trigger = density == CollapsibleDensity::Dense && !disabled && !open;
+    let (trigger_padding_inline, trigger_padding_block, trigger_gap, trigger_font_size) =
+        if dense_trigger {
+            (
+                scale::space::xs(inline_size),
+                scale::space::xs2(inline_size),
+                scale::space::xs2(inline_size),
+                scale::font_size::f00(inline_size),
+            )
+        } else {
+            (
+                scale::space::s(inline_size),
+                scale::space::xs(inline_size),
+                scale::space::xs(inline_size),
+                scale::font_size::f0(inline_size),
+            )
+        };
+    let dense_content = density == CollapsibleDensity::Dense;
+
+    CollapsibleLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        trigger_min_height: scale::space::FIELD,
+        trigger_padding_inline,
+        trigger_padding_block,
+        trigger_gap,
+        trigger_font_size,
+        trigger_line_height: scale::line_height::LH0,
+        indicator_size: scale::space::s(inline_size),
+        indicator_font_size: scale::font_size::f00(inline_size),
+        indicator_line_height: scale::line_height::LH00,
+        content_padding: if dense_content {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_font_size: if dense_content {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        content_line_height: scale::line_height::LH0,
+    }
+}
+
 pub fn collapsible_render_nodes(
     model: &CollapsibleModel,
     state: &CollapsibleState,
@@ -243,6 +312,31 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_collapsible_model(&default_collapsible_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens_and_state_rules() {
+        let compact = collapsible_layout_metrics(CollapsibleDensity::Standard, false, false, 320.0);
+        let wide = collapsible_layout_metrics(CollapsibleDensity::Standard, false, false, 1_000.0);
+        let dense_closed =
+            collapsible_layout_metrics(CollapsibleDensity::Dense, false, false, 1_000.0);
+        let dense_open =
+            collapsible_layout_metrics(CollapsibleDensity::Dense, false, true, 1_000.0);
+        let dense_disabled =
+            collapsible_layout_metrics(CollapsibleDensity::Dense, true, false, 1_000.0);
+
+        assert!(compact.trigger_padding_inline < wide.trigger_padding_inline);
+        assert!(dense_closed.trigger_padding_inline < wide.trigger_padding_inline);
+        assert_eq!(
+            dense_open.trigger_padding_inline,
+            wide.trigger_padding_inline
+        );
+        assert_eq!(
+            dense_disabled.trigger_padding_inline,
+            wide.trigger_padding_inline
+        );
+        assert!(dense_closed.content_padding < wide.content_padding);
+        assert_eq!(wide.max_width, scale::container::CONTROL);
     }
 
     #[test]

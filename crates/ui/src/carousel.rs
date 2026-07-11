@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CarouselDensity {
@@ -111,6 +113,29 @@ pub struct CarouselRenderNode {
     pub selected: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CarouselLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub content_gap: f32,
+    pub item_min_height: f32,
+    pub item_padding: f32,
+    pub item_gap: f32,
+    pub title_font_size: f32,
+    pub title_line_height: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub controls_gap: f32,
+    pub nav_size: f32,
+    pub nav_font_size: f32,
+    pub nav_line_height: f32,
+    pub indicator_padding_inline: f32,
+    pub indicator_padding_block: f32,
+    pub indicator_font_size: f32,
+    pub indicator_line_height: f32,
 }
 
 impl CarouselSlide {
@@ -244,6 +269,61 @@ impl CarouselState {
 
 pub fn validate_carousel_model(model: &CarouselModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn carousel_layout_metrics(
+    density: CarouselDensity,
+    disabled: bool,
+    inline_size: f32,
+) -> CarouselLayoutMetrics {
+    let dense_root = density == CarouselDensity::Dense && !disabled;
+    let root_padding = if dense_root {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let root_gap = root_padding;
+    let content_gap = if density == CarouselDensity::Dense {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let (title_font_size, title_line_height, detail_font_size) =
+        if density == CarouselDensity::Dense {
+            (
+                scale::font_size::f0(inline_size),
+                scale::line_height::LH0,
+                scale::font_size::f00(inline_size),
+            )
+        } else {
+            (
+                scale::font_size::f1(inline_size),
+                scale::line_height::LH2,
+                scale::font_size::f0(inline_size),
+            )
+        };
+
+    CarouselLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding,
+        root_gap,
+        content_gap,
+        item_min_height: scale::space::xl(inline_size),
+        item_padding: scale::space::s(inline_size),
+        item_gap: scale::space::xs2(inline_size),
+        title_font_size,
+        title_line_height,
+        detail_font_size,
+        detail_line_height: scale::line_height::LH0,
+        controls_gap: scale::space::xs(inline_size),
+        nav_size: scale::space::l(inline_size),
+        nav_font_size: scale::font_size::f0(inline_size),
+        nav_line_height: scale::line_height::LH0,
+        indicator_padding_inline: scale::space::xs(inline_size),
+        indicator_padding_block: scale::space::xs3(inline_size),
+        indicator_font_size: scale::font_size::f00(inline_size),
+        indicator_line_height: scale::line_height::LH00,
+    }
 }
 
 pub fn carousel_render_nodes(
@@ -454,6 +534,20 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_carousel_model(&default_carousel_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_share_fluid_tailwind_tokens() {
+        let compact = carousel_layout_metrics(CarouselDensity::Standard, false, 320.0);
+        let wide = carousel_layout_metrics(CarouselDensity::Standard, false, 1_000.0);
+        let dense = carousel_layout_metrics(CarouselDensity::Dense, false, 1_000.0);
+        let disabled_dense = carousel_layout_metrics(CarouselDensity::Dense, true, 1_000.0);
+
+        assert!(compact.root_padding < wide.root_padding);
+        assert!(dense.root_padding < wide.root_padding);
+        assert_eq!(disabled_dense.root_padding, wide.root_padding);
+        assert!(dense.detail_font_size < wide.detail_font_size);
+        assert_eq!(wide.max_width, scale::container::CONTROL);
     }
 
     #[test]

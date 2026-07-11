@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RadioGroupDensity {
@@ -135,6 +137,47 @@ pub struct RadioGroupRenderNode {
     pub required: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct RadioGroupLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub title_row_gap: f32,
+    pub title_font_size: f32,
+    pub status_font_size: f32,
+    pub list_gap: f32,
+    pub item_padding: f32,
+    pub item_gap: f32,
+    pub emphasized_item_padding: f32,
+    pub emphasized_item_gap: f32,
+    pub control_size: f32,
+    pub dot_size: f32,
+    pub text_gap: f32,
+    pub label_font_size: f32,
+    pub emphasized_label_font_size: f32,
+    pub detail_font_size: f32,
+    pub line_height: f32,
+}
+
+impl RadioGroupLayoutMetrics {
+    pub fn item_outer_height(self, emphasized: bool, disabled: bool, border_width: f32) -> f32 {
+        let padding = if emphasized {
+            self.emphasized_item_padding
+        } else {
+            self.item_padding
+        };
+        let label_font_size = if disabled {
+            self.emphasized_label_font_size
+        } else {
+            self.label_font_size
+        };
+        let text_height = label_font_size * self.line_height
+            + self.text_gap
+            + self.detail_font_size * self.line_height;
+        self.control_size.max(text_height) + padding * 2.0 + border_width.max(0.0) * 2.0
+    }
 }
 
 impl RadioGroupOption {
@@ -299,6 +342,71 @@ impl RadioGroupState {
 
 pub fn validate_radio_group_model(model: &RadioGroupModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn radio_group_layout_metrics(
+    model: &RadioGroupModel,
+    inline_size: f32,
+) -> RadioGroupLayoutMetrics {
+    let dense = model.density == RadioGroupDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.disabled;
+    RadioGroupLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        title_row_gap: scale::space::xs2(inline_size),
+        title_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        status_font_size: scale::font_size::f00(inline_size),
+        list_gap: match (dense, model.orientation) {
+            (_, RadioGroupOrientation::Horizontal) | (false, RadioGroupOrientation::Vertical) => {
+                scale::space::xs2(inline_size)
+            }
+            (true, RadioGroupOrientation::Vertical) => scale::space::xs3(inline_size),
+        },
+        item_padding: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        item_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        emphasized_item_padding: scale::space::xs(inline_size),
+        emphasized_item_gap: scale::space::xs(inline_size),
+        control_size: scale::space::s(inline_size),
+        dot_size: scale::space::xs2(inline_size),
+        text_gap: scale::space::xs3(inline_size),
+        label_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        emphasized_label_font_size: scale::font_size::f0(inline_size),
+        detail_font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub const fn radio_group_item_uses_emphasized_metrics(
+    selected: bool,
+    focused: bool,
+    disabled: bool,
+) -> bool {
+    selected || focused || disabled
 }
 
 pub fn radio_group_render_nodes(
@@ -553,5 +661,37 @@ mod tests {
     fn selected_label_uses_selected_option() {
         let model = default_radio_group_model().with_selected_value("system");
         assert_eq!(selected_radio_group_label(&model, &model.state()), "System");
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_orientation_and_state_precedence() {
+        let standard = radio_group_layout_metrics(&default_radio_group_model(), 1_000.0);
+        let dense = radio_group_layout_metrics(
+            &default_radio_group_model().with_density(RadioGroupDensity::Dense),
+            1_000.0,
+        );
+        let horizontal = radio_group_layout_metrics(
+            &default_radio_group_model()
+                .with_density(RadioGroupDensity::Dense)
+                .with_orientation(RadioGroupOrientation::Horizontal),
+            1_000.0,
+        );
+        let dense_disabled = radio_group_layout_metrics(
+            &default_radio_group_model()
+                .with_density(RadioGroupDensity::Dense)
+                .disabled(),
+            1_000.0,
+        );
+
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.list_gap < standard.list_gap);
+        assert_eq!(horizontal.list_gap, standard.list_gap);
+        assert_eq!(dense_disabled.root_padding, standard.root_padding);
+        assert!(radio_group_item_uses_emphasized_metrics(true, false, false));
+        assert!(radio_group_item_uses_emphasized_metrics(false, true, false));
+        assert!(!radio_group_item_uses_emphasized_metrics(
+            false, false, false
+        ));
+        assert!(standard.item_outer_height(true, false, 1.0) > standard.control_size);
     }
 }

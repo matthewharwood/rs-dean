@@ -1,3 +1,4 @@
+use crate::scale;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
@@ -53,6 +54,19 @@ pub struct AvatarImage {
     pub src: String,
     #[garde(length(min = 1, max = 160))]
     pub alt: String,
+    #[serde(default)]
+    #[garde(dive)]
+    pub preview: AvatarImagePreview,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, Serialize, Validate)]
+pub struct AvatarImagePreview {
+    #[garde(length(min = 1, max = 8))]
+    pub label: String,
+    #[garde(skip)]
+    pub srgb: [u8; 3],
+    #[garde(skip)]
+    pub font_size_at_64: u8,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq, Serialize, Validate)]
@@ -109,12 +123,51 @@ pub struct AvatarRenderNode {
     pub disabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AvatarLayoutMetrics {
+    pub diameter: f32,
+    pub font_size: f32,
+    pub shadow_offset: f32,
+    pub shadow_blur: f32,
+}
+
+impl Default for AvatarImagePreview {
+    fn default() -> Self {
+        Self {
+            label: "IMG".to_owned(),
+            srgb: [15, 118, 110],
+            font_size_at_64: 22,
+        }
+    }
+}
+
+impl AvatarImagePreview {
+    pub fn new(label: impl Into<String>, srgb: [u8; 3]) -> Self {
+        Self {
+            label: label.into(),
+            srgb,
+            font_size_at_64: 22,
+        }
+    }
+
+    pub const fn with_font_size_at_64(mut self, font_size: u8) -> Self {
+        self.font_size_at_64 = font_size;
+        self
+    }
+}
+
 impl AvatarImage {
     pub fn new(src: impl Into<String>, alt: impl Into<String>) -> Self {
         Self {
             src: src.into(),
             alt: alt.into(),
+            preview: AvatarImagePreview::default(),
         }
+    }
+
+    pub fn with_preview(mut self, preview: AvatarImagePreview) -> Self {
+        self.preview = preview;
+        self
     }
 }
 
@@ -124,10 +177,10 @@ impl AvatarModel {
             size: AvatarSize::Medium,
             name: name.into(),
             fallback: fallback.into(),
-            image: Some(AvatarImage::new(
-                DEFAULT_AVATAR_IMAGE_SRC,
-                "Matthew Harwood profile image",
-            )),
+            image: Some(
+                AvatarImage::new(DEFAULT_AVATAR_IMAGE_SRC, "Matthew Harwood profile image")
+                    .with_preview(AvatarImagePreview::new("MH", [15, 118, 110])),
+            ),
             loading: false,
             disabled: false,
         }
@@ -212,6 +265,30 @@ impl AvatarState {
 
 pub fn validate_avatar_model(model: &AvatarModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn avatar_layout_metrics(size: AvatarSize, inline_size: f32) -> AvatarLayoutMetrics {
+    let (diameter, font_size) = match size {
+        AvatarSize::Small => (
+            scale::space::l(inline_size),
+            scale::font_size::f00(inline_size),
+        ),
+        AvatarSize::Medium => (
+            scale::space::xl(inline_size),
+            scale::font_size::f0(inline_size),
+        ),
+        AvatarSize::Large => (
+            scale::space::xl2(inline_size),
+            scale::font_size::f1(inline_size),
+        ),
+    };
+
+    AvatarLayoutMetrics {
+        diameter,
+        font_size,
+        shadow_offset: scale::space::xs3(inline_size),
+        shadow_blur: scale::space::xs2(inline_size),
+    }
 }
 
 pub fn avatar_render_nodes(model: &AvatarModel, state: AvatarState) -> Vec<AvatarRenderNode> {
@@ -322,6 +399,20 @@ mod tests {
         assert_eq!(nodes.first().map(|node| node.part), Some(AvatarPart::Root));
         assert!(nodes.iter().any(|node| node.part == AvatarPart::Image));
         assert!(nodes.iter().any(|node| node.part == AvatarPart::Fallback));
+    }
+
+    #[test]
+    fn image_preview_and_layout_are_renderer_neutral() {
+        let model = default_avatar_model();
+        let image = model.image.expect("default avatar has an image");
+        let compact = avatar_layout_metrics(AvatarSize::Large, 320.0);
+        let wide = avatar_layout_metrics(AvatarSize::Large, 1_000.0);
+
+        assert_eq!(image.preview.label, "MH");
+        assert_eq!(image.preview.srgb, [15, 118, 110]);
+        assert_eq!(image.preview.font_size_at_64, 22);
+        assert!(wide.diameter > compact.diameter);
+        assert!(wide.font_size > compact.font_size);
     }
 
     #[test]

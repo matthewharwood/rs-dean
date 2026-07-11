@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum DrawerSide {
@@ -146,6 +148,28 @@ pub struct DrawerRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DrawerLayoutMetrics {
+    pub trigger_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub overlay_padding: f32,
+    pub panel_width: f32,
+    pub panel_height: f32,
+    pub panel_padding: f32,
+    pub panel_gap: f32,
+    pub handle_width: f32,
+    pub active_handle_width: f32,
+    pub handle_height: f32,
+    pub title_font_size: f32,
+    pub description_font_size: f32,
+    pub title_height: f32,
+    pub description_height: f32,
+    pub body_height: f32,
+    pub footer_height: f32,
+    pub action_height: f32,
 }
 
 impl DrawerAction {
@@ -477,6 +501,95 @@ pub fn drawer_render_nodes(model: &DrawerModel, state: &DrawerState) -> Vec<Draw
     nodes
 }
 
+pub fn drawer_layout_metrics(
+    model: &DrawerModel,
+    viewport_width: f32,
+    viewport_height: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> DrawerLayoutMetrics {
+    let border_width = border_width.max(0.0);
+    let trigger_padding_inline = scale::space::xs(inline_size);
+    let trigger_padding_block = scale::space::xs2(inline_size);
+    let description_font_size = scale::font_size::f0(inline_size);
+    let trigger_height = (description_font_size * scale::line_height::LH0
+        + trigger_padding_block * 2.0
+        + border_width * 2.0)
+        .max(scale::space::L);
+    let overlay_padding = scale::space::s(inline_size);
+    let panel_width =
+        (viewport_width - overlay_padding * 2.0).clamp(1.0, scale::container::CONTROL);
+    let panel_padding = overlay_padding;
+    let panel_gap = overlay_padding;
+    let handle_width = scale::space::l(inline_size);
+    let active_handle_width = scale::space::xl(inline_size);
+    let handle_height = scale::space::xs2(inline_size);
+    let title_font_size = scale::font_size::f1(inline_size);
+    let content_width = (panel_width - panel_padding * 2.0 - border_width * 2.0).max(1.0);
+    let title_height = scale::estimate_text_block_height(
+        &model.title,
+        content_width,
+        title_font_size,
+        scale::line_height::LH2,
+        0.48,
+    );
+    let description_height = scale::estimate_text_block_height(
+        &model.description,
+        content_width,
+        description_font_size,
+        scale::line_height::LH0,
+        0.47,
+    );
+    let body_height = scale::estimate_text_block_height(
+        &model.body,
+        content_width,
+        description_font_size,
+        scale::line_height::LH0,
+        0.47,
+    );
+    let action_height = trigger_height;
+    let footer_height = if model.actions.is_empty() {
+        0.0
+    } else {
+        action_height
+    };
+    let header_height = title_height + scale::space::xs2(inline_size) + description_height;
+    let vertical_panel_height = border_width * 2.0
+        + panel_padding * 2.0
+        + handle_height
+        + header_height
+        + body_height
+        + footer_height
+        + panel_gap * 3.0;
+    let panel_height = match model.side {
+        DrawerSide::Top | DrawerSide::Bottom => vertical_panel_height,
+        DrawerSide::Right | DrawerSide::Left => {
+            (viewport_height - overlay_padding * 2.0).max(vertical_panel_height)
+        }
+    };
+
+    DrawerLayoutMetrics {
+        trigger_height,
+        trigger_padding_inline,
+        trigger_padding_block,
+        overlay_padding,
+        panel_width,
+        panel_height,
+        panel_padding,
+        panel_gap,
+        handle_width,
+        active_handle_width,
+        handle_height,
+        title_font_size,
+        description_font_size,
+        title_height,
+        description_height,
+        body_height,
+        footer_height,
+        action_height,
+    }
+}
+
 pub fn default_drawer_model() -> DrawerModel {
     DrawerModel::new(
         "Open drawer",
@@ -590,5 +703,23 @@ mod tests {
                 .filter(|node| node.actionable)
                 .all(|node| node.disabled)
         );
+    }
+
+    #[test]
+    fn bottom_drawer_metrics_keep_the_overlay_out_of_trigger_flow() {
+        let model = default_drawer_model().with_default_open(true);
+        let metrics = drawer_layout_metrics(&model, 1_000.0, 700.0, 1_000.0, 1.0);
+
+        assert!(metrics.panel_height > 200.0);
+        assert_eq!(metrics.panel_width, scale::container::CONTROL);
+        assert!(metrics.trigger_height < metrics.panel_height);
+    }
+
+    #[test]
+    fn side_drawer_metrics_fill_the_padded_viewport_height() {
+        let model = default_drawer_model().with_side(DrawerSide::Right);
+        let metrics = drawer_layout_metrics(&model, 1_000.0, 700.0, 1_000.0, 1.0);
+
+        assert!((metrics.panel_height - (700.0 - metrics.overlay_padding * 2.0)).abs() < 0.01);
     }
 }

@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum LabelDensity {
@@ -126,6 +128,18 @@ pub struct LabelRenderNode {
     pub visible: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct LabelLayoutMetrics {
+    pub root_gap: f32,
+    pub root_emphasis_gap: f32,
+    pub text_font_size: f32,
+    pub text_line_height: f32,
+    pub requirement_font_size: f32,
+    pub requirement_line_height: f32,
+    pub optional_padding_inline: f32,
+    pub optional_padding_block: f32,
 }
 
 impl LabelModel {
@@ -264,6 +278,33 @@ impl LabelState {
 
 pub fn validate_label_model(model: &LabelModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn label_layout_metrics(model: &LabelModel, inline_size: f32) -> LabelLayoutMetrics {
+    let dense = model.density == LabelDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.loading && !model.disabled;
+    LabelLayoutMetrics {
+        root_gap: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        root_emphasis_gap: scale::space::xs2(inline_size),
+        text_font_size: if dense && !model.disabled {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        text_line_height: scale::line_height::LH0,
+        requirement_font_size: scale::font_size::f00(inline_size),
+        requirement_line_height: scale::line_height::LH0,
+        optional_padding_inline: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        optional_padding_block: scale::space::xs3(inline_size),
+    }
 }
 
 pub fn label_render_nodes(model: &LabelModel, state: &LabelState) -> Vec<LabelRenderNode> {
@@ -487,5 +528,27 @@ mod tests {
                 .iter()
                 .any(|node| node.part == LabelPart::Text && node.invalid)
         );
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_disabled_precedence() {
+        let standard = label_layout_metrics(&default_label_model(), 448.0);
+        let dense = label_layout_metrics(
+            &default_label_model().with_density(LabelDensity::Dense),
+            448.0,
+        );
+        let dense_disabled = label_layout_metrics(
+            &default_label_model()
+                .with_density(LabelDensity::Dense)
+                .disabled(),
+            448.0,
+        );
+
+        assert!(dense.root_gap < standard.root_gap);
+        assert!(dense.text_font_size < standard.text_font_size);
+        assert!(dense.optional_padding_inline < standard.optional_padding_inline);
+        assert_eq!(dense_disabled.root_gap, standard.root_gap);
+        assert_eq!(dense_disabled.text_font_size, standard.text_font_size);
+        assert_eq!(dense.root_emphasis_gap, standard.root_gap);
     }
 }

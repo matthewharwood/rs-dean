@@ -57,6 +57,7 @@ fn main() -> Result<()> {
         Some("preview") => preview(),
         Some("pages") => pages(),
         Some("static-analysis") => static_analysis(),
+        Some("story-parity") => story_parity(args.next()),
         Some("stories") => stories(),
         Some("ui-bevy-stories") => ui_bevy_stories(),
         Some("help") | None => {
@@ -84,6 +85,11 @@ Commands:
   build            build static marketing/game output and GitHub Pages artifacts
   pages            build aggregate GitHub Pages artifact in target/pages
   static-analysis  run format, clippy, rustdoc, dependency, and repo policy checks
+  story-parity [ui|blocks|story-id|ui-through:<slug>|blocks-through:<slug>]
+                   visually verify paired Leptos and Bevy story routes at
+                   desktop and mobile viewports; select one catalog, one
+                   route, a first-to-current sweep, or omit the argument to
+                   sweep all
   gate             one-pass Rust gate
   check            alias for gate
   check-fast       alias for gate
@@ -1825,7 +1831,14 @@ fn check_ui_design_token_classes() -> Result<()> {
         "shadow-sm",
         "shadow-md",
         "shadow-lg",
+        "max-w-md",
+        "max-w-prose",
+        "max-w-xl",
+        "max-w-2xl",
+        "max-w-3xl",
+        "max-w-4xl",
     ];
+    let invalid_semantic_aliases = ["bg-overlay"];
     for path in &source_paths {
         let contents =
             fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
@@ -1833,6 +1846,14 @@ fn check_ui_design_token_classes() -> Result<()> {
             if class_token_is_present(&contents, class) {
                 bail!(
                     "{} uses stock Tailwind design-scale class `{class}`; use rs-dean-ui token utilities instead",
+                    path.display()
+                );
+            }
+        }
+        for class in invalid_semantic_aliases {
+            if class_token_is_present(&contents, class) {
+                bail!(
+                    "{} uses undefined semantic Tailwind class `{class}`; use `bg-surface-overlay`",
                     path.display()
                 );
             }
@@ -1895,6 +1916,568 @@ fn cargo_tree_has_package(tree: &str, package: &str) -> bool {
         })
         .starts_with(&prefix)
     })
+}
+
+#[derive(Debug, Clone, Copy)]
+enum StoryRenderer {
+    Leptos,
+    Bevy,
+}
+
+impl StoryRenderer {
+    const fn label(self) -> &'static str {
+        match self {
+            Self::Leptos => "Leptos",
+            Self::Bevy => "Bevy",
+        }
+    }
+
+    const fn file_label(self) -> &'static str {
+        match self {
+            Self::Leptos => "leptos",
+            Self::Bevy => "bevy",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct StoryViewportProfile {
+    label: &'static str,
+    width: u32,
+    height: u32,
+}
+
+const STORY_PARITY_VIEWPORTS: [StoryViewportProfile; 2] = [
+    StoryViewportProfile {
+        label: "desktop",
+        width: 1_000,
+        height: 700,
+    },
+    StoryViewportProfile {
+        label: "mobile",
+        width: 390,
+        height: 844,
+    },
+];
+
+#[derive(Debug)]
+struct StoryScreenshotSignature {
+    width: u32,
+    height: u32,
+    dominant_rgb: [u8; 3],
+    distinct_color_bins: usize,
+    edge_pixels: usize,
+    occupied_tiles: usize,
+    occupied_tile_mask: [u64; 5],
+    edge_rows: [usize; 14],
+    edge_columns: [usize; 20],
+    bounds: [u32; 4],
+}
+
+fn story_parity(requested_story: Option<String>) -> Result<()> {
+    let story_ids = story_parity_ids(requested_story.as_deref())?;
+    let leptos_server = TrunkServer::start(STORIES_APP)?;
+    let bevy_server = TrunkServer::start(UI_BEVY_STORIES_APP)?;
+    let output = env::current_dir()
+        .context("resolve repository root")?
+        .join("target/story-parity");
+    fs::create_dir_all(&output).with_context(|| format!("create {}", output.display()))?;
+
+    let chrome = find_chrome()?;
+    let profile = output.join("chrome-profile");
+    let _ = fs::remove_dir_all(&profile);
+    fs::create_dir_all(&profile).with_context(|| format!("create {}", profile.display()))?;
+    let (_browser, mut cdp) = BrowserProcess::start(&chrome, &profile)?;
+    let session_id = create_browser_page_session(&mut cdp)?;
+
+    for (index, story_id) in story_ids.iter().enumerate() {
+        for viewport in STORY_PARITY_VIEWPORTS {
+            set_story_viewport(&mut cdp, &session_id, viewport)?;
+            let leptos = capture_story_route(
+                &mut cdp,
+                &session_id,
+                &leptos_server.url,
+                story_id,
+                StoryRenderer::Leptos,
+                viewport,
+                &output,
+            )?;
+            let bevy = capture_story_route(
+                &mut cdp,
+                &session_id,
+                &bevy_server.url,
+                story_id,
+                StoryRenderer::Bevy,
+                viewport,
+                &output,
+            )?;
+            assert_story_visual_parity(
+                &format!("{story_id} at {}", viewport.label),
+                &leptos,
+                &bevy,
+            )?;
+        }
+        println!(
+            "story-parity: [{}/{}] {story_id} matched desktop and mobile",
+            index + 1,
+            story_ids.len()
+        );
+    }
+
+    println!(
+        "story-parity: {} paired route(s) rendered and matched at desktop and mobile viewports",
+        story_ids.len()
+    );
+    Ok(())
+}
+
+fn story_parity_ids(requested_story: Option<&str>) -> Result<Vec<String>> {
+    let ui = SHADCN_COMPONENTS
+        .iter()
+        .map(|definition| format!("ui-{}", definition.slug))
+        .collect::<Vec<_>>();
+    let blocks = BLOCKS
+        .iter()
+        .map(|definition| format!("block-{}", definition.slug))
+        .collect::<Vec<_>>();
+    let all = ui.iter().chain(&blocks).cloned().collect::<Vec<_>>();
+    match requested_story {
+        Some(request) if let Some(endpoint) = request.strip_prefix("ui-through:") => {
+            story_ids_through(ui, endpoint, "ui-")
+        }
+        Some(request) if let Some(endpoint) = request.strip_prefix("blocks-through:") => {
+            story_ids_through(blocks, endpoint, "block-")
+        }
+        Some("ui") => Ok(ui),
+        Some("blocks") => Ok(blocks),
+        Some(story_id) if all.iter().any(|candidate| candidate == story_id) => {
+            Ok(vec![story_id.to_owned()])
+        }
+        Some(story_id) => bail!("unknown canonical story id `{story_id}`"),
+        None => Ok(all),
+    }
+}
+
+fn story_ids_through(mut ids: Vec<String>, endpoint: &str, prefix: &str) -> Result<Vec<String>> {
+    let endpoint = if endpoint.starts_with(prefix) {
+        endpoint.to_owned()
+    } else {
+        format!("{prefix}{endpoint}")
+    };
+    let endpoint_index = ids
+        .iter()
+        .position(|candidate| candidate == &endpoint)
+        .with_context(|| format!("unknown canonical story id `{endpoint}`"))?;
+    ids.truncate(endpoint_index + 1);
+    Ok(ids)
+}
+
+fn create_browser_page_session(cdp: &mut CdpConnection) -> Result<String> {
+    let browser_context = cdp_command(
+        cdp,
+        None,
+        "Target.createBrowserContext",
+        json!({ "disposeOnDetach": true }),
+    )?;
+    let browser_context_id = browser_context
+        .get("browserContextId")
+        .and_then(Value::as_str)
+        .context("Chrome CDP Target.createBrowserContext returned no browserContextId")?;
+    let target = cdp_command(
+        cdp,
+        None,
+        "Target.createTarget",
+        json!({
+            "url": "about:blank",
+            "browserContextId": browser_context_id
+        }),
+    )?;
+    let target_id = target
+        .get("targetId")
+        .and_then(Value::as_str)
+        .context("Chrome CDP Target.createTarget returned no targetId")?;
+    cdp_command(
+        cdp,
+        None,
+        "Target.activateTarget",
+        json!({ "targetId": target_id }),
+    )?;
+    let session = cdp_command(
+        cdp,
+        None,
+        "Target.attachToTarget",
+        json!({ "targetId": target_id, "flatten": true }),
+    )?;
+    let session_id = session
+        .get("sessionId")
+        .and_then(Value::as_str)
+        .context("Chrome CDP Target.attachToTarget returned no sessionId")?
+        .to_owned();
+    cdp_command(cdp, Some(&session_id), "Page.enable", json!({}))?;
+    cdp_command(cdp, Some(&session_id), "Runtime.enable", json!({}))?;
+    cdp_command(cdp, Some(&session_id), "Page.bringToFront", json!({}))?;
+    Ok(session_id)
+}
+
+fn set_story_viewport(
+    cdp: &mut CdpConnection,
+    session_id: &str,
+    viewport: StoryViewportProfile,
+) -> Result<()> {
+    cdp_command(
+        cdp,
+        Some(session_id),
+        "Emulation.setDeviceMetricsOverride",
+        json!({
+            "width": viewport.width,
+            "height": viewport.height,
+            "deviceScaleFactor": 1,
+            "mobile": false
+        }),
+    )?;
+    cdp_command(
+        cdp,
+        Some(session_id),
+        "Emulation.setVisibleSize",
+        json!({ "width": viewport.width, "height": viewport.height }),
+    )?;
+    Ok(())
+}
+
+fn capture_story_route(
+    cdp: &mut CdpConnection,
+    session_id: &str,
+    base_url: &str,
+    story_id: &str,
+    renderer: StoryRenderer,
+    viewport: StoryViewportProfile,
+    output: &Path,
+) -> Result<StoryScreenshotSignature> {
+    let url = format!("{base_url}?story={story_id}");
+    cdp.console_messages.clear();
+    cdp_command(
+        cdp,
+        Some(session_id),
+        "Page.navigate",
+        json!({ "url": url }),
+    )?;
+    wait_for_story_route(cdp, session_id, story_id, renderer)?;
+    let screenshot = output.join(format!(
+        "{story_id}-{}-{}.png",
+        renderer.file_label(),
+        viewport.label
+    ));
+    capture_stable_story_screenshot(cdp, session_id, &screenshot, story_id, renderer)
+}
+
+fn capture_stable_story_screenshot(
+    cdp: &mut CdpConnection,
+    session_id: &str,
+    screenshot: &Path,
+    story_id: &str,
+    renderer: StoryRenderer,
+) -> Result<StoryScreenshotSignature> {
+    let candidate = screenshot.with_extension("candidate.png");
+    let mut best: Option<(StoryScreenshotSignature, Vec<u8>)> = None;
+    for _ in 0..12 {
+        wait_for_animation_frames(cdp, session_id)?;
+        capture_cdp_screenshot(cdp, session_id, &candidate)?;
+        if let Ok(signature) = story_screenshot_signature(&candidate)
+            && best.as_ref().is_none_or(|(best_signature, _)| {
+                (signature.occupied_tiles, signature.edge_pixels)
+                    > (best_signature.occupied_tiles, best_signature.edge_pixels)
+            })
+        {
+            let bytes = fs::read(&candidate)
+                .with_context(|| format!("read candidate screenshot {}", candidate.display()))?;
+            best = Some((signature, bytes));
+        }
+        thread::sleep(Duration::from_millis(25));
+    }
+    let _ = fs::remove_file(&candidate);
+    let Some((signature, bytes)) = best else {
+        bail!(
+            "{} story `{story_id}` did not produce a nonblank screenshot",
+            renderer.label()
+        );
+    };
+    fs::write(screenshot, bytes)
+        .with_context(|| format!("write best screenshot {}", screenshot.display()))?;
+    Ok(signature)
+}
+
+fn wait_for_story_route(
+    cdp: &mut CdpConnection,
+    session_id: &str,
+    story_id: &str,
+    renderer: StoryRenderer,
+) -> Result<()> {
+    let story_id = serde_json::to_string(story_id).context("encode story id for browser")?;
+    let expression = match renderer {
+        StoryRenderer::Leptos => format!(
+            r##"(() => {{
+  const storyId = {story_id};
+  const story = document.querySelector(`[data-story-id="${{storyId}}"]`);
+  const rect = story && story.getBoundingClientRect();
+  const fontsReady = !document.fonts ||
+    (document.fonts.status === "loaded" && document.fonts.check("16px Inter"));
+  return JSON.stringify({{
+    ready: Boolean(fontsReady && story && rect && rect.width > 0 && rect.height > 0 && story.textContent.trim()),
+    storyId: story && story.dataset.storyId,
+    width: rect && rect.width,
+    height: rect && rect.height,
+    textLength: story ? story.textContent.trim().length : 0,
+    fontsReady
+  }});
+}})()"##
+        ),
+        StoryRenderer::Bevy => format!(
+            r##"(() => {{
+  const storyId = {story_id};
+  const canvas = document.querySelector("#ui-bevy-stories-canvas");
+  const rect = canvas && canvas.getBoundingClientRect();
+  return JSON.stringify({{
+    ready: Boolean(canvas && canvas.dataset.storyReady === "true" && canvas.dataset.storyRoute === storyId && rect.width > 0 && rect.height > 0),
+    storyId: canvas && canvas.dataset.storyRoute,
+    width: rect && rect.width,
+    height: rect && rect.height,
+    bitmapWidth: canvas && canvas.width,
+    bitmapHeight: canvas && canvas.height,
+    webgpu: Boolean(navigator.gpu)
+  }});
+}})()"##
+        ),
+    };
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        let last = match evaluate_json(cdp, session_id, &expression) {
+            Ok(state) if state.get("ready").and_then(Value::as_bool) == Some(true) => {
+                if matches!(renderer, StoryRenderer::Bevy)
+                    && state.get("webgpu").and_then(Value::as_bool) != Some(true)
+                {
+                    bail!("Bevy story browser does not expose WebGPU: {state}");
+                }
+                return Ok(());
+            }
+            Ok(state) => state.to_string(),
+            Err(error) => error.to_string(),
+        };
+        if Instant::now() >= deadline {
+            let console = cdp.console_messages.join("\n");
+            bail!(
+                "{} story `{}` did not become ready: {}\nconsole:\n{}",
+                renderer.label(),
+                story_id,
+                last,
+                console
+            );
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+}
+
+fn story_screenshot_signature(path: &Path) -> Result<StoryScreenshotSignature> {
+    let file = fs::File::open(path).with_context(|| format!("open {}", path.display()))?;
+    let decoder = png::Decoder::new(BufReader::new(file));
+    let mut reader = decoder
+        .read_info()
+        .with_context(|| format!("read PNG metadata for {}", path.display()))?;
+    let buffer_size = reader
+        .output_buffer_size()
+        .context("PNG output buffer size is unavailable")?;
+    let mut buffer = vec![0; buffer_size];
+    let info = reader
+        .next_frame(&mut buffer)
+        .with_context(|| format!("decode {}", path.display()))?;
+    let pixels = &buffer[..info.buffer_size()];
+    let channels = match info.color_type {
+        png::ColorType::Rgb => 3,
+        png::ColorType::Rgba => 4,
+        other => bail!("unsupported screenshot color type {other:?}"),
+    };
+    let mut bins = vec![0usize; 16 * 16 * 16];
+    for pixel in pixels.chunks_exact(channels) {
+        if channels == 4 && pixel[3] < 220 {
+            continue;
+        }
+        let index = ((pixel[0] as usize >> 4) << 8)
+            | ((pixel[1] as usize >> 4) << 4)
+            | (pixel[2] as usize >> 4);
+        bins[index] += 1;
+    }
+    let (dominant_bin, _) = bins
+        .iter()
+        .enumerate()
+        .max_by_key(|(_, count)| *count)
+        .context("screenshot contains no opaque pixels")?;
+    let dominant_rgb = [
+        (((dominant_bin >> 8) & 0x0f) * 16 + 8) as u8,
+        (((dominant_bin >> 4) & 0x0f) * 16 + 8) as u8,
+        ((dominant_bin & 0x0f) * 16 + 8) as u8,
+    ];
+    let distinct_color_bins = bins.iter().filter(|count| **count > 16).count();
+    let mut foreground_pixels = 0usize;
+    let mut edge_pixels = 0usize;
+    let mut occupied_tile_mask = [0_u64; 5];
+    let mut edge_rows = [0_usize; 14];
+    let mut edge_columns = [0_usize; 20];
+    let mut min_x = u32::MAX;
+    let mut max_x = 0u32;
+    let mut min_y = u32::MAX;
+    let mut max_y = 0u32;
+    for y in 4..info.height.saturating_sub(4) {
+        for x in 4..info.width.saturating_sub(4) {
+            let index = ((y * info.width + x) as usize) * channels;
+            if channels == 4 && pixels[index + 3] < 220 {
+                continue;
+            }
+            let distance = (i16::from(pixels[index]) - i16::from(dominant_rgb[0])).abs()
+                + (i16::from(pixels[index + 1]) - i16::from(dominant_rgb[1])).abs()
+                + (i16::from(pixels[index + 2]) - i16::from(dominant_rgb[2])).abs();
+            if distance > 42 {
+                foreground_pixels += 1;
+            }
+
+            let right = index + channels;
+            let below = index + info.width as usize * channels;
+            let right_distance = (i16::from(pixels[index]) - i16::from(pixels[right])).abs()
+                + (i16::from(pixels[index + 1]) - i16::from(pixels[right + 1])).abs()
+                + (i16::from(pixels[index + 2]) - i16::from(pixels[right + 2])).abs();
+            let below_distance = (i16::from(pixels[index]) - i16::from(pixels[below])).abs()
+                + (i16::from(pixels[index + 1]) - i16::from(pixels[below + 1])).abs()
+                + (i16::from(pixels[index + 2]) - i16::from(pixels[below + 2])).abs();
+            if right_distance.max(below_distance) > 36 {
+                edge_pixels += 1;
+                min_x = min_x.min(x);
+                max_x = max_x.max(x);
+                min_y = min_y.min(y);
+                max_y = max_y.max(y);
+                let tile_x = (x as usize * 20 / info.width as usize).min(19);
+                let tile_y = (y as usize * 14 / info.height as usize).min(13);
+                let tile = tile_y * 20 + tile_x;
+                occupied_tile_mask[tile / 64] |= 1_u64 << (tile % 64);
+                edge_rows[tile_y] += 1;
+                edge_columns[tile_x] += 1;
+            }
+        }
+    }
+    let occupied_tiles = occupied_tile_mask
+        .into_iter()
+        .map(u64::count_ones)
+        .sum::<u32>() as usize;
+    if foreground_pixels < 2_000
+        || edge_pixels < 500
+        || occupied_tiles < 4
+        || distinct_color_bins < 4
+    {
+        bail!(
+            "story frame is visually blank: {foreground_pixels} foreground pixels, {edge_pixels} edge pixels, {occupied_tiles} occupied tiles, and {distinct_color_bins} color bins"
+        );
+    }
+    Ok(StoryScreenshotSignature {
+        width: info.width,
+        height: info.height,
+        dominant_rgb,
+        distinct_color_bins,
+        edge_pixels,
+        occupied_tiles,
+        occupied_tile_mask,
+        edge_rows,
+        edge_columns,
+        bounds: [min_x, min_y, max_x, max_y],
+    })
+}
+
+fn assert_story_visual_parity(
+    story_id: &str,
+    leptos: &StoryScreenshotSignature,
+    bevy: &StoryScreenshotSignature,
+) -> Result<()> {
+    if leptos.width != bevy.width || leptos.height != bevy.height {
+        bail!("story `{story_id}` screenshot dimensions differ: {leptos:?} vs {bevy:?}");
+    }
+    let background_distance = leptos
+        .dominant_rgb
+        .iter()
+        .zip(bevy.dominant_rgb)
+        .map(|(left, right)| (i16::from(*left) - i16::from(right)).unsigned_abs())
+        .sum::<u16>();
+    if background_distance > 36 {
+        bail!("story `{story_id}` dominant theme colors differ too much: {leptos:?} vs {bevy:?}");
+    }
+    let edge_ratio = leptos.edge_pixels as f64 / bevy.edge_pixels as f64;
+    if !(0.30..=3.30).contains(&edge_ratio) {
+        bail!(
+            "story `{story_id}` visual edge density differs too much ({edge_ratio:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    let tile_ratio = leptos.occupied_tiles as f64 / bevy.occupied_tiles as f64;
+    if !(0.50..=2.00).contains(&tile_ratio) {
+        bail!(
+            "story `{story_id}` spatial occupancy differs too much ({tile_ratio:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    let tile_intersection = leptos
+        .occupied_tile_mask
+        .iter()
+        .zip(bevy.occupied_tile_mask)
+        .map(|(left, right)| (left & right).count_ones())
+        .sum::<u32>();
+    let tile_union = leptos
+        .occupied_tile_mask
+        .iter()
+        .zip(bevy.occupied_tile_mask)
+        .map(|(left, right)| (left | right).count_ones())
+        .sum::<u32>();
+    let tile_overlap = f64::from(tile_intersection) / f64::from(tile_union.max(1));
+    if tile_overlap < 0.45 {
+        bail!(
+            "story `{story_id}` occupied regions overlap too little ({tile_overlap:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    let row_distance = normalized_profile_distance(&leptos.edge_rows, &bevy.edge_rows);
+    let column_distance = normalized_profile_distance(&leptos.edge_columns, &bevy.edge_columns);
+    if row_distance > 0.50 || column_distance > 0.50 {
+        bail!(
+            "story `{story_id}` edge distribution differs too much (rows {row_distance:.2}, columns {column_distance:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    let leptos_width = leptos.bounds[2] - leptos.bounds[0] + 1;
+    let bevy_width = bevy.bounds[2] - bevy.bounds[0] + 1;
+    let width_ratio = f64::from(leptos_width) / f64::from(bevy_width);
+    if !(0.45..=2.20).contains(&width_ratio) {
+        bail!(
+            "story `{story_id}` occupied width differs too much ({width_ratio:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    let leptos_height = leptos.bounds[3] - leptos.bounds[1] + 1;
+    let bevy_height = bevy.bounds[3] - bevy.bounds[1] + 1;
+    let height_ratio = f64::from(leptos_height) / f64::from(bevy_height);
+    if !(0.45..=2.20).contains(&height_ratio) {
+        bail!(
+            "story `{story_id}` occupied height differs too much ({height_ratio:.2}): {leptos:?} vs {bevy:?}"
+        );
+    }
+    if leptos
+        .distinct_color_bins
+        .abs_diff(bevy.distinct_color_bins)
+        > 96
+    {
+        bail!("story `{story_id}` color complexity differs too much: {leptos:?} vs {bevy:?}");
+    }
+    Ok(())
+}
+
+fn normalized_profile_distance<const N: usize>(left: &[usize; N], right: &[usize; N]) -> f64 {
+    let left_total = left.iter().sum::<usize>().max(1) as f64;
+    let right_total = right.iter().sum::<usize>().max(1) as f64;
+    left.iter()
+        .zip(right)
+        .map(|(left, right)| {
+            (f64::from(*left as u32) / left_total - f64::from(*right as u32) / right_total).abs()
+        })
+        .sum::<f64>()
+        / 2.0
 }
 
 fn check_cube_smoke_render() -> Result<()> {
@@ -2582,7 +3165,7 @@ impl TrunkServer {
     }
 
     fn wait_until_ready(&mut self) -> Result<()> {
-        let deadline = Instant::now() + Duration::from_secs(30);
+        let deadline = Instant::now() + Duration::from_secs(180);
         loop {
             if let Some(status) = self.child.try_wait().context("poll Trunk server")? {
                 bail!("trunk serve exited early with {status}");
@@ -2975,4 +3558,37 @@ where
         bail!("{program} exited with {status}");
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ui_story_range_includes_every_predecessor() {
+        let ids = story_parity_ids(Some("ui-through:alert-dialog"))
+            .expect("alert dialog is a canonical UI story");
+
+        assert_eq!(ids, ["ui-accordion", "ui-alert", "ui-alert-dialog"]);
+    }
+
+    #[test]
+    fn block_story_range_accepts_a_catalog_slug() {
+        let endpoint = BLOCKS
+            .get(2)
+            .expect("block catalog has at least three entries");
+        let request = format!("blocks-through:{}", endpoint.slug);
+        let ids = story_parity_ids(Some(&request)).expect("block endpoint is canonical");
+
+        assert_eq!(ids.len(), 3);
+        assert_eq!(ids.last(), Some(&format!("block-{}", endpoint.slug)));
+    }
+
+    #[test]
+    fn story_range_rejects_an_unknown_endpoint() {
+        let error = story_parity_ids(Some("ui-through:not-a-component"))
+            .expect_err("unknown endpoint must fail");
+
+        assert!(error.to_string().contains("unknown canonical story id"));
+    }
 }

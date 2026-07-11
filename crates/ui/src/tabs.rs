@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::dom::ui_dom_id;
+use crate::{dom::ui_dom_id, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -130,6 +130,32 @@ pub struct TabsRenderNode {
     pub loading: bool,
     pub disabled: bool,
     pub actionable: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TabsControlLayoutMetrics {
+    pub min_height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TabsLayoutMetrics {
+    pub width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub status_font_size: f32,
+    pub status_line_height: f32,
+    pub status_letter_spacing: f32,
+    pub vertical_status_width: f32,
+    pub list_padding: f32,
+    pub list_gap: f32,
+    pub vertical_list_width: f32,
+    pub content_gap: f32,
+    pub error_padding: f32,
+    pub desktop_vertical: bool,
 }
 
 impl TabsItem {
@@ -370,6 +396,204 @@ pub fn tabs_render_nodes(model: &TabsModel, state: &TabsState) -> Vec<TabsRender
     nodes
 }
 
+pub const fn tabs_uses_dense_root_metrics(
+    density: TabsDensity,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    matches!(density, TabsDensity::Dense) && !disabled && !invalid
+}
+
+pub const fn tabs_uses_dense_trigger_metrics(
+    density: TabsDensity,
+    focused: bool,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    matches!(density, TabsDensity::Dense) && !focused && !disabled && !invalid
+}
+
+pub const fn tabs_uses_dense_content_metrics(
+    density: TabsDensity,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    matches!(density, TabsDensity::Dense) && !disabled && !invalid
+}
+
+pub const fn tabs_uses_desktop_vertical_layout(
+    orientation: TabsOrientation,
+    inline_size: f32,
+    disabled: bool,
+    invalid: bool,
+) -> bool {
+    matches!(orientation, TabsOrientation::Vertical)
+        && inline_size >= scale::container::NARROW
+        && !disabled
+        && !invalid
+}
+
+pub fn tabs_trigger_layout_metrics(
+    density: TabsDensity,
+    focused: bool,
+    disabled: bool,
+    invalid: bool,
+    inline_size: f32,
+) -> TabsControlLayoutMetrics {
+    let dense = tabs_uses_dense_trigger_metrics(density, focused, disabled, invalid);
+    TabsControlLayoutMetrics {
+        min_height: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub fn tabs_content_layout_metrics(
+    density: TabsDensity,
+    disabled: bool,
+    invalid: bool,
+    inline_size: f32,
+) -> TabsControlLayoutMetrics {
+    let dense = tabs_uses_dense_content_metrics(density, disabled, invalid);
+    TabsControlLayoutMetrics {
+        min_height: 0.0,
+        padding_inline: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        padding_block: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        line_height: scale::line_height::LH0,
+    }
+}
+
+pub fn tabs_content_min_height(
+    model: &TabsModel,
+    state: &TabsState,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> f32 {
+    let invalid = model.error.is_some();
+    let layout = tabs_layout_metrics(model, available_width, inline_size, border_width);
+    let selected = tabs_render_nodes(model, state)
+        .into_iter()
+        .find(|node| node.part == TabsPart::Content && node.visible);
+    let disabled = selected.as_ref().is_none_or(|node| node.disabled);
+    let content = selected.as_ref().map_or("", |node| node.detail.as_str());
+    let control = tabs_content_layout_metrics(model.density, disabled, invalid, inline_size);
+    let root_inner_width =
+        (layout.width - border_width.max(0.0) * 2.0 - layout.root_padding * 2.0).max(1.0);
+    let content_outer_width = if layout.desktop_vertical {
+        (root_inner_width
+            - layout.vertical_status_width
+            - layout.vertical_list_width
+            - layout.root_gap * 2.0)
+            .max(1.0)
+    } else {
+        root_inner_width
+    };
+    let text_width =
+        (content_outer_width - border_width.max(0.0) * 2.0 - control.padding_inline * 2.0).max(1.0);
+    scale::estimate_precise_text_block_height(
+        content,
+        text_width,
+        control.font_size,
+        control.line_height,
+        0.0,
+    )
+}
+
+pub fn tabs_layout_metrics(
+    model: &TabsModel,
+    available_width: f32,
+    inline_size: f32,
+    border_width: f32,
+) -> TabsLayoutMetrics {
+    let invalid = model.error.is_some();
+    let dense_root = tabs_uses_dense_root_metrics(model.density, model.disabled, invalid);
+    let width = available_width.clamp(1.0, scale::container::CONTENT);
+    let root_padding = if dense_root {
+        scale::space::xs(inline_size)
+    } else {
+        scale::space::s(inline_size)
+    };
+    let root_gap = if dense_root {
+        scale::space::xs2(inline_size)
+    } else {
+        scale::space::xs(inline_size)
+    };
+    let list_padding = if model.density == TabsDensity::Dense {
+        scale::space::xs3(inline_size)
+    } else {
+        scale::space::xs2(inline_size)
+    };
+    let list_gap = scale::space::xs2(inline_size);
+    let status_font_size = scale::font_size::f00(inline_size);
+    let vertical_status_width = scale::space::xl(inline_size);
+    let vertical_list_width = model
+        .items
+        .iter()
+        .map(|item| {
+            let disabled = model.loading || model.disabled || item.disabled;
+            let trigger =
+                tabs_trigger_layout_metrics(model.density, false, disabled, invalid, inline_size);
+            scale::estimate_inline_text_width(&item.label, trigger.font_size, 0.0)
+                + trigger.padding_inline * 2.0
+                + border_width.max(0.0) * 2.0
+        })
+        .fold(0.0_f32, f32::max)
+        + list_padding * 2.0;
+
+    TabsLayoutMetrics {
+        width,
+        root_padding,
+        root_gap,
+        status_font_size,
+        status_line_height: scale::line_height::LH0,
+        status_letter_spacing: scale::letter_spacing::LABEL,
+        vertical_status_width,
+        list_padding,
+        list_gap,
+        vertical_list_width,
+        content_gap: scale::space::xs2(inline_size),
+        error_padding: scale::space::s(inline_size),
+        desktop_vertical: tabs_uses_desktop_vertical_layout(
+            model.orientation,
+            inline_size,
+            model.disabled,
+            invalid,
+        ),
+    }
+}
+
 pub fn default_tabs_items() -> Vec<TabsItem> {
     vec![
         TabsItem::new(
@@ -533,5 +757,57 @@ mod tests {
             tabs_dom_id("tabs-panel", "Billing & Plans"),
             "tabs-panel-billing-plans"
         );
+    }
+
+    #[test]
+    fn layout_metrics_follow_tailwind_density_and_breakpoint_rules() {
+        let standard = default_tabs_model();
+        let dense = standard.clone().with_density(TabsDensity::Dense);
+        let standard_metrics = tabs_layout_metrics(&standard, 473.0, 1_000.0, 1.0);
+        let dense_metrics = tabs_layout_metrics(&dense, 473.0, 1_000.0, 1.0);
+        assert_eq!(standard_metrics.width, 473.0);
+        assert_eq!(standard_metrics.root_padding, scale::space::s(1_000.0));
+        assert_eq!(dense_metrics.root_padding, scale::space::xs(1_000.0));
+        assert!(dense_metrics.list_padding < standard_metrics.list_padding);
+
+        let vertical = standard.clone().with_orientation(TabsOrientation::Vertical);
+        assert!(tabs_layout_metrics(&vertical, 473.0, 1_000.0, 1.0).desktop_vertical);
+        assert!(!tabs_layout_metrics(&vertical, 473.0, 640.0, 1.0).desktop_vertical);
+    }
+
+    #[test]
+    fn focused_and_blocked_triggers_restore_standard_metrics() {
+        let dense = tabs_trigger_layout_metrics(TabsDensity::Dense, false, false, false, 1_000.0);
+        let focused = tabs_trigger_layout_metrics(TabsDensity::Dense, true, false, false, 1_000.0);
+        let disabled = tabs_trigger_layout_metrics(TabsDensity::Dense, false, true, false, 1_000.0);
+        assert_eq!(dense.min_height, scale::space::s(1_000.0));
+        assert_eq!(focused.min_height, scale::space::FIELD);
+        assert_eq!(disabled.min_height, scale::space::FIELD);
+        assert!(focused.padding_inline > dense.padding_inline);
+    }
+
+    #[test]
+    fn content_height_accounts_for_wrapped_selected_copy() {
+        let model = default_tabs_model();
+        let state = model.state();
+        let metrics =
+            tabs_content_layout_metrics(model.density, false, false, scale::container::CONTENT);
+        let height = tabs_content_min_height(&model, &state, 320.0, scale::container::CONTENT, 1.0);
+        assert!(height > metrics.font_size * metrics.line_height);
+    }
+
+    #[test]
+    fn dense_mobile_content_stays_on_one_line_when_glyphs_fit() {
+        let model = TabsModel::new(vec![TabsItem::new(
+            "Leptos",
+            "leptos",
+            "The DOM renderer owns selected and focused state locally unless the app persists a preference.",
+        )])
+        .with_density(TabsDensity::Dense)
+        .with_selected_value("leptos");
+        let state = model.state();
+        let metrics = tabs_content_layout_metrics(model.density, false, false, 640.0);
+        let height = tabs_content_min_height(&model, &state, 605.0, 640.0, 1.0);
+        assert_eq!(height, metrics.font_size * metrics.line_height);
     }
 }

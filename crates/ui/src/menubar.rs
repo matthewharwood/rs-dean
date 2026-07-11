@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum MenubarDensity {
@@ -144,6 +146,39 @@ pub struct MenubarRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MenubarLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub row_gap: f32,
+    pub menu_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub emphasized_trigger_min_height: f32,
+    pub emphasized_trigger_padding_inline: f32,
+    pub emphasized_trigger_padding_block: f32,
+    pub emphasized_trigger_font_size: f32,
+    pub content_min_width: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub item_min_height: f32,
+    pub item_padding_inline: f32,
+    pub item_padding_block: f32,
+    pub item_gap: f32,
+    pub item_font_size: f32,
+    pub emphasized_item_min_height: f32,
+    pub emphasized_item_padding_inline: f32,
+    pub emphasized_item_padding_block: f32,
+    pub emphasized_item_gap: f32,
+    pub emphasized_item_font_size: f32,
+    pub shortcut_margin_inline: f32,
+    pub shortcut_font_size: f32,
+    pub line_height: f32,
 }
 
 impl MenubarItem {
@@ -363,6 +398,102 @@ impl MenubarState {
 
 pub fn validate_menubar_model(model: &MenubarModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn menubar_layout_metrics(model: &MenubarModel, inline_size: f32) -> MenubarLayoutMetrics {
+    let dense = model.density == MenubarDensity::Dense;
+    let dense_root = dense && model.error.is_none() && !model.loading && !model.disabled;
+    MenubarLayoutMetrics {
+        max_width: scale::container::NARROW,
+        root_padding: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        row_gap: scale::space::xs2(inline_size),
+        menu_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_min_height: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        emphasized_trigger_min_height: scale::space::FIELD,
+        emphasized_trigger_padding_inline: scale::space::xs(inline_size),
+        emphasized_trigger_padding_block: scale::space::xs2(inline_size),
+        emphasized_trigger_font_size: scale::font_size::f0(inline_size),
+        content_min_width: if dense {
+            scale::space::xl3(inline_size)
+        } else {
+            scale::space::xl4(inline_size)
+        },
+        content_padding: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        item_min_height: if dense {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        item_padding_inline: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        item_padding_block: if dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        item_gap: if dense {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        item_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        emphasized_item_min_height: scale::space::FIELD,
+        emphasized_item_padding_inline: scale::space::xs(inline_size),
+        emphasized_item_padding_block: scale::space::xs2(inline_size),
+        emphasized_item_gap: scale::space::s(inline_size),
+        emphasized_item_font_size: scale::font_size::f0(inline_size),
+        shortcut_margin_inline: scale::space::s(inline_size),
+        shortcut_font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn menubar_render_nodes(model: &MenubarModel, state: &MenubarState) -> Vec<MenubarRenderNode> {
@@ -738,5 +869,31 @@ mod tests {
             .expect("default menubar includes new project");
         assert_eq!(new_project.menu_index, 0);
         assert_eq!(new_project.item_index, 0);
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_emphasis_precedence() {
+        let standard = menubar_layout_metrics(&default_menubar_model(), 1_280.0);
+        let dense = menubar_layout_metrics(
+            &default_menubar_model().with_density(MenubarDensity::Dense),
+            1_280.0,
+        );
+        let dense_loading = menubar_layout_metrics(
+            &default_menubar_model()
+                .with_density(MenubarDensity::Dense)
+                .loading(),
+            1_280.0,
+        );
+
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.trigger_min_height < standard.trigger_min_height);
+        assert!(dense.content_min_width < standard.content_min_width);
+        assert!(dense.item_font_size < standard.item_font_size);
+        assert_eq!(dense_loading.root_padding, standard.root_padding);
+        assert_eq!(
+            dense.emphasized_trigger_min_height,
+            standard.trigger_min_height
+        );
+        assert_eq!(dense.emphasized_item_font_size, standard.item_font_size);
     }
 }

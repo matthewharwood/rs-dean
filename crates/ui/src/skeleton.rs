@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SkeletonDensity {
@@ -106,6 +108,26 @@ pub struct SkeletonRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SkeletonLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub content_gap: f32,
+    pub text_gap: f32,
+    pub block_height: f32,
+    pub line_height: f32,
+    pub media_min_height: f32,
+    pub status_font_size: f32,
+    pub status_line_height: f32,
+    pub status_tracking_em: f32,
+    pub error_padding: f32,
+    pub error_font_size: f32,
+    pub error_line_height: f32,
+    pub shadow_level: u8,
+    pub dense_root: bool,
 }
 
 impl SkeletonModel {
@@ -286,6 +308,71 @@ pub fn validate_skeleton_model(model: &SkeletonModel) -> Result<(), garde::Repor
     model.validate()
 }
 
+pub fn skeleton_layout_metrics(model: &SkeletonModel, inline_size: f32) -> SkeletonLayoutMetrics {
+    let dense = model.density == SkeletonDensity::Dense;
+    let dense_root = skeleton_uses_dense_root_metrics(
+        dense,
+        model.loading,
+        model.error.is_some(),
+        model.disabled,
+    );
+    SkeletonLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        content_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        text_gap: scale::space::xs2(inline_size),
+        block_height: if dense {
+            scale::space::m(inline_size)
+        } else {
+            scale::space::l(inline_size)
+        },
+        line_height: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        media_min_height: if dense {
+            scale::space::l(inline_size)
+        } else {
+            scale::space::xl(inline_size)
+        },
+        status_font_size: scale::font_size::f00(inline_size),
+        status_line_height: scale::line_height::LH0,
+        status_tracking_em: 0.08,
+        error_padding: scale::space::xs(inline_size),
+        error_font_size: scale::font_size::f0(inline_size),
+        error_line_height: scale::line_height::LH0,
+        shadow_level: u8::from(model.loading && !model.disabled),
+        dense_root,
+    }
+}
+
+pub const fn skeleton_uses_dense_root_metrics(
+    dense: bool,
+    loading: bool,
+    invalid: bool,
+    disabled: bool,
+) -> bool {
+    dense && loading && !invalid && !disabled
+}
+
+pub const fn skeleton_placeholder_uses_border(active: bool, invalid: bool, disabled: bool) -> bool {
+    !disabled && (active || invalid)
+}
+
 pub fn skeleton_render_nodes(
     model: &SkeletonModel,
     state: &SkeletonState,
@@ -408,6 +495,33 @@ mod tests {
 
         let model = default_skeleton_model().with_text_lines(7);
         assert!(validate_skeleton_model(&model).is_err());
+    }
+
+    #[test]
+    fn layout_metrics_follow_fluid_density_and_root_state_precedence() {
+        let standard = skeleton_layout_metrics(&default_skeleton_model(), 1_000.0);
+        let dense_model = default_skeleton_model().with_density(SkeletonDensity::Dense);
+        let dense = skeleton_layout_metrics(&dense_model, 1_000.0);
+        let dense_ready = skeleton_layout_metrics(&dense_model.clone().ready(), 1_000.0);
+        let dense_disabled = skeleton_layout_metrics(&dense_model.disabled(), 1_000.0);
+
+        assert_eq!(standard.max_width, scale::container::CONTROL);
+        assert_eq!(standard.block_height, scale::space::l(1_000.0));
+        assert!(dense.block_height < standard.block_height);
+        assert!(dense.root_padding < standard.root_padding);
+        assert_eq!(dense_ready.root_padding, standard.root_padding);
+        assert_eq!(dense_disabled.root_padding, standard.root_padding);
+        assert_eq!(dense.shadow_level, 1);
+        assert_eq!(dense_ready.shadow_level, 0);
+        assert_eq!(dense_disabled.shadow_level, 0);
+    }
+
+    #[test]
+    fn placeholder_border_precedence_matches_renderer_classes() {
+        assert!(!skeleton_placeholder_uses_border(false, false, false));
+        assert!(skeleton_placeholder_uses_border(true, false, false));
+        assert!(skeleton_placeholder_uses_border(false, true, false));
+        assert!(!skeleton_placeholder_uses_border(true, true, true));
     }
 
     #[test]

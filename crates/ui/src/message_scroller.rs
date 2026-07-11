@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-use crate::{MessageAction, MessageModel, MessageSide};
+use crate::{MessageAction, MessageModel, MessageSide, scale};
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -127,6 +127,27 @@ pub struct MessageScrollerRenderNode {
     pub actionable: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MessageScrollerLayoutMetrics {
+    pub max_width: f32,
+    pub compact_root: bool,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub viewport_max_height: f32,
+    pub viewport_padding: f32,
+    pub list_gap: f32,
+    pub empty_padding: f32,
+    pub empty_font_size: f32,
+    pub empty_line_height: f32,
+    pub anchor_height: f32,
+    pub compact_jump: bool,
+    pub jump_min_height: f32,
+    pub jump_padding_inline: f32,
+    pub jump_padding_block: f32,
+    pub jump_font_size: f32,
+    pub jump_line_height: f32,
 }
 
 impl MessageScrollerEntry {
@@ -323,6 +344,74 @@ impl MessageScrollerState {
 
 pub fn validate_message_scroller_model(model: &MessageScrollerModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn message_scroller_layout_metrics(
+    model: &MessageScrollerModel,
+    state: &MessageScrollerState,
+    inline_size: f32,
+) -> MessageScrollerLayoutMetrics {
+    let dense = model.density == MessageScrollerDensity::Dense;
+    let root_active = state.is_active_part(MessageScrollerPart::Root) || state.jump_active();
+    let compact_root =
+        dense && !root_active && model.error.is_none() && !model.loading && !model.disabled;
+    let jump_disabled = model.loading || model.disabled || state.at_latest();
+    let compact_jump = dense && !state.jump_active() && !jump_disabled;
+    MessageScrollerLayoutMetrics {
+        max_width: scale::container::NARROW,
+        compact_root,
+        root_padding: if compact_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if compact_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        viewport_max_height: if dense {
+            scale::space::xl3(inline_size)
+        } else {
+            scale::space::xl4(inline_size)
+        },
+        viewport_padding: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        list_gap: if dense {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        empty_padding: scale::space::s(inline_size),
+        empty_font_size: scale::font_size::f0(inline_size),
+        empty_line_height: scale::line_height::LH0,
+        anchor_height: scale::space::SELECTOR,
+        compact_jump,
+        jump_min_height: if compact_jump {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        jump_padding_inline: if compact_jump {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        jump_padding_block: if compact_jump {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        jump_font_size: if compact_jump {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        jump_line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn message_scroller_render_nodes(
@@ -590,6 +679,37 @@ mod tests {
                 part.label()
             );
         }
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_jump_precedence() {
+        let standard_model = default_message_scroller_model();
+        let standard =
+            message_scroller_layout_metrics(&standard_model, &standard_model.state(), 1_280.0);
+        let dense_model = standard_model
+            .clone()
+            .with_density(MessageScrollerDensity::Dense);
+        let dense = message_scroller_layout_metrics(&dense_model, &dense_model.state(), 1_280.0);
+        let dense_latest_model = dense_model.clone().with_at_latest(true);
+        let dense_latest = message_scroller_layout_metrics(
+            &dense_latest_model,
+            &dense_latest_model.state(),
+            1_280.0,
+        );
+        let dense_loading_model = dense_model.clone().loading();
+        let dense_loading = message_scroller_layout_metrics(
+            &dense_loading_model,
+            &dense_loading_model.state(),
+            1_280.0,
+        );
+
+        assert!(dense.compact_root);
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.viewport_max_height < standard.viewport_max_height);
+        assert!(dense.compact_jump);
+        assert!(!dense_latest.compact_jump);
+        assert!(!dense_loading.compact_root);
+        assert_eq!(dense_loading.root_padding, standard.root_padding);
     }
 
     #[test]

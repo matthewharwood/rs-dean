@@ -1,6 +1,8 @@
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ProgressDensity {
@@ -93,6 +95,36 @@ pub struct ProgressRenderNode {
     pub invalid: bool,
     pub loading: bool,
     pub disabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ProgressLayoutMetrics {
+    pub max_width: f32,
+    pub root_padding: f32,
+    pub root_gap: f32,
+    pub track_height: f32,
+    pub label_row_gap: f32,
+    pub label_font_size: f32,
+    pub value_font_size: f32,
+    pub detail_font_size: f32,
+    pub line_height: f32,
+}
+
+impl ProgressLayoutMetrics {
+    pub fn intrinsic_outer_height(self, border_width: f32) -> f32 {
+        self.root_padding * 2.0
+            + self.track_height
+            + self.label_font_size * self.line_height
+            + self.detail_font_size * self.line_height
+            + self.root_gap * 2.0
+            + border_width.max(0.0) * 2.0
+    }
+
+    pub fn detail_fits_inline(self, detail: &str, available_width: f32, border_width: f32) -> bool {
+        let inner_width =
+            (available_width - self.root_padding * 2.0 - border_width.max(0.0) * 2.0).max(1.0);
+        scale::estimate_inline_text_width(detail, self.detail_font_size, 0.0).ceil() <= inner_width
+    }
 }
 
 impl ProgressModel {
@@ -209,6 +241,49 @@ impl Default for ProgressState {
 
 pub fn validate_progress_model(model: &ProgressModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn progress_layout_metrics(model: &ProgressModel, inline_size: f32) -> ProgressLayoutMetrics {
+    let dense = model.density == ProgressDensity::Dense;
+    let invalid = model.error.is_some();
+    let dense_root = dense && !invalid && !model.disabled;
+    let dense_track = dense && !model.loading && !invalid && !model.disabled;
+    let dense_detail = dense && !invalid && !model.disabled;
+    ProgressLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_padding: if dense_root {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        root_gap: if dense_root {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        track_height: if dense_track {
+            scale::space::xs(inline_size)
+        } else {
+            scale::space::s(inline_size)
+        },
+        label_row_gap: scale::space::xs2(inline_size),
+        label_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        value_font_size: if dense {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        detail_font_size: if dense_detail || invalid || model.disabled {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        line_height: scale::line_height::LH0,
+    }
 }
 
 pub fn progress_render_nodes(
@@ -467,5 +542,41 @@ mod tests {
         let model = default_progress_model().with_error("Upload failed");
         let nodes = progress_render_nodes(&model, &model.state());
         assert!(nodes.iter().all(|node| node.invalid));
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_state_precedence() {
+        let standard = progress_layout_metrics(&default_progress_model(), 1_000.0);
+        let dense = progress_layout_metrics(
+            &default_progress_model().with_density(ProgressDensity::Dense),
+            1_000.0,
+        );
+        let dense_loading = progress_layout_metrics(
+            &default_progress_model()
+                .with_density(ProgressDensity::Dense)
+                .loading(),
+            1_000.0,
+        );
+        let dense_disabled = progress_layout_metrics(
+            &default_progress_model()
+                .with_density(ProgressDensity::Dense)
+                .disabled(),
+            1_000.0,
+        );
+
+        assert!(dense.root_padding < standard.root_padding);
+        assert!(dense.track_height < standard.track_height);
+        assert!(dense.label_font_size < standard.label_font_size);
+        assert_eq!(dense_loading.root_padding, dense.root_padding);
+        assert_eq!(dense_loading.track_height, standard.track_height);
+        assert_eq!(dense_disabled.root_padding, standard.root_padding);
+        assert_eq!(dense_disabled.detail_font_size, dense.detail_font_size);
+        assert!(dense.intrinsic_outer_height(1.0) < standard.intrinsic_outer_height(1.0));
+        assert!(standard.detail_fits_inline("Short detail", 448.0, 1.0));
+        assert!(!standard.detail_fits_inline(
+            "A deliberately long progress detail that must wrap inside a narrow control",
+            240.0,
+            1.0,
+        ));
     }
 }

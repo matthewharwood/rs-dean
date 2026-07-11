@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 
+use crate::scale;
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum DropdownMenuDensity {
@@ -141,6 +143,45 @@ pub struct DropdownMenuRenderNode {
     pub loading: bool,
     pub disabled: bool,
     pub destructive: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DropdownMenuItemLayoutMetrics {
+    pub min_height: f32,
+    pub padding_inline: f32,
+    pub padding_block: f32,
+    pub gap: f32,
+    pub font_size: f32,
+    pub line_height: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DropdownMenuLayoutMetrics {
+    pub max_width: f32,
+    pub root_gap: f32,
+    pub trigger_min_height: f32,
+    pub trigger_padding_inline: f32,
+    pub trigger_padding_block: f32,
+    pub trigger_font_size: f32,
+    pub trigger_line_height: f32,
+    pub content_margin_top: f32,
+    pub content_padding: f32,
+    pub content_gap: f32,
+    pub standard_item: DropdownMenuItemLayoutMetrics,
+    pub dense_item: DropdownMenuItemLayoutMetrics,
+    pub body_gap: f32,
+    pub detail_font_size: f32,
+    pub detail_line_height: f32,
+    pub shortcut_padding_inline: f32,
+    pub shortcut_padding_block: f32,
+    pub shortcut_font_size: f32,
+    pub shortcut_line_height: f32,
+    pub label_padding_inline: f32,
+    pub label_padding_block: f32,
+    pub label_font_size: f32,
+    pub label_line_height: f32,
+    pub separator_margin_block: f32,
+    pub separator_height: f32,
 }
 
 impl DropdownMenuItem {
@@ -361,6 +402,83 @@ impl DropdownMenuState {
 
 pub fn validate_dropdown_menu_model(model: &DropdownMenuModel) -> Result<(), garde::Report> {
     model.validate()
+}
+
+pub fn dropdown_menu_layout_metrics(
+    density: DropdownMenuDensity,
+    open: bool,
+    disabled: bool,
+    inline_size: f32,
+) -> DropdownMenuLayoutMetrics {
+    let dense_root = density == DropdownMenuDensity::Dense && !disabled;
+    let dense_trigger = density == DropdownMenuDensity::Dense && !open;
+    let standard_item = DropdownMenuItemLayoutMetrics {
+        min_height: scale::space::FIELD,
+        padding_inline: scale::space::xs(inline_size),
+        padding_block: scale::space::xs2(inline_size),
+        gap: scale::space::xs(inline_size),
+        font_size: scale::font_size::f0(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+    let dense_item = DropdownMenuItemLayoutMetrics {
+        min_height: scale::space::s(inline_size),
+        padding_inline: scale::space::xs2(inline_size),
+        padding_block: scale::space::xs3(inline_size),
+        gap: scale::space::xs2(inline_size),
+        font_size: scale::font_size::f00(inline_size),
+        line_height: scale::line_height::LH0,
+    };
+    DropdownMenuLayoutMetrics {
+        max_width: scale::container::CONTROL,
+        root_gap: if dense_root {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_min_height: if dense_trigger {
+            scale::space::s(inline_size)
+        } else {
+            scale::space::FIELD
+        },
+        trigger_padding_inline: if dense_trigger {
+            scale::space::xs2(inline_size)
+        } else {
+            scale::space::xs(inline_size)
+        },
+        trigger_padding_block: if dense_trigger {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        trigger_font_size: if dense_trigger {
+            scale::font_size::f00(inline_size)
+        } else {
+            scale::font_size::f0(inline_size)
+        },
+        trigger_line_height: scale::line_height::LH0,
+        content_margin_top: scale::space::xs2(inline_size),
+        content_padding: if density == DropdownMenuDensity::Dense {
+            scale::space::xs3(inline_size)
+        } else {
+            scale::space::xs2(inline_size)
+        },
+        content_gap: scale::space::xs3(inline_size),
+        standard_item,
+        dense_item,
+        body_gap: scale::space::xs3(inline_size),
+        detail_font_size: scale::font_size::f00(inline_size),
+        detail_line_height: scale::line_height::LH0,
+        shortcut_padding_inline: scale::space::xs2(inline_size),
+        shortcut_padding_block: scale::space::xs3(inline_size),
+        shortcut_font_size: scale::font_size::f00(inline_size),
+        shortcut_line_height: scale::line_height::LH0,
+        label_padding_inline: scale::space::xs(inline_size),
+        label_padding_block: scale::space::xs3(inline_size),
+        label_font_size: scale::font_size::f00(inline_size),
+        label_line_height: scale::line_height::LH0,
+        separator_margin_block: scale::space::xs3(inline_size),
+        separator_height: scale::space::xs3(inline_size),
+    }
 }
 
 pub fn dropdown_menu_render_nodes(
@@ -607,6 +725,21 @@ mod tests {
     #[test]
     fn default_model_validates_with_garde() {
         assert!(validate_dropdown_menu_model(&default_dropdown_menu_model()).is_ok());
+    }
+
+    #[test]
+    fn layout_metrics_preserve_dense_and_emphasized_token_scales() {
+        let standard =
+            dropdown_menu_layout_metrics(DropdownMenuDensity::Standard, true, false, 1_000.0);
+        let dense_closed =
+            dropdown_menu_layout_metrics(DropdownMenuDensity::Dense, false, false, 1_000.0);
+        let dense_open =
+            dropdown_menu_layout_metrics(DropdownMenuDensity::Dense, true, false, 1_000.0);
+
+        assert!(dense_closed.trigger_min_height < standard.trigger_min_height);
+        assert_eq!(dense_open.trigger_min_height, standard.trigger_min_height);
+        assert!(dense_open.dense_item.min_height < dense_open.standard_item.min_height);
+        assert_eq!(standard.max_width, scale::container::CONTROL);
     }
 
     #[test]
