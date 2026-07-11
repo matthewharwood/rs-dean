@@ -953,11 +953,21 @@ fn render_book_templates(book: &mut Value, templates: &CrateBookTemplates) -> Re
         Ok(())
     }
 
-    let sections = book
-        .get_mut("sections")
+    let items_key = match (book.get("sections"), book.get("items")) {
+        (Some(_), None) => "sections",
+        (None, Some(_)) => "items",
+        (Some(_), Some(_)) => {
+            bail!("mdBook book cannot contain both `sections` and `items`");
+        }
+        (None, None) => {
+            bail!("mdBook book must contain `sections` (0.4) or `items` (0.5)");
+        }
+    };
+    let items = book
+        .get_mut(items_key)
         .and_then(Value::as_array_mut)
-        .context("mdBook book sections must be an array")?;
-    render_items(sections, templates)
+        .with_context(|| format!("mdBook book `{items_key}` must be an array"))?;
+    render_items(items, templates)
 }
 
 fn build_ui_book(target: &Path) -> Result<()> {
@@ -3697,10 +3707,11 @@ mod tests {
     }
 
     #[test]
-    fn mdbook_preprocessor_resolves_nested_template_chapters() {
+    fn mdbook_preprocessor_resolves_v04_and_v05_book_roots() {
         let templates = CrateBookTemplates::load().expect("crate-book templates should load");
-        let mut book = json!({
-            "sections": [{
+        for items_key in ["sections", "items"] {
+            let mut book = json!({});
+            book[items_key] = json!([{
                 "Chapter": {
                     "name": "Button",
                     "content": UI_COMPONENT_TEMPLATE_DIRECTIVE,
@@ -3710,17 +3721,18 @@ mod tests {
                     "source_path": "components/button.md",
                     "parent_names": [],
                 }
-            }]
-        });
+            }]);
 
-        render_book_templates(&mut book, &templates).expect("preprocessor should render chapter");
+            render_book_templates(&mut book, &templates)
+                .expect("preprocessor should render chapter");
 
-        let content = book["sections"][0]["Chapter"]["content"]
-            .as_str()
-            .expect("rendered chapter content should remain a string");
-        assert!(content.starts_with("# Button\n"));
-        assert!(content.contains("../../../stories/?story=ui-button"));
-        assert!(!content.contains(UI_COMPONENT_TEMPLATE_DIRECTIVE));
+            let content = book[items_key][0]["Chapter"]["content"]
+                .as_str()
+                .expect("rendered chapter content should remain a string");
+            assert!(content.starts_with("# Button\n"));
+            assert!(content.contains("../../../stories/?story=ui-button"));
+            assert!(!content.contains(UI_COMPONENT_TEMPLATE_DIRECTIVE));
+        }
     }
 
     #[test]
