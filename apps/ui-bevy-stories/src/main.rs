@@ -2891,6 +2891,7 @@ fn spawn_block_primitive(
         BevyBlockPrimitiveKind::UiComponentHost(id) => Some(id),
         _ => None,
     };
+    let centers_label = primitive.centers_label();
     let origin = block_primitive_origin(primitive.center, primitive.size, content_size);
     let text_justify = block_text_justify(primitive.text_align);
     let disabled = primitive.ui.as_ref().is_some_and(|ui| ui.disabled);
@@ -2928,7 +2929,11 @@ fn spawn_block_primitive(
             } else {
                 Overflow::clip()
             },
-            flex_direction: FlexDirection::Column,
+            flex_direction: if centers_label {
+                FlexDirection::Row
+            } else {
+                FlexDirection::Column
+            },
             ..default()
         },
         BackgroundColor(fill),
@@ -2961,18 +2966,13 @@ fn spawn_block_primitive(
     }
 
     if primitive.font_size > 0.0 && !primitive.label.trim().is_empty() {
-        let line_break = if primitive.kind == BevyBlockPrimitiveKind::Action {
+        let line_break = if centers_label {
             LineBreak::NoWrap
         } else {
             LineBreak::WordOrCharacter
         };
         entity.with_children(|container| {
-            container.spawn((
-                Node {
-                    width: percent(100),
-                    min_width: px(0),
-                    ..default()
-                },
+            let mut label = container.spawn((
                 Text::new(primitive.label.clone()),
                 TextFont {
                     font: fonts.inter.clone().into(),
@@ -2985,6 +2985,14 @@ fn spawn_block_primitive(
                 TextColor(text_color),
                 TextLayout::new(text_justify, line_break),
             ));
+            if !centers_label {
+                label.insert(Node {
+                    width: percent(100),
+                    max_width: percent(100),
+                    min_width: px(0),
+                    ..default()
+                });
+            }
         });
     }
 

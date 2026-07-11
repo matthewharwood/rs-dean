@@ -66,6 +66,11 @@ and a Bevy-only game app.
   shows only that component's DOM variants and Bevy adapter output. Update the
   Rust catalog and story fixtures first, regenerate the book, then let the gate
   verify the book has not drifted.
+- All books under `docs/crates` use shared Handlebars Markdown templates from
+  `docs/crates/templates`. Generated catalog pages stay as one-line
+  `{{#rs-dean-template ...}}` directives; `cargo xtask mdbook-template` resolves
+  typed catalog data during mdBook builds. Edit the templates and Rust context,
+  never expand repeated page scaffolding back into generated source files.
 - Reusable Leptos UI must use the `rs-dean-ui` Tailwind token utilities for
   typography, spacing, radius, shadow, and motion scales, such as `text-0`,
   `gap-m`, `p-s`, `rounded-box`, `font-7`, `leading-0`, and `shadow-2`.

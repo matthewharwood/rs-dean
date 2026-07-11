@@ -96,6 +96,13 @@ Leptos story fixture through `/stories/?story=ui-{component}` beside the Bevy
 primitive story through `/ui-bevy-stories/?story=ui-{component}`, so each page
 shows only that component's DOM variants and Bevy adapter output.
 
+Both crate books keep shared Markdown structure in Handlebars templates under
+`docs/crates/templates`. Generated component and block pages contain one
+`{{#rs-dean-template ...}}` directive; the Rust `mdbook-template` preprocessor
+resolves the chapter path through the typed catalogs and expands the complete
+page during mdBook builds. Change shared page structure in the templates, then
+regenerate the books instead of duplicating Markdown across catalog pages.
+
 `cargo xtask story-parity ui` and `cargo xtask story-parity blocks` launch both
 story harnesses and verify every paired route at `1000x700` desktop and
 `390x844` mobile viewports. Each route must become renderer-ready, produce a
