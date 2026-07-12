@@ -1,0 +1,32 @@
+# {{name}}
+
+Original `rs-dean-blocks` fixture corresponding one-to-one with the
+[Tailwind Plus source reference]({{source}}). No subscription source markup is
+copied into this implementation.
+
+{{> story_pair}}
+
+## Contract
+
+| Field | Value |
+| --- | --- |
+| Registry id | `{{index}}` |
+| Slug | `{{slug}}` |
+| Surface | {{surface}} |
+| Family | {{family}} |
+| Pattern | {{pattern}} |
+| Layout | {{layout}} |
+| Media | {{media}} |
+| Chrome | {{chrome}} |
+| Interaction | {{interaction}} |
+| Primary UI component | {{component}} |
+
+## Consumer Implementation
+
+Resolve `{{slug}}` through `block_by_slug`, or obtain its stable id with
+`BlockId::from_index({{index}})`. Start from `BlockInstance::fixture` for sample
+content, then replace typed content slots. Place instances in `BlockPage.blocks`
+in vertical order; schema versions and duplicate keys validate before render.
+
+Transient interaction state remains local to the owning UI component. Persisted
+authoring data belongs in `crates/state` through `rs-dean-idb`.

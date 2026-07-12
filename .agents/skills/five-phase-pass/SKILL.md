@@ -56,6 +56,13 @@ only consume existing UI components and design tokens. Run
 `cargo xtask gen-block-issues` and `cargo xtask gen-block-book` after catalog,
 fixture, layout, or route changes.
 
+Shared crate-book page structure belongs in `docs/crates/templates` as strict
+Handlebars Markdown templates. Generated UI and block pages must remain
+one-line `{{#rs-dean-template ...}}` directives. The Rust
+`cargo xtask mdbook-template` preprocessor resolves chapter paths against the
+typed catalogs and expands templates during mdBook builds; do not copy the
+expanded scaffolding back into individual source pages.
+
 Use the local Bevy and modern-Rust skills before changing their owned surfaces.
 
 ### P2 — Template
@@ -137,6 +144,10 @@ remove the old wording from docs/skills.
   each page embeds the matching `/stories/?story=ui-{component}` isolated live
   Leptos fixture beside `/ui-bevy-stories/?story=ui-{component}` so the page
   shows only that component's DOM variants and Bevy primitive adapter output.
+- Every generated UI/block catalog page contains one mdBook template directive,
+  every shared template renders with strict typed data, and built HTML contains
+  the expected isolated Leptos and Bevy story routes with no unresolved
+  `rs-dean-template` directive.
 - `crates/blocks` has one `_issues/blocks` task and one generated
   `docs/crates/blocks` page per registry entry; each page embeds the matching
   `block-{slug}` fixture in both story harnesses from one validated plan.

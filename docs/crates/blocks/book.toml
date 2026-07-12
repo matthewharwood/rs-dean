@@ -7,3 +7,7 @@ src = "src"
 [build]
 build-dir = "../../../target/mdbook/blocks"
 create-missing = false
+
+[preprocessor.rs-dean-templates]
+command = "cargo xtask mdbook-template"
+after = ["links"]

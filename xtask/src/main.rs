@@ -2,7 +2,7 @@ use std::{
     env,
     ffi::OsStr,
     fs,
-    io::{BufReader, Read, Write},
+    io::{self, BufReader, Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
@@ -16,6 +16,7 @@ use std::os::unix::fs::PermissionsExt;
 use anyhow::{Context, Result, bail};
 use base64::Engine as _;
 use command_fds::{CommandFdExt, FdMapping};
+use handlebars::Handlebars;
 use os_pipe::{PipeReader, PipeWriter};
 use rs_dean_blocks::{BLOCKS, BlockDefinition};
 use rs_dean_ui::{ComponentDefinition, SHADCN_COMPONENTS, component_implementation};
@@ -31,6 +32,7 @@ const UI_BOOK: &str = "docs/crates/ui";
 const UI_BOOK_GENERATED: &str = "target/generated-ui-book";
 const BLOCK_BOOK: &str = "docs/crates/blocks";
 const BLOCK_BOOK_GENERATED: &str = "target/generated-block-book";
+const CRATE_BOOK_TEMPLATES: &str = "docs/crates/templates";
 const BLOCK_ISSUES: &str = "_issues/blocks";
 const BLOCK_ISSUES_GENERATED: &str = "target/generated-block-issues";
 
@@ -50,6 +52,7 @@ fn main() -> Result<()> {
         Some("gen-block-issues") => gen_block_issues(),
         Some("gen-ui-book") => gen_ui_book(),
         Some("install-tailwindcss") => install_tailwindcss(),
+        Some("mdbook-template") => mdbook_template(args),
         Some("gen-app") => {
             let name = args.next().unwrap_or_else(|| "test-project".to_owned());
             gen_app(&name)
@@ -82,6 +85,7 @@ Commands:
   gen-block-issues regenerate the Tailwind Plus block implementation backlog
   preview          serve the release app on :3100
   gen-ui-book      regenerate the UI crate mdBook source from the Rust catalog
+  mdbook-template  render typed crate-book Handlebars templates for mdBook
   build            build static marketing/game output and GitHub Pages artifacts
   pages            build aggregate GitHub Pages artifact in target/pages
   static-analysis  run format, clippy, rustdoc, dependency, and repo policy checks
@@ -705,6 +709,267 @@ fn build_pages_app(app: &str, target: &Path, route: &str, base: &str) -> Result<
     verify_trunk_dist(&dist)
 }
 
+const UI_INDEX_TEMPLATE_DIRECTIVE: &str = "{{#rs-dean-template ui-index}}";
+const BLOCK_INDEX_TEMPLATE_DIRECTIVE: &str = "{{#rs-dean-template block-index}}";
+const UI_COMPONENT_TEMPLATE_DIRECTIVE: &str = "{{#rs-dean-template ui-component}}";
+const BLOCK_TEMPLATE_DIRECTIVE: &str = "{{#rs-dean-template block}}";
+
+fn mdbook_template_source(directive: &str) -> String {
+    format!("{directive}\n")
+}
+
+struct CrateBookTemplates {
+    registry: Handlebars<'static>,
+}
+
+impl CrateBookTemplates {
+    fn load() -> Result<Self> {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .context("resolve workspace root from xtask manifest")?
+            .join(CRATE_BOOK_TEMPLATES);
+        let mut registry = Handlebars::new();
+        registry.set_strict_mode(true);
+        registry.register_escape_fn(handlebars::no_escape);
+        register_crate_book_template(&mut registry, &root, "ui-index", "ui-index.md.hbs")?;
+        register_crate_book_template(&mut registry, &root, "block-index", "block-index.md.hbs")?;
+        register_crate_book_template(&mut registry, &root, "ui-component", "ui-component.md.hbs")?;
+        register_crate_book_template(&mut registry, &root, "block", "block.md.hbs")?;
+        let partial_path = root.join("story-pair.md.hbs");
+        let partial = fs::read_to_string(&partial_path)
+            .with_context(|| format!("read {}", partial_path.display()))?;
+        registry
+            .register_partial("story_pair", partial)
+            .context("register crate-book story-pair template")?;
+        Ok(Self { registry })
+    }
+
+    fn render_chapter(&self, content: &str, path: Option<&Path>) -> Result<Option<String>> {
+        let directive = content.trim();
+        let rendered = match directive {
+            UI_INDEX_TEMPLATE_DIRECTIVE => {
+                require_template_path(path, Path::new("index.md"), directive)?;
+                self.render_ui_index()?
+            }
+            BLOCK_INDEX_TEMPLATE_DIRECTIVE => {
+                require_template_path(path, Path::new("index.md"), directive)?;
+                self.render_block_index()?
+            }
+            UI_COMPONENT_TEMPLATE_DIRECTIVE => {
+                let path = path.context("UI component template chapter must have a source path")?;
+                let slug = chapter_slug(path, "components")?;
+                let definition = SHADCN_COMPONENTS
+                    .iter()
+                    .find(|definition| definition.slug == slug)
+                    .copied()
+                    .with_context(|| format!("unknown UI component template slug `{slug}`"))?;
+                self.render_ui_component(definition)?
+            }
+            BLOCK_TEMPLATE_DIRECTIVE => {
+                let path = path.context("block template chapter must have a source path")?;
+                let slug = chapter_slug(path, "blocks")?;
+                let definition = BLOCKS
+                    .iter()
+                    .find(|definition| definition.slug == slug)
+                    .copied()
+                    .with_context(|| format!("unknown block template slug `{slug}`"))?;
+                self.render_block(definition)?
+            }
+            _ if directive.starts_with("{{#rs-dean-template") => {
+                bail!("unknown rs-dean mdBook template directive `{directive}`")
+            }
+            _ => return Ok(None),
+        };
+        Ok(Some(rendered))
+    }
+
+    fn render_ui_index(&self) -> Result<String> {
+        self.render(
+            "ui-index",
+            &json!({ "components": SHADCN_COMPONENTS.len() }),
+        )
+    }
+
+    fn render_block_index(&self) -> Result<String> {
+        self.render(
+            "block-index",
+            &json!({
+                "blocks": BLOCKS.len(),
+                "families": rs_dean_blocks::BLOCK_FAMILIES.len(),
+            }),
+        )
+    }
+
+    fn render_ui_component(&self, definition: ComponentDefinition) -> Result<String> {
+        let implementation = component_implementation(definition.id);
+        self.render(
+            "ui-component",
+            &json!({
+                "ui_component": true,
+                "name": definition.name,
+                "slug": definition.slug,
+                "story_id": format!("ui-{}", definition.slug),
+                "summary": definition.summary,
+                "category": definition.category.label(),
+                "framework": definition.framework.label(),
+                "state": definition.state.label(),
+                "render_contract": implementation.render.label(),
+                "state_contract": implementation.state.label(),
+                "layout_contract": implementation.layout.label(),
+                "variants": implementation.variants,
+                "states": implementation.states,
+                "anatomy": implementation.anatomy,
+                "accessibility": implementation.accessibility,
+                "consumer_contract": implementation.consumer_contract,
+                "end_user_outcome": implementation.end_user_outcome,
+            }),
+        )
+    }
+
+    fn render_block(&self, definition: BlockDefinition) -> Result<String> {
+        let family = definition.family_definition();
+        self.render(
+            "block",
+            &json!({
+                "ui_component": false,
+                "name": definition.name,
+                "story_id": format!("block-{}", definition.slug),
+                "source": definition.source_url(),
+                "index": definition.id.index(),
+                "slug": definition.slug,
+                "surface": family.surface.label(),
+                "family": family.name,
+                "pattern": family.pattern.label(),
+                "layout": definition.resolved_layout().label(),
+                "media": definition.media.label(),
+                "chrome": definition.chrome.label(),
+                "interaction": definition.interaction.label(),
+                "component": family.primary_component.definition().name,
+            }),
+        )
+    }
+
+    fn render(&self, template: &str, context: &Value) -> Result<String> {
+        self.registry
+            .render(template, context)
+            .with_context(|| format!("render crate-book template `{template}`"))
+    }
+}
+
+fn register_crate_book_template(
+    registry: &mut Handlebars<'static>,
+    root: &Path,
+    name: &str,
+    file: &str,
+) -> Result<()> {
+    let path = root.join(file);
+    let template = fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
+    registry
+        .register_template_string(name, template)
+        .with_context(|| format!("register crate-book template `{name}`"))
+}
+
+fn require_template_path(path: Option<&Path>, expected: &Path, directive: &str) -> Result<()> {
+    let path = path.with_context(|| format!("template directive `{directive}` needs a path"))?;
+    if path != expected {
+        bail!(
+            "template directive `{directive}` belongs in {}, not {}",
+            expected.display(),
+            path.display(),
+        );
+    }
+    Ok(())
+}
+
+fn chapter_slug<'a>(path: &'a Path, expected_parent: &str) -> Result<&'a str> {
+    if path.parent() != Some(Path::new(expected_parent)) {
+        bail!(
+            "template chapter {} must be directly under `{expected_parent}`",
+            path.display(),
+        );
+    }
+    path.file_stem()
+        .and_then(OsStr::to_str)
+        .with_context(|| format!("resolve template slug from {}", path.display()))
+}
+
+fn mdbook_template(mut args: impl Iterator<Item = String>) -> Result<()> {
+    if let Some(argument) = args.next() {
+        if argument != "supports" {
+            bail!("unknown mdbook-template argument `{argument}`");
+        }
+        let _renderer = args
+            .next()
+            .context("mdbook-template supports requires a renderer")?;
+        if let Some(extra) = args.next() {
+            bail!("unexpected mdbook-template supports argument `{extra}`");
+        }
+        return Ok(());
+    }
+
+    let mut input: Vec<Value> =
+        serde_json::from_reader(io::stdin().lock()).context("parse mdBook preprocessor input")?;
+    if input.len() != 2 {
+        bail!(
+            "mdBook preprocessor input must contain context and book, found {} values",
+            input.len(),
+        );
+    }
+    let mut book = input.pop().context("mdBook input is missing its book")?;
+    let templates = CrateBookTemplates::load()?;
+    render_book_templates(&mut book, &templates)?;
+    serde_json::to_writer(io::stdout().lock(), &book)
+        .context("write mdBook preprocessor output")?;
+    Ok(())
+}
+
+fn render_book_templates(book: &mut Value, templates: &CrateBookTemplates) -> Result<()> {
+    fn render_items(items: &mut [Value], templates: &CrateBookTemplates) -> Result<()> {
+        for item in items {
+            let Some(chapter) = item.get_mut("Chapter") else {
+                continue;
+            };
+            let content = chapter
+                .get("content")
+                .and_then(Value::as_str)
+                .context("mdBook chapter content must be a string")?
+                .to_owned();
+            let path = chapter
+                .get("path")
+                .and_then(Value::as_str)
+                .map(PathBuf::from);
+            if let Some(rendered) = templates.render_chapter(&content, path.as_deref())? {
+                *chapter
+                    .get_mut("content")
+                    .context("mdBook chapter is missing mutable content")? =
+                    Value::String(rendered);
+            }
+            let sub_items = chapter
+                .get_mut("sub_items")
+                .and_then(Value::as_array_mut)
+                .context("mdBook chapter sub_items must be an array")?;
+            render_items(sub_items, templates)?;
+        }
+        Ok(())
+    }
+
+    let items_key = match (book.get("sections"), book.get("items")) {
+        (Some(_), None) => "sections",
+        (None, Some(_)) => "items",
+        (Some(_), Some(_)) => {
+            bail!("mdBook book cannot contain both `sections` and `items`");
+        }
+        (None, None) => {
+            bail!("mdBook book must contain `sections` (0.4) or `items` (0.5)");
+        }
+    };
+    let items = book
+        .get_mut(items_key)
+        .and_then(Value::as_array_mut)
+        .with_context(|| format!("mdBook book `{items_key}` must be an array"))?;
+    render_items(items, templates)
+}
+
 fn build_ui_book(target: &Path) -> Result<()> {
     check_ui_book()?;
     let destination = env::current_dir()
@@ -993,14 +1258,17 @@ fn write_block_book_sources(root: &Path) -> Result<()> {
     fs::create_dir_all(&blocks).with_context(|| format!("create {}", blocks.display()))?;
     fs::write(root.join("book.toml"), block_book_toml())
         .with_context(|| format!("write {}", root.join("book.toml").display()))?;
-    fs::write(src.join("index.md"), block_book_index())
-        .with_context(|| format!("write {}", src.join("index.md").display()))?;
+    fs::write(
+        src.join("index.md"),
+        mdbook_template_source(BLOCK_INDEX_TEMPLATE_DIRECTIVE),
+    )
+    .with_context(|| format!("write {}", src.join("index.md").display()))?;
     fs::write(src.join("SUMMARY.md"), block_book_summary())
         .with_context(|| format!("write {}", src.join("SUMMARY.md").display()))?;
     for definition in BLOCKS {
         fs::write(
             blocks.join(format!("{}.md", definition.slug)),
-            block_book_page(definition),
+            mdbook_template_source(BLOCK_TEMPLATE_DIRECTIVE),
         )
         .with_context(|| {
             format!(
@@ -1022,46 +1290,12 @@ src = "src"
 [build]
 build-dir = "../../../target/mdbook/blocks"
 create-missing = false
+
+[preprocessor.rs-dean-templates]
+command = "cargo xtask mdbook-template"
+after = ["links"]
 "#
     .to_owned()
-}
-
-fn block_book_index() -> String {
-    format!(
-        r#"# rs-dean-blocks
-
-`rs-dean-blocks` is the typed composition layer over `rs-dean-ui`. It owns the
-one-to-one block registry, validated authoring schema, constrained layout plans,
-and shared Leptos/Bevy renderer inputs.
-
-This book is generated from the Rust catalog. Every page embeds the same
-pre-filled `BlockInstance` in the isolated Leptos and Bevy story harnesses.
-
-## Pages Structure
-
-- [Marketing app](../../marketing/)
-- [Game app](../../game/)
-- [Stories app](../../stories/)
-- [UI Bevy stories app](../../ui-bevy-stories/)
-- [Crate index](../)
-- [rs-dean-ui book](../ui/)
-
-## Catalog Coverage
-
-- Blocks documented: {blocks}
-- Families: {families}
-- Source surfaces: Marketing, Application UI, Ecommerce
-- Source of truth: `crates/blocks/src/catalog_data.rs`
-- Authoring boundary: serde plus garde-validated `BlockPage` and `BlockInstance`
-- Renderer boundary: one `BlockPlan` consumed by Leptos and Bevy
-
-Run `cargo xtask gen-block-book` after catalog, fixture, or story-route changes.
-`cargo xtask gate` verifies the book, block issues, and isolated routes remain
-in sync.
-"#,
-        blocks = BLOCKS.len(),
-        families = rs_dean_blocks::BLOCK_FAMILIES.len(),
-    )
 }
 
 fn block_book_summary() -> String {
@@ -1087,80 +1321,8 @@ fn block_book_summary() -> String {
     summary
 }
 
-fn block_book_page(definition: BlockDefinition) -> String {
-    let family = definition.family_definition();
-    let story_id = format!("block-{}", definition.slug);
-    format!(
-        r#"# {name}
-
-Original `rs-dean-blocks` fixture corresponding one-to-one with the
-[Tailwind Plus source reference]({source}). No subscription source markup is
-copied into this implementation.
-
-## Live Fixtures
-
-Both frames deserialize the same typed fixture, validate it with `garde`, and
-derive the same `BlockPlan`. Leptos consumes token-only `rs-dean-ui` components;
-Bevy consumes the same palette, spacing, grid, and component roles without a
-Leptos dependency.
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start;">
-  <section>
-    <h3>Leptos Block Story</h3>
-    <iframe title="{name} Leptos block fixture" src="../../../stories/?story={story_id}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
-  </section>
-  <section>
-    <h3>Bevy Block Story</h3>
-    <iframe title="{name} Bevy block fixture" src="../../../ui-bevy-stories/?story={story_id}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
-  </section>
-</div>
-
-Open the [full Leptos block story](../../../stories/?story={story_id}) or the
-[full Bevy block story](../../../ui-bevy-stories/?story={story_id}) for a wider
-surface.
-
-## Contract
-
-| Field | Value |
-| --- | --- |
-| Registry id | `{index}` |
-| Slug | `{slug}` |
-| Surface | {surface} |
-| Family | {family} |
-| Pattern | {pattern} |
-| Layout | {layout} |
-| Media | {media} |
-| Chrome | {chrome} |
-| Interaction | {interaction} |
-| Primary UI component | {component} |
-
-## Consumer Implementation
-
-Resolve `{slug}` through `block_by_slug`, or obtain its stable id with
-`BlockId::from_index({index})`. Start from `BlockInstance::fixture` for sample
-content, then replace typed content slots. Place instances in `BlockPage.blocks`
-in vertical order; schema versions and duplicate keys validate before render.
-
-Transient interaction state remains local to the owning UI component. Persisted
-authoring data belongs in `crates/state` through `rs-dean-idb`.
-"#,
-        name = definition.name,
-        source = definition.source_url(),
-        story_id = story_id,
-        index = definition.id.index(),
-        slug = definition.slug,
-        surface = family.surface.label(),
-        family = family.name,
-        pattern = family.pattern.label(),
-        layout = definition.resolved_layout().label(),
-        media = definition.media.label(),
-        chrome = definition.chrome.label(),
-        interaction = definition.interaction.label(),
-        component = family.primary_component.definition().name,
-    )
-}
-
 fn check_block_book_story_anchors() -> Result<()> {
+    let templates = CrateBookTemplates::load()?;
     let stories =
         fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
     let bevy_stories = fs::read_to_string("apps/ui-bevy-stories/src/main.rs")
@@ -1184,8 +1346,7 @@ fn check_block_book_story_anchors() -> Result<()> {
             .join("src")
             .join("blocks")
             .join(format!("{}.md", definition.slug));
-        let page = fs::read_to_string(&page_path)
-            .with_context(|| format!("read {}", page_path.display()))?;
+        let page = templates.render_block(definition)?;
         let story_id = format!("block-{}", definition.slug);
         for route in [
             format!("src=\"../../../stories/?story={story_id}\""),
@@ -1200,16 +1361,19 @@ fn check_block_book_story_anchors() -> Result<()> {
 }
 
 fn verify_block_book_dist(dist: &Path) -> Result<()> {
-    if !dist.join("index.html").exists() {
-        bail!("missing {}", dist.join("index.html").display());
-    }
+    verify_rendered_crate_book_page(&dist.join("index.html"), &[])?;
     for definition in BLOCKS {
         let path = dist
             .join("blocks")
             .join(format!("{}.html", definition.slug));
-        if !path.exists() {
-            bail!("missing blocks book page {}", path.display());
-        }
+        let story_id = format!("block-{}", definition.slug);
+        verify_rendered_crate_book_page(
+            &path,
+            &[
+                format!("../../../stories/?story={story_id}"),
+                format!("../../../ui-bevy-stories/?story={story_id}"),
+            ],
+        )?;
     }
     Ok(())
 }
@@ -1231,14 +1395,17 @@ fn write_ui_book_sources(root: &Path) -> Result<()> {
     fs::create_dir_all(&components).with_context(|| format!("create {}", components.display()))?;
     fs::write(root.join("book.toml"), ui_book_toml())
         .with_context(|| format!("write {}", root.join("book.toml").display()))?;
-    fs::write(src.join("index.md"), ui_book_index())
-        .with_context(|| format!("write {}", src.join("index.md").display()))?;
+    fs::write(
+        src.join("index.md"),
+        mdbook_template_source(UI_INDEX_TEMPLATE_DIRECTIVE),
+    )
+    .with_context(|| format!("write {}", src.join("index.md").display()))?;
     fs::write(src.join("SUMMARY.md"), ui_book_summary())
         .with_context(|| format!("write {}", src.join("SUMMARY.md").display()))?;
     for definition in SHADCN_COMPONENTS {
         fs::write(
             components.join(format!("{}.md", definition.slug)),
-            ui_component_book_page(definition),
+            mdbook_template_source(UI_COMPONENT_TEMPLATE_DIRECTIVE),
         )
         .with_context(|| {
             format!(
@@ -1260,46 +1427,12 @@ src = "src"
 [build]
 build-dir = "../../../target/mdbook/ui"
 create-missing = false
+
+[preprocessor.rs-dean-templates]
+command = "cargo xtask mdbook-template"
+after = ["links"]
 "#
     .to_owned()
-}
-
-fn ui_book_index() -> String {
-    format!(
-        r#"# rs-dean-ui
-
-`rs-dean-ui` owns the shared design tokens, semantic themes, shadcn-inspired
-component catalog, canonical typed story fixtures, Leptos renderers, and Bevy
-primitive adapters.
-
-This book is generated from the Rust catalog. The component pages link back to
-the live Leptos and Bevy story harnesses with isolated story routes, so each
-page shows only that component's pre-filled DOM fixtures and matching Bevy
-primitive adapter used by local component development.
-
-## Pages Structure
-
-- [Marketing app](../../marketing/)
-- [Game app](../../game/)
-- [Stories app](../../stories/)
-- [UI Bevy stories app](../../ui-bevy-stories/)
-- [Crate index](../)
-
-## Component Coverage
-
-- Components documented: {}
-- Source of truth: `crates/ui/src/catalog.rs`
-- Implementation contracts: `crates/ui/src/kit.rs`
-- Canonical story fixtures: `crates/ui/src/story_fixtures.rs`
-- Leptos live fixtures: `apps/stories/src/main.rs`
-- Bevy primitive fixtures: `apps/ui-bevy-stories/src/main.rs`
-
-Run `cargo xtask gen-ui-book` after adding, removing, or renaming a component.
-`cargo xtask gate` verifies this book stays in sync with the catalog and story
-harnesses.
-"#,
-        SHADCN_COMPONENTS.len()
-    )
 }
 
 fn ui_book_summary() -> String {
@@ -1313,95 +1446,6 @@ fn ui_book_summary() -> String {
         ));
     }
     summary
-}
-
-fn ui_component_book_page(definition: ComponentDefinition) -> String {
-    let implementation = component_implementation(definition.id);
-    format!(
-        r#"# {name}
-
-{summary}
-
-## Live Fixtures
-
-The embedded Leptos surface renders pre-filled DOM fixtures for this
-component's variants, states, themed rendering, and validation paths. The Bevy
-surface renders the same shared `rs-dean-ui` component contract through its
-Bevy primitive adapter. Both frames use isolated story routes so this page only
-shows {name} examples.
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start;">
-  <section>
-    <h3>Leptos DOM Story</h3>
-    <iframe title="{name} Leptos live story fixtures" src="../../../stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
-  </section>
-  <section>
-    <h3>Bevy Primitive Story</h3>
-    <iframe title="{name} Bevy primitive story fixtures" src="../../../ui-bevy-stories/?story=ui-{slug}" loading="lazy" style="width: 100%; min-height: 44rem; border: 1px solid #d0d7de; border-radius: 8px;"></iframe>
-  </section>
-</div>
-
-Open the [full Leptos stories page](../../../stories/#ui-{slug}) or the
-[full Bevy story page](../../../ui-bevy-stories/?story=ui-{slug}) when a wider
-canvas is needed.
-
-## Contract
-
-| Field | Value |
-| --- | --- |
-| Category | {category} |
-| Framework | {framework} |
-| State | {state} |
-| Render contract | {render_contract} |
-| State contract | {state_contract} |
-| Layout contract | {layout_contract} |
-
-## Variants
-
-{variants}
-## States
-
-{states}
-## Anatomy
-
-{anatomy}
-## Accessibility
-
-{accessibility}
-## Consumer Implementation
-
-{consumer_contract}
-
-## End User Outcome
-
-{end_user_outcome}
-"#,
-        name = definition.name,
-        slug = definition.slug,
-        summary = definition.summary,
-        category = definition.category.label(),
-        framework = definition.framework.label(),
-        state = definition.state.label(),
-        render_contract = implementation.render.label(),
-        state_contract = implementation.state.label(),
-        layout_contract = implementation.layout.label(),
-        variants = markdown_list(implementation.variants),
-        states = markdown_list(implementation.states),
-        anatomy = markdown_list(implementation.anatomy),
-        accessibility = markdown_list(implementation.accessibility),
-        consumer_contract = implementation.consumer_contract,
-        end_user_outcome = implementation.end_user_outcome,
-    )
-}
-
-fn markdown_list(items: &[&str]) -> String {
-    let mut list = String::new();
-    for item in items {
-        list.push_str("- ");
-        list.push_str(item);
-        list.push('\n');
-    }
-    list
 }
 
 fn compare_generated_tree(expected: &Path, actual: &Path) -> Result<()> {
@@ -1472,6 +1516,7 @@ fn collect_generated_source_files(
 }
 
 fn check_ui_book_story_anchors() -> Result<()> {
+    let templates = CrateBookTemplates::load()?;
     let stories =
         fs::read_to_string("apps/stories/src/main.rs").context("read apps/stories/src/main.rs")?;
     let bevy_stories = fs::read_to_string("apps/ui-bevy-stories/src/main.rs")
@@ -1507,8 +1552,7 @@ fn check_ui_book_story_anchors() -> Result<()> {
             .join("src")
             .join("components")
             .join(format!("{}.md", definition.slug));
-        let page = fs::read_to_string(&page_path)
-            .with_context(|| format!("read {}", page_path.display()))?;
+        let page = templates.render_ui_component(definition)?;
         let isolated_story_src = format!("src=\"../../../stories/?story={story_id}\"");
         if !page.contains(&isolated_story_src) {
             bail!(
@@ -1528,15 +1572,38 @@ fn check_ui_book_story_anchors() -> Result<()> {
 }
 
 fn verify_ui_book_dist(dist: &Path) -> Result<()> {
-    if !dist.join("index.html").exists() {
-        bail!("missing {}", dist.join("index.html").display());
-    }
+    verify_rendered_crate_book_page(&dist.join("index.html"), &[])?;
     for definition in SHADCN_COMPONENTS {
         let path = dist
             .join("components")
             .join(format!("{}.html", definition.slug));
-        if !path.exists() {
-            bail!("missing UI book component page {}", path.display());
+        let story_id = format!("ui-{}", definition.slug);
+        verify_rendered_crate_book_page(
+            &path,
+            &[
+                format!("../../../stories/?story={story_id}"),
+                format!("../../../ui-bevy-stories/?story={story_id}"),
+            ],
+        )?;
+    }
+    Ok(())
+}
+
+fn verify_rendered_crate_book_page(path: &Path, expected_routes: &[String]) -> Result<()> {
+    let html = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    if html.contains("rs-dean-template") {
+        bail!(
+            "rendered crate-book page {} contains an unresolved template directive",
+            path.display(),
+        );
+    }
+    for route in expected_routes {
+        let iframe_src = format!("src=\"{route}\"");
+        if !html.contains(&iframe_src) {
+            bail!(
+                "rendered crate-book page {} must embed `{iframe_src}`",
+                path.display(),
+            );
         }
     }
     Ok(())
@@ -3563,6 +3630,110 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn crate_book_templates_render_every_typed_catalog_page() {
+        let templates = CrateBookTemplates::load().expect("crate-book templates should load");
+        let ui_index = templates
+            .render_ui_index()
+            .expect("UI index template should render");
+        let block_index = templates
+            .render_block_index()
+            .expect("block index template should render");
+        assert!(ui_index.contains(&format!(
+            "Components documented: {}",
+            SHADCN_COMPONENTS.len()
+        )));
+        assert!(block_index.contains(&format!("Blocks documented: {}", BLOCKS.len())));
+
+        for definition in SHADCN_COMPONENTS {
+            let page = templates
+                .render_ui_component(definition)
+                .expect("UI component template should render");
+            let story_id = format!("ui-{}", definition.slug);
+            assert!(page.starts_with(&format!("# {}\n", definition.name)));
+            assert!(page.contains(&format!("../../../stories/?story={story_id}")));
+            assert!(page.contains(&format!("../../../ui-bevy-stories/?story={story_id}")));
+            assert!(!page.contains("{{"));
+        }
+
+        for definition in BLOCKS {
+            let page = templates
+                .render_block(definition)
+                .expect("block template should render");
+            let story_id = format!("block-{}", definition.slug);
+            assert!(page.starts_with(&format!("# {}\n", definition.name)));
+            assert!(page.contains(&format!("../../../stories/?story={story_id}")));
+            assert!(page.contains(&format!("../../../ui-bevy-stories/?story={story_id}")));
+            assert!(!page.contains("{{"));
+        }
+    }
+
+    #[test]
+    fn crate_book_directives_keep_checked_in_pages_compact() {
+        let templates = CrateBookTemplates::load().expect("crate-book templates should load");
+        let rendered_lines = SHADCN_COMPONENTS
+            .iter()
+            .map(|definition| {
+                templates
+                    .render_ui_component(*definition)
+                    .expect("UI component template should render")
+                    .lines()
+                    .count()
+            })
+            .chain(BLOCKS.iter().map(|definition| {
+                templates
+                    .render_block(*definition)
+                    .expect("block template should render")
+                    .lines()
+                    .count()
+            }))
+            .sum::<usize>();
+        let directive_lines = SHADCN_COMPONENTS.len() + BLOCKS.len();
+
+        assert_eq!(
+            mdbook_template_source(UI_COMPONENT_TEMPLATE_DIRECTIVE)
+                .lines()
+                .count(),
+            1
+        );
+        assert_eq!(
+            mdbook_template_source(BLOCK_TEMPLATE_DIRECTIVE)
+                .lines()
+                .count(),
+            1
+        );
+        assert!(rendered_lines > directive_lines * 20);
+    }
+
+    #[test]
+    fn mdbook_preprocessor_resolves_v04_and_v05_book_roots() {
+        let templates = CrateBookTemplates::load().expect("crate-book templates should load");
+        for items_key in ["sections", "items"] {
+            let mut book = json!({});
+            book[items_key] = json!([{
+                "Chapter": {
+                    "name": "Button",
+                    "content": UI_COMPONENT_TEMPLATE_DIRECTIVE,
+                    "number": [1],
+                    "sub_items": [],
+                    "path": "components/button.md",
+                    "source_path": "components/button.md",
+                    "parent_names": [],
+                }
+            }]);
+
+            render_book_templates(&mut book, &templates)
+                .expect("preprocessor should render chapter");
+
+            let content = book[items_key][0]["Chapter"]["content"]
+                .as_str()
+                .expect("rendered chapter content should remain a string");
+            assert!(content.starts_with("# Button\n"));
+            assert!(content.contains("../../../stories/?story=ui-button"));
+            assert!(!content.contains(UI_COMPONENT_TEMPLATE_DIRECTIVE));
+        }
+    }
 
     #[test]
     fn ui_story_range_includes_every_predecessor() {

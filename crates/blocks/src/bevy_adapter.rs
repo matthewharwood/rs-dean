@@ -42,6 +42,17 @@ pub struct BevyBlockPrimitive {
     pub ui: Option<BevyUiPrimitive>,
 }
 
+impl BevyBlockPrimitive {
+    pub fn centers_label(&self) -> bool {
+        self.text_align == GridAlign::Center
+            && (self.kind == BevyBlockPrimitiveKind::Action
+                || self
+                    .ui
+                    .as_ref()
+                    .is_some_and(|primitive| primitive.role == UiBlockRole::Action))
+    }
+}
+
 #[derive(Debug)]
 struct CopyMetrics {
     inline_size: f32,
@@ -1813,6 +1824,19 @@ mod tests {
                         definition.slug,
                         primitive.part,
                     );
+                    if primitive.kind == BevyBlockPrimitiveKind::Action
+                        || primitive
+                            .ui
+                            .as_ref()
+                            .is_some_and(|ui| ui.role == UiBlockRole::Action)
+                    {
+                        assert!(
+                            primitive.centers_label(),
+                            "{} `{}` must center its action label at viewport {viewport}",
+                            definition.slug,
+                            primitive.part,
+                        );
+                    }
                 }
             }
         }

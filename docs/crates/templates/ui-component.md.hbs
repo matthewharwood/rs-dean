@@ -1,0 +1,48 @@
+# {{name}}
+
+{{summary}}
+
+{{> story_pair}}
+
+## Contract
+
+| Field | Value |
+| --- | --- |
+| Category | {{category}} |
+| Framework | {{framework}} |
+| State | {{state}} |
+| Render contract | {{render_contract}} |
+| State contract | {{state_contract}} |
+| Layout contract | {{layout_contract}} |
+
+## Variants
+
+{{#each variants}}
+- {{this}}
+{{/each}}
+
+## States
+
+{{#each states}}
+- {{this}}
+{{/each}}
+
+## Anatomy
+
+{{#each anatomy}}
+- {{this}}
+{{/each}}
+
+## Accessibility
+
+{{#each accessibility}}
+- {{this}}
+{{/each}}
+
+## Consumer Implementation
+
+{{consumer_contract}}
+
+## End User Outcome
+
+{{end_user_outcome}}
